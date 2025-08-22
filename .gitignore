@@ -1,0 +1,30 @@
+# Composer
+/vendor/
+composer.phar
+
+# PHPUnit
+.phpunit.cache/
+coverage/
+.phpunit.result.cache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Test artifacts
+/tests/temp/
+/tests/output/

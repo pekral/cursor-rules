@@ -1,3 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
 # Laravel & PHP Guidelines for AI Code Assistants
 
 This file contains Laravel and PHP coding standards optimized for AI code assistants like Claude Code, GitHub Copilot, and Cursor. These guidelines are derived from Spatie's comprehensive Laravel & PHP standards.

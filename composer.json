@@ -1,0 +1,58 @@
+{
+  "name": "pekral/cursor-rules",
+  "description": "Cursor editor rules for PHP/Laravel projects",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": "^8.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.0",
+    "pekral/phpstan-rules": "^0.4.2",
+    "pekral/rector-rules": "^0.4.1",
+    "pekral/phpcs-rules": "^0.4.1",
+    "laravel/pint": "^1.24"
+  },
+  "bin": [
+    "bin/cursor-rules"
+  ],
+  "autoload": {
+    "psr-4": {
+      "Pekral\\CursorRules\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "check": [
+      "./vendor/bin/phpcs --standard=vendor/pekral/phpcs-rules/ruleset.xml src/ tests/",
+      "phpstan analyse src/ --level=max --memory-limit=1G",
+      "./vendor/bin/pint tests/ --parallel"
+    ],
+    "fix": [
+      "./vendor/bin/phpcbf --standard=vendor/pekral/phpcs-rules/ruleset.xml src/ tests/",
+      "rector process src/ tests/ --config=vendor/pekral/rector-rules/rector.php"
+    ],
+    "test": "phpunit tests/"
+  },
+  "extra": {
+    "cursor-rules": {
+      "source": "vendor/pekral/cursor-rules/.cursor/rules",
+      "target": ".cursor/rules"
+    }
+  },
+  "archive": {
+    "exclude": [
+      "/tests"
+    ]
+  },
+  "config": {
+    "allow-plugins": {
+      "phpstan/extension-installer": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
+}

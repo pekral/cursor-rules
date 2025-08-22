@@ -3,10 +3,6 @@ description:
 globs: 
 alwaysApply: true
 ---
----
-description: Code Quality Guidelines
-globs: 
----
 # Code Quality Guidelines
 
 ## PHP version

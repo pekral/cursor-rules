@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: PHP Tests
+    name: PHP Checkers
     runs-on: ubuntu-latest
 
     strategy:

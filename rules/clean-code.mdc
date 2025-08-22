@@ -1,0 +1,200 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Guidelines for writing clean, maintainable, and human-readable code. Apply these rules when writing or reviewing code to ensure consistency and quality.
+globs: 
+---
+# Clean Code Guidelines
+
+## PHP Standards
+
+- Use short nullable notation: `?string` not `string|null`
+- Always specify `void` return types when methods return nothing
+
+## Class Structure
+- Use typed properties, not docblocks:
+- Constructor property promotion when all properties can be promoted:
+
+## Features
+- Use PHP features (php version is defined in composer.json file) when appropriate (e.g., typed properties, match expressions).
+
+## Exceptions
+- Create custom exceptions when necessary.
+
+## PHPDocs
+- Fill missing shaped array for all iterable types
+- Never generate phpdocs for non existing variable
+- Comments must be in English
+- Analyze the existing PHPDocs and if it does not match the functionality then modify the existing PHPDocs
+- Delete unnecessary comments, but not those that can be used for PHPStan analysis. If the short description is the same or very similar to the method or function name, delete it.
+- Document iterables with generics:
+  ```php
+  /** @return Collection<int, User> */
+  public function getUsers(): Collection
+  ```
+- Use one-line docblocks when possible: `/** @var string */`
+- Most common type should be first in multi-type docblocks:
+  ```php
+  /** @var Collection|SomeWeirdVendor\Collection */
+  ```
+- For iterables, always specify key and value types:
+  ```php
+  /**
+   * @param array<int, MyObject> $myArray
+   * @param int $typedArgument
+   */
+  function someFunction(array $myArray, int $typedArgument) {}
+  ```
+- Use array shape notation for fixed keys, put each key on it's own line:
+  ```php
+  /** @return array{
+     first: SomeClass,
+     second: SomeClass
+  } */
+  ```
+
+  ## Control Flow
+  - **Avoid else**: Use early returns instead of nested conditions
+  - **Separate conditions**: Prefer multiple if statements over compound conditions
+  - **Always use curly brackets** even for single statements
+  - **Ternary operators**: Each part on own line unless very short
+
+### Routes
+- URLs: kebab-case (`/open-source`)
+- Route names: camelCase (`->name('openSource')`)
+- Parameters: camelCase (`{userId}`)
+- Use tuple notation: `[Controller::class, 'method']`
+
+### Controllers
+- Plural resource names (`PostsController`)
+
+### Artisan Commands
+- Names: kebab-case (`delete-old-records`)
+- Always provide feedback (`$this->comment('All ok!')`)
+- Show progress for loops, summary at end
+- Put output BEFORE processing item (easier debugging):
+  ```php
+  $items->each(function(Item $item) {
+      $this->info("Processing item id `{$item->id}`...");
+      $this->processItem($item);
+  });
+
+  $this->comment("Processed {$items->count()} items.");
+  ```
+## Strings & Formatting
+
+- **String interpolation** over concatenation:
+
+## Enums
+
+- Use PascalCase for enum values:
+
+## Comments
+
+- **Avoid comments** - write expressive code instead
+- When needed, use proper formatting:
+  ```php
+  // Single line with space after //
+
+  /*
+   * Multi-line blocks start with single *
+   */
+  ```
+- Refactor comments into descriptive function names
+
+
+## Blade Templates
+
+- Indent with 4 spaces
+- No spaces after control structures:
+  ```blade
+  @if($condition)
+      Something
+  @endif
+  ```
+
+## API Routing
+
+- Use plural resource names: `/errors`
+- Use kebab-case: `/error-occurrences`
+- Limit deep nesting for simplicity:
+  ```
+  /error-occurrences/1
+  /errors/1/occurrences
+  ```
+### Naming Conventions
+- **Classes**: PascalCase (`UserController`, `OrderStatus`)
+- **Methods/Variables**: camelCase (`getUserName`, `$firstName`)
+- **Routes**: kebab-case (`/open-source`, `/user-profile`)
+- **Config files**: kebab-case (`pdf-generator.php`)
+- **Config keys**: snake_case (`chrome_path`)
+- **Artisan commands**: kebab-case (`php artisan delete-old-records`)
+
+## Validation
+- Custom validation rules use snake_case:
+  ```php
+  Validator::extend('organisation_type', function ($attribute, $value) {
+      return OrganisationType::isValid($value);
+  });
+
+### Configuration
+- Files: kebab-case (`pdf-generator.php`)
+- Keys: snake_case (`chrome_path`)
+- Add service configs to `config/services.php`, don't create new files
+- Use `config()` helper, avoid `env()` outside config files
+
+## Constants Over Magic Numbers
+- Replace hard-coded values with named constants
+- Use descriptive constant names that explain the value's purpose
+- Keep constants at the top of the file or in a dedicated constants file
+
+## Meaningful Names
+- Variables, functions, and classes should reveal their purpose
+- Names should explain why something exists and how it's used
+- Avoid abbreviations unless they're universally understood
+- Always mark new classes as final
+- Set method and class names as camel case
+
+## Smart Comments
+- Don't comment on what the code does - make the code self-documenting
+- Use comments to explain why something is done a certain way
+- Document APIs, complex algorithms, and non-obvious side effects
+
+## Single Responsibility
+- Each function should do exactly one thing
+- Functions should be small and focused
+- If a function needs a comment to explain what it does, it should be split
+
+## DRY (Don't Repeat Yourself)
+- Extract repeated code into reusable functions
+- Share common logic through proper abstraction
+- Maintain single sources of truth
+
+## Clean Structure
+- Keep related code together
+- Organize code in a logical hierarchy
+- Use consistent file and folder naming conventions
+
+## Encapsulation
+- Hide implementation details
+- Expose clear interfaces
+- Move nested conditionals into well-named functions
+- Move nested conditionals into well-named functions
+
+## Code Quality Maintenance
+- Refactor continuously
+- Fix technical debt early
+- Leave code cleaner than you found it
+
+## Testing
+- Write tests before fixing bugs
+- Keep tests readable and maintainable
+- Test edge cases and error conditions
+
+## Version Control
+- Write clear commit messages
+- Make small, focused commits
+- Use meaningful branch names

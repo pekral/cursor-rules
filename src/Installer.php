@@ -8,8 +8,6 @@ use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
-use function date_date_set;
-use function var_export;
 
 final class Installer
 {

@@ -2,7 +2,6 @@
 
 [![Code Quality Check](https://github.com/pekral/cursor-rules/workflows/Code%20Quality%20Check/badge.svg)](https://github.com/pekral/cursor-rules/actions)
 [![Tests](https://github.com/pekral/cursor-rules/workflows/Tests/badge.svg)](https://github.com/pekral/cursor-rules/actions)
-[![Auto Fix Code](https://github.com/pekral/cursor-rules/workflows/Auto%20Fix%20Code/badge.svg)](https://github.com/pekral/cursor-rules/actions)
 
 This repository contains **custom rules for the Cursor editor**.  
 The goal is to provide consistent, automated, and high-quality coding standards across PHP, Laravel, and testing workflows.

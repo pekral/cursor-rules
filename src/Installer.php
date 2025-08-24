@@ -8,6 +8,8 @@ use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
+use function date_date_set;
+use function var_export;
 
 final class Installer
 {
@@ -48,7 +50,7 @@ final class Installer
     private static function installRules(bool $force, bool $symlink): int
     {
         $root = self::findProjectRoot();
-        
+
         // Check if we're in development mode (rules/ folder exists in project root)
         $devSource = $root . '/rules';
         $vendorSource = $root . '/vendor/pekral/cursor-rules/.cursor/rules';

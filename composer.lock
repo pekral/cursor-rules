@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bf9c6ad1de2024d0be7500b4867d6e84",
+    "content-hash": "73720acfc6bd8eae04f2a394bd795ce5",
     "packages": [],
     "packages-dev": [
         {
@@ -292,29 +292,33 @@
         },
         {
             "name": "pekral/phpcs-rules",
-            "version": "0.4.1",
+            "version": "0.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pekral/phpcs-rules.git",
-                "reference": "4c9b8f94b0977ca01fa6ec7855511747355943b2"
+                "reference": "6955e19747cf31e10656218f64c3636e32e521de"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pekral/phpcs-rules/zipball/4c9b8f94b0977ca01fa6ec7855511747355943b2",
-                "reference": "4c9b8f94b0977ca01fa6ec7855511747355943b2",
+                "url": "https://api.github.com/repos/pekral/phpcs-rules/zipball/6955e19747cf31e10656218f64c3636e32e521de",
+                "reference": "6955e19747cf31e10656218f64c3636e32e521de",
                 "shasum": ""
             },
             "require": {
                 "php": "^8.4",
-                "slevomat/coding-standard": "^8.19.1"
+                "slevomat/coding-standard": "^8.20.0"
             },
             "require-dev": {
-                "roave/security-advisories": "dev-latest"
+                "illuminate/collections": "^12.25",
+                "mockery/mockery": "^1.6",
+                "phpunit/phpunit": "^12.3",
+                "roave/security-advisories": "dev-latest",
+                "symfony/console": "^7.3"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "0.4.x-dev"
+            "autoload": {
+                "psr-4": {
+                    "Pekral\\PhpcsRulesBuild\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -361,7 +365,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-07-24T18:58:23+00:00"
+            "time": "2025-08-24T16:16:02+00:00"
         },
         {
             "name": "pekral/phpstan-rules",

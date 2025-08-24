@@ -51,7 +51,7 @@ final class Installer
 
         // Check if we're in development mode (rules/ folder exists in project root)
         $devSource = $root . '/rules';
-        $vendorSource = $root . '/vendor/pekral/cursor-rules/.cursor/rules';
+        $vendorSource = $root . '/vendor/pekral/cursor-rules/rules';
         
         // Use development source if it exists, otherwise fall back to vendor source
         $source = is_dir($devSource) ? $devSource : $vendorSource;

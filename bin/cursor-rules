@@ -1,6 +1,25 @@
 #!/usr/bin/env php
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+// Try to find autoloader in different locations
+$autoloadPaths = [
+    __DIR__ . '/../vendor/autoload.php',                    // Development mode
+    __DIR__ . '/../../../autoload.php',                     // Composer dependency
+    __DIR__ . '/../../../../autoload.php',                  // Deeper nesting
+];
+
+$autoloadFound = false;
+foreach ($autoloadPaths as $autoloadPath) {
+    if (file_exists($autoloadPath)) {
+        require $autoloadPath;
+        $autoloadFound = true;
+        break;
+    }
+}
+
+if (!$autoloadFound) {
+    fwrite(STDERR, "Could not find autoload.php. Make sure you're running this from a Composer project.\n");
+    exit(1);
+}
 
 Pekral\CursorRules\Installer::run($argv);

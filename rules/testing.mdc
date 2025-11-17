@@ -4,7 +4,6 @@ globs:
 alwaysApply: true
 ---
 ## Analysis before writing tests
-- Project using Pest testing framework (read actual version from composer.json file)
 - Analyze the new code in the tests and try to make the code as simple and readable as possible, but leave the critical parts of the code under test.
 - Before generating the code, analyze the class for which the tests are being updated thoroughly
 - If there are already some test cases, follow the concept of written tests for this class

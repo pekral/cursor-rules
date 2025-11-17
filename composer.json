@@ -82,7 +82,7 @@
     ],
     "test:coverage": [
       "echo \"📊 Running coverage tests with PCOV...\"",
-      "php -dpcov.enabled=1 -dpcov.directory=src -dpcov.exclude=tests -dxdebug.mode=off vendor/bin/pest --coverage tests"
+      "php -dpcov.enabled=1 -dpcov.directory=src -dpcov.exclude=tests -dxdebug.mode=off vendor/bin/pest --coverage tests --min=100"
     ]
   },
   "extra": {

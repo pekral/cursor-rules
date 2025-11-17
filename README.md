@@ -3,97 +3,83 @@
 [![Code Quality Check](https://github.com/pekral/cursor-rules/workflows/Code%20Quality%20Check/badge.svg)](https://github.com/pekral/cursor-rules/actions)
 [![Tests](https://github.com/pekral/cursor-rules/workflows/Tests/badge.svg)](https://github.com/pekral/cursor-rules/actions)
 
-This repository contains **custom rules for the Cursor editor**.  
-The goal is to provide consistent, automated, and high-quality coding standards across PHP, Laravel, and testing workflows.
+Cursor Rules ships a complete set of `.mdc` files for the Cursor editor. The installer discovers the project root, mirrors the entire `rules/` directory (including empty subfolders), and copies or symlinks every file into the target project. The result is a consistent bundle of rules for PHP, Laravel, and testing workflows.
 
-## 🚀 Installation
+## Why This Package
 
-### Quick Install
+- unified coding guidelines for PHP 8.4 projects
+- Pest-based testing with mandatory code analysis and 100 % coverage
+- strong focus on clean code: typed properties, SRP, no redundant comments
+- fast onboarding inside development repositories
 
-Install cursor rules using the provided binary script:
+## Installation
 
 ```bash
-# Install via Composer
 composer require pekral/cursor-rules --dev
-
-# Install rules to your project
 vendor/bin/cursor-rules install
 ```
 
-### Installation Options
+The installer creates `.cursor/rules` in the project root by default. When the package is required via Composer, the source files are read from `vendor/pekral/cursor-rules/rules`; in development it falls back to the local `rules/` directory.
+
+### Available Commands
 
 ```bash
-# Force overwrite existing files
-vendor/bin/cursor-rules install --force
-
-# Create symlinks instead of copying (recommended for development)
-vendor/bin/cursor-rules install --symlink
-
-# Show help
-vendor/bin/cursor-rules help
+vendor/bin/cursor-rules help               # print help
+vendor/bin/cursor-rules install            # copy/symlink everything to the target
+vendor/bin/cursor-rules install --force    # overwrite existing files
+vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
 ```
 
-The installer will automatically:
-- Create `.cursor/rules/` directory in your project root
-- Copy or symlink all rule files
-- Handle both development and production installations
-- Preserve existing rules (unless `--force` is used)
+### Installer Flow
 
-## 📂 Repository Structure
+1. Determine the project root (`composer.json` search or configured fallback).
+2. Resolve the rules source (local `rules/` or `vendor/...`).
+3. Resolve the destination: `.cursor/rules` or `CURSOR_RULES_TARGET_DIR`.
+4. Create the destination root and replicate the whole directory tree, including empty folders.
+5. Copy or symlink every file, optionally overriding existing files via `--force`.
+6. Surface explicit errors for missing directories, removal failures, copy/symlink issues, etc.
 
-```
-.cursor/
- └─ rules/
-     ├─ testing.mdc
-     ├─ spatie.mdc
-     ├─ git.mdc
-     ├─ code-aquality.mdc
-     └─ clean-code.mdc
-```
+### CLI Switches
 
-Each rule file (`.mdc`) includes instructions that Cursor automatically attaches when writing, editing, or generating code.
+| Option       | Description                                                             |
+|--------------|-------------------------------------------------------------------------|
+| `--force`    | Overwrite files that already exist in the target directory.             |
+| `--symlink`  | Create symlinks when the OS permits; automatically falls back to copy.  |
+| *(default)*  | Only copy missing files and keep existing content untouched.            |
 
----
+### Environment Variables
 
-## 📖 Rules Overview
+| Variable                           | Purpose                                                               |
+|------------------------------------|------------------------------------------------------------------------|
+| `CURSOR_RULES_TARGET_DIR`          | Absolute path to the destination (for example `/app/.cursor/rules`).  |
+| `CURSOR_RULES_PROJECT_ROOT`        | Skips auto-discovery of the project root.                             |
+| `CURSOR_RULES_PROJECT_ROOT_FALLBACK` | Fallback root if `getcwd()` cannot be resolved.                      |
+| `CURSOR_RULES_DISABLE_SYMLINKS`    | Forces copy mode even when `--symlink` is used.                       |
+| `CURSOR_RULES_FORCE_WINDOWS`       | Simulates a Windows environment (symlinks are disabled).              |
+| `CURSOR_RULES_FAIL_SYMLINK`        | Test flag that forces a symlink failure.                              |
+| `CURSOR_RULES_FAIL_COPY`           | Test flag that forces a copy failure.                                 |
 
-| Rule File           | Description                                                                                         | Scope / Type       |
-|---------------------|-----------------------------------------------------------------------------------------------------|--------------------|
-| **testing.mdc**     | Guidelines for writing and maintaining **Pest tests**. Analyze classes before writing tests, keep tests simple and readable, and follow existing patterns. | Always Apply |
-| **spatie.mdc**      | **Laravel & PHP coding standards** derived from Spatie's guidelines. Follow Laravel conventions first, then PSR standards. | Always apply |
-| **git.mdc**         | Enforce **Conventional Commits**. All commit messages must follow the specification with short, consistent messages. | Always Apply |
-| **code-aquality.mdc** | **Code Quality guidelines**: target the actual PHP version, verify information, avoid assumptions, no apologies, avoid commented-out code, and prefer file-by-file changes. | Always Apply |
-| **clean-code.mdc**  | **Clean Code rules**: typed properties, constructor promotion, short nullable notation, explicit `void` return types, and consistent class structure. | Always Apply |
+## Rules Overview
 
----
+| File                 | Description                                                                  | Scope  |
+|----------------------|------------------------------------------------------------------------------|--------|
+| `php-classes.mdc`    | Class structure, typed properties, SRP                                       | Always |
+| `php-docs.mdc`       | Required docs for iterables, generics, array shapes                          | Always |
+| `php-fixing-bugs.mdc`| Bug-fix workflow, tests-first refactoring guardrails                        | Always |
+| `php-laravel.mdc`    | Laravel conventions (naming, configs, routes, Blade, jobs, events)           | Always |
+| `php-standards.mdc`  | Global clean-code rules, no redundant comments                               | Always |
+| `php-testing.mdc`    | Pest conventions, 100 % coverage, no private/protected assertions             | Always |
+| `templates/*.md`     | Task templates and checklists (e.g., class refactoring)                      | Manual |
 
-## 🎯 How to Use
+All `.mdc` files are ready for automatic injection by Cursor so every edit stays aligned with the enforced standards.
 
-1. **Install rules** using `vendor/bin/cursor-rules install`
-2. Cursor automatically applies rules marked with `alwaysApply: true`.  
-3. To invoke **manual rules**, call them in the Cursor chat using `@rule-name`.  
-4. When editing code, these rules act as **guardrails** to enforce standards, improve readability, and ensure test coverage.
+## Development & Testing
 
----
+- Run tests: `./vendor/bin/pest`
+- Full quality check: `composer check`
+- Generate 100 % coverage report: `composer test:coverage`
+- Remove `coverage.xml` before committing if it was produced locally
 
-## ✨ Benefits
+## License
 
-- Consistent **Laravel & PHP coding style** across projects.  
-- High-quality, maintainable code with **Clean Code principles**.  
-- Automated enforcement of **Conventional Commits**.  
-- Smarter, **Pest-based test generation**.  
-- Better readability and reduced cognitive complexity.
-
----
-
-## 📝 License
-
-MIT – free to use, modify, and distribute.
-
----
-
-📌 This setup ensures that every piece of generated code, commit, and test in Cursor follows **best practices** while remaining clean, maintainable, and production-ready.
-
----
-
-See [`.github/README.md`](.github/README.md) for detailed workflow documentation.
+MIT — free to use, modify, and distribute.

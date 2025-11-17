@@ -92,6 +92,23 @@ test('install copies nested directories', function (): void {
     }
 });
 
+test('install creates empty nested directories from source', function (): void {
+    $root = installerCreateProjectRoot();
+    $targetDir = installerTargetDirectoryFor($root);
+    putenv('CURSOR_RULES_TARGET_DIR=' . $targetDir);
+    $emptyDirectory = $root . '/rules/templates/snippets/deep';
+    installerEnsureDirectory($emptyDirectory);
+
+    try {
+        installerRunInstallerFrom($root, ['cursor-rules', 'install']);
+
+        expect(is_dir($targetDir . '/templates/snippets/deep'))->toBeTrue();
+    } finally {
+        putenv('CURSOR_RULES_TARGET_DIR');
+        installerRemoveDirectory($root);
+    }
+});
+
 test('install fails when target directory cannot be created', function (): void {
     if (stripos(PHP_OS, 'WIN') === 0) {
         expect(true)->toBeTrue();

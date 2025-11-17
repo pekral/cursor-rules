@@ -58,6 +58,7 @@ final class Installer
         $targetDir = self::resolveTargetDirectory($root);
 
         self::ensureDirectoryExists($targetDir);
+        self::replicateDirectories($source, $targetDir);
 
         $files = self::listFiles($source);
         $copied = self::processFiles($files, $source, $targetDir, $force, $symlink);
@@ -188,6 +189,24 @@ final class Installer
         sort($files);
 
         return $files;
+    }
+
+    private static function replicateDirectories(string $source, string $targetDir): void
+    {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST,
+        );
+
+        foreach ($iterator as $directory) {
+            if (!$directory instanceof SplFileInfo || !$directory->isDir()) {
+                continue;
+            }
+
+            $relativePath = self::extractFilePath($directory, $source);
+
+            self::ensureDirectoryExists($targetDir . '/' . $relativePath);
+        }
     }
 
     private static function extractFilePath(SplFileInfo $file, string $base): string

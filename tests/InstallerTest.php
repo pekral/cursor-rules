@@ -3,18 +3,68 @@
 declare(strict_types = 1);
 
 use Pekral\CursorRules\Installer;
+use Pest\PendingCalls\TestCall;
 
-test('run shows help when no command is provided', function (): void {
+dataset('installer-run-commands', [
+    'help fallback' => [
+        [
+            'args' => ['cursor-rules'],
+            'expectedExitCode' => 0,
+            'expectedOutputFragment' => 'Usage:',
+        ],
+    ],
+    'unknown command' => [
+        [
+            'args' => ['cursor-rules', 'unknown'],
+            'expectedExitCode' => 1,
+            'expectedOutputFragment' => null,
+        ],
+    ],
+]);
+
+function installerRegisterRunCommandTest(): TestCall
+{
+    $testCall = test('run command handling responds according to provided arguments', function (array $scenario): void {
+        /** @var array{
+         *     args: array<int, string>,
+         *     expectedExitCode: int,
+         *     expectedOutputFragment: string|null
+         * } $scenario
+         */
+        ob_start();
+        $exitCode = Installer::run($scenario['args']);
+        $output = (string) ob_get_clean();
+
+        expect($exitCode)->toBe($scenario['expectedExitCode']);
+
+        if ($scenario['expectedOutputFragment'] !== null) {
+            expect($output)->toContain($scenario['expectedOutputFragment']);
+        }
+    });
+
+    if (!$testCall instanceof TestCall) {
+        throw new LogicException('Failed to register installer run command dataset test.');
+    }
+
+    return $testCall;
+}
+
+$runCommandTestCall = installerRegisterRunCommandTest();
+$runCommandTestCall->with('installer-run-commands');
+
+test('run shows help when executed without arguments', function (): void {
     ob_start();
     $exitCode = Installer::run(['cursor-rules']);
-    $output = ob_get_clean();
+    $output = (string) ob_get_clean();
 
     expect($exitCode)->toBe(0);
     expect($output)->toContain('Usage:');
 });
 
-test('run returns error for unknown command', function (): void {
-    expect(Installer::run(['cursor-rules', 'unknown']))->toBe(1);
+test('run returns error code for unknown command input', function (): void {
+    $exitCode = Installer::run(['cursor-rules', 'unknown']);
+
+    expect($exitCode)->toBe(1);
 });
 
 test('install copies rules from development directory', function (): void {
@@ -55,22 +105,71 @@ test('install falls back to vendor directory', function (): void {
     }
 });
 
+test('project rules take precedence when vendor rules also exist', function (): void {
+    $root = installerCreateProjectRoot();
+    $targetDir = installerTargetDirectoryFor($root);
+    putenv('CURSOR_RULES_TARGET_DIR=' . $targetDir);
+    $vendorRules = $root . '/vendor/pekral/cursor-rules/rules';
+    installerWriteFile($root . '/rules/priority.mdc', 'project content');
+    installerWriteFile($vendorRules . '/priority.mdc', 'vendor content');
+
+    try {
+        installerRunInstallerFrom($root, ['cursor-rules', 'install']);
+        $installedFile = $targetDir . '/priority.mdc';
+
+        expect($installedFile)->toBeFile();
+        expect(file_get_contents($installedFile))->toBe('project content');
+    } finally {
+        putenv('CURSOR_RULES_TARGET_DIR');
+        installerRemoveDirectory($root);
+    }
+});
+
 test('default target directory is used when no override is provided', function (): void {
-    $baseDir = __DIR__ . '/tmp-base-' . bin2hex(random_bytes(4));
-    $root = installerCreateProjectRoot($baseDir);
+    $root = installerCreateProjectRoot();
     installerWriteFile($root . '/rules/default.mdc', 'default content');
     $workingDirectory = installerCreateWorkingDirectory($root);
+    $supportsHiddenDirectories = installerSupportsCursorDirectoryCreation();
 
     try {
         $exitCode = installerRunInstallerFrom($workingDirectory, ['cursor-rules', 'install']);
 
-        expect($exitCode)->toBe(0);
         $installedFile = $root . '/.cursor/rules/default.mdc';
-        expect($installedFile)->toBeFile();
-        expect(file_get_contents($installedFile))->toBe('default content');
+
+        if ($supportsHiddenDirectories) {
+            expect($exitCode)->toBe(0);
+            expect($installedFile)->toBeFile();
+            expect(file_get_contents($installedFile))->toBe('default content');
+        } else {
+            expect($exitCode)->toBe(1);
+            expect(is_file($installedFile))->toBeFalse();
+        }
     } finally {
         installerRemoveDirectory($root);
-        installerRemoveDirectory($baseDir);
+    }
+});
+
+test('empty target directory override falls back to default location', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/empty-override.mdc', 'empty override content');
+    putenv('CURSOR_RULES_TARGET_DIR=');
+    $supportsHiddenDirectories = installerSupportsCursorDirectoryCreation();
+
+    try {
+        $exitCode = installerRunInstallerFrom($root, ['cursor-rules', 'install']);
+        $installedFile = $root . '/.cursor/rules/empty-override.mdc';
+
+        if ($supportsHiddenDirectories) {
+            expect($exitCode)->toBe(0);
+            expect($installedFile)->toBeFile();
+            expect(file_get_contents($installedFile))->toBe('empty override content');
+        } else {
+            expect($exitCode)->toBe(1);
+            expect(is_file($installedFile))->toBeFalse();
+        }
+    } finally {
+        putenv('CURSOR_RULES_TARGET_DIR');
+        installerRemoveDirectory($root);
     }
 });
 
@@ -149,6 +248,38 @@ test('install respects the force flag', function (): void {
         installerRunInstallerFrom($root, ['cursor-rules', 'install', '--force']);
         expect(file_get_contents($installedFile))->toBe('new content');
     } finally {
+        putenv('CURSOR_RULES_TARGET_DIR');
+        installerRemoveDirectory($root);
+    }
+});
+
+test('installer output reports only processed files', function (): void {
+    $root = installerCreateProjectRoot();
+    $targetDir = installerTargetDirectoryFor($root);
+    putenv('CURSOR_RULES_TARGET_DIR=' . $targetDir);
+    installerWriteFile($root . '/rules/fresh.mdc', 'fresh');
+    installerWriteFile($root . '/rules/skip.mdc', 'new');
+    installerWriteFile($targetDir . '/skip.mdc', 'existing');
+    $originalCwd = getcwd();
+    $originalCwd = $originalCwd === false ? '' : $originalCwd;
+
+    try {
+        chdir($root);
+        ob_start();
+        $exitCode = Installer::run(['cursor-rules', 'install']);
+        $output = (string) ob_get_clean();
+
+        expect($exitCode)->toBe(0);
+        expect($targetDir . '/fresh.mdc')->toBeFile();
+        expect($targetDir . '/skip.mdc')->toBeFile();
+
+        preg_match('/\((\d+) files\)/', $output, $matches);
+        expect($matches[1] ?? null)->toBe('1');
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
         putenv('CURSOR_RULES_TARGET_DIR');
         installerRemoveDirectory($root);
     }

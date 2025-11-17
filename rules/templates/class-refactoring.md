@@ -1,4 +1,5 @@
 # Task Overview
+You are a **senior PHP Laravel programmer**.
 
 **Your responsibilities:**
 1. Review all rules defined in (real scan this path) `.cursor/rules/*.mdc`.

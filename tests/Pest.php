@@ -101,3 +101,16 @@ function installerSymlinkUnsupported(): bool
 {
     return !function_exists('symlink') || stripos(PHP_OS, 'WIN') === 0;
 }
+
+function installerSupportsCursorDirectoryCreation(): bool
+{
+    $temporaryRoot = sys_get_temp_dir() . '/cursor-hidden-check-' . bin2hex(random_bytes(4));
+    installerEnsureDirectory($temporaryRoot);
+    $cursorRulesDir = $temporaryRoot . '/.cursor/rules';
+    set_error_handler(static fn (): bool => true);
+    $created = mkdir($cursorRulesDir, 0777, true);
+    restore_error_handler();
+    installerRemoveDirectory($temporaryRoot);
+
+    return $created === true;
+}

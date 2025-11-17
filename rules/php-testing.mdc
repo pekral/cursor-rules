@@ -31,7 +31,7 @@ alwaysApply: true
 - Never create Test class property, prefer local variables!
 - Never edit logic out of tests!
 - Everytime run new tests a repair errors!
-- testing data create in english language
+- testing data create in english.
 - Never create tests (and asserts too) for abstract classes, protected or private properties.
 - Generate phpdocs for variables when it comes to factory model and variable is using
 - Always write tests as simply and human-readable as possible.

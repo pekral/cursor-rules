@@ -32,3 +32,6 @@ Thumbs.db
 
 .cursor/*
 composer.lock
+
+
+build/

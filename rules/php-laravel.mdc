@@ -1,0 +1,80 @@
+---
+description: Base rules for Laravel projects.
+globs:
+alwaysApply: true
+---
+
+!!Apply only if `laravel` is in `composer.json`!!
+
+### Configuration
+- Keys: snake_case (`chrome_path`)
+- Add service configs to `config/services.php`, don't create new files
+- Use `config()` helper, avoid `env()` outside config files
+
+### Naming Conventions
+- **Follow Laravel conventions first.** If Laravel has a documented way to do something, use it. Only deviate when you have a clear justification.
+- **Classes**: PascalCase (`UserController`, `OrderStatus`)
+- **Methods/Variables**: camelCase (`getUserName`, `$firstName`)
+- **Routes**: kebab-case (`/open-source`, `/user-profile`)
+- **Config files**: kebab-case (`pdf-generator.php`)
+- **Config keys**: snake_case (`chrome_path`)
+- **Artisan commands**: kebab-case (`php artisan delete-old-records`)
+- Controllers: plural resource name + `Controller` (`PostsController`)
+- Views: camelCase (`openSource.blade.php`)
+- Jobs: action-based (`CreateUser`, `SendEmailNotification`)
+- Events: tense-based (`UserRegistering`, `UserRegistered`)
+- Listeners: action + `Listener` suffix (`SendInvitationMailListener`)
+- Commands: action + `Command` suffix (`PublishScheduledPostsCommand`)
+- Mailables: purpose + `Mail` suffix (`AccountActivatedMail`)
+- Resources/Transformers: plural + `Resource`/`Transformer` (`UsersResource`)
+- Enums: descriptive name, no prefix (`OrderStatus`, `BookingType`)
+
+## Blade Templates
+- Indent with 4 spaces
+- No spaces after control structures:
+  ```blade
+  @if($condition)
+      Something
+  @endif
+  ```
+
+### Routes
+- URLs: kebab-case (`/open-source`)
+	- Route names: dot notation (`->name('profile.show')`)
+- Parameters: camelCase (`{userId}`)
+- Use tuple notation: `[Controller::class, 'method']`
+- Limit deep nesting for simplicity:
+  ```
+  /error-occurrences/1
+  /errors/1/occurrences
+  ```
+
+### Controllers
+- Plural resource names (`PostsController`)
+- Stick to CRUD methods (`index`, `create`, `store`, `show`, `edit`, `update`, `destroy`)
+- Extract new controllers for non-CRUD actions
+
+### Artisan Commands
+- Names: kebab-case (`delete-old-records`)
+- Put output BEFORE processing item (easier debugging):
+  ```php
+  $items->each(function(Item $item) {
+      $this->info("Processing item id `{$item->id}`...");
+      $this->processItem($item);
+  });
+
+  $this->comment("Processed {$items->count()} items.");
+  ```
+
+## Authorization
+
+- Policies use camelCase: `Gate::define('editPost', ...)`
+- Use CRUD words, but `view` instead of `show`
+
+## Translations
+
+- Use `__()` function over `@lang`:
+
+### Migrations
+- do not write down methods in migrations, only up methods
+

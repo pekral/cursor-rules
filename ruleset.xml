@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<ruleset name="PHPCS Rules">
+    <description>Custom PHPCS rules for package</description>
+
+    <!-- Include pekral/phpcs-rules -->
+    <rule ref="vendor/pekral/phpcs-rules/ruleset.xml"/>
+
+    <!-- Exclude vendor directory -->
+    <exclude-pattern>vendor/*</exclude-pattern>
+    <exclude-pattern>coverage.xml</exclude-pattern>
+
+</ruleset>

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1763388165">
+  <project timestamp="1763388165" name="Clover Coverage">
+    <package name="Pekral\CursorRules">
+      <file name="/Users/petrkral/Projects/cursor-rules/src/Installer.php">
+        <class name="Pekral\CursorRules\Installer" namespace="Pekral\CursorRules">
+          <metrics complexity="61" methods="23" coveredmethods="23" conditionals="0" coveredconditionals="0" statements="125" coveredstatements="125" elements="148" coveredelements="148"/>
+        </class>
+        <line num="18" type="method" name="run" visibility="public" complexity="4" crap="4" count="20"/>
+        <line num="20" type="stmt" count="20"/>
+        <line num="21" type="stmt" count="20"/>
+        <line num="22" type="stmt" count="20"/>
+        <line num="25" type="stmt" count="20"/>
+        <line num="26" type="stmt" count="1"/>
+        <line num="29" type="stmt" count="19"/>
+        <line num="30" type="stmt" count="1"/>
+        <line num="32" type="stmt" count="1"/>
+        <line num="35" type="stmt" count="18"/>
+        <line num="36" type="stmt" count="7"/>
+        <line num="37" type="stmt" count="7"/>
+        <line num="39" type="stmt" count="7"/>
+        <line num="43" type="method" name="showHelp" visibility="private" complexity="1" crap="1" count="1"/>
+        <line num="45" type="stmt" count="1"/>
+        <line num="46" type="stmt" count="1"/>
+        <line num="47" type="stmt" count="1"/>
+        <line num="48" type="stmt" count="1"/>
+        <line num="49" type="stmt" count="1"/>
+        <line num="51" type="stmt" count="1"/>
+        <line num="54" type="method" name="installRules" visibility="private" complexity="1" crap="1" count="18"/>
+        <line num="56" type="stmt" count="18"/>
+        <line num="57" type="stmt" count="18"/>
+        <line num="58" type="stmt" count="16"/>
+        <line num="60" type="stmt" count="16"/>
+        <line num="62" type="stmt" count="14"/>
+        <line num="63" type="stmt" count="14"/>
+        <line num="65" type="stmt" count="11"/>
+        <line num="67" type="stmt" count="11"/>
+        <line num="73" type="method" name="processFiles" visibility="private" complexity="2" crap="2" count="14"/>
+        <line num="75" type="stmt" count="14"/>
+        <line num="76" type="stmt" count="14"/>
+        <line num="77" type="stmt" count="14"/>
+        <line num="78" type="stmt" count="14"/>
+        <line num="79" type="stmt" count="14"/>
+        <line num="80" type="stmt" count="14"/>
+        <line num="81" type="stmt" count="14"/>
+        <line num="82" type="stmt" count="14"/>
+        <line num="83" type="stmt" count="14"/>
+        <line num="84" type="stmt" count="14"/>
+        <line num="85" type="stmt" count="14"/>
+        <line num="88" type="method" name="shouldProcessFile" visibility="private" complexity="3" crap="3" count="14"/>
+        <line num="90" type="stmt" count="14"/>
+        <line num="91" type="stmt" count="14"/>
+        <line num="92" type="stmt" count="14"/>
+        <line num="94" type="stmt" count="14"/>
+        <line num="96" type="stmt" count="14"/>
+        <line num="97" type="stmt" count="1"/>
+        <line num="100" type="stmt" count="14"/>
+        <line num="103" type="method" name="ensureDirectoryExists" visibility="private" complexity="5" crap="5" count="16"/>
+        <line num="105" type="stmt" count="16"/>
+        <line num="106" type="stmt" count="13"/>
+        <line num="109" type="stmt" count="13"/>
+        <line num="110" type="stmt" count="1"/>
+        <line num="113" type="stmt" count="12"/>
+        <line num="114" type="stmt" count="12"/>
+        <line num="115" type="stmt" count="12"/>
+        <line num="117" type="stmt" count="12"/>
+        <line num="118" type="stmt" count="1"/>
+        <line num="122" type="method" name="installFile" visibility="private" complexity="5" crap="5" count="14"/>
+        <line num="124" type="stmt" count="14"/>
+        <line num="126" type="stmt" count="12"/>
+        <line num="127" type="stmt" count="2"/>
+        <line num="128" type="stmt" count="1"/>
+        <line num="131" type="stmt" count="10"/>
+        <line num="134" type="stmt" count="11"/>
+        <line num="137" type="method" name="removeExistingTarget" visibility="private" complexity="4" crap="4" count="14"/>
+        <line num="139" type="stmt" count="14"/>
+        <line num="140" type="stmt" count="11"/>
+        <line num="143" type="stmt" count="3"/>
+        <line num="144" type="stmt" count="1"/>
+        <line num="147" type="stmt" count="2"/>
+        <line num="148" type="stmt" count="2"/>
+        <line num="149" type="stmt" count="2"/>
+        <line num="151" type="stmt" count="2"/>
+        <line num="152" type="stmt" count="1"/>
+        <line num="156" type="method" name="findProjectRoot" visibility="private" complexity="5" crap="5" count="17"/>
+        <line num="158" type="stmt" count="17"/>
+        <line num="160" type="stmt" count="17"/>
+        <line num="161" type="stmt" count="2"/>
+        <line num="164" type="stmt" count="17"/>
+        <line num="165" type="stmt" count="3"/>
+        <line num="166" type="stmt" count="3"/>
+        <line num="169" type="stmt" count="17"/>
+        <line num="175" type="method" name="listFiles" visibility="private" complexity="2" crap="2" count="14"/>
+        <line num="177" type="stmt" count="14"/>
+        <line num="178" type="stmt" count="14"/>
+        <line num="179" type="stmt" count="14"/>
+        <line num="180" type="stmt" count="14"/>
+        <line num="181" type="stmt" count="14"/>
+        <line num="183" type="stmt" count="14"/>
+        <line num="185" type="stmt" count="14"/>
+        <line num="188" type="stmt" count="14"/>
+        <line num="190" type="stmt" count="14"/>
+        <line num="193" type="method" name="extractFilePath" visibility="private" complexity="1" crap="1" count="14"/>
+        <line num="195" type="stmt" count="14"/>
+        <line num="197" type="stmt" count="14"/>
+        <line num="200" type="method" name="copy" visibility="private" complexity="3" crap="3" count="11"/>
+        <line num="202" type="stmt" count="11"/>
+        <line num="203" type="stmt" count="1"/>
+        <line num="207" type="method" name="canSymlink" visibility="private" complexity="3" crap="3" count="4"/>
+        <line num="209" type="stmt" count="4"/>
+        <line num="210" type="stmt" count="1"/>
+        <line num="213" type="stmt" count="3"/>
+        <line num="214" type="stmt" count="1"/>
+        <line num="217" type="stmt" count="2"/>
+        <line num="220" type="method" name="shouldDisableSymlinks" visibility="private" complexity="1" crap="1" count="4"/>
+        <line num="222" type="stmt" count="4"/>
+        <line num="225" type="method" name="resolveRulesSource" visibility="private" complexity="3" crap="3" count="18"/>
+        <line num="227" type="stmt" count="18"/>
+        <line num="229" type="stmt" count="18"/>
+        <line num="230" type="stmt" count="15"/>
+        <line num="233" type="stmt" count="3"/>
+        <line num="235" type="stmt" count="3"/>
+        <line num="236" type="stmt" count="1"/>
+        <line num="239" type="stmt" count="2"/>
+        <line num="242" type="method" name="resolveTargetDirectory" visibility="private" complexity="3" crap="3" count="16"/>
+        <line num="244" type="stmt" count="16"/>
+        <line num="246" type="stmt" count="16"/>
+        <line num="247" type="stmt" count="15"/>
+        <line num="250" type="stmt" count="1"/>
+        <line num="253" type="method" name="resolveProjectRoot" visibility="private" complexity="3" crap="3" count="18"/>
+        <line num="255" type="stmt" count="18"/>
+        <line num="257" type="stmt" count="18"/>
+        <line num="258" type="stmt" count="1"/>
+        <line num="261" type="stmt" count="17"/>
+        <line num="264" type="method" name="fallbackProjectRoot" visibility="private" complexity="3" crap="3" count="2"/>
+        <line num="266" type="stmt" count="2"/>
+        <line num="268" type="stmt" count="2"/>
+        <line num="269" type="stmt" count="1"/>
+        <line num="272" type="stmt" count="1"/>
+        <line num="275" type="method" name="isFilesystemRoot" visibility="private" complexity="3" crap="3" count="17"/>
+        <line num="277" type="stmt" count="17"/>
+        <line num="278" type="stmt" count="1"/>
+        <line num="281" type="stmt" count="17"/>
+        <line num="284" type="method" name="shouldForceSymlinkFailure" visibility="private" complexity="1" crap="1" count="2"/>
+        <line num="286" type="stmt" count="2"/>
+        <line num="289" type="method" name="shouldForceCopyFailure" visibility="private" complexity="1" crap="1" count="11"/>
+        <line num="291" type="stmt" count="11"/>
+        <line num="294" type="method" name="isWindowsEnvironment" visibility="private" complexity="2" crap="2" count="3"/>
+        <line num="296" type="stmt" count="3"/>
+        <line num="297" type="stmt" count="1"/>
+        <line num="300" type="stmt" count="2"/>
+        <line num="303" type="method" name="isTruthyFlag" visibility="private" complexity="2" crap="2" count="12"/>
+        <line num="305" type="stmt" count="12"/>
+        <line num="307" type="stmt" count="12"/>
+        <line num="308" type="stmt" count="11"/>
+        <line num="311" type="stmt" count="4"/>
+        <metrics loc="315" ncloc="305" classes="1" methods="23" coveredmethods="23" conditionals="0" coveredconditionals="0" statements="125" coveredstatements="125" elements="148" coveredelements="148"/>
+      </file>
+      <file name="/Users/petrkral/Projects/cursor-rules/src/InstallerFailure.php">
+        <class name="Pekral\CursorRules\InstallerFailure" namespace="Pekral\CursorRules">
+          <metrics complexity="4" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="4" coveredstatements="4" elements="8" coveredelements="8"/>
+        </class>
+        <line num="12" type="method" name="missingSource" visibility="public" complexity="1" crap="1" count="2"/>
+        <line num="14" type="stmt" count="2"/>
+        <line num="17" type="method" name="directoryCreationFailed" visibility="public" complexity="1" crap="1" count="2"/>
+        <line num="19" type="stmt" count="2"/>
+        <line num="22" type="method" name="fileCopyFailed" visibility="public" complexity="1" crap="1" count="1"/>
+        <line num="24" type="stmt" count="1"/>
+        <line num="27" type="method" name="removalFailed" visibility="public" complexity="1" crap="1" count="2"/>
+        <line num="29" type="stmt" count="2"/>
+        <metrics loc="33" ncloc="33" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="4" coveredstatements="4" elements="8" coveredelements="8"/>
+      </file>
+    </package>
+    <metrics files="2" loc="348" ncloc="338" classes="2" methods="27" coveredmethods="27" conditionals="0" coveredconditionals="0" statements="129" coveredstatements="129" elements="156" coveredelements="156"/>
+  </project>
+</coverage>

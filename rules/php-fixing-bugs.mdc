@@ -1,0 +1,9 @@
+---
+description: Standards and safety rules applied during code refactoring to maintain quality and prevent regressions.
+globs:
+alwaysApply: true
+---
+
+## Refactoring guidelines
+- Write tests before fixing bugs, and check 100% coverage before refactoring.
+

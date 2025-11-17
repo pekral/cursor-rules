@@ -17,21 +17,27 @@ final class Installer
      */
     public static function run(array $argv): int
     {
-        $cmd = $argv[1] ?? 'help';
+        $command = $argv[1] ?? 'help';
         $force = in_array('--force', $argv, true);
         $symlink = in_array('--symlink', $argv, true);
 
-        if ($cmd === 'help') {
-            return self::showHelp();
-        }
+        try {
+            if ($command === 'help') {
+                return self::showHelp();
+            }
 
-        if ($cmd !== 'install') {
-            fwrite(STDERR, sprintf('Unknown command: %s%s', $cmd, PHP_EOL));
+            if ($command !== 'install') {
+                fwrite(STDERR, sprintf('Unknown command: %s%s', $command, PHP_EOL));
+
+                return 1;
+            }
+
+            return self::installRules($force, $symlink);
+        } catch (InstallerFailure $exception) {
+            fwrite(STDERR, $exception->getMessage() . PHP_EOL);
 
             return 1;
         }
-
-        return self::installRules($force, $symlink);
     }
 
     private static function showHelp(): int
@@ -47,76 +53,45 @@ final class Installer
 
     private static function installRules(bool $force, bool $symlink): int
     {
-        $root = self::findProjectRoot();
+        $root = self::resolveProjectRoot();
+        $source = self::resolveRulesSource($root);
+        $targetDir = self::resolveTargetDirectory($root);
 
-        // Check if we're in development mode (rules/ folder exists in project root)
-        $devSource = $root . '/rules';
-        $vendorSource = $root . '/vendor/pekral/cursor-rules/rules';
-        
-        // Use development source if it exists, otherwise fall back to vendor source
-        $source = is_dir($devSource) ? $devSource : $vendorSource;
-        $targetDir = $root . '/.cursor/rules';
-
-        if (!is_dir($source)) {
-            fwrite(STDERR, sprintf('Source not found: %s%s', $source, PHP_EOL));
-            fwrite(STDERR, 'Make sure you have either a rules/ folder in your project root or the package is installed via Composer.' . PHP_EOL);
-
-            return 1;
-        }
-
-        if (!self::ensureTargetDirectory($targetDir)) {
-            return 1;
-        }
+        self::ensureDirectoryExists($targetDir);
 
         $files = self::listFiles($source);
         $copied = self::processFiles($files, $source, $targetDir, $force, $symlink);
 
-        echo "Cursor rules installed to {$targetDir} ({$copied} files).\n";
+        echo sprintf('Cursor rules installed to %s (%d files).%s', $targetDir, $copied, PHP_EOL);
 
         return 0;
     }
 
-    private static function ensureTargetDirectory(string $targetDir): bool
-    {
-        if (!is_dir($targetDir) && !mkdir($targetDir, 0777, true) && !is_dir($targetDir)) {
-            fwrite(STDERR, sprintf('Cannot create target directory: %s%s', $targetDir, PHP_EOL));
-
-            return false;
-        }
-
-        return true;
-    }
-
     /**
-     * @param array<string> $files
+     * @param array<int, string> $files
      */
-    private static function processFiles(array $files, string $vendorSource, string $targetDir, bool $force, bool $symlink): int
+    private static function processFiles(array $files, string $source, string $targetDir, bool $force, bool $symlink): int
     {
-        $copied = 0;
-
-        foreach ($files as $relPath) {
-            if (self::shouldProcessFile($relPath, $vendorSource, $targetDir, $force, $symlink)) {
-                $copied += 1;
-            }
-        }
-
-        return $copied;
+        return array_reduce(
+            $files,
+            static fn (int $copied, string $relativePath): int => $copied + (self::shouldProcessFile(
+                $relativePath,
+                $source,
+                $targetDir,
+                $force,
+                $symlink,
+            ) ? 1 : 0),
+            0,
+        );
     }
 
-    private static function shouldProcessFile(string $relPath, string $vendorSource, string $targetDir, bool $force, bool $symlink): bool
+    private static function shouldProcessFile(string $relativePath, string $source, string $targetDir, bool $force, bool $symlink): bool
     {
-        $src = $vendorSource . '/' . $relPath;
-        $dst = $targetDir . '/' . $relPath;
-
+        $src = $source . '/' . $relativePath;
+        $dst = $targetDir . '/' . $relativePath;
         $dirName = dirname($dst);
 
-        if ($dirName === '') {
-            return false;
-        }
-
-        if (!self::ensureDirectoryExists($dirName)) {
-            return false;
-        }
+        self::ensureDirectoryExists($dirName);
 
         if (file_exists($dst) && !$force) {
             return false;
@@ -125,23 +100,31 @@ final class Installer
         return self::installFile($src, $dst, $symlink);
     }
 
-    private static function ensureDirectoryExists(string $dir): bool
+    private static function ensureDirectoryExists(string $directory): void
     {
-        if (!is_dir($dir) && !mkdir($dir, 0777, true) && !is_dir($dir)) {
-            fwrite(STDERR, 'Cannot create directory: ' . $dir . "\n");
-
-            return false;
+        if (is_dir($directory)) {
+            return;
         }
 
-        return true;
+        if (is_file($directory)) {
+            throw InstallerFailure::directoryCreationFailed($directory);
+        }
+
+        set_error_handler(static fn (): bool => true);
+        $created = mkdir($directory, 0777, true);
+        restore_error_handler();
+
+        if (!$created && !is_dir($directory)) {
+            throw InstallerFailure::directoryCreationFailed($directory);
+        }
     }
 
     private static function installFile(string $src, string $dst, bool $symlink): bool
     {
-        if ($symlink && self::canSymlink()) {
-            @unlink($dst);
+        self::removeExistingTarget($dst);
 
-            if (@symlink($src, $dst) === false) {
+        if ($symlink && self::canSymlink()) {
+            if (self::shouldForceSymlinkFailure() || !symlink($src, $dst)) {
                 self::copy($src, $dst);
             }
         } else {
@@ -151,22 +134,35 @@ final class Installer
         return true;
     }
 
+    private static function removeExistingTarget(string $destination): void
+    {
+        if (!file_exists($destination)) {
+            return;
+        }
+
+        if (is_dir($destination)) {
+            throw InstallerFailure::removalFailed($destination);
+        }
+
+        set_error_handler(static fn (): bool => true);
+        $deleted = unlink($destination);
+        restore_error_handler();
+
+        if ($deleted === false) {
+            throw InstallerFailure::removalFailed($destination);
+        }
+    }
+
     private static function findProjectRoot(): string
     {
-        // Walk up until composer.json is found (simple heuristic)
         $dir = getcwd();
 
         if ($dir === false) {
-            $dir = sys_get_temp_dir();
+            $dir = self::fallbackProjectRoot();
         }
 
-        while ($dir !== '/' && $dir !== '' && !file_exists($dir . '/composer.json')) {
+        while ($dir !== '' && !self::isFilesystemRoot($dir) && !file_exists($dir . '/composer.json')) {
             $parentDir = dirname($dir);
-
-            if ($parentDir === $dir) {
-                break;
-            }
-
             $dir = $parentDir;
         }
 
@@ -174,23 +170,19 @@ final class Installer
     }
 
     /**
-     * @return array<string>
+     * @return array<int, string>
      */
     private static function listFiles(string $base): array
     {
-        $it = new RecursiveIteratorIterator(
+        $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($base, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::LEAVES_ONLY,
         );
         $files = [];
 
-        foreach ($it as $file) {
-            if ($file instanceof SplFileInfo) {
-                $filePath = self::processFileItem($file, $base);
-
-                if ($filePath !== null) {
-                    $files[] = $filePath;
-                }
-            }
+        foreach ($iterator as $file) {
+            /** @var \SplFileInfo $file */
+            $files[] = self::extractFilePath($file, $base);
         }
 
         sort($files);
@@ -198,17 +190,8 @@ final class Installer
         return $files;
     }
 
-    private static function processFileItem(SplFileInfo $file, string $base): ?string
+    private static function extractFilePath(SplFileInfo $file, string $base): string
     {
-        return self::extractFilePath($file, $base);
-    }
-
-    private static function extractFilePath(SplFileInfo $file, string $base): ?string
-    {
-        if (!$file->isFile()) {
-            return null;
-        }
-
         $pathname = $file->getPathname();
 
         return ltrim(str_replace($base, '', $pathname), '/');
@@ -216,17 +199,116 @@ final class Installer
 
     private static function copy(string $src, string $dst): void
     {
-        copy($src, $dst);
+        if (self::shouldForceCopyFailure() || !copy($src, $dst)) {
+            throw InstallerFailure::fileCopyFailed($src, $dst);
+        }
     }
 
     private static function canSymlink(): bool
     {
-        if (stripos(PHP_OS, 'WIN') === 0) {
-            // keep it simple on Windows
+        if (self::shouldDisableSymlinks()) {
+            return false;
+        }
+
+        if (self::isWindowsEnvironment()) {
             return false;
         }
 
         return function_exists('symlink');
+    }
+
+    private static function shouldDisableSymlinks(): bool
+    {
+        return self::isTruthyFlag('CURSOR_RULES_DISABLE_SYMLINKS');
+    }
+
+    private static function resolveRulesSource(string $root): string
+    {
+        $developmentSource = $root . '/rules';
+
+        if (is_dir($developmentSource)) {
+            return $developmentSource;
+        }
+
+        $vendorSource = $root . '/vendor/pekral/cursor-rules/rules';
+
+        if (is_dir($vendorSource)) {
+            return $vendorSource;
+        }
+
+        throw InstallerFailure::missingSource($developmentSource, $vendorSource);
+    }
+
+    private static function resolveTargetDirectory(string $root): string
+    {
+        $override = getenv('CURSOR_RULES_TARGET_DIR');
+
+        if (is_string($override) && $override !== '') {
+            return $override;
+        }
+
+        return $root . '/.cursor/rules';
+    }
+
+    private static function resolveProjectRoot(): string
+    {
+        $override = getenv('CURSOR_RULES_PROJECT_ROOT');
+
+        if (is_string($override) && $override !== '') {
+            return $override;
+        }
+
+        return self::findProjectRoot();
+    }
+
+    private static function fallbackProjectRoot(): string
+    {
+        $override = getenv('CURSOR_RULES_PROJECT_ROOT_FALLBACK');
+
+        if (is_string($override) && $override !== '') {
+            return $override;
+        }
+
+        return sys_get_temp_dir();
+    }
+
+    private static function isFilesystemRoot(string $path): bool
+    {
+        if ($path === '' || $path === DIRECTORY_SEPARATOR) {
+            return true;
+        }
+
+        return preg_match('/^[A-Za-z]:\\\\?$/', $path) === 1;
+    }
+
+    private static function shouldForceSymlinkFailure(): bool
+    {
+        return self::isTruthyFlag('CURSOR_RULES_FAIL_SYMLINK');
+    }
+
+    private static function shouldForceCopyFailure(): bool
+    {
+        return self::isTruthyFlag('CURSOR_RULES_FAIL_COPY');
+    }
+
+    private static function isWindowsEnvironment(): bool
+    {
+        if (self::isTruthyFlag('CURSOR_RULES_FORCE_WINDOWS')) {
+            return true;
+        }
+
+        return stripos(PHP_OS, 'WIN') === 0;
+    }
+
+    private static function isTruthyFlag(string $flag): bool
+    {
+        $value = getenv($flag);
+
+        if ($value === false) {
+            return false;
+        }
+
+        return in_array(strtolower($value), ['1', 'true', 'on', 'yes'], true);
     }
 
 }

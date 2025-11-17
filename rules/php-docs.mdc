@@ -1,0 +1,41 @@
+---
+description: Conventions and validation rules for writing and maintaining PHPDoc blocks across the project.
+globs:
+alwaysApply: true
+---
+
+## Comments
+- Avoid giving feedback about understanding in comments or documentation.
+- **Avoid comments** - write expressive code instead
+- Don't comment on what the code does - make the code self-documenting
+- Document APIs, complex algorithms, and non-obvious side effects
+
+## PHPDocs blocks
+- Fill missing shaped array for all iterable types.
+- Never generate phpdoc for non existing variable.
+- Analyze the existing PHPDocs and if it does not match the functionality then modify the existing PHPDocs.
+- Delete unnecessary comments, but not those that can be used for PHPStan analysis. If the short description is the same or very similar to the method or function name, delete it.
+- Document iterables with generics:
+  ```php
+  /** @return Collection<int, User> */
+  public function getUsers(): Collection
+  ```
+- Most common type should be first in multi-type docblocks:
+  ```php
+  /** @var Collection|SomeWeirdVendor\Collection */
+  ```
+- For iterables, always specify key and value types:
+  ```php
+  /**
+   * @param array<int, MyObject> $myArray
+   * @param int $typedArgument
+   */
+  function someFunction(array $myArray, int $typedArgument) {}
+  ```
+- Use array shape notation for fixed keys, put each key on it's own line:
+  ```php
+  /** @return array{
+     first: SomeClass,
+     second: SomeClass
+  } */
+  ```

@@ -1,0 +1,27 @@
+---
+description: Rules for designing, structuring, and maintaining PHP classes to keep the codebase clean, predictable, and consistent.
+globs:
+alwaysApply: true
+---
+
+## Class Structure
+- Create custom exceptions when necessary.
+- Use typed properties, not docblocks.
+- Constructor property promotion when all properties can be promoted.
+- Always mark new classes as final
+- Set method and class names as camel case
+
+## Single Responsibility
+- Each function should do exactly one thing
+- Functions should be small and focused
+- If a function needs a comment to explain what it does, it should be split
+
+## Clean Structure
+- Keep related code together
+- Organize code in a logical hierarchy
+- Use consistent file and folder naming conventions
+
+## Encapsulation
+- Hide implementation details
+- Expose clear interfaces
+- Move nested conditionals into well-named functions

@@ -1,0 +1,139 @@
+name: Update Changelog
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  update-changelog:
+    name: "📝 Update CHANGELOG.md"
+    runs-on: ubuntu-latest
+
+    # Skip if this is the changelog update commit itself
+    if: "!contains(github.event.head_commit.message, '[skip-changelog]')"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Get PR information and commits
+        id: pr-info
+        run: |
+          # Get the merge commit hash
+          MERGE_COMMIT=$(git rev-parse HEAD)
+          echo "merge-commit=$MERGE_COMMIT" >> $GITHUB_OUTPUT
+          
+          # Try to find PR number from merge commit message
+          PR_NUMBER=$(git log --oneline -1 --pretty=format:"%s" | grep -o '#[0-9]\+' | head -1 | sed 's/#//' || echo "")
+          echo "pr-number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          
+          # Get commits from the merged PR (commits between previous merge and current)
+          PREV_MERGE=$(git log --merges --pretty=format:"%H" -n 2 | tail -1)
+          if [ -z "$PREV_MERGE" ]; then
+            # If no previous merge, get last 20 commits
+            COMMITS=$(git log --pretty=format:"- %s" -n 20 --no-merges)
+          else
+            # Get commits between previous merge and current HEAD
+            COMMITS=$(git log --pretty=format:"- %s" ${PREV_MERGE}..HEAD --no-merges)
+          fi
+          
+          # Filter out changelog update commits
+          COMMITS=$(echo "$COMMITS" | grep -v "\[skip-changelog\]" | grep -v "chore: update CHANGELOG")
+          
+          # Format commits with conventional commit style
+          FORMATTED_COMMITS=""
+          while IFS= read -r line; do
+            if [[ $line =~ ^-\ (feat|fix|chore|docs|style|refactor|test|perf)(\(.*\))?:\ (.*)$ ]]; then
+              TYPE="${BASH_REMATCH[1]}"
+              SCOPE="${BASH_REMATCH[2]}"
+              MESSAGE="${BASH_REMATCH[3]}"
+              case $TYPE in
+                feat) FORMATTED_COMMITS="$FORMATTED_COMMITS\n- ✨ **Added**: $MESSAGE";;
+                fix) FORMATTED_COMMITS="$FORMATTED_COMMITS\n- 🐛 **Fixed**: $MESSAGE";;
+                chore) FORMATTED_COMMITS="$FORMATTED_COMMITS\n- 🔧 **Changed**: $MESSAGE";;
+                docs) FORMATTED_COMMITS="$FORMATTED_COMMITS\n- 📚 **Documentation**: $MESSAGE";;
+                style) FORMATTED_COMMITS="$FORMATTED_COMMITS\n- 💄 **Style**: $MESSAGE";;
+                refactor) FORMATTED_COMMITS="$FORMATTED_COMMITS\n- ♻️ **Refactored**: $MESSAGE";;
+                test) FORMATTED_COMMITS="$FORMATTED_COMMITS\n- ✅ **Tests**: $MESSAGE";;
+                perf) FORMATTED_COMMITS="$FORMATTED_COMMITS\n- ⚡ **Performance**: $MESSAGE";;
+              esac
+            else
+              # Non-conventional commits
+              CLEAN_LINE=$(echo "$line" | sed 's/^- //')
+              FORMATTED_COMMITS="$FORMATTED_COMMITS\n- 📝 **Changed**: $CLEAN_LINE"
+            fi
+          done <<< "$COMMITS"
+          
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$FORMATTED_COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          # Get current date
+          echo "date=$(date '+%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Update CHANGELOG.md
+        run: |
+          DATE="${{ steps.pr-info.outputs.date }}"
+          PR_NUMBER="${{ steps.pr-info.outputs.pr-number }}"
+          COMMITS="${{ steps.pr-info.outputs.commits }}"
+          
+          # Skip if no commits to add
+          if [ -z "$COMMITS" ] || [ "$COMMITS" = "" ]; then
+            echo "No commits to add to changelog"
+            exit 0
+          fi
+          
+          # Create new changelog entry
+          NEW_ENTRY="## [Unreleased] - $DATE"
+          if [ ! -z "$PR_NUMBER" ]; then
+            NEW_ENTRY="$NEW_ENTRY (PR #$PR_NUMBER)"
+          fi
+          
+          # Create temporary file
+          {
+            echo "# Changelog"
+            echo ""
+            echo "All notable changes to \`arch-app-services\` will be documented in this file."
+            echo ""
+            echo "$NEW_ENTRY"
+            echo ""
+            echo -e "$COMMITS"
+            echo ""
+            # Add existing changelog content (skip first 4 lines - header)
+            tail -n +5 CHANGELOG.md
+          } > changelog_temp.md
+          
+          # Replace the original file
+          mv changelog_temp.md CHANGELOG.md
+
+      - name: Commit and push changes
+        run: |
+          if git diff --quiet CHANGELOG.md; then
+            echo "No changes to CHANGELOG.md"
+            exit 0
+          fi
+          
+          git add CHANGELOG.md
+          git commit -m "chore: update CHANGELOG.md [skip-changelog]"
+          git push origin master
+
+      - name: Create summary
+        run: |
+          echo "## 📝 CHANGELOG Updated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Date:** ${{ steps.pr-info.outputs.date }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR:** #${{ steps.pr-info.outputs.pr-number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commits added:** $(echo '${{ steps.pr-info.outputs.commits }}' | wc -l)" >> $GITHUB_STEP_SUMMARY

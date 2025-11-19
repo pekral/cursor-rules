@@ -42,3 +42,7 @@ You are a **senior PHP Laravel programmer**.
 ## Project Maintenance Steps
 - Make sure when new tests are added, they cover all relevant code.
 - Remove the coverage file if it exists.
+
+## Commenting
+- Add missing phpdocs for the class and methods  only on more complex issues.Simpler issues that are clear at first glance can be left without comments. If necessary, update the comments according to the current logic if they disagree with the original comment.
+- Fill missing phpdocs for phpstan analysis errors.

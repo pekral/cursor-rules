@@ -19,6 +19,7 @@ You are a **senior PHP Laravel programmer**.
 - Translate all comments into English.
 - Use **Spatie DTOs** instead of arrays (if this package is available in this project) — except in Laravel Job constructors where DTOs must *not* be used.
 - Use Laravel helper functions instead of native PHP functions when appropriate (see “Reasoning instructions”).
+- Never hide errors using ignore entries (phpstan, phpcs, etc.). I don't want to hide the error, but I want to solve it in a way that is clean, simple, and optimized.
 
 ---
 

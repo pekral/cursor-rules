@@ -54,4 +54,5 @@ alwaysApply: true
 - Do code review
 
 
-
+## Laravel feature testing
+- For feature tests write end-to-end tests that mimic real-world scenarios (workflow), not just trivialities.

@@ -26,6 +26,7 @@ alwaysApply: true
 - Don't remove unrelated code or functionalities. Pay attention to preserving existing structures.
 
 ## PHP Standards
+- Never use ?array or nullable iterated typehints
 - Use PHP features (php version is defined in composer.json file) when appropriate (e.g., typed properties, match expressions), Generate code for actual php version.
 - Use short nullable notation: `?string` not `string|null`.
 - Always specify `void` return types when methods return nothing.

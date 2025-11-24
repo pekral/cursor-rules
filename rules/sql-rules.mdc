@@ -1,0 +1,47 @@
+---
+description: SQL & Database Performance Review rules for PHP / Laravel projects.
+alwaysApply: true
+---
+
+---
+description: Instructions for SQL query optimization, database design, and ORM performance.
+Use these guidelines when reviewing or writing SQL queries to ensure speed, scalability, and correctness.
+globs:
+---
+
+## SQL Basics
+ - Always include EXPLAIN for each new or modified query.
+ - Never accept queries that cause a full table scan without clear justification.
+ - Avoid N+1 queries. Use eager loading (`with()`, `load()`) or JOINs.
+ - Avoid SELECT * — always specify required columns.
+ - Each JOIN column must be indexed on both tables.
+ - Always use parameterized queries (no concatenated SQL).
+
+## Indexes
+ - Check composite indexes — order of columns matters (left-to-right rule).
+ - If the query filters by (user_id, status) and sorts by created_at, suggest index (user_id, status, created_at).
+ - Drop redundant single-column indexes if a composite index already covers them.
+ - Nullable columns should appear last in composite indexes.
+ - Avoid negative conditions (`<>`, `!=`, `NOT IN`, `NOT LIKE`) — they break index usage.
+ - Check if ORDER BY and LIMIT match the active index.
+   If not, propose index tuning or query rewrite.
+
+## Query Optimization
+ - WHERE clauses must be SARGable (Search ARGument Able):
+   - Avoid functions or operations on indexed columns (`DATE(col)`, `LOWER(col)`, `col + 1`).
+   - Prefer ranges: `col BETWEEN ? AND ?` instead of `DATE(col) = ?`.
+ - Use seek pagination (`WHERE id > ? LIMIT ?`) instead of OFFSET pagination.
+ - Simplify complex subqueries. Consider caching or denormalization for repeated expensive queries.
+ - If a query runs often with the same parameters, suggest `Cache::remember()` in Laravel.
+ - When a query slows down unexpectedly, suggest running `ANALYZE TABLE` or `OPTIMIZE TABLE`.
+
+## Laravel / Eloquent
+ - Detect N+1 issues: look for queries executed inside loops.
+ - Replace loops with eager loading:
+   Example:
+   ```php
+   // Bad
+   foreach ($users as $u) { $u->posts->count(); }
+
+   // Good
+   $users = User::with('posts')->get();

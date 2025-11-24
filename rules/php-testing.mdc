@@ -56,3 +56,4 @@ alwaysApply: true
 
 ## Laravel feature testing
 - For feature tests write end-to-end tests that mimic real-world scenarios (workflow), not just trivialities.
+- Focus on rules that make sense for your business, not just "endpoint returns data."  

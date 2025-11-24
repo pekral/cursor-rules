@@ -1,0 +1,10 @@
+---
+description: Defined rules for create new layouts or template components
+globs:
+alwaysApply: true
+---
+
+## Create new templates
+ - analyze existing UI style (analyze layout, colors, typography, etc.)
+ - If you want to create new template, keep existing UI style.
+ - Every new UI must be human friendly and simplicitly understandable.

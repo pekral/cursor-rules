@@ -37,6 +37,12 @@ alwaysApply: true
 ## Naming
 - Variables, functions, and classes should reveal their purpose
 - Names should explain why something exists and how it's used
+- Classes in StudlyCaps/PascalCase, methods and properties in camelCase.
+- Name methods using meaningful verbs + a description of the action (e.g., createUser, getOrderById, updateProduct, deleteInvoice — for CRUD and service operations).
+- If the method returns a boolean, the prefix can be, for example, is, has, can — e.g., isActive, hasErrors.
+- Variables and properties: understandable names, not $a, $tmp, but e.g., $userEmail, $orderItems.
+
+Translated with DeepL.com (free version)
 
 ## DRY (Don't Repeat Yourself)
 - Extract repeated code into reusable functions

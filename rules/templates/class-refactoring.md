@@ -31,6 +31,7 @@ You are a **senior PHP Laravel programmer**.
 - Follow the Single Responsibility Principle.
 - If a method body exceeds roughly 30 lines, review and extract private methods when appropriate.
 - Do not create a variable if it is used only once.
+- Modify code by SOLID principles for actual changes.
 
 ---
 

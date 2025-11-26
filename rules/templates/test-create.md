@@ -6,6 +6,7 @@ Write clean, modern, and human-readable code at all times.
 
 Your task is to analyze **Example::class**, its usage in the application, and all related tests.  
 Add missing tests and edge cases while following project conventions and all testing rules.
+If you created new tests, do class refactoring to make them more readable and maintainable by defined rules in `.cursor/templates/class-refactoring.mdc`.
 
 ---
 

@@ -51,3 +51,6 @@ Forbidden:
 ## Code coverage
 - Code coverage must be 100%!
 - Check code coverage only for changes
+
+## Asserts
+- Follow the arrange-act-assert pattern

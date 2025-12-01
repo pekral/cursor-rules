@@ -6,6 +6,7 @@ You are a **senior PHP Laravel programmer**.
 2. Apply these rules to the `ExampleClass::class`.
 3. Analyze the class and complete all tasks from the defined TODO list.
 4. After refactoring, verify and inspect the code coverage for this class.
+5. Check the generated code and if it can be written in a simpler way without changing the logic, use the simpler and more readable version of the code.
 
 ---
 

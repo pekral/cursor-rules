@@ -19,6 +19,7 @@ alwaysApply: true
 ## Mocking
 - Create mocks only for services or classes that use third-party services (http api request, http client) to retrieve data. Never use mocks otherwise!
 - Use Mockery::class when is available but prefer Framework mocking classes like Http::fake() for Laravel.
+- Mocking outside of defined rules can only be used when it is necessary to mock an error state of the application.
 
 ## Asserts
 - Assert only values from the tested class or method

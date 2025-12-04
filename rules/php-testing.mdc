@@ -48,6 +48,7 @@ alwaysApply: true
 - Run tests only for changed files, find the tests before testing and check only for those found tests
 
 ## After create or modify tests
+- Never change env variables in tests!
 - If there is a file with code coverage, delete it.
 - After generating the code, check that you have followed all the defined rules for writing the test in the .cursoreditor/rules/testing.mdc configuration file. If not, check the broken rules and modify them to meet all the rules!
 - Delete unnecessary comments

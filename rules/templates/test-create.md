@@ -26,6 +26,7 @@ If you created new tests, do class refactoring to make them more readable and ma
 - Understand global test utilities, helper methods, and startup logic.
 - Use existing patterns and conventions for new tests.
 - Remove unnecessary mocks.
+- never change env variables in tests!
 
 ---
 

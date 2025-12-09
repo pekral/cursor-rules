@@ -14,6 +14,7 @@ If you created new tests, do class refactoring to make them more readable and ma
 
 ## General Analysis
 - Review all rules defined in `.cursor/rules/*.mdc` — all of them must be applied.
+- If the project supports PEST syntax, write tests in Pest syntax; otherwise, use classic PHPUnit syntax.
 - Locate existing tests for this functionality.
 - If tests do not exist, create them following existing conventions.
 - Never modify production code — only write and adjust tests.

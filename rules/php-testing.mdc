@@ -59,3 +59,10 @@ alwaysApply: true
 ## Laravel feature testing
 - For feature tests write end-to-end tests that mimic real-world scenarios (workflow), not just trivialities.
 - Focus on rules that make sense for your business, not just "endpoint returns data."  
+
+## Pest testing
+- Using expect() instead of assert. 
+- Don't write more except, but merge using and()
+- Describe always has the same name as the tested class.
+- Write the dataset only in the following style: ->with()
+- Do not use test(), only it() function

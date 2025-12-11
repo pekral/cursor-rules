@@ -53,6 +53,7 @@ Forbidden:
 ## Code coverage
 - Code coverage must be 100%!
 - Check code coverage only for changes
+- If there is an uncovered "catch" block, you are allowed to create mocks to ensure 100% coverage.
 
 ## Asserts
 - Follow the arrange-act-assert pattern

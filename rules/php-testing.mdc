@@ -26,7 +26,7 @@ alwaysApply: true
 - Follow the arrange-act-assert pattern
 
 ## Generated code
-- There must be no conditions on items from the dataset. If there must be, it is better to create separate tests.
+- Dataset-driven tests must not include conditional logic. Create separate tests for cases that would require conditions.
 - Test edge cases and error conditions
 - Data provider must be defined via argument not phpdoc block.
 - Use data providers if you can and it will simplify writing and readability

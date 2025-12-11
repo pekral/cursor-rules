@@ -67,3 +67,4 @@ alwaysApply: true
 - Describe always has the same name as the tested class.
 - Write the dataset only in the following style: ->with()
 - Do not use test(), only it() function
+- If a dataset contains repeating values, split it into multiple ->with() calls so PEST generates all combinations.

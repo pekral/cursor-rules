@@ -57,3 +57,4 @@ Forbidden:
 
 ## Asserts
 - Follow the arrange-act-assert pattern
+- Apply arrange & act & assert principle

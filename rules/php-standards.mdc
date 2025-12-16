@@ -42,8 +42,6 @@ alwaysApply: true
 - If the method returns a boolean, the prefix can be, for example, is, has, can — e.g., isActive, hasErrors.
 - Variables and properties: understandable names, not $a, $tmp, but e.g., $userEmail, $orderItems.
 
-Translated with DeepL.com (free version)
-
 ## DRY (Don't Repeat Yourself)
 - Extract repeated code into reusable functions
 - Share common logic through proper abstraction
@@ -51,3 +49,6 @@ Translated with DeepL.com (free version)
 
 ## Verify Information
 - Always verify information before presenting it. Do not make assumptions or speculate without clear evidence.
+
+## Variables
+- Only create variables if the values are used in more than one place and only if the code is readable by humans.

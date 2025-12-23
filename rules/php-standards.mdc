@@ -51,4 +51,4 @@ alwaysApply: true
 - Always verify information before presenting it. Do not make assumptions or speculate without clear evidence.
 
 ## Variables
-- - If there is only one variable in the code and it is only used in one place, there is no need to define the variable, but pass the result of the called code to where it belongs, instead of creating a variable.
+- If there is only one variable in the code and it is only used in one place, there is no need to define the variable, but pass the result of the called code to where it belongs, instead of creating a variable.

@@ -40,6 +40,7 @@ alwaysApply: true
 - Always write tests as simply and human-readable as possible.
 - Mark the test class as final
 - Never write tests for protected and private methods and properties!
+- Never use dynamic dates in tests
 
 ## Code coverage
 - Code coverage must be 100%!

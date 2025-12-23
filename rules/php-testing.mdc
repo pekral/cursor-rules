@@ -24,6 +24,7 @@ alwaysApply: true
 ## Asserts
 - Assert only values from the tested class or method
 - Follow the arrange-act-assert pattern
+- `Bus::assertDispatched` must check only run command and don't check properties
 
 ## Generated code
 - Dataset-driven tests must not include conditional logic. Create separate tests for cases that would require conditions.

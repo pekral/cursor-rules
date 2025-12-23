@@ -64,6 +64,7 @@ alwaysApply: true
 - Focus on rules that make sense for your business, not just "endpoint returns data."  
 
 ## Pest testing
+- Multiple expectations can be chained together for PEST syntax
 - Using expect() instead of assert. 
 - Don't write more except, but merge using and()
 - Describe always has the same name as the tested class.

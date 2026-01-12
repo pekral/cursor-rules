@@ -1,0 +1,12 @@
+## Filament Rules
+ 
+- When generating Filament resource, you MUST generate Filament smoke tests to check if the Resource works. When making changes to Filament resource, you MUST run the tests (generate them if they don't exist) and make changes to resource/tests to make the tests pass.
+- When generating Filament resource, don't generate View page or Infolist, unless specifically instructed.
+- When referencing the Filament routes, aim to use `getUrl()` instead of Laravel `route()`. Instead of `route('filament.admin.resources.class-schedules.index')`, use `ClassScheduleResource::getUrl('index')`. Also, specify the exacy Resource name, instead of `getResource()`.
+- When writing tests with Pest, use syntax `Livewire::test(class)` and not `livewire(class)`, to avoid extra dependency on `pestphp/pest-plugin-livewire`.
+- When using Enum class for Eloquent Model field, add Enum `HasLabel`, `HasColor` and `HasIcon` interfaces if aren't added yet instead of specifying values/labels/colors/icons inside of Filament Forms/Tables. **CRITICAL**: Always use the exact return type declarations from the interface definitions - do NOT substitute specific types (e.g., use `string|BackedEnum|Htmlable|null` for `getIcon()`, not `string|Heroicon|null`). When defining a default using enum never add `->value`. Refer to this docs page: https://filamentphp.com/docs/4.x/advanced/enums
+- Always use Enum instead of hardcoded string value where possible, if Enum class exists. For example, in the tests, when creating data, if field is casted to Enum, then use that Enum instead of hardcoded string value.
+- When adding icons, always use the Filament enum Filament\Support\Icons\Heroicon class instead of string.
+- When adding actions that require authorization, use the `->authorize('ability')` method on the action instead of manually calling `Gate::authorize()` or checking `Gate::allows()`. The `authorize()` method handles both authorization enforcement and action visibility automatically.
+- In Filament v4, validation rule `unique()` has `ignoreRecord: true` by default, no need to specify it.
+- In Filament v4, if you create custom Blade files with Tailwind classes, you need to create a custom theme and specify the folder of those Blade files in theme.css.

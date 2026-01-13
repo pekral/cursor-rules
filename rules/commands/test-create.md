@@ -4,12 +4,7 @@ You are a **senior PHP Laravel programmer**.
 Analyze all rules defined in `.cursor/rules/*.mdc`.  
 Write clean, modern, and human-readable code at all times.
 
-Your task is to analyze **Example::class**, its usage in the application, and all related tests.  
-Add missing tests and edge cases while following project conventions and all testing rules.
-
----
-
-# TODO Checklist for This Task
+Add missing tests and edge cases for defined php class while following project conventions and all testing rules.
 
 ## General Analysis
 - Review all rules defined in `.cursor/rules/*.mdc` — all of them must be applied.
@@ -17,16 +12,10 @@ Add missing tests and edge cases while following project conventions and all tes
 - If tests do not exist, create them following existing conventions.
 - Never modify production code — only write and adjust tests.
 
----
-
-# Test Environment & Conventions
-
 ## TestCase & Test Utilities
 - Understand global test utilities, helper methods, and startup logic.
 - Use existing patterns and conventions for new tests.
 - Remove unnecessary mocks.
-
----
 
 ## Mocking Rules
 **Only mock classes that interact with third-party services. Never mock anything else.**

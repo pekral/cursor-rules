@@ -8,7 +8,7 @@ Cursor Rules ships a complete set of `.mdc` files for the Cursor editor. The ins
 ## Why This Package
 
 - unified coding guidelines for PHP 8.4 projects
-- Pest-based testing with mandatory code analysis and 100 % coverage
+- Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
 - fast onboarding inside development repositories
 
@@ -61,24 +61,53 @@ vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
 
 ## Rules Overview
 
-| File                 | Description                                                                  | Scope  |
-|----------------------|------------------------------------------------------------------------------|--------|
-| `php-classes.mdc`    | Class structure, typed properties, SRP                                       | Always |
-| `php-docs.mdc`       | Required docs for iterables, generics, array shapes                          | Always |
-| `php-fixing-bugs.mdc`| Bug-fix workflow, tests-first refactoring guardrails                        | Always |
-| `php-laravel.mdc`    | Laravel conventions (naming, configs, routes, Blade, jobs, events)           | Always |
-| `php-standards.mdc`  | Global clean-code rules, no redundant comments                               | Always |
-| `php-testing.mdc`    | Pest conventions, 100 % coverage, no private/protected assertions             | Always |
-| `templates/*.md`     | Task templates and checklists (e.g., class refactoring)                      | Manual |
+| File                    | Description                                                              | Scope  |
+|-------------------------|--------------------------------------------------------------------------|--------|
+| `app-architecture.mdc`  | Application architecture (repositories, services, controllers, DTOs)      | Always |
+| `laravel-filament.mdc`  | Filament v4 rules (resources, enums, tests)                              | Always |
+| `php-classes.mdc`       | Class structure, typed properties, SRP                                   | Always |
+| `php-docs.mdc`          | Required docs for iterables, generics, array shapes                      | Always |
+| `php-fixing-bugs.mdc`   | Bug-fix workflow, tests-first refactoring guardrails                     | Always |
+| `php-laravel.mdc`       | Laravel conventions (naming, configs, routes, Blade, jobs, events)       | Always |
+| `php-standards.mdc`     | Global clean-code rules, no redundant comments                          | Always |
+| `php-testing.mdc`       | Pest conventions, 100% coverage, no private/protected assertions          | Always |
+| `sql-rules.mdc`         | SQL query optimization, indexes, N+1 prevention                          | Always |
+| `ui-templates.mdc`      | Rules for creating new templates and UI components                       | Always |
+| `commands/*.md`         | Task templates and checklists (e.g., class refactoring, code review)    | Manual |
 
 All `.mdc` files are ready for automatic injection by Cursor so every edit stays aligned with the enforced standards.
 
 ## Development & Testing
 
-- Run tests: `./vendor/bin/pest`
-- Full quality check: `composer check`
-- Generate 100 % coverage report: `composer test:coverage`
-- Remove `coverage.xml` before committing if it was produced locally
+### Composer Scripts
+
+```bash
+composer check              # run full quality check
+composer fix                # run all automatic fixes
+composer analyse            # run PHPStan static analysis
+composer test:coverage      # run tests with 100% coverage
+composer security-audit     # run security audit of dependencies
+```
+
+### Individual Commands
+
+```bash
+composer phpcs-check        # PHP CodeSniffer check
+composer phpcs-fix          # PHP CodeSniffer fix
+composer pint-check         # Laravel Pint check
+composer pint-fix           # Laravel Pint fix
+composer rector-check       # Rector check (dry-run)
+composer rector-fix         # Rector fix
+```
+
+### Testing
+
+```bash
+./vendor/bin/pest           # run all tests
+composer test:coverage      # run tests with coverage (min. 100%)
+```
+
+Remove `coverage.xml` before committing if it was produced locally.
 
 ## License
 

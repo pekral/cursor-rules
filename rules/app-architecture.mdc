@@ -1,0 +1,33 @@
+## Repositories
+- Only for read-only access
+- No business rules.
+- Disallow writes (`create`, `update`, `delete`, `save`, `attach`, `sync`, `increment`, `decrement`, `restore`, `forceDelete` etc.).
+
+## Services
+- Business logic will always be encapsulated in the service.
+- Return DTOs or models.
+
+## Data builders
+- Prepare or transform domain data for persistence.
+- Prepare a DTO objects if a more complex structure must be returned
+- Assemble DTOs (e.g., adding defaults, enriching values).
+- Never query DB directly.
+
+## Controllers
+- Delegate business logic to services only, logic in controllers is only for presentation and slim.
+- Must always be named **plural** (e.g., `ContactsController`, `DomainsController`)
+- Only accept **FormRequest** objects from the feature’s `Requests/` folder. Method injection is allowed.
+- Never call `validate()` inside the controller.
+- Must import only Services
+- Command controllers are single-purpose and should expose **one verb-y endpoint**, typically `store` (POST) for the command, delegating to Service
+
+## HTTP Requests
+- Each controller method must have a dedicated **FormRequest** class.
+- Handles validation & authorization.
+
+## Model Managers
+- Never read from database directly.
+- Just only for store data into database.
+
+## DTO
+- Extends Spatie\LaravelData\Data::class if this class is available

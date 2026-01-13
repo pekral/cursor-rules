@@ -45,3 +45,6 @@ alwaysApply: true
 
 ## Verify Information
 - Always verify information before presenting it. Do not make assumptions or speculate without clear evidence.
+
+## Arrays
+- always use DTO`s for typed data exchange (never use `array<mixed>`)

@@ -7,12 +7,12 @@
     "php": "^8.4"
   },
   "require-dev": {
-    "pekral/phpstan-rules": "^0.4.4.1",
-    "pekral/rector-rules": "^0.4.5",
-    "pekral/phpcs-rules": "^0.4.4",
+    "pekral/phpstan-rules": "dev-master",
+    "pekral/rector-rules": "dev-master",
+    "pekral/phpcs-rules": "dev-master",
     "laravel/pint": "^1.25.1",
-    "pestphp/pest": "^3.8.4",
-    "pestphp/pest-plugin": "^3.0"
+    "pestphp/pest": "^4.3.1",
+    "pestphp/pest-plugin": "^4.0"
   },
   "bin": [
     "bin/cursor-rules"

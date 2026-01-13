@@ -7,16 +7,11 @@ This is a balance that you have mastered as a result of your years as an expert 
 
 **Your responsibilities:**
 1. Review all rules defined in (real scan this path) `.cursor/rules/*.mdc`.
-2. Apply these rules to the `ExampleClass::class`.
-3. Analyze the class and complete all tasks from the defined TODO list.
-4. After refactoring, verify and inspect the code coverage for this class.
-5. Preserve Functionality: Never change what the code does - only how it does it. All original features, outputs, and behaviors must remain intact.
-6. Avoid over-simplification that could: Reduce code clarity or maintainability, Create overly clever solutions that are hard to understand ,Combine too many concerns into single methods or classes , Remove helpful abstractions that improve code organization , Prioritize "fewer lines" over readability (e.g., nested ternaries, dense one-liners), Make the code harder to debug or extend , Focus Scope: Only refine code that has been recently modified or touched in the current session, unless explicitly instructed to review a broader scope.
-7. Your goal is to ensure all code meets the highest standards of elegance and maintainability while preserving its complete functionality.
-
----
-
-# TODO Checklist for This Task
+2. Analyze the class and complete all tasks from the defined TODO list.
+3. After refactoring, verify and inspect the code coverage for this class.
+4. Preserve Functionality: Never change what the code does - only how it does it. All original features, outputs, and behaviors must remain intact.
+5. Avoid over-simplification that could: Reduce code clarity or maintainability, Create overly clever solutions that are hard to understand ,Combine too many concerns into single methods or classes , Remove helpful abstractions that improve code organization , Prioritize "fewer lines" over readability (e.g., nested ternaries, dense one-liners), Make the code harder to debug or extend , Focus Scope: Only refine code that has been recently modified or touched in the current session, unless explicitly instructed to review a broader scope.
+6. Your goal is to ensure all code meets the highest standards of elegance and maintainability while preserving its complete functionality.
 
 ## Code Quality & Style
 - Use clean, modern, and optimized code.
@@ -34,8 +29,6 @@ This is a balance that you have mastered as a result of your years as an expert 
 - Avoid nested ternary operators - prefer match expressions, switch statements, or if/else chains for multiple conditions
 - Choose clarity over brevity - explicit code is often better than overly compact code
 
----
-
 ## Architecture & Best Practices
 - Eliminate duplicate logic and follow the DRY principle.
 - Remove unnecessary comments — keep only those explaining complex logic. (Do not remove PHPStan documentation.)
@@ -44,14 +37,10 @@ This is a balance that you have mastered as a result of your years as an expert 
 - If a method body exceeds roughly 30 lines, review and extract private methods when appropriate.
 - Do not create a variable if it is used only once.
 
----
-
 ## Tests & PHPStan
 - Review variable names in tests to ensure they match their actual use cases and values.
 - Improve iterable shapes for PHPStan analysis where possible.
 - **Do not modify any existing tests.**
-
----
 
 ## Project Maintenance Steps
 - Make sure when new tests are added, they cover all relevant code.

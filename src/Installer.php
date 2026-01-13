@@ -32,7 +32,7 @@ final class Installer
                 return 1;
             }
 
-            return self::installRules($force, $symlink);
+            return self::install($force, $symlink);
         } catch (InstallerFailure $exception) {
             fwrite(STDERR, $exception->getMessage() . PHP_EOL);
 
@@ -51,21 +51,35 @@ final class Installer
         return 0;
     }
 
-    private static function installRules(bool $force, bool $symlink): int
+    private static function install(bool $force, bool $symlink): int
     {
-        $root = self::resolveProjectRoot();
-        $source = self::resolveRulesSource($root);
-        $targetDir = self::resolveTargetDirectory($root);
+        $root = InstallerPath::resolveProjectRoot();
+        $totalCopied = 0;
 
+        $rulesSource = InstallerPath::resolveRulesSource($root);
+        $rulesTarget = InstallerPath::resolveTargetDirectory($root);
+        $totalCopied += self::installDirectory($rulesSource, $rulesTarget, $force, $symlink);
+
+        $commandsSource = InstallerPath::resolveCommandsSource($root);
+
+        if ($commandsSource !== null) {
+            $commandsTarget = InstallerPath::resolveCommandsTargetDirectory($root);
+            $totalCopied += self::installDirectory($commandsSource, $commandsTarget, $force, $symlink);
+        }
+
+        echo sprintf('Cursor rules installed (%d files).%s', $totalCopied, PHP_EOL);
+
+        return 0;
+    }
+
+    private static function installDirectory(string $source, string $targetDir, bool $force, bool $symlink): int
+    {
         self::ensureDirectoryExists($targetDir);
         self::replicateDirectories($source, $targetDir);
 
         $files = self::listFiles($source);
-        $copied = self::processFiles($files, $source, $targetDir, $force, $symlink);
 
-        echo sprintf('Cursor rules installed to %s (%d files).%s', $targetDir, $copied, PHP_EOL);
-
-        return 0;
+        return self::processFiles($files, $source, $targetDir, $force, $symlink);
     }
 
     /**
@@ -154,22 +168,6 @@ final class Installer
         }
     }
 
-    private static function findProjectRoot(): string
-    {
-        $dir = getcwd();
-
-        if ($dir === false) {
-            $dir = self::fallbackProjectRoot();
-        }
-
-        while ($dir !== '' && !self::isFilesystemRoot($dir) && !file_exists($dir . '/composer.json')) {
-            $parentDir = dirname($dir);
-            $dir = $parentDir;
-        }
-
-        return $dir;
-    }
-
     /**
      * @return array<int, string>
      */
@@ -239,65 +237,6 @@ final class Installer
     private static function shouldDisableSymlinks(): bool
     {
         return self::isTruthyFlag('CURSOR_RULES_DISABLE_SYMLINKS');
-    }
-
-    private static function resolveRulesSource(string $root): string
-    {
-        $developmentSource = $root . '/rules';
-
-        if (is_dir($developmentSource)) {
-            return $developmentSource;
-        }
-
-        $vendorSource = $root . '/vendor/pekral/cursor-rules/rules';
-
-        if (is_dir($vendorSource)) {
-            return $vendorSource;
-        }
-
-        throw InstallerFailure::missingSource($developmentSource, $vendorSource);
-    }
-
-    private static function resolveTargetDirectory(string $root): string
-    {
-        $override = getenv('CURSOR_RULES_TARGET_DIR');
-
-        if (is_string($override) && $override !== '') {
-            return $override;
-        }
-
-        return $root . '/.cursor/rules';
-    }
-
-    private static function resolveProjectRoot(): string
-    {
-        $override = getenv('CURSOR_RULES_PROJECT_ROOT');
-
-        if (is_string($override) && $override !== '') {
-            return $override;
-        }
-
-        return self::findProjectRoot();
-    }
-
-    private static function fallbackProjectRoot(): string
-    {
-        $override = getenv('CURSOR_RULES_PROJECT_ROOT_FALLBACK');
-
-        if (is_string($override) && $override !== '') {
-            return $override;
-        }
-
-        return sys_get_temp_dir();
-    }
-
-    private static function isFilesystemRoot(string $path): bool
-    {
-        if ($path === '' || $path === DIRECTORY_SEPARATOR) {
-            return true;
-        }
-
-        return preg_match('/^[A-Za-z]:\\\\?$/', $path) === 1;
     }
 
     private static function shouldForceSymlinkFailure(): bool

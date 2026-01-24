@@ -60,11 +60,11 @@ final class Installer
         $rulesTarget = InstallerPath::resolveTargetDirectory($root);
         $totalCopied += self::installDirectory($rulesSource, $rulesTarget, $force, $symlink);
 
-        $commandsSource = InstallerPath::resolveCommandsSource($root);
+        $skillsSource = InstallerPath::resolveSkillsSource($root);
 
-        if ($commandsSource !== null) {
-            $commandsTarget = InstallerPath::resolveCommandsTargetDirectory($root);
-            $totalCopied += self::installDirectory($commandsSource, $commandsTarget, $force, $symlink);
+        if ($skillsSource !== null) {
+            $skillsTarget = InstallerPath::resolveSkillsTargetDirectory($root);
+            $totalCopied += self::installDirectory($skillsSource, $skillsTarget, $force, $symlink);
         }
 
         echo sprintf('Cursor rules installed (%d files).%s', $totalCopied, PHP_EOL);

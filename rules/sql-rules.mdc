@@ -42,6 +42,5 @@ globs:
    ```php
    // Bad
    foreach ($users as $u) { $u->posts->count(); }
-
    // Good
    $users = User::with('posts')->get();

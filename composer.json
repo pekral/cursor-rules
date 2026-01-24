@@ -1,22 +1,28 @@
 {
   "name": "pekral/cursor-rules",
   "description": "Cursor editor rules for PHP/Laravel projects",
-  "type": "library",
   "license": "MIT",
+  "type": "library",
   "require": {
     "php": "^8.4"
   },
   "require-dev": {
+    "ergebnis/composer-normalize": "^2.48",
+    "laravel/pint": "^1.25.1",
+    "pekral/phpcs-rules": "dev-master",
     "pekral/phpstan-rules": "dev-master",
     "pekral/rector-rules": "dev-master",
-    "pekral/phpcs-rules": "dev-master",
-    "laravel/pint": "^1.25.1",
     "pestphp/pest": "^4.3.1",
-    "pestphp/pest-plugin": "^4.0"
+    "pestphp/pest-plugin": "^4.0",
+    "pestphp/pest-plugin-type-coverage": "^4.0",
+    "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan": "^2.1",
+    "phpstan/phpstan-deprecation-rules": "^2.0",
+    "phpstan/phpstan-mockery": "^2.0",
+    "phpstan/phpstan-phpunit": "^2.0",
+    "roave/security-advisories": "dev-latest",
+    "squizlabs/php_codesniffer": "^4.0"
   },
-  "bin": [
-    "bin/cursor-rules"
-  ],
   "autoload": {
     "psr-4": {
       "Pekral\\CursorRules\\": "src/"
@@ -27,6 +33,28 @@
       "Tests\\": "tests/"
     }
   },
+  "bin": [
+    "bin/cursor-rules"
+  ],
+  "archive": {
+    "exclude": [
+      "/tests"
+    ]
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "ergebnis/composer-normalize": true,
+      "pestphp/pest-plugin": true,
+      "phpstan/extension-installer": true
+    }
+  },
+  "extra": {
+    "cursor-rules": {
+      "source": "vendor/pekral/cursor-rules/.cursor/rules",
+      "target": ".cursor/rules"
+    }
+  },
   "scripts": {
     "analyse": [
       "echo \"🔍 Running PHPStan static analysis...\"",
@@ -34,6 +62,7 @@
     ],
     "check": [
       "echo \"🚀 Running full quality check...\"",
+      "@composer-normalize-check",
       "@phpcs-check",
       "@pint-check",
       "@rector-check",
@@ -41,12 +70,21 @@
       "@security-audit",
       "@test:coverage"
     ],
+    "composer-normalize-check": [
+      "echo \"📝 Checking Composer normalize...\"",
+      "composer normalize --dry-run"
+    ],
+    "composer-normalize-fix": [
+      "echo \"📝 Running Composer normalize fix...\"",
+      "composer normalize || true"
+    ],
     "coverage": [
       "echo \"📊 Running code coverage analysis...\"",
       "@test:coverage"
     ],
     "fix": [
       "echo \"🔧 Running all fixes...\"",
+      "@composer-normalize-fix",
       "@rector-fix",
       "@pint-fix",
       "@phpcs-fix",
@@ -84,23 +122,5 @@
       "echo \"📊 Running coverage tests with PCOV...\"",
       "php -dpcov.enabled=1 -dpcov.directory=src -dpcov.exclude=tests -dxdebug.mode=off vendor/bin/pest --coverage tests --min=100"
     ]
-  },
-  "extra": {
-    "cursor-rules": {
-      "source": "vendor/pekral/cursor-rules/.cursor/rules",
-      "target": ".cursor/rules"
-    }
-  },
-  "archive": {
-    "exclude": [
-      "/tests"
-    ]
-  },
-  "config": {
-    "allow-plugins": {
-      "phpstan/extension-installer": true,
-      "dealerdirect/phpcodesniffer-composer-installer": true,
-      "pestphp/pest-plugin": true
-    }
   }
 }

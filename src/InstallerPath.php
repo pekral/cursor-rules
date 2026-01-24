@@ -35,15 +35,15 @@ final class InstallerPath
         throw InstallerFailure::missingSource($developmentSource, $vendorSource);
     }
 
-    public static function resolveCommandsSource(string $root): ?string
+    public static function resolveSkillsSource(string $root): ?string
     {
-        $developmentSource = $root . '/commands';
+        $developmentSource = $root . '/skills';
 
         if (is_dir($developmentSource)) {
             return $developmentSource;
         }
 
-        $vendorSource = $root . '/vendor/pekral/cursor-rules/commands';
+        $vendorSource = $root . '/vendor/pekral/cursor-rules/skills';
 
         if (is_dir($vendorSource)) {
             return $vendorSource;
@@ -63,15 +63,15 @@ final class InstallerPath
         return $root . '/.cursor/rules';
     }
 
-    public static function resolveCommandsTargetDirectory(string $root): string
+    public static function resolveSkillsTargetDirectory(string $root): string
     {
-        $override = getenv('CURSOR_RULES_COMMANDS_TARGET_DIR');
+        $override = getenv('CURSOR_RULES_SKILLS_TARGET_DIR');
 
         if (is_string($override) && $override !== '') {
             return $override;
         }
 
-        return $root . '/.cursor/commands';
+        return $root . '/.cursor/skills';
     }
 
     private static function findProjectRoot(): string

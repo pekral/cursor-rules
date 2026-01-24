@@ -556,79 +556,79 @@ test('project root search falls back to system temp when nothing is found', func
     }
 });
 
-test('install copies commands from development directory', function (): void {
+test('install copies skills from development directory', function (): void {
     $root = installerCreateProjectRoot();
     $targetDir = installerTargetDirectoryFor($root);
-    $commandsTargetDir = $root . '/cursor-commands-target';
+    $skillsTargetDir = $root . '/cursor-skills-target';
     putenv('CURSOR_RULES_TARGET_DIR=' . $targetDir);
-    putenv('CURSOR_RULES_COMMANDS_TARGET_DIR=' . $commandsTargetDir);
+    putenv('CURSOR_RULES_SKILLS_TARGET_DIR=' . $skillsTargetDir);
     installerWriteFile($root . '/rules/example.mdc', 'rules content');
-    installerWriteFile($root . '/commands/test-command.md', 'command content');
+    installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
 
     try {
         installerRunInstallerFrom($root, ['cursor-rules', 'install']);
-        $installedCommand = $commandsTargetDir . '/test-command.md';
+        $installedSkill = $skillsTargetDir . '/test-skill/SKILL.md';
 
-        expect($installedCommand)->toBeFile();
-        expect(file_get_contents($installedCommand))->toBe('command content');
+        expect($installedSkill)->toBeFile();
+        expect(file_get_contents($installedSkill))->toBe('skill content');
     } finally {
         putenv('CURSOR_RULES_TARGET_DIR');
-        putenv('CURSOR_RULES_COMMANDS_TARGET_DIR');
+        putenv('CURSOR_RULES_SKILLS_TARGET_DIR');
         installerRemoveDirectory($root);
     }
 });
 
-test('install copies commands from vendor directory', function (): void {
+test('install copies skills from vendor directory', function (): void {
     $root = installerCreateProjectRoot();
     $targetDir = installerTargetDirectoryFor($root);
-    $commandsTargetDir = $root . '/cursor-commands-target';
+    $skillsTargetDir = $root . '/cursor-skills-target';
     putenv('CURSOR_RULES_TARGET_DIR=' . $targetDir);
-    putenv('CURSOR_RULES_COMMANDS_TARGET_DIR=' . $commandsTargetDir);
-    $vendorCommands = $root . '/vendor/pekral/cursor-rules/commands';
+    putenv('CURSOR_RULES_SKILLS_TARGET_DIR=' . $skillsTargetDir);
+    $vendorSkills = $root . '/vendor/pekral/cursor-rules/skills';
     installerWriteFile($root . '/rules/example.mdc', 'rules content');
-    installerWriteFile($vendorCommands . '/vendor-command.md', 'vendor command content');
+    installerWriteFile($vendorSkills . '/vendor-skill/SKILL.md', 'vendor skill content');
 
     try {
         installerRunInstallerFrom($root, ['cursor-rules', 'install']);
-        $installedCommand = $commandsTargetDir . '/vendor-command.md';
+        $installedSkill = $skillsTargetDir . '/vendor-skill/SKILL.md';
 
-        expect($installedCommand)->toBeFile();
-        expect(file_get_contents($installedCommand))->toBe('vendor command content');
+        expect($installedSkill)->toBeFile();
+        expect(file_get_contents($installedSkill))->toBe('vendor skill content');
     } finally {
         putenv('CURSOR_RULES_TARGET_DIR');
-        putenv('CURSOR_RULES_COMMANDS_TARGET_DIR');
+        putenv('CURSOR_RULES_SKILLS_TARGET_DIR');
         installerRemoveDirectory($root);
     }
 });
 
-test('install skips commands when source does not exist', function (): void {
+test('install skips skills when source does not exist', function (): void {
     $root = installerCreateProjectRoot();
     $targetDir = installerTargetDirectoryFor($root);
-    $commandsTargetDir = $root . '/cursor-commands-target';
+    $skillsTargetDir = $root . '/cursor-skills-target';
     putenv('CURSOR_RULES_TARGET_DIR=' . $targetDir);
-    putenv('CURSOR_RULES_COMMANDS_TARGET_DIR=' . $commandsTargetDir);
+    putenv('CURSOR_RULES_SKILLS_TARGET_DIR=' . $skillsTargetDir);
     installerWriteFile($root . '/rules/example.mdc', 'rules content');
 
     try {
         $exitCode = installerRunInstallerFrom($root, ['cursor-rules', 'install']);
 
         expect($exitCode)->toBe(0);
-        expect(is_dir($commandsTargetDir))->toBeFalse();
+        expect(is_dir($skillsTargetDir))->toBeFalse();
     } finally {
         putenv('CURSOR_RULES_TARGET_DIR');
-        putenv('CURSOR_RULES_COMMANDS_TARGET_DIR');
+        putenv('CURSOR_RULES_SKILLS_TARGET_DIR');
         installerRemoveDirectory($root);
     }
 });
 
-test('commands target directory uses default when no override provided', function (): void {
+test('skills target directory uses default when no override provided', function (): void {
     $root = installerCreateProjectRoot();
     $targetDir = installerTargetDirectoryFor($root);
-    $defaultCommandsTargetDir = $root . '/.cursor/commands';
+    $defaultSkillsTargetDir = $root . '/.cursor/skills';
     putenv('CURSOR_RULES_TARGET_DIR=' . $targetDir);
-    putenv('CURSOR_RULES_COMMANDS_TARGET_DIR=');
+    putenv('CURSOR_RULES_SKILLS_TARGET_DIR=');
     installerWriteFile($root . '/rules/example.mdc', 'rules content');
-    installerWriteFile($root . '/commands/default-command.md', 'default command');
+    installerWriteFile($root . '/skills/default-skill/SKILL.md', 'default skill');
     $supportsHiddenDirectories = installerSupportsCursorDirectoryCreation();
 
     try {
@@ -636,13 +636,13 @@ test('commands target directory uses default when no override provided', functio
 
         if ($supportsHiddenDirectories) {
             expect($exitCode)->toBe(0);
-            expect($defaultCommandsTargetDir . '/default-command.md')->toBeFile();
+            expect($defaultSkillsTargetDir . '/default-skill/SKILL.md')->toBeFile();
         } else {
             expect($exitCode)->toBe(1);
         }
     } finally {
         putenv('CURSOR_RULES_TARGET_DIR');
-        putenv('CURSOR_RULES_COMMANDS_TARGET_DIR');
+        putenv('CURSOR_RULES_SKILLS_TARGET_DIR');
         installerRemoveDirectory($root);
     }
 });

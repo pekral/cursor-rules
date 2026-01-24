@@ -106,7 +106,7 @@ jobs:
           {
             echo "# Changelog"
             echo ""
-            echo "All notable changes to \`arch-app-services\` will be documented in this file."
+            echo "All notable changes to \`cursor-rules\` will be documented in this file."
             echo ""
             echo "$NEW_ENTRY"
             echo ""

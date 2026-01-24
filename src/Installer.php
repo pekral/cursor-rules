@@ -139,7 +139,7 @@ final class Installer
         self::removeExistingTarget($dst);
 
         if ($symlink && self::canSymlink()) {
-            if (self::shouldForceSymlinkFailure() || !symlink($src, $dst)) {
+            if (!symlink($src, $dst)) {
                 self::copy($src, $dst);
             }
         } else {
@@ -216,57 +216,18 @@ final class Installer
 
     private static function copy(string $src, string $dst): void
     {
-        if (self::shouldForceCopyFailure() || !copy($src, $dst)) {
+        if (!copy($src, $dst)) {
             throw InstallerFailure::fileCopyFailed($src, $dst);
         }
     }
 
     private static function canSymlink(): bool
     {
-        if (self::shouldDisableSymlinks()) {
-            return false;
-        }
-
-        if (self::isWindowsEnvironment()) {
+        if (stripos(PHP_OS, 'WIN') === 0) {
             return false;
         }
 
         return function_exists('symlink');
-    }
-
-    private static function shouldDisableSymlinks(): bool
-    {
-        return self::isTruthyFlag('CURSOR_RULES_DISABLE_SYMLINKS');
-    }
-
-    private static function shouldForceSymlinkFailure(): bool
-    {
-        return self::isTruthyFlag('CURSOR_RULES_FAIL_SYMLINK');
-    }
-
-    private static function shouldForceCopyFailure(): bool
-    {
-        return self::isTruthyFlag('CURSOR_RULES_FAIL_COPY');
-    }
-
-    private static function isWindowsEnvironment(): bool
-    {
-        if (self::isTruthyFlag('CURSOR_RULES_FORCE_WINDOWS')) {
-            return true;
-        }
-
-        return stripos(PHP_OS, 'WIN') === 0;
-    }
-
-    private static function isTruthyFlag(string $flag): bool
-    {
-        $value = getenv($flag);
-
-        if ($value === false) {
-            return false;
-        }
-
-        return in_array(strtolower($value), ['1', 'true', 'on', 'yes'], true);
     }
 
 }

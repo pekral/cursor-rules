@@ -9,12 +9,6 @@ final class InstallerPath
 
     public static function resolveProjectRoot(): string
     {
-        $override = getenv('CURSOR_RULES_PROJECT_ROOT');
-
-        if (is_string($override) && $override !== '') {
-            return $override;
-        }
-
         return self::findProjectRoot();
     }
 
@@ -26,13 +20,13 @@ final class InstallerPath
             return $developmentSource;
         }
 
-        $vendorSource = $root . '/vendor/pekral/cursor-rules/rules';
+        $packageSource = self::getPackageDirectory() . '/rules';
 
-        if (is_dir($vendorSource)) {
-            return $vendorSource;
+        if (is_dir($packageSource)) {
+            return $packageSource;
         }
 
-        throw InstallerFailure::missingSource($developmentSource, $vendorSource);
+        throw InstallerFailure::missingSource($developmentSource, $packageSource);
     }
 
     public static function resolveSkillsSource(string $root): ?string
@@ -43,10 +37,10 @@ final class InstallerPath
             return $developmentSource;
         }
 
-        $vendorSource = $root . '/vendor/pekral/cursor-rules/skills';
+        $packageSource = self::getPackageDirectory() . '/skills';
 
-        if (is_dir($vendorSource)) {
-            return $vendorSource;
+        if (is_dir($packageSource)) {
+            return $packageSource;
         }
 
         return null;
@@ -54,24 +48,17 @@ final class InstallerPath
 
     public static function resolveTargetDirectory(string $root): string
     {
-        $override = getenv('CURSOR_RULES_TARGET_DIR');
-
-        if (is_string($override) && $override !== '') {
-            return $override;
-        }
-
         return $root . '/.cursor/rules';
     }
 
     public static function resolveSkillsTargetDirectory(string $root): string
     {
-        $override = getenv('CURSOR_RULES_SKILLS_TARGET_DIR');
-
-        if (is_string($override) && $override !== '') {
-            return $override;
-        }
-
         return $root . '/.cursor/skills';
+    }
+
+    private static function getPackageDirectory(): string
+    {
+        return dirname(__DIR__);
     }
 
     private static function findProjectRoot(): string
@@ -79,26 +66,14 @@ final class InstallerPath
         $dir = getcwd();
 
         if ($dir === false) {
-            $dir = self::fallbackProjectRoot();
+            return sys_get_temp_dir();
         }
 
         while ($dir !== '' && !self::isFilesystemRoot($dir) && !file_exists($dir . '/composer.json')) {
-            $parentDir = dirname($dir);
-            $dir = $parentDir;
+            $dir = dirname($dir);
         }
 
         return $dir;
-    }
-
-    private static function fallbackProjectRoot(): string
-    {
-        $override = getenv('CURSOR_RULES_PROJECT_ROOT_FALLBACK');
-
-        if (is_string($override) && $override !== '') {
-            return $override;
-        }
-
-        return sys_get_temp_dir();
     }
 
     private static function isFilesystemRoot(string $path): bool

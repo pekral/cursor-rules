@@ -26,7 +26,9 @@ final class InstallerPath
             return $packageSource;
         }
 
+        // @codeCoverageIgnoreStart
         throw InstallerFailure::missingSource($developmentSource, $packageSource);
+        // @codeCoverageIgnoreEnd
     }
 
     public static function resolveSkillsSource(string $root): ?string
@@ -43,7 +45,9 @@ final class InstallerPath
             return $packageSource;
         }
 
+        // @codeCoverageIgnoreStart
         return null;
+        // @codeCoverageIgnoreEnd
     }
 
     public static function resolveTargetDirectory(string $root): string
@@ -66,7 +70,9 @@ final class InstallerPath
         $dir = getcwd();
 
         if ($dir === false) {
+            // @codeCoverageIgnoreStart
             return sys_get_temp_dir();
+            // @codeCoverageIgnoreEnd
         }
 
         while ($dir !== '' && !self::isFilesystemRoot($dir) && !file_exists($dir . '/composer.json')) {

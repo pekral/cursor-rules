@@ -7,21 +7,21 @@
     "php": "^8.4"
   },
   "require-dev": {
-    "ergebnis/composer-normalize": "^2.48",
-    "laravel/pint": "^1.25.1",
+    "ergebnis/composer-normalize": "^2.48.2",
+    "laravel/pint": "^1.27.0",
     "pekral/phpcs-rules": "dev-master",
     "pekral/phpstan-rules": "dev-master",
     "pekral/rector-rules": "dev-master",
     "pestphp/pest": "^4.3.1",
     "pestphp/pest-plugin": "^4.0",
-    "pestphp/pest-plugin-type-coverage": "^4.0",
-    "phpstan/extension-installer": "^1.4",
-    "phpstan/phpstan": "^2.1",
-    "phpstan/phpstan-deprecation-rules": "^2.0",
+    "pestphp/pest-plugin-type-coverage": "^4.0.3",
+    "phpstan/extension-installer": "^1.4.3",
+    "phpstan/phpstan": "^2.1.37",
+    "phpstan/phpstan-deprecation-rules": "^2.0.3",
     "phpstan/phpstan-mockery": "^2.0",
-    "phpstan/phpstan-phpunit": "^2.0",
+    "phpstan/phpstan-phpunit": "^2.0.12",
     "roave/security-advisories": "dev-latest",
-    "squizlabs/php_codesniffer": "^4.0"
+    "squizlabs/php_codesniffer": "^4.0.1"
   },
   "autoload": {
     "psr-4": {

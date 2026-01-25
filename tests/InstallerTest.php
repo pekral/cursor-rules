@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use Pekral\CursorRules\Installer;
+use Pekral\CursorRules\InstallerFailure;
 use Pekral\CursorRules\InstallerPath;
 
 test('run shows help when executed without arguments', function (): void {
@@ -84,7 +85,8 @@ test('resolveSkillsSource falls back to package directory', function (): void {
 test('install copies rules from development directory', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/rules/example.mdc', 'dev content');
-    $originalCwd = getcwd() ?: '';
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
         chdir($root);
@@ -108,7 +110,8 @@ test('install copies rules from development directory', function (): void {
 
 test('install copies rules from package when no development directory', function (): void {
     $root = installerCreateProjectRoot();
-    $originalCwd = getcwd() ?: '';
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
         chdir($root);
@@ -122,6 +125,7 @@ test('install copies rules from package when no development directory', function
         expect(is_dir($installedDir))->toBeTrue();
 
         $files = glob($installedDir . '/*.mdc');
+        $files = $files !== false ? $files : [];
         expect(count($files))->toBeGreaterThan(0);
     } finally {
         if ($originalCwd !== '') {
@@ -137,7 +141,8 @@ test('install respects force flag', function (): void {
     installerWriteFile($root . '/rules/force.mdc', 'new content');
     $installedFile = $root . '/.cursor/rules/force.mdc';
     installerWriteFile($installedFile, 'existing content');
-    $originalCwd = getcwd() ?: '';
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
         chdir($root);
@@ -169,7 +174,8 @@ test('install creates symlinks when requested', function (): void {
 
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/rules/link.mdc', 'link content');
-    $originalCwd = getcwd() ?: '';
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
         chdir($root);
@@ -193,7 +199,8 @@ test('install creates symlinks when requested', function (): void {
 test('install copies nested directories', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/rules/nested/deep/example.mdc', 'nested content');
-    $originalCwd = getcwd() ?: '';
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
         chdir($root);
@@ -218,7 +225,8 @@ test('install copies skills from development directory', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/rules/example.mdc', 'rules');
     installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
-    $originalCwd = getcwd() ?: '';
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
         chdir($root);
@@ -231,6 +239,250 @@ test('install copies skills from development directory', function (): void {
         expect(is_file($installedSkill))->toBeTrue();
         expect(file_get_contents($installedSkill))->toBe('skill content');
     } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('InstallerFailure missingSource creates exception with correct message', function (): void {
+    $exception = InstallerFailure::missingSource('/dev/path', '/vendor/path');
+
+    expect($exception)->toBeInstanceOf(InstallerFailure::class);
+    expect($exception->getMessage())->toBe('Source not found. Checked /dev/path and /vendor/path.');
+});
+
+test('InstallerFailure directoryCreationFailed creates exception with correct message', function (): void {
+    $exception = InstallerFailure::directoryCreationFailed('/some/directory');
+
+    expect($exception)->toBeInstanceOf(InstallerFailure::class);
+    expect($exception->getMessage())->toBe('Cannot create directory: /some/directory');
+});
+
+test('InstallerFailure fileCopyFailed creates exception with correct message', function (): void {
+    $exception = InstallerFailure::fileCopyFailed('/source/file', '/dest/file');
+
+    expect($exception)->toBeInstanceOf(InstallerFailure::class);
+    expect($exception->getMessage())->toBe('Unable to copy /source/file to /dest/file.');
+});
+
+test('InstallerFailure removalFailed creates exception with correct message', function (): void {
+    $exception = InstallerFailure::removalFailed('/some/path');
+
+    expect($exception)->toBeInstanceOf(InstallerFailure::class);
+    expect($exception->getMessage())->toBe('Cannot remove: /some/path');
+});
+
+test('install fails when target path is a file instead of directory', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/test.mdc', 'content');
+    file_put_contents($root . '/.cursor', 'blocking file');
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        $exitCode = Installer::run(['cursor-rules', 'install']);
+        ob_get_clean();
+
+        expect($exitCode)->toBe(1);
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install fails when destination is directory that cannot be removed', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/test.mdc', 'content');
+    $targetDir = $root . '/.cursor/rules/test.mdc';
+    installerEnsureDirectory($targetDir);
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        $exitCode = Installer::run(['cursor-rules', 'install', '--force']);
+        ob_get_clean();
+
+        expect($exitCode)->toBe(1);
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('resolveSkillsSource falls back to package when development directory does not exist', function (): void {
+    $root = sys_get_temp_dir() . '/no-skills-' . bin2hex(random_bytes(4));
+    installerEnsureDirectory($root);
+
+    try {
+        $result = InstallerPath::resolveSkillsSource($root);
+        $packageDir = dirname(__DIR__);
+
+        expect($result)->toBe($packageDir . '/skills');
+    } finally {
+        installerRemoveDirectory($root);
+    }
+});
+
+test('resolveProjectRoot returns current working directory', function (): void {
+    $result = InstallerPath::resolveProjectRoot();
+
+    expect($result)->toBeString();
+    expect(strlen($result))->toBeGreaterThan(0);
+});
+
+test('install fails when rules subdirectory path is a file', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/subdir/test.mdc', 'content');
+    $targetSubdir = $root . '/.cursor/rules/subdir';
+    installerEnsureDirectory(dirname($targetSubdir));
+    file_put_contents($targetSubdir, 'blocking file');
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        $exitCode = Installer::run(['cursor-rules', 'install']);
+        ob_get_clean();
+
+        expect($exitCode)->toBe(1);
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('resolveTargetDirectory returns correct path', function (): void {
+    $result = InstallerPath::resolveTargetDirectory('/test/root');
+
+    expect($result)->toBe('/test/root/.cursor/rules');
+});
+
+test('resolveSkillsTargetDirectory returns correct path', function (): void {
+    $result = InstallerPath::resolveSkillsTargetDirectory('/test/root');
+
+    expect($result)->toBe('/test/root/.cursor/skills');
+});
+
+test('isFilesystemRoot returns true for root paths', function (): void {
+    $reflection = new ReflectionClass(InstallerPath::class);
+    $method = $reflection->getMethod('isFilesystemRoot');
+    $method->setAccessible(true);
+
+    expect($method->invoke(null, ''))->toBeTrue();
+    expect($method->invoke(null, DIRECTORY_SEPARATOR))->toBeTrue();
+    expect($method->invoke(null, 'C:'))->toBeTrue();
+    expect($method->invoke(null, 'D:\\'))->toBeTrue();
+    expect($method->invoke(null, '/home/user'))->toBeFalse();
+});
+
+test('findProjectRoot traverses directories up', function (): void {
+    $root = installerCreateProjectRoot();
+    $subdir = $root . '/deep/nested/path';
+    installerEnsureDirectory($subdir);
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($subdir);
+
+        $reflection = new ReflectionClass(InstallerPath::class);
+        $method = $reflection->getMethod('findProjectRoot');
+        $method->setAccessible(true);
+
+        $result = $method->invoke(null);
+        $expectedRoot = realpath($root);
+        $expectedRoot = $expectedRoot !== false ? $expectedRoot : $root;
+
+        expect($result)->toBe($expectedRoot);
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install fails when copy fails due to unwritable destination', function (): void {
+    if (posix_getuid() === 0) {
+        expect(true)->toBeTrue();
+
+        return;
+    }
+
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/test.mdc', 'content');
+    $targetDir = $root . '/.cursor/rules';
+    installerEnsureDirectory($targetDir);
+    chmod($targetDir, 0444);
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        set_error_handler(static fn (): bool => true);
+        $exitCode = Installer::run(['cursor-rules', 'install']);
+        restore_error_handler();
+        ob_get_clean();
+
+        expect($exitCode)->toBe(1);
+    } finally {
+        chmod($targetDir, 0755);
+
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install fails when existing file cannot be removed', function (): void {
+    if (posix_getuid() === 0) {
+        expect(true)->toBeTrue();
+
+        return;
+    }
+
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/test.mdc', 'new content');
+    $targetDir = $root . '/.cursor/rules';
+    $targetFile = $targetDir . '/test.mdc';
+    installerWriteFile($targetFile, 'old content');
+    chmod($targetDir, 0555);
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        set_error_handler(static fn (): bool => true);
+        $exitCode = Installer::run(['cursor-rules', 'install', '--force']);
+        restore_error_handler();
+        ob_get_clean();
+
+        expect($exitCode)->toBe(1);
+    } finally {
+        chmod($targetDir, 0755);
+
         if ($originalCwd !== '') {
             chdir($originalCwd);
         }

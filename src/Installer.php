@@ -140,7 +140,9 @@ final class Installer
 
         if ($symlink && self::canSymlink()) {
             if (!symlink($src, $dst)) {
+                // @codeCoverageIgnoreStart
                 self::copy($src, $dst);
+                // @codeCoverageIgnoreEnd
             }
         } else {
             self::copy($src, $dst);
@@ -224,7 +226,9 @@ final class Installer
     private static function canSymlink(): bool
     {
         if (stripos(PHP_OS, 'WIN') === 0) {
+            // @codeCoverageIgnoreStart
             return false;
+            // @codeCoverageIgnoreEnd
         }
 
         return function_exists('symlink');

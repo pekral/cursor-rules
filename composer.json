@@ -60,6 +60,10 @@
       "echo \"🔍 Running PHPStan static analysis...\"",
       "vendor/bin/phpstan analyse --memory-limit=2G"
     ],
+    "build": [
+      "@fix",
+      "@check"
+    ],
     "check": [
       "echo \"🚀 Running full quality check...\"",
       "@composer-normalize-check",

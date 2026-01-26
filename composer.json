@@ -9,9 +9,9 @@
   "require-dev": {
     "ergebnis/composer-normalize": "^2.48.2",
     "laravel/pint": "^1.27.0",
-    "pekral/phpcs-rules": "dev-master",
-    "pekral/phpstan-rules": "dev-master",
-    "pekral/rector-rules": "dev-master",
+    "pekral/phpcs-rules": "^0.4.5",
+    "pekral/phpstan-rules": "^0.4.5",
+    "pekral/rector-rules": "^0.4.7",
     "pestphp/pest": "^4.3.1",
     "pestphp/pest-plugin": "^4.0",
     "pestphp/pest-plugin-type-coverage": "^4.0.3",

@@ -2,6 +2,17 @@
 
 All notable changes to `cursor-rules` will be documented in this file.
 
+## [Unreleased] - 2026-01-27
+
+
+- 📝 **Changed**: Update SKILL.md
+- 🔧 **Changed**: composer update dependencies
+- ✨ **Added**: new auto fix bug skill
+- 🐛 **Fixed**: Symfony console v.8
+- 🐛 **Fixed**: update changelog file action
+- ♻️ **Refactored**: optimalize commands  prompts
+- 🐛 **Fixed**: install rules to correct folder
+
 ## [Unreleased] - 2026-01-26 (PR #12)
 
 

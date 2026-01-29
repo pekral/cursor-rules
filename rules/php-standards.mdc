@@ -10,6 +10,40 @@ alwaysApply: true
 - No extra empty lines between `{}` brackets
 - Let code "breathe" - avoid cramped formatting
 
+## Fluent & High-Quality SDK API
+
+Prefer fluent, natural-language readable APIs over ad-hoc helpers.
+
+Core logic should be:
+- clean core
+- reusable SDK
+- high-quality API
+- framework-agnostic (no framework glue)
+- no helper chaos
+
+Use fluent value-object wrappers for domain primitives,
+so method names read like English sentences.
+
+Good example:
+    Iterable::of($value)->isEmpty()
+    Url::of($uri)->isSecure()
+    StringValue::of($text)->isBlank()
+
+Bad example:
+    Helper::checkEmpty($data)
+    Utils::validateIterable($x)
+    SomeClass::empty()
+
+Naming guidelines:
+- Factory methods: of(), from()
+- Boolean queries: isEmpty(), isNotEmpty(), isValid(), hasItems()
+- Use english phrases that read naturally
+
+Avoid:
+- vague verbs
+- mixed helpers without context
+- god utils with many static methods
+
 ## No Inventions
 - Don't invent changes other than what's explicitly requested.
 

@@ -251,28 +251,8 @@ test('install copies all files from rules and skills directories', function (): 
     $packageDir = dirname(__DIR__);
     $rulesSource = $packageDir . '/rules';
     $skillsSource = $packageDir . '/skills';
-
-    $countFiles = function (string $dir): int {
-        if (!is_dir($dir)) {
-            return 0;
-        }
-
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::LEAVES_ONLY,
-        );
-        $count = 0;
-        foreach ($iterator as $file) {
-            if ($file instanceof SplFileInfo && $file->isFile()) {
-                $count++;
-            }
-        }
-
-        return $count;
-    };
-
-    $expectedRulesCount = $countFiles($rulesSource);
-    $expectedSkillsCount = $countFiles($skillsSource);
+    $expectedRulesCount = installerCountFiles($rulesSource);
+    $expectedSkillsCount = installerCountFiles($skillsSource);
 
     $root = installerCreateProjectRoot();
     $cwd = getcwd();
@@ -288,9 +268,8 @@ test('install copies all files from rules and skills directories', function (): 
 
         $rulesTarget = $root . '/.cursor/rules';
         $skillsTarget = $root . '/.cursor/skills';
-
-        $actualRulesCount = $countFiles($rulesTarget);
-        $actualSkillsCount = $countFiles($skillsTarget);
+        $actualRulesCount = installerCountFiles($rulesTarget);
+        $actualSkillsCount = installerCountFiles($skillsTarget);
 
         expect($actualRulesCount)->toBe($expectedRulesCount, 'Rules: all source files should be copied');
         expect($actualSkillsCount)->toBe($expectedSkillsCount, 'Skills: all source files should be copied');

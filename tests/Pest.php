@@ -66,3 +66,24 @@ function installerSymlinkUnsupported(): bool
 {
     return !function_exists('symlink') || stripos(PHP_OS, 'WIN') === 0;
 }
+
+function installerCountFiles(string $dir): int
+{
+    if (!is_dir($dir)) {
+        return 0;
+    }
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::LEAVES_ONLY,
+    );
+    $count = 0;
+
+    foreach ($iterator as $file) {
+        if ($file instanceof SplFileInfo && $file->isFile()) {
+            $count++;
+        }
+    }
+
+    return $count;
+}

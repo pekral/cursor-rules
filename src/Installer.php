@@ -176,7 +176,10 @@ final class Installer
     private static function listFiles(string $base): array
     {
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($base, FilesystemIterator::SKIP_DOTS),
+            new RecursiveDirectoryIterator(
+                $base,
+                FilesystemIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS,
+            ),
             RecursiveIteratorIterator::LEAVES_ONLY,
         );
         $files = [];
@@ -194,7 +197,10 @@ final class Installer
     private static function replicateDirectories(string $source, string $targetDir): void
     {
         $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS),
+            new RecursiveDirectoryIterator(
+                $source,
+                FilesystemIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS,
+            ),
             RecursiveIteratorIterator::SELF_FIRST,
         );
 

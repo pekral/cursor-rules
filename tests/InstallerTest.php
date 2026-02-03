@@ -247,6 +247,63 @@ test('install copies skills from development directory', function (): void {
     }
 });
 
+test('install copies all files from rules and skills directories', function (): void {
+    $packageDir = dirname(__DIR__);
+    $rulesSource = $packageDir . '/rules';
+    $skillsSource = $packageDir . '/skills';
+
+    $countFiles = function (string $dir): int {
+        if (!is_dir($dir)) {
+            return 0;
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::LEAVES_ONLY,
+        );
+        $count = 0;
+        foreach ($iterator as $file) {
+            if ($file instanceof SplFileInfo && $file->isFile()) {
+                $count++;
+            }
+        }
+
+        return $count;
+    };
+
+    $expectedRulesCount = $countFiles($rulesSource);
+    $expectedSkillsCount = $countFiles($skillsSource);
+
+    $root = installerCreateProjectRoot();
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        $exitCode = Installer::run(['cursor-rules', 'install']);
+        $output = (string) ob_get_clean();
+
+        expect($exitCode)->toBe(0);
+
+        $rulesTarget = $root . '/.cursor/rules';
+        $skillsTarget = $root . '/.cursor/skills';
+
+        $actualRulesCount = $countFiles($rulesTarget);
+        $actualSkillsCount = $countFiles($skillsTarget);
+
+        expect($actualRulesCount)->toBe($expectedRulesCount, 'Rules: all source files should be copied');
+        expect($actualSkillsCount)->toBe($expectedSkillsCount, 'Skills: all source files should be copied');
+        expect($output)->toContain(sprintf('(%d files)', $expectedRulesCount + $expectedSkillsCount));
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
 test('InstallerFailure missingSource creates exception with correct message', function (): void {
     $exception = InstallerFailure::missingSource('/dev/path', '/vendor/path');
 

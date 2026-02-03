@@ -53,6 +53,7 @@ Commit message rules:
 - Must follow Conventional Commits.
 - For bugfixes default to `fix:` (optionally `fix(scope):`).
 - Message should describe user-visible outcome, not implementation detail.
+- Add commit message by defined rules
 
 Examples:
 - `fix(auth): prevent token refresh race condition`

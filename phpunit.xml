@@ -13,6 +13,6 @@
   <php>
     <ini name="pcov.enabled" value="1"/>
     <ini name="pcov.directory" value="src"/>
-    <ini name="pcov.exclude" value="tests"/>
+    <ini name="pcov.exclude" value="~tests~"/>
   </php>
 </phpunit>

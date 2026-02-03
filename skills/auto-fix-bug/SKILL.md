@@ -53,7 +53,7 @@ Commit message rules:
 - Must follow Conventional Commits.
 - For bugfixes default to `fix:` (optionally `fix(scope):`).
 - Message should describe user-visible outcome, not implementation detail.
-- Add commit message by defined rules
+- Add commit message by defined rules and GitHub automatically creates a link to the mentioned issue. For example, if your issue number is 123 , you can mention it in your PR like this: #123
 
 Examples:
 - `fix(auth): prevent token refresh race condition`

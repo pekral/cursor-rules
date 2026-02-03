@@ -1,84 +1,96 @@
 ---
-description: Project-wide PHP conventions and best practices enforced across all application source files.
-globs:
+description: Unified coding standards for PHP/Laravel projects
 alwaysApply: true
 ---
-
-## Whitespace
-- Add blank lines between statements for readability
-- Exception: sequences of equivalent single-line operations
-- No extra empty lines between `{}` brackets
-- Let code "breathe" - avoid cramped formatting
-
-## Fluent & High-Quality SDK API
-
-Prefer fluent, natural-language readable APIs over ad-hoc helpers.
-
-Core logic should be:
-- clean core
-- reusable SDK
-- high-quality API
-- framework-agnostic (no framework glue)
-- no helper chaos
-
-Use fluent value-object wrappers for domain primitives,
-so method names read like English sentences.
-
-Good example:
-    Iterable::of($value)->isEmpty()
-    Url::of($uri)->isSecure()
-    StringValue::of($text)->isBlank()
-
-Bad example:
-    Helper::checkEmpty($data)
-    Utils::validateIterable($x)
-    SomeClass::empty()
-
-Naming guidelines:
-- Factory methods: of(), from()
-- Boolean queries: isEmpty(), isNotEmpty(), isValid(), hasItems()
-- Use english phrases that read naturally
-
-Avoid:
-- vague verbs
-- mixed helpers without context
-- god utils with many static methods
-
-## No Inventions
-- Don't invent changes other than what's explicitly requested.
-
-## No Implementation Checks
-- Don't ask the user to verify implementations that are visible in the provided context.
-
-## No Unnecessary Updates
-- Don't suggest updates or changes to files when there are no actual modifications needed.
-
-## No Apologies
-- Never use apologies.
-
-## Preserve Existing Code
-- Don't remove unrelated code or functionalities. Pay attention to preserving existing structures.
-
-## PHP Standards
-- Never use ?array or nullable iterated typehints
-- Use PHP features (php version is defined in composer.json file) when appropriate (e.g., typed properties, match expressions), Generate code for actual php version.
-- Use short nullable notation: `?string` not `string|null`.
-- Always specify `void` return types when methods return nothing.
-
-## Enums
-- All words in enum values should be capitalized.
 
 ## Naming
 - Variables, functions, and classes should reveal their purpose
 - Names should explain why something exists and how it's used
+- Classes: PascalCase, always `final`
+- Methods/Variables: camelCase, reveal purpose
+- Routes: kebab-case URLs, dot notation names
+- Config keys: snake_case
+- Controllers: plural + `Controller` (PostsController)
+- Jobs: action-based (CreateUser)
+- Events: tense-based (UserRegistered)
+- Enums: descriptive, CAPITALIZED values
+
+## Structure
+- Single responsibility per function
+- Hide implementation, expose clear interfaces
+- Move nested conditionals into named functions
+- Use DTOs for typed data exchange (never `array<mixed>`)
+- Custom exceptions when necessary
+
+## Constants Over Magic Numbers
+- Replace hard-coded values with named constants
+- Use descriptive constant names that explain the value's purpose
+
+## Whitespace
+- Add blank lines between statements for readability; exception: sequences of equivalent single-line operations
+- No extra empty lines between `{}` brackets; let code "breathe" — avoid cramped formatting
+
+## PHP Style
+- Never `?array` or nullable iterated typehints
+- Use short nullable notation: `?string` not `string|null`
+- Always specify `void` return types when methods return nothing
+- Use PHP version from composer.json (typed properties, match expressions, etc.)
+- Document iterables with generics: `Collection<int, User>`
+- Array shapes for fixed keys, each key on own line
+
+## Testing
+- 100% code coverage for changes
+- Arrange-act-assert pattern, error cases first
+- Descriptive method names, simple human-readable tests
+- Data providers via argument, not PHPDoc
+- Mock only external services (HTTP clients) or for testing catch exceptions
+- Final test classes, local variables only
+
+## Bug-Fix Workflow
+- Write tests BEFORE fixing bugs
+- Check 100% coverage before refactoring
+- Run tests only for changed files
+
+## SQL / Performance
+- No N+1: use `with()`, `load()`, or JOINs
+- SARGable WHERE clauses (no functions on indexed columns)
+- Seek pagination over OFFSET
+- Never `SELECT *`; fetch only needed columns
+- Use EXPLAIN for new or changed queries: avoid type ALL, high rows, Using filesort, Using temporary
+- Prepared statements with bound parameters; never concatenate user input into SQL
+- Push filtering, sorting, aggregation into SQL; avoid doing it in application code
+- Refactor or split very complex joins when EXPLAIN shows poor plans; when profiling use slow query log and prioritize frequent or longest queries
+- **Indexes:** index columns used in WHERE, JOIN, ORDER BY, GROUP BY; composite index order must match query filter/sort; avoid low-cardinality-only indexes; use covering indexes when a query can be satisfied from the index; drop unused or redundant indexes when changing schema; aim for 3–5 well-chosen indexes per table; prefer parallel index creation on large tables
+- **Transactions:** keep transactions short; avoid holding locks during app logic; batch writes in single transactions where appropriate; reduce lock contention via batching and suitable isolation levels; use `SHOW ENGINE INNODB STATUS` to diagnose lock waits when investigating issues
+- Index JOIN columns on both tables; composite index order matters (left-to-right)
+
+## Docs
+- Don't comment on what the code does - make the code self-documenting
+- Document APIs, complex algorithms, and non-obvious side effects
+
+## Single Responsibility
+- Each function should do exactly one thing
+- Functions should be small and focused
+- If a function needs a comment to explain what it does, it should be split
 
 ## DRY (Don't Repeat Yourself)
 - Extract repeated code into reusable functions
 - Share common logic through proper abstraction
 - Maintain single sources of truth
 
-## Verify Information
-- Always verify information before presenting it. Do not make assumptions or speculate without clear evidence.
+## Clean Structure
+- Keep related code together
+- Organize code in a logical hierarchy
+- Use consistent file and folder naming conventions
+- Expose clear interfaces
 
-## Arrays
-- always use DTO`s for typed data exchange (never use `array<mixed>`)
+## Code Quality Maintenance
+- Refactor continuously
+- Fix technical debt early
+- Leave code cleaner than you found it
+
+## API Design (fluent SDK-style)
+- Prefer fluent, readable APIs over ad-hoc helpers; core logic clean, reusable, framework-agnostic
+- Use fluent value-object wrappers for domain primitives so method names read like English (e.g. `Iterable::of($value)->isEmpty()`, `Url::of($uri)->isSecure()`)
+- Factory methods: `of()`, `from()`; boolean queries: `isEmpty()`, `isNotEmpty()`, `isValid()`, `hasItems()`
+- Avoid: vague verbs, mixed helpers without context, god utils with many static methods

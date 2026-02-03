@@ -1,0 +1,14 @@
+---
+description: Project tech stack and core context
+alwaysApply: true
+---
+
+## Tech Stack
+- Defined in composer.json
+
+## AI Behavior
+- No apologies, no invented changes
+- Preserve existing code, don't remove unrelated logic
+- Verify before presenting, no speculation
+- Don't ask the user to verify implementations that are visible in the provided context
+- Don't suggest updates or changes to files when there are no actual modifications needed

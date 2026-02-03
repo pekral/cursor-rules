@@ -1,0 +1,33 @@
+---
+description: Filament v4 specific rules
+globs:
+  - app/Filament/**/*.php
+---
+
+## Resources
+- Generate smoke tests for every Resource; when changing a Resource, run tests (add them if missing) and fix resource/tests until they pass
+- No View page or Infolist unless requested
+- Use `Resource::getUrl('index')` with the exact Resource class (e.g. `ClassScheduleResource::getUrl('index')`), not `route()` or `getResource()`
+
+## Enums
+- Add `HasLabel`, `HasColor`, `HasIcon` interfaces on Enums for model fields; use them in Forms/Tables instead of inline values/labels/colors/icons
+- Use exact return types from interface definitions (e.g. `string|BackedEnum|Htmlable|null` for `getIcon()`, not `string|Heroicon|null`)
+- Never add `->value` when defining a default with enum
+- Use Enum instances instead of hardcoded strings where an Enum exists (e.g. in tests for casted fields)
+
+## Testing
+- Use `Livewire::test(class)` syntax, not `livewire(class)` (avoids pestphp/pest-plugin-livewire)
+
+## Actions
+- Use `->authorize('ability')` on actions for authorization (handles enforcement and visibility); do not use `Gate::authorize()` or `Gate::allows()` manually
+- v4: `unique()` has `ignoreRecord: true` by default; do not specify it
+
+## UI
+- Icons: use `Filament\Support\Icons\Heroicon` enum, not string
+- Custom Blade files with Tailwind: create a custom theme and register the Blade folder in theme.css
+
+## Deprecated (v3 → v4, do not use)
+- `->form()` on Actions/Filters → use `->schema()`
+- `->mutateFormDataUsing()` → use `->mutateDataUsing()`
+- `Placeholder::make()` → use `TextEntry::make()->state()` (Filament\Infolists\Components\TextEntry)
+- `->label('')` for hidden labels → use `->hiddenLabel()`

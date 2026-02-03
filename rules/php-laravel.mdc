@@ -1,80 +1,72 @@
 ---
-description: Base rules for Laravel projects.
+description: Laravel architecture and conventions
 globs:
-alwaysApply: true
+  - app/**/*.php
+  - resources/views/**/*.blade.php
 ---
 
-!!Apply only if `laravel` is in `composer.json`!!
+## Layer Responsibilities
+- **Controllers**: Slim, delegate to Services, accept FormRequest only
+- **Services**: All business logic, return DTOs or models
+- **Repositories**: Read-only, no writes, no business rules
+- **ModelManagers**: Write-only, store data to DB
+- **Data Builders**: Transform/prepare DTOs, never query DB
+- **Jobs**: Slim, delegate to Services
+- **Events**: Slim, delegate to Services
+- **Commands**: Slim, delegate to Services
 
-### Configuration
-- Keys: snake_case (`chrome_path`)
-- Add service configs to `config/services.php`, don't create new files
-- Use `config()` helper, avoid `env()` outside config files
+## Controllers
+- Inject services by method injection
+- Plural names (ContactsController)
+- CRUD methods only (index, create, store, show, edit, update, destroy)
+- Extract new controller for non-CRUD actions
+- Never call `validate()` inside controller
+- Implement proper request validation using Form Requests
+- Aim for "slim" Controllers and put larger logic pieces in Service classes
 
-### Naming Conventions
-- **Follow Laravel conventions first.** If Laravel has a documented way to do something, use it. Only deviate when you have a clear justification.
-- **Classes**: PascalCase (`UserController`, `OrderStatus`)
-- **Methods/Variables**: camelCase (`getUserName`, `$firstName`)
-- **Routes**: kebab-case (`/open-source`, `/user-profile`)
-- **Config files**: kebab-case (`pdf-generator.php`)
-- **Config keys**: snake_case (`chrome_path`)
-- **Artisan commands**: kebab-case (`php artisan delete-old-records`)
-- Controllers: plural resource name + `Controller` (`PostsController`)
-- Views: camelCase (`openSource.blade.php`)
-- Jobs: action-based (`CreateUser`, `SendEmailNotification`)
-- Events: tense-based (`UserRegistering`, `UserRegistered`)
-- Listeners: action + `Listener` suffix (`SendInvitationMailListener`)
-- Commands: action + `Command` suffix (`PublishScheduledPostsCommand`)
-- Mailables: purpose + `Mail` suffix (`AccountActivatedMail`)
-- Resources/Transformers: plural + `Resource`/`Transformer` (`UsersResource`)
-- Enums: descriptive name, no prefix (`OrderStatus`, `BookingType`)
+## Database / Schema
+- Primary keys on every table; prefer INT over BIGINT unless > ~2B rows
+- Smallest fitting data types: INT for integers, DECIMAL for money, VARCHAR(n) for short strings, TIMESTAMP over DATETIME where possible
+- Use InnoDB (row-level locking, foreign keys, transactions)
+- Naming: lower_case_snake_case for tables and columns
+- Normalize first; denormalize only when metrics show a read bottleneck
+- Partition large tables by range (e.g. date) when query patterns benefit
 
-## Blade Templates
-- Indent with 4 spaces
-- No spaces after control structures:
-  ```blade
-  @if($condition)
-      Something
-  @endif
-  ```
+## Migrations
+- Only `up()` methods, no `down()`
+- When adding columns in a migration, update the model's `$fillable` array to include those new attributes
+- Never chain multiple migration-creating commands (e.g., `make:model -m`, `make:migration`) with `&&` or `;` — they may get identical timestamps; run each command separately and wait for completion before running the next
 
-### Routes
-- URLs: kebab-case (`/open-source`)
-	- Route names: dot notation (`->name('profile.show')`)
-- Parameters: camelCase (`{userId}`)
-- Use tuple notation: `[Controller::class, 'method']`
-- Limit deep nesting for simplicity:
-  ```
-  /error-occurrences/1
-  /errors/1/occurrences
-  ```
+## Blade / Views
+- Analyze existing UI style before creating new
+- Keep consistent layout, colors, typography
+- Human-friendly, simply understandable
+- Blade: 4-space indent, no space after control structures
 
-### Controllers
-- Plural resource names (`PostsController`)
-- Stick to CRUD methods (`index`, `create`, `store`, `show`, `edit`, `update`, `destroy`)
-- Extract new controllers for non-CRUD actions
+## Testing
+- Laravel: prefer Http::fake() over Mockery
 
-### Artisan Commands
-- Names: kebab-case (`delete-old-records`)
-- Put output BEFORE processing item (easier debugging):
-  ```php
-  $items->each(function(Item $item) {
-      $this->info("Processing item id `{$item->id}`...");
-      $this->processItem($item);
-  });
+## Helpers
+- Use Laravel helpers instead of `use` section classes. Examples: use `auth()->id()` instead of `Auth::id()` and adding `Auth` in the `use` section. Other examples: use `redirect()->route()` instead of `Redirect::route()`, or `str()->slug()` instead of `Str::slug()`.
 
-  $this->comment("Processed {$items->count()} items.");
-  ```
+## Best practices
+- Follow Laravel best practices and conventions
+- Use object-oriented programming with a focus on SOLID principles
+- Prefer iteration and modularization over duplication
+- Favor dependency injection and service containers
+- Use Eloquent ORM instead of raw SQL queries when possible
+- Implement Repository pattern for data access layer
+- Use Laravel's built-in authentication and authorization features
+- Utilize Laravel's caching mechanisms for improved performance
+- Implement job queues for long-running tasks
+- Use Laravel's built-in testing tools (Pest) for unit and feature tests
+- Implement proper database indexing for improved query performance
+- Use Laravel's built-in pagination features
+- Implement proper error logging and monitoring
+- Use Laravel's routing system for defining application endpoints
 
-## Authorization
+## Dependencies
+- Composer for dependency management
 
-- Policies use camelCase: `Gate::define('editPost', ...)`
-- Use CRUD words, but `view` instead of `show`
-
-## Translations
-
-- Use `__()` function over `@lang`:
-
-### Migrations
-- do not write down methods in migrations, only up methods
-
+## Livewire
+- In Livewire projects, don't use Livewire Volt. Only Livewire class components.

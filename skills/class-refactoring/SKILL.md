@@ -5,47 +5,65 @@ description: PHP/Laravel code simplification and refactoring specialist. Use whe
 
 # Class Refactoring
 
-PHP/Laravel code simplification specialist. Enhance clarity, consistency, and maintainability while preserving exact functionality.
+**Role:** PHP/Laravel code simplification specialist. Enhance clarity, consistency, and maintainability while preserving exact functionality.
 
-## Process
+**Constraint:** Change how, not what. Preserve functionality.
 
-1. Review all `.cursor/rules/*.mdc` rules
-2. Analyze class and complete TODO list tasks
-3. Verify code coverage after refactoring
-4. Preserve functionality — change how, not what
-5. Focus on recently modified code unless instructed otherwise
+---
 
-## Anti-patterns to Avoid
+## 1. Process
 
-- Over-simplification reducing clarity
-- Overly clever/dense solutions
-- Combining too many concerns
-- Removing helpful abstractions
-- Prioritizing fewer lines over readability
-- Nested ternaries — prefer match/switch/if-else
+**Do (in order):**
+1. Review all `.cursor/rules/*.mdc` rules.
+2. Analyze the class and complete the TODO list tasks.
+3. Verify code coverage after refactoring.
+4. Preserve functionality — change how, not what.
+5. Focus on recently modified code unless instructed otherwise.
 
-## Code Quality
+---
 
-- Clean, modern, optimized code
-- Stateless PHP classes
-- Collections over foreach where appropriate
-- PHPDoc for PHPStan analysis
-- English comments only
-- Spatie DTOs instead of arrays (except Job constructors)
-- Laravel helpers over native PHP when appropriate
+## 2. Anti-patterns to Avoid
 
-## Architecture
+**Do not:**
+- Over-simplify in a way that reduces clarity.
+- Use overly clever or dense solutions.
+- Combine too many concerns.
+- Remove helpful abstractions.
+- Prioritize fewer lines over readability.
+- Use nested ternaries — prefer `match`, `switch`, or `if`/`else`.
 
-- DRY principle — eliminate duplicates
-- Remove obvious comments (keep PHPStan docs)
-- Single Responsibility Principle
-- Extract private methods if body exceeds ~30 lines
-- No single-use variables
+---
 
-## Tests & PHPStan
+## 3. Code Quality
 
-- Match test variable names to actual use cases
-- Improve iterable shapes for PHPStan
-- Do not modify existing tests
-- New tests must cover relevant code
-- Remove coverage files after verification
+**Apply:**
+- Clean, modern, optimized code.
+- Stateless PHP classes.
+- Collections over `foreach` where appropriate.
+- PHPDoc for PHPStan analysis.
+- English comments only.
+- Spatie DTOs instead of arrays (except Job constructors).
+- Laravel helpers over native PHP when appropriate.
+
+---
+
+## 4. Architecture
+
+**Apply:**
+- DRY principle — eliminate duplicates.
+- Remove obvious comments; keep PHPStan-relevant docs.
+- Single Responsibility Principle.
+- Extract private methods if body exceeds ~30 lines.
+- No single-use variables.
+
+---
+
+## 5. Tests & PHPStan
+
+**Do:**
+- Match test variable names to actual use cases.
+- Improve iterable shapes for PHPStan.
+- New tests must cover relevant code.
+- Remove coverage files after verification.
+
+**Do not:** Modify existing tests (unless refactoring requires it for consistency).

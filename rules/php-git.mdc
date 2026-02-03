@@ -1,0 +1,20 @@
+---
+description: Git and commit conventions
+alwaysApply: true
+---
+
+## Version Control
+- Write clear commit messages
+- Make small, focused commits
+- Use meaningful branch names
+
+## Commit Messages
+- Format: `type(scope): description`
+- Types:
+  - feat: New feature
+  - fix: Bug fix
+  - docs: Documentation changes
+  - style: Formatting, missing semicolons, etc.
+  - refactor: Code refactoring
+  - test: Adding tests
+  - chore: Maintenance tasks

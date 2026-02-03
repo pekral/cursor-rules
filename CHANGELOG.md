@@ -2,6 +2,15 @@
 
 All notable changes to `cursor-rules` will be documented in this file.
 
+## [Unreleased] - 2026-02-03 (PR #14)
+
+
+- 🔧 **Changed**: refresh readme.md file
+- 🔧 **Changed**: update readme
+- 🔧 **Changed**: cleanup rules and skills
+- 📝 **Changed**: Update SKILL.md
+- 📝 **Changed**: Update SKILL.md
+
 ## [Unreleased] - 2026-02-03
 
 

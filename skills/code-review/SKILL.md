@@ -14,6 +14,7 @@ Senior PHP Laravel code reviewer. Perform code review for changes vs `master` br
 - DynamoDB used as NoSQL database and cache layer
 - All changes must comply with `.cursor/rules/*.mdc`
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules
+- Ensure SRP in this class and apply SOLID principles so that the code is readable for developers.
 
 ## Git Analysis
 

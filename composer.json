@@ -1,22 +1,19 @@
 {
   "name": "pekral/cursor-rules",
-  "description": "Cursor editor rules for PHP/Laravel projects",
+  "description": "Custom rules for Cursor editor",
   "license": "MIT",
   "type": "library",
-  "require": {
-    "php": "^8.4"
-  },
   "require-dev": {
-    "ergebnis/composer-normalize": "^2.48.2",
+    "ergebnis/composer-normalize": "^2.49.0",
     "laravel/pint": "^1.27.0",
-    "pekral/phpcs-rules": "^0.4.5",
+    "pekral/phpcs-rules": "^0.4.6",
     "pekral/phpstan-rules": "^0.4.5",
     "pekral/rector-rules": "^0.4.7",
-    "pestphp/pest": "^4.3.1",
+    "pestphp/pest": "^4.3.2",
     "pestphp/pest-plugin": "^4.0",
     "pestphp/pest-plugin-type-coverage": "^4.0.3",
     "phpstan/extension-installer": "^1.4.3",
-    "phpstan/phpstan": "^2.1.37",
+    "phpstan/phpstan": "^2.1.38",
     "phpstan/phpstan-deprecation-rules": "^2.0.3",
     "phpstan/phpstan-mockery": "^2.0",
     "phpstan/phpstan-phpunit": "^2.0.12",

@@ -1,8 +1,35 @@
 {
   "name": "pekral/cursor-rules",
-  "description": "Custom rules for Cursor editor",
+  "description": "PHP and Laravel Cursor rules — coding standards, testing, and conventions for Cursor editor",
   "license": "MIT",
   "type": "library",
+  "keywords": [
+    "cursor",
+    "cursor-rules",
+    "cursor-editor",
+    "php-cursor-rules",
+    "laravel-cursor-rules",
+    "php",
+    "laravel",
+    "coding-standards",
+    "rules",
+    "phpstan",
+    "pest",
+    "clean-code"
+  ],
+  "authors": [
+    {
+      "name": "Petr Král",
+      "homepage": "https://pekral.cz",
+      "role": "lead"
+    }
+  ],
+  "homepage": "https://github.com/pekral/cursor-rules",
+  "support": {
+    "issues": "https://github.com/pekral/cursor-rules/issues",
+    "source": "https://github.com/pekral/cursor-rules",
+    "docs": "https://github.com/pekral/cursor-rules#readme"
+  },
   "require-dev": {
     "ergebnis/composer-normalize": "^2.49.0",
     "laravel/pint": "^1.27.0",

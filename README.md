@@ -1,13 +1,13 @@
-# Cursor Rules
+# PHP & Laravel Cursor Rules
 
 [![Code Quality Check](https://github.com/pekral/cursor-rules/workflows/Code%20Quality%20Check/badge.svg)](https://github.com/pekral/cursor-rules/actions)
 [![Tests](https://github.com/pekral/cursor-rules/workflows/Tests/badge.svg)](https://github.com/pekral/cursor-rules/actions)
 
-Cursor Rules ships a complete set of `.mdc` files for the Cursor editor. The installer discovers the project root, mirrors the entire `rules/` directory (including empty subfolders), and copies or symlinks every file into the target project. The result is a consistent bundle of rules for PHP, Laravel, and testing workflows.
+PHP Cursor Rules and Laravel Cursor Rules in one package — a complete set of `.mdc` files for the Cursor editor and PHP projects. The installer discovers the project root, mirrors the entire `rules/` directory (including empty subfolders), and copies or symlinks every file into the target project. The result is a consistent bundle of PHP cursor rules and Laravel cursor rules for PHP coding standards, testing, and conventions.
 
 ## Why This Package
 
-- unified coding guidelines for PHP 8.4 projects
+- unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
 - fast onboarding inside development repositories
@@ -61,21 +61,15 @@ vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
 
 ## Rules Overview
 
-| File                    | Description                                                              | Scope  |
-|-------------------------|--------------------------------------------------------------------------|--------|
-| `app-architecture.mdc`  | Application architecture (repositories, services, controllers, DTOs)      | Always |
-| `laravel-filament.mdc`  | Filament v4 rules (resources, enums, tests)                              | Always |
-| `php-classes.mdc`       | Class structure, typed properties, SRP                                   | Always |
-| `php-docs.mdc`          | Required docs for iterables, generics, array shapes                      | Always |
-| `php-fixing-bugs.mdc`   | Bug-fix workflow, tests-first refactoring guardrails                     | Always |
-| `php-laravel.mdc`       | Laravel conventions (naming, configs, routes, Blade, jobs, events)       | Always |
-| `php-standards.mdc`     | Global clean-code rules, no redundant comments                          | Always |
-| `php-testing.mdc`       | Pest conventions, 100% coverage, no private/protected assertions          | Always |
-| `sql-rules.mdc`         | SQL query optimization, indexes, N+1 prevention                          | Always |
-| `ui-templates.mdc`      | Rules for creating new templates and UI components                       | Always |
-| `commands/*.md`         | Task templates and checklists (e.g., class refactoring, code review)    | Manual |
+| File                | Description                                        | Scope   |
+|---------------------|----------------------------------------------------|---------|
+| `php-core.mdc`      | PHP project tech stack and core context            | Always  |
+| `php-filament.mdc`  | Filament v4 rules (resources, enums, tests)        | Filament|
+| `php-git.mdc`       | Git and commit conventions for PHP projects        | Always  |
+| `php-laravel.mdc`   | Laravel and PHP architecture and conventions       | Laravel |
+| `php-standards.mdc` | Unified PHP coding standards for Laravel projects  | Always  |
 
-All `.mdc` files are ready for automatic injection by Cursor so every edit stays aligned with the enforced standards.
+All `.mdc` files are ready for automatic injection by Cursor so every PHP edit stays aligned with the enforced standards.
 
 ## Development & Testing
 
@@ -108,6 +102,10 @@ composer test:coverage      # run tests with coverage (min. 100%)
 ```
 
 Remove `coverage.xml` before committing if it was produced locally.
+
+## Author
+
+**Petr Král** — PHP Developer & Laravel programmer, open source contributor ([pekral.cz](https://pekral.cz)).
 
 ## License
 

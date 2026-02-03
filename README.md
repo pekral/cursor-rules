@@ -1,12 +1,13 @@
-# PHP & Laravel Cursor Rules
+# Cursor Rules for PHP and Laravel
 
 [![Code Quality Check](https://github.com/pekral/cursor-rules/workflows/Code%20Quality%20Check/badge.svg)](https://github.com/pekral/cursor-rules/actions)
 [![Tests](https://github.com/pekral/cursor-rules/workflows/Tests/badge.svg)](https://github.com/pekral/cursor-rules/actions)
 
-PHP Cursor Rules and Laravel Cursor Rules in one package — a complete set of `.mdc` files for the Cursor editor and PHP projects. The installer discovers the project root, mirrors the entire `rules/` directory (including empty subfolders), and copies or symlinks every file into the target project. The result is a consistent bundle of PHP cursor rules and Laravel cursor rules for PHP coding standards, testing, and conventions.
+**Cursor rules for PHP and Laravel** — a complete set of `.mdc` rule files and Cursor Agent skills for the Cursor editor. One package for PHP and Laravel cursor rules: coding standards, testing, and conventions. The installer discovers the project root (via `composer.json` lookup from the current directory), mirrors the `rules/` directory into `.cursor/rules` and the `skills/` directory into `.cursor/skills`, and copies or symlinks every file into the target project. Use cursor rules for PHP and Laravel to keep every edit aligned with enforced standards, plus optional Agent skills for bug fixing, code review, refactoring, testing, and package review.
 
 ## Why This Package
 
+- cursor rules for PHP and Laravel in one Composer-installable package
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
@@ -19,7 +20,7 @@ composer require pekral/cursor-rules --dev
 vendor/bin/cursor-rules install
 ```
 
-The installer creates `.cursor/rules` in the project root by default. When the package is required via Composer, the source files are read from `vendor/pekral/cursor-rules/rules`; in development it falls back to the local `rules/` directory.
+The installer creates `.cursor/rules` and `.cursor/skills` in the project root. When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`; in development it falls back to the local `rules/` and `skills/` directories.
 
 ### Available Commands
 
@@ -32,12 +33,12 @@ vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
 
 ### Installer Flow
 
-1. Determine the project root (`composer.json` search or configured fallback).
-2. Resolve the rules source (local `rules/` or `vendor/...`).
-3. Resolve the destination: `.cursor/rules` or `CURSOR_RULES_TARGET_DIR`.
-4. Create the destination root and replicate the whole directory tree, including empty folders.
-5. Copy or symlink every file, optionally overriding existing files via `--force`.
-6. Surface explicit errors for missing directories, removal failures, copy/symlink issues, etc.
+1. Determine the project root by walking up from the current directory until `composer.json` is found.
+2. Resolve the rules source (local `rules/` or `vendor/pekral/cursor-rules/rules`).
+3. Create `.cursor/rules` and replicate the full directory tree; copy or symlink each file.
+4. If present, resolve the skills source (local `skills/` or `vendor/pekral/cursor-rules/skills`) and install into `.cursor/skills` the same way.
+5. Optionally overwrite existing files with `--force`; use `--symlink` to prefer symlinks (fallback to copy on Windows).
+6. Surface explicit errors for missing directories, removal failures, and copy/symlink failures.
 
 ### CLI Switches
 
@@ -47,19 +48,9 @@ vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
 | `--symlink`  | Create symlinks when the OS permits; automatically falls back to copy.  |
 | *(default)*  | Only copy missing files and keep existing content untouched.            |
 
-### Environment Variables
-
-| Variable                           | Purpose                                                               |
-|------------------------------------|------------------------------------------------------------------------|
-| `CURSOR_RULES_TARGET_DIR`          | Absolute path to the destination (for example `/app/.cursor/rules`).  |
-| `CURSOR_RULES_PROJECT_ROOT`        | Skips auto-discovery of the project root.                             |
-| `CURSOR_RULES_PROJECT_ROOT_FALLBACK` | Fallback root if `getcwd()` cannot be resolved.                      |
-| `CURSOR_RULES_DISABLE_SYMLINKS`    | Forces copy mode even when `--symlink` is used.                       |
-| `CURSOR_RULES_FORCE_WINDOWS`       | Simulates a Windows environment (symlinks are disabled).              |
-| `CURSOR_RULES_FAIL_SYMLINK`        | Test flag that forces a symlink failure.                              |
-| `CURSOR_RULES_FAIL_COPY`           | Test flag that forces a copy failure.                                 |
-
 ## Rules Overview
+
+Cursor rules for PHP and Laravel included in this package:
 
 | File                | Description                                        | Scope   |
 |---------------------|----------------------------------------------------|---------|
@@ -69,17 +60,31 @@ vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
 | `php-laravel.mdc`   | Laravel and PHP architecture and conventions       | Laravel |
 | `php-standards.mdc` | Unified PHP coding standards for Laravel projects  | Always  |
 
-All `.mdc` files are ready for automatic injection by Cursor so every PHP edit stays aligned with the enforced standards.
+All `.mdc` files are ready for automatic injection by Cursor so every PHP and Laravel edit stays aligned with the enforced standards.
+
+## Skills Overview
+
+Agent skills are installed into `.cursor/skills/` and can be invoked when relevant:
+
+| Skill             | Description                                                                 |
+|-------------------|-----------------------------------------------------------------------------|
+| `auto-fix-bug`    | Fix a reported bug end-to-end: reproduce, add test, fix, open PR.           |
+| `class-refactoring` | Simplify and refactor PHP/Laravel code, improve clarity and consistency.  |
+| `code-review`     | Senior PHP/Laravel code review (pull requests, changes vs base); read-only.|
+| `package-review`  | Review and validate public packages (GitHub, composer.json, docs links).   |
+| `test-create`     | Create or extend PHP/Laravel tests, follow project conventions, 100% coverage. |
 
 ## Development & Testing
 
 ### Composer Scripts
 
 ```bash
-composer check              # run full quality check
-composer fix                # run all automatic fixes
+composer check              # run full quality check (normalize, phpcs, pint, rector, phpstan, audit, tests)
+composer fix                # run all automatic fixes (normalize, rector, pint, phpcs)
+composer build              # fix then check
 composer analyse            # run PHPStan static analysis
-composer test:coverage      # run tests with 100% coverage
+composer test:coverage       # run tests with 100% coverage
+composer coverage           # alias for test:coverage
 composer security-audit     # run security audit of dependencies
 ```
 

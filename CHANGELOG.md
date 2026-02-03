@@ -6,6 +6,18 @@ All notable changes to `cursor-rules` will be documented in this file.
 
 
 - 📝 **Changed**: Update SKILL.md
+- 📝 **Changed**: Update SKILL.md
+- 🔧 **Changed**: composer update dependencies
+- 🐛 **Fixed**: installer
+- 📝 **Changed**: Update SKILL.md
+- 📝 **Changed**: Update php-standards.mdc
+- 📝 **Changed**: Update SKILL.md
+- 📝 **Changed**: Update SKILL.md
+
+## [Unreleased] - 2026-02-03
+
+
+- 📝 **Changed**: Update SKILL.md
 - 🔧 **Changed**: composer update dependencies
 - 🐛 **Fixed**: installer
 - 📝 **Changed**: Update SKILL.md

@@ -52,3 +52,4 @@ Senior PHP Laravel programmer for writing clean, modern, human-readable tests fo
 ## 5. Coverage
 
 **Requirement:** 100% coverage required for changes.
+- Remove generated coverage after work is done.

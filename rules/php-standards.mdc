@@ -45,6 +45,7 @@ alwaysApply: true
 - Data providers via argument, not PHPDoc
 - Mock only external services (HTTP clients) or for testing catch exceptions
 - Final test classes, local variables only
+- In tests, avoid reflection and use mocks instead (even partial ones, if they are effective and easy to read).
 
 ## Bug-Fix Workflow
 - Write tests BEFORE fixing bugs

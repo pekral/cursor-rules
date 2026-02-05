@@ -23,6 +23,8 @@ alwaysApply: true
 - Custom exceptions when necessary
 - When designing architecture, use composition whenever possible.
 - Always prefer simple classes or functions unless state is truly necessary.
+- When designing architecture, use composition whenever possible.
+- Always prefer simple classes or functions unless state is truly necessary.
 
 ## Constants Over Magic Numbers
 - Replace hard-coded values with named constants

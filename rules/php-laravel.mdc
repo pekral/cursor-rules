@@ -47,6 +47,7 @@ globs:
 - Laravel: prefer Http::fake() over Mockery
 - Always call jobs in tests using ::dispatch(), e.g., MyJob::dispatch()
 - Always call console commands using Artisan::call(MyCommand::class)
+- Mocking services is only allowed for classes that use external service calls or if it is necessary to simulate an exception throw.
 
 ## Helpers
 - Use Laravel helpers instead of `use` section classes. Examples: use `auth()->id()` instead of `Auth::id()` and adding `Auth` in the `use` section. Other examples: use `redirect()->route()` instead of `Redirect::route()`, or `str()->slug()` instead of `Str::slug()`.

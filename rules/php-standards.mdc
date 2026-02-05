@@ -96,3 +96,6 @@ alwaysApply: true
 - Use fluent value-object wrappers for domain primitives so method names read like English (e.g. `Iterable::of($value)->isEmpty()`, `Url::of($uri)->isSecure()`)
 - Factory methods: `of()`, `from()`; boolean queries: `isEmpty()`, `isNotEmpty()`, `isValid()`, `hasItems()`
 - Avoid: vague verbs, mixed helpers without context, god utils with many static methods
+
+## Attributes
+- If the problem or logic can be solved by writing via attributes, use them.

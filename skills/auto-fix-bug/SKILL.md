@@ -9,7 +9,7 @@ description: Fix a reported bug end-to-end: reproduce it, add a regression test,
 
 **Non-negotiable outcome:** When this skill is used, you MUST deliver:
 1. A **new branch** with the fix.
-2. At least one **commit** (Conventional Commits).
+2. At least one **commit** (Conventional Commits). Link the issue from GitHub using a commit message, e.g., fixed #123, where 123 is the issue number.
 3. A **GitHub Pull Request** opened from that branch.
 
 If you cannot create the PR automatically (missing permissions, no `gh`), push the branch and output the exact manual steps to create the PR in the GitHub UI.

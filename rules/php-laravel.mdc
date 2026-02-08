@@ -51,6 +51,7 @@ globs:
 
 ## Helpers
 - Use Laravel helpers instead of `use` section classes. Examples: use `auth()->id()` instead of `Auth::id()` and adding `Auth` in the `use` section. Other examples: use `redirect()->route()` instead of `Redirect::route()`, or `str()->slug()` instead of `Str::slug()`.
+- Replace all foreach with collect() helper.
 
 ## Best practices
 - Follow Laravel best practices and conventions

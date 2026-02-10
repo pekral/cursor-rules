@@ -1,6 +1,4 @@
-do @.cursor/skills/auto-fix-bug/SKILL.md for given issues urls (If issue is close or not ready for process, dont do anything!) and
-1. after writing code, do @.cursor/skills/class-refactoring/SKILL.md for all new php classes, fix DRY, apply solid and apply SRP!
-2. run fixers if it is available
-3. do @.cursor/skills/code-review/SKILL.md, if all critical issues and repeat from 1. point.
+For the given URL addresses of issues, run @.cursor/skills/auto-fix-bug/SKILL.md (if the issue is closed or not ready for processing, do nothing!) and after writing the code, run @.cursor/skills/class-refactoring/SKILL.md for all new PHP classes, fix DRY, apply solid, and apply SRP! Then run the fixes if available (composer scripts, phing, etc.) and then 
+ run @.cursor/skills/code-review/SKILL.md if all critical issues are resolved, and repeat from step 1.
 
-If there are any changes, then create PR by defined rules everytime!
+Always verify functionality according to the assignment, and if everything is OK and some files have been changed, create a PR according to the defined rules every time!

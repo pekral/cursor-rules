@@ -18,3 +18,4 @@ alwaysApply: true
   - refactor: Code refactoring
   - test: Adding tests
   - chore: Maintenance tasks
+- A brief but concise report

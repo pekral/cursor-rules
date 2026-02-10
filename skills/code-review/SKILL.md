@@ -11,14 +11,11 @@ description: Senior PHP Laravel code reviewer. Use when reviewing pull requests,
 
 ---
 
-<<<<<<< Updated upstream
-- DynamoDB used as NoSQL database and cache layer
-- All changes must comply with `.cursor/rules/*.mdc`
-- Understand what has changed and pay attention to the structural quality of the code defined in the rules
-- Ensure SRP in this class and apply SOLID principles so that the code is readable for developers.
-=======
 ## 1. General
->>>>>>> Stashed changes
+
+- All changes must comply with `.cursor/rules/*.mdc`.
+- Understand what has changed and pay attention to the structural quality of the code defined in the rules.
+- Ensure SRP in each class and apply SOLID principles so that the code is readable for developers.
 
 **Assumptions:**
 - PHPStan (level max), Rector (pekral/rector-rules), PHPCS (pekral/phpcs-rules), and Pint are in use and passing.

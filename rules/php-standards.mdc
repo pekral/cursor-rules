@@ -105,4 +105,4 @@ alwaysApply: true
 - If the problem or logic can be solved by writing via attributes, use them.
 
 ## Coding style
-- Never reformating existing code!
+- Never reformat existing code!

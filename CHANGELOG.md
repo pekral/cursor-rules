@@ -59,7 +59,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 - ✨ **Added**: new auto fix bug skill
 - 🐛 **Fixed**: Symfony console v.8
 - 🐛 **Fixed**: update changelog file action
-- ♻️ **Refactored**: optimalize commands  prompts
+- ♻️ **Refactored**: optimize commands  prompts
 - 🐛 **Fixed**: install rules to correct folder
 
 ## [Unreleased] - 2026-01-29
@@ -72,7 +72,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 - ✨ **Added**: new auto fix bug skill
 - 🐛 **Fixed**: Symfony console v.8
 - 🐛 **Fixed**: update changelog file action
-- ♻️ **Refactored**: optimalize commands  prompts
+- ♻️ **Refactored**: optimize commands  prompts
 - 🐛 **Fixed**: install rules to correct folder
 
 ## [Unreleased] - 2026-01-28
@@ -84,7 +84,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 - ✨ **Added**: new auto fix bug skill
 - 🐛 **Fixed**: Symfony console v.8
 - 🐛 **Fixed**: update changelog file action
-- ♻️ **Refactored**: optimalize commands  prompts
+- ♻️ **Refactored**: optimize commands  prompts
 - 🐛 **Fixed**: install rules to correct folder
 
 ## [Unreleased] - 2026-01-27
@@ -95,7 +95,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 - ✨ **Added**: new auto fix bug skill
 - 🐛 **Fixed**: Symfony console v.8
 - 🐛 **Fixed**: update changelog file action
-- ♻️ **Refactored**: optimalize commands  prompts
+- ♻️ **Refactored**: optimize commands  prompts
 - 🐛 **Fixed**: install rules to correct folder
 
 ## [Unreleased] - 2026-01-26 (PR #12)
@@ -105,7 +105,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 - ✨ **Added**: new auto fix bug skill
 - 🐛 **Fixed**: Symfony console v.8
 - 🐛 **Fixed**: update changelog file action
-- ♻️ **Refactored**: optimalize commands  prompts
+- ♻️ **Refactored**: optimize commands  prompts
 - 🐛 **Fixed**: install rules to correct folder
 
 ## [Unreleased] - 2026-01-25
@@ -113,7 +113,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 
 - 🐛 **Fixed**: Symfony console v.8
 - 🐛 **Fixed**: update changelog file action
-- ♻️ **Refactored**: optimalize commands  prompts
+- ♻️ **Refactored**: optimize commands  prompts
 - 🐛 **Fixed**: install rules to correct folder
 - 🔧 **Changed**: refresh readme
 - ✨ **Added**: cursor rules defined as Cursor commands now + composer update dependencies

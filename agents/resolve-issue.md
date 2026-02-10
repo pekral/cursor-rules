@@ -1,4 +1,7 @@
-For the given URL addresses of issues, run @.cursor/skills/auto-fix-bug/SKILL.md (if the issue is closed or not ready for processing, do nothing!) and after writing the code, run @.cursor/skills/class-refactoring/SKILL.md for all new PHP classes, fix DRY, apply solid, and apply SRP! Then run the fixes if available (composer scripts, phing, etc.) and then 
- run @.cursor/skills/code-review/SKILL.md if all critical issues are resolved, and repeat from step 1.
+For the given URL addresses of problems, run .cursor/skills/auto-fix-bug/SKILL.md (if the problem is closed or not ready for processing, do nothing!) and then proceed according to the defined points:
 
-Always verify functionality according to the assignment, and if everything is OK and some files have been changed, create a PR according to the defined rules every time! All texts must be in english!
+1. After writing the code, refactor according to the rules in .cursor/skills/class-refactoring/SKILL.md for all new PHP classes, fix DRY, apply solid principles (if appropriate), and SRP!
+
+2. Run the fixes (analyze composer.json and run the fixers, choose the most suitable script(s)), if available.
+
+3. Perform the code review defined in .cursor/skills/code-review/SKILL.md. If any critical issues are found, ask the user and let them choose what to fix. If they choose something, modify the code and start iterating again from step 1.

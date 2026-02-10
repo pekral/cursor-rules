@@ -25,9 +25,11 @@ test('package directory points to correct location', function (): void {
     $packageDir = dirname(__DIR__);
     $rulesDir = $packageDir . '/rules';
     $skillsDir = $packageDir . '/skills';
+    $agentsDir = $packageDir . '/agents';
 
     expect(is_dir($rulesDir))->toBeTrue();
     expect(is_dir($skillsDir))->toBeTrue();
+    expect(is_dir($agentsDir))->toBeTrue();
 });
 
 test('resolveRulesSource prefers development directory', function (): void {
@@ -77,6 +79,32 @@ test('resolveSkillsSource falls back to package directory', function (): void {
         $packageDir = dirname(__DIR__);
 
         expect($source)->toBe($packageDir . '/skills');
+    } finally {
+        installerRemoveDirectory($root);
+    }
+});
+
+test('resolveAgentsSource prefers development directory', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/agents/test.md', 'content');
+
+    try {
+        $source = InstallerPath::resolveAgentsSource($root);
+
+        expect($source)->toBe($root . '/agents');
+    } finally {
+        installerRemoveDirectory($root);
+    }
+});
+
+test('resolveAgentsSource falls back to package directory', function (): void {
+    $root = installerCreateProjectRoot();
+
+    try {
+        $source = InstallerPath::resolveAgentsSource($root);
+        $packageDir = dirname(__DIR__);
+
+        expect($source)->toBe($packageDir . '/agents');
     } finally {
         installerRemoveDirectory($root);
     }
@@ -247,12 +275,40 @@ test('install copies skills from development directory', function (): void {
     }
 });
 
-test('install copies all files from rules and skills directories', function (): void {
+test('install copies agents from development directory', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/example.mdc', 'rules');
+    installerWriteFile($root . '/agents/issue-resolve.md', 'agent content');
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        $installedAgent = $root . '/.cursor/agents/issue-resolve.md';
+
+        expect(is_file($installedAgent))->toBeTrue();
+        expect(file_get_contents($installedAgent))->toBe('agent content');
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install copies all files from rules, skills and agents directories', function (): void {
     $packageDir = dirname(__DIR__);
     $rulesSource = $packageDir . '/rules';
     $skillsSource = $packageDir . '/skills';
+    $agentsSource = $packageDir . '/agents';
     $expectedRulesCount = installerCountFiles($rulesSource);
     $expectedSkillsCount = installerCountFiles($skillsSource);
+    $expectedAgentsCount = installerCountFiles($agentsSource);
 
     $root = installerCreateProjectRoot();
     $cwd = getcwd();
@@ -268,12 +324,15 @@ test('install copies all files from rules and skills directories', function (): 
 
         $rulesTarget = $root . '/.cursor/rules';
         $skillsTarget = $root . '/.cursor/skills';
+        $agentsTarget = $root . '/.cursor/agents';
         $actualRulesCount = installerCountFiles($rulesTarget);
         $actualSkillsCount = installerCountFiles($skillsTarget);
+        $actualAgentsCount = installerCountFiles($agentsTarget);
 
         expect($actualRulesCount)->toBe($expectedRulesCount, 'Rules: all source files should be copied');
         expect($actualSkillsCount)->toBe($expectedSkillsCount, 'Skills: all source files should be copied');
-        expect($output)->toContain(sprintf('(%d files)', $expectedRulesCount + $expectedSkillsCount));
+        expect($actualAgentsCount)->toBe($expectedAgentsCount, 'Agents: all source files should be copied');
+        expect($output)->toContain(sprintf('(%d files)', $expectedRulesCount + $expectedSkillsCount + $expectedAgentsCount));
     } finally {
         if ($originalCwd !== '') {
             chdir($originalCwd);
@@ -372,6 +431,20 @@ test('resolveSkillsSource falls back to package when development directory does 
     }
 });
 
+test('resolveAgentsSource falls back to package when development directory does not exist', function (): void {
+    $root = sys_get_temp_dir() . '/no-agents-' . bin2hex(random_bytes(4));
+    installerEnsureDirectory($root);
+
+    try {
+        $result = InstallerPath::resolveAgentsSource($root);
+        $packageDir = dirname(__DIR__);
+
+        expect($result)->toBe($packageDir . '/agents');
+    } finally {
+        installerRemoveDirectory($root);
+    }
+});
+
 test('resolveProjectRoot returns current working directory', function (): void {
     $result = InstallerPath::resolveProjectRoot();
 
@@ -414,6 +487,12 @@ test('resolveSkillsTargetDirectory returns correct path', function (): void {
     $result = InstallerPath::resolveSkillsTargetDirectory('/test/root');
 
     expect($result)->toBe('/test/root/.cursor/skills');
+});
+
+test('resolveAgentsTargetDirectory returns correct path', function (): void {
+    $result = InstallerPath::resolveAgentsTargetDirectory('/test/root');
+
+    expect($result)->toBe('/test/root/.cursor/agents');
 });
 
 test('isFilesystemRoot returns true for root paths', function (): void {

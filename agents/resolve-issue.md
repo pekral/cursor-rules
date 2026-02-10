@@ -7,3 +7,5 @@ For the given URL addresses of problems, run .cursor/skills/auto-fix-bug/SKILL.m
 3. Perform the code review defined in .cursor/skills/code-review/SKILL.md. If any critical issues are found, ask the user and let them choose what to fix. If they choose something, modify the code and start iterating again from step 1.
 
 4. Test the functionality according to the assignment. If there are any example files, analyze them and modify the existing ones for the current changes or create new example files. If none exist, skip this point.
+
+5. If the code is ready for submission, create a new branch according to the conventions, create a commit according to the conventions, and push the current branch to the repository. After a successful push, switch to the main branch and send me a link to the PR.

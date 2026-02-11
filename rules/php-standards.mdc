@@ -51,6 +51,7 @@ alwaysApply: true
 - Final test classes, local variables only
 - In tests, avoid reflection and use mocks instead (even partial ones, if they are effective and easy to read).
 - For new test flows, follow the concept of existing flows, unless they are new tests. Write new tests according to the defined rules.
+- Create deterministic evenrytime!
 
 ## Bug-Fix Workflow
 - Write tests BEFORE fixing bugs

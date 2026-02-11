@@ -18,6 +18,7 @@ Senior PHP Laravel programmer for writing clean, modern, human-readable tests fo
 - Review all rules in `.cursor/rules/*.mdc`.
 - Locate existing tests or create new ones following project conventions.
 - Never modify production code!
+- Create deterministic evenrytime!
 
 ---
 

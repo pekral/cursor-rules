@@ -26,10 +26,12 @@ test('package directory points to correct location', function (): void {
     $rulesDir = $packageDir . '/rules';
     $skillsDir = $packageDir . '/skills';
     $agentsDir = $packageDir . '/agents';
+    $securityRulesDir = $packageDir . '/rules/security';
 
     expect(is_dir($rulesDir))->toBeTrue();
     expect(is_dir($skillsDir))->toBeTrue();
     expect(is_dir($agentsDir))->toBeTrue();
+    expect(is_dir($securityRulesDir))->toBeTrue();
 });
 
 test('resolveRulesSource prefers development directory', function (): void {
@@ -468,6 +470,67 @@ test('install fails when rules subdirectory path is a file', function (): void {
         ob_get_clean();
 
         expect($exitCode)->toBe(1);
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install copies security rules from rules/security directory', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/example.mdc', 'rules');
+    installerWriteFile($root . '/rules/security/backend.md', 'backend security');
+    installerWriteFile($root . '/rules/security/frontend.md', 'frontend security');
+    installerWriteFile($root . '/rules/security/mobile.md', 'mobile security');
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        $securityDir = $root . '/.cursor/rules/security';
+
+        expect(is_file($securityDir . '/backend.md'))->toBeTrue();
+        expect(file_get_contents($securityDir . '/backend.md'))->toBe('backend security');
+        expect(is_file($securityDir . '/frontend.md'))->toBeTrue();
+        expect(file_get_contents($securityDir . '/frontend.md'))->toBe('frontend security');
+        expect(is_file($securityDir . '/mobile.md'))->toBeTrue();
+        expect(file_get_contents($securityDir . '/mobile.md'))->toBe('mobile security');
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install always force-copies security rules even without force flag', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/example.mdc', 'rules');
+    installerWriteFile($root . '/rules/security/backend.md', 'new security content');
+    $securityFile = $root . '/.cursor/rules/security/backend.md';
+    installerWriteFile($securityFile, 'old security content');
+    $regularFile = $root . '/.cursor/rules/example.mdc';
+    installerWriteFile($regularFile, 'old rules content');
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        expect(file_get_contents($securityFile))->toBe('new security content');
+        expect(file_get_contents($regularFile))->toBe('old rules content');
     } finally {
         if ($originalCwd !== '') {
             chdir($originalCwd);

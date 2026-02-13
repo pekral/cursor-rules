@@ -19,6 +19,7 @@ description: PHP/Laravel code simplification and refactoring specialist. Use whe
 3. Verify code coverage after refactoring.
 4. Preserve functionality — change how, not what.
 5. Focus on recently modified code unless instructed otherwise.
+6. No increase in public API surface without strong justification
 
 ---
 
@@ -55,6 +56,12 @@ description: PHP/Laravel code simplification and refactoring specialist. Use whe
 - Single Responsibility Principle.
 - Extract private methods if body exceeds ~30 lines.
 - No single-use variables.
+- Extract intention-revealing private methods
+- Separate orchestration layer from business logic
+- Split by responsibility
+- Centralize business rules
+- Business logic duplication is not allowed.
+- Method signatures must remain expressive and minimal.
 
 ---
 

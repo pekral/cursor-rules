@@ -41,6 +41,7 @@ alwaysApply: true
 - Always specify `void` return types when methods return nothing
 - Use PHP version from composer.json (typed properties, match expressions, etc.)
 - Document iterables with generics: `Collection<int, User>`
+- Use shorter and more readable syntax where possible
 - Array shapes for fixed keys, each key on own line
 
 ## Testing

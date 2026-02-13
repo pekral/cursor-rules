@@ -6,8 +6,8 @@ globs:
 ---
 
 ## Layer Responsibilities
-- **Controllers**: Slim, delegate to Services, accept FormRequest only
-- **Services**: All business logic, return DTOs or models
+- **Controllers**: Slim, delegate to Services, accept FormRequest only, Do not contain business logic.
+- **Services**: All business logic, return DTOs or models, use Single Responsibility, Keep services stateless. Dont read and write operations in one service method.
 - **Repositories**: Read-only, no writes, no business rules
 - **ModelManagers**: Write-only, store data to DB
 - **Data Builders**: Transform/prepare DTOs, never query DB
@@ -34,6 +34,9 @@ globs:
 - Partition large tables by range (e.g. date) when query patterns benefit
 - Prefer to use Eloquent over using Query Builder and raw SQL queries. Prefer collections over arrays
 - Do not execute queries in Blade templates and use eager loading (N + 1 problem)
+- Define relationships, scopes, casts, and accessors in the model.
+- Use enums with `HasLabel`, `HasColor`, `HasIcon` where applicable.
+- No business logic in models.
 
 ## Migrations
 - Only `up()` methods, no `down()`
@@ -77,3 +80,21 @@ globs:
 
 ## Livewire
 - In Livewire projects, don't use Livewire Volt. Only Livewire class components.
+
+## Queue System and Jobs
+- Queue long-running or external-dependent tasks.
+- Implement `ShouldQueue` and `ShouldBeUnique` where applicable.
+- Set `$tries`, `$backoff`, and `$timeout` on every job.
+- Handle failed jobs with `failed()` method.
+- Use job batching for related operations.
+- Jobs are idempotent — safe to retry.
+- No heavy logic in constructors (serialization issues).
+- Queue connections and workers are configured for the workload.
+
+## Middleware
+- Use middleware for cross-cutting concerns (auth, rate limiting, headers, logging).
+- Register middleware in the appropriate group or route.
+- Keep middleware focused — one concern per middleware.
+- Middleware does not contain business logic.
+- Order of middleware is intentional and correct.
+- Terminate middleware is used for post-response tasks.

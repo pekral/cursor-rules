@@ -154,8 +154,17 @@ test('install copies rules from package when no development directory', function
         $installedDir = $root . '/.cursor/rules';
         expect(is_dir($installedDir))->toBeTrue();
 
-        $files = glob($installedDir . '/*.mdc');
-        $files = $files !== false ? $files : [];
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($installedDir, FilesystemIterator::SKIP_DOTS),
+        );
+        $files = [];
+
+        foreach ($iterator as $file) {
+            if ($file instanceof SplFileInfo && $file->getExtension() === 'mdc') {
+                $files[] = $file->getPathname();
+            }
+        }
+
         expect(count($files))->toBeGreaterThan(0);
     } finally {
         if ($originalCwd !== '') {

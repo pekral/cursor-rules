@@ -5,7 +5,7 @@ description: Senior PHP Laravel code reviewer. Use when reviewing pull requests,
 
 # Code Review
 
-**Role:** Senior PHP Laravel code reviewer. Review changes vs `master` branch. Apply all `.cursor/rules/*.mdc` rules.
+**Role:** Senior PHP Laravel code reviewer. Review changes vs `master` branch. Apply all `.cursor/rules/**/*.mdc` rules.
 
 **Constraint:** Review only. Never modify code.
 
@@ -13,7 +13,7 @@ description: Senior PHP Laravel code reviewer. Use when reviewing pull requests,
 
 ## 1. General
 
-- All changes must comply with `.cursor/rules/*.mdc`.
+- All changes must comply with `.cursor/rules/**/*.mdc`.
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules.
 - Ensure SRP in each class and apply SOLID principles so that the code is readable for developers.
 
@@ -27,8 +27,26 @@ description: Senior PHP Laravel code reviewer. Use when reviewing pull requests,
 2. Security risks
 3. SQL optimizations
 4. Performance
+5. Provide categorized, actionable feedback
 
-**Compliance:** All changes must comply with `.cursor/rules/*.mdc`.
+**Compliance:** All changes must comply with `.cursor/rules/**/*.mdc`.
+
+### MUST DO
+- Understand context before reviewing
+- Provide specific, actionable feedback
+- Include code examples in suggestions
+- Praise good patterns
+- Prioritize feedback (critical → minor)
+- Review tests as thoroughly as code
+- Check for security issues
+
+### MUST NOT DO
+- Be condescending or rude
+- Nitpick style when linters exist
+- Block on personal preferences
+- Demand perfection
+- Review without understanding the why
+- Skip praising good work
 
 ---
 
@@ -61,7 +79,7 @@ description: Senior PHP Laravel code reviewer. Use when reviewing pull requests,
 
 ## 4. Database Review (SQL Optimizations)
 
-Apply rules from `.cursor/rules/*.mdc`.
+Apply rules from `.cursor/rules/**/*.mdc`.
 
 **Schema:**
 - Primary keys on every table; fitting data types (INT, DECIMAL, VARCHAR(n), TIMESTAMP); InnoDB; `lower_case_snake_case`; normalized; partition large tables by range where beneficial.
@@ -184,7 +202,7 @@ Apply when reviewing views.
 
 **Review best practices:**
 - Give concrete fixes or code snippets where relevant; not only “something is wrong”.
-- Evaluate code in project context and against `.cursor/rules/*.mdc`.
+- Evaluate code in project context and against `.cursor/rules/**/*.mdc`.
 - Findings are recommendations; final decisions remain with the human reviewer.
 
 ---

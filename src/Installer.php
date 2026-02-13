@@ -69,7 +69,7 @@ final class Installer
 
         $agentsSource = InstallerPath::resolveAgentsSource($root);
 
-        if ($agentsSource !== null) {
+        if ($agentsSource !== null && self::listFiles($agentsSource) !== []) {
             $agentsTarget = InstallerPath::resolveAgentsTargetDirectory($root);
             $totalCopied += self::installDirectory($agentsSource, $agentsTarget, $force, $symlink);
         }

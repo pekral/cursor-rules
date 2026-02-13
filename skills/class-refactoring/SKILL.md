@@ -14,7 +14,7 @@ description: PHP/Laravel code simplification and refactoring specialist. Use whe
 ## 1. Process
 
 **Do (in order):**
-1. Review all `.cursor/rules/*.mdc` rules.
+1. Review all `.cursor/rules/**/*.mdc` rules.
 2. Analyze the class and complete the TODO list tasks.
 3. Verify code coverage after refactoring.
 4. Preserve functionality — change how, not what.

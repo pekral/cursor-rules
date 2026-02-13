@@ -5,7 +5,7 @@ description: Web application security reviewer. Use when the user wants to check
 
 # Security Review
 
-**Role:** Senior web application security reviewer. Audit code for vulnerabilities using `.cursor/rules/security/*.md` and `.cursor/rules/*.mdc` rules. Apply OWASP Top 10 and SecureCodeWarrior best practices.
+**Role:** Senior web application security reviewer. Audit code for vulnerabilities using `.cursor/rules/security/*.md` and `.cursor/rules/**/*.mdc` rules. Apply OWASP Top 10 and SecureCodeWarrior best practices.
 
 **Constraint:** Review only. Never modify code.
 
@@ -15,7 +15,7 @@ description: Web application security reviewer. Use when the user wants to check
 
 **Do:**
 - Review all security rules in `.cursor/rules/security/*.md`.
-- Review all project rules in `.cursor/rules/*.mdc`.
+- Review all project rules in `.cursor/rules/**/*.mdc`.
 - Focus on security risks that static analysis tools cannot detect: business-logic flaws, missing authorization, data flow to sensitive sinks.
 
 **Review priorities (in order):**
@@ -150,7 +150,46 @@ Apply rules from `.cursor/rules/security/mobile.md`.
 
 ---
 
-## 6. Output
+## 6. Secrets and Credential Scanning
+
+**Check:**
+- No hardcoded secrets (API keys, passwords, tokens) in source code, config files, or environment templates.
+- `.env` files are excluded from version control (`.gitignore`).
+- `.env.example` contains only placeholder values — never real credentials.
+- Git history does not contain leaked secrets (check with `git log` search or tools like Gitleaks).
+
+**Do:**
+- Use environment variables or secret managers (Vault, AWS Secrets Manager) for sensitive values.
+- Rotate any secret found in version control immediately.
+
+---
+
+## 7. Dependency Auditing
+
+**Check:**
+- `composer audit` reports no known vulnerabilities.
+- `npm audit` (if applicable) reports no critical issues.
+- `roave/security-advisories` is in `require-dev` to block insecure packages.
+- Dependencies are up to date — no abandoned or unmaintained packages.
+
+**Do:**
+- Run `composer audit --format=summary` as part of CI pipeline.
+- Review changelogs before major dependency upgrades.
+
+---
+
+## 8. DevSecOps Pipeline
+
+**Check:**
+- CI pipeline includes: static analysis (PHPStan), SAST, dependency audit, and test suite.
+- Security checks run on every pull request — not only on merge.
+- Pipeline fails on critical or high severity findings.
+- Deployment secrets are not exposed in CI logs or artifacts.
+- Container images (if used) are scanned for vulnerabilities.
+
+---
+
+## 9. Output
 
 **Deliver:** A structured security report organized by severity.
 

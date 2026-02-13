@@ -23,6 +23,7 @@ globs:
 - Never call `validate()` inside controller
 - Implement proper request validation using Form Requests
 - Aim for "slim" Controllers and put larger logic pieces in Service classes
+- Ensure that every route checks permissions (e.g., auth/can middleware). Every CRUD action validates input.
 
 ## Database / Schema
 - Primary keys on every table; prefer INT over BIGINT unless > ~2B rows

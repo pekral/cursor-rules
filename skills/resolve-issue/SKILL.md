@@ -16,6 +16,7 @@ description: End-to-end workflow for GitHub issues: run auto-fix-bug from issue 
 **Do:**
 - For each given issue URL, run the workflow from `.cursor/skills/auto-fix-bug/SKILL.md`.
 - If the problem is closed or not ready for processing, do nothing and stop.
+- After resolve issues do `.cursor/skills/security-review/SKILL.md` and for sql do `.cursor/skills/database-optimizer/SKILL.md` if needed.
 
 ---
 

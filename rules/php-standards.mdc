@@ -14,6 +14,7 @@ alwaysApply: true
 - Jobs: action-based (CreateUser)
 - Events: tense-based (UserRegistered)
 - Enums: descriptive, CAPITALIZED values
+- Prefer descriptive method and variable names over comments
 
 ## Structure
 - Single responsibility per function

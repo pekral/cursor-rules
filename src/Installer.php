@@ -115,11 +115,18 @@ final class Installer
 
         self::ensureDirectoryExists($dirName);
 
-        if (file_exists($dst) && !$force) {
+        $effectiveForce = $force || self::isSecurityRule($relativePath);
+
+        if (file_exists($dst) && !$effectiveForce) {
             return false;
         }
 
         return self::installFile($src, $dst, $symlink);
+    }
+
+    private static function isSecurityRule(string $relativePath): bool
+    {
+        return str_starts_with($relativePath, 'security/') || str_starts_with($relativePath, 'security\\');
     }
 
     private static function ensureDirectoryExists(string $directory): void

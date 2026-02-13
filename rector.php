@@ -12,6 +12,7 @@ return static function (RectorConfig $rectorConfig): void {
 
     $rectorConfig->skip([
         __DIR__ . '/vendor',
+        __DIR__ . '/src/ComposerPlugin.php',
     ]);
 
     $rectorConfig->import(__DIR__ . '/vendor/pekral/rector-rules/rector.php');

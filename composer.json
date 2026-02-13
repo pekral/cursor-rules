@@ -2,7 +2,7 @@
   "name": "pekral/cursor-rules",
   "description": "PHP and Laravel Cursor rules — coding standards, testing, and conventions for Cursor editor",
   "license": "MIT",
-  "type": "library",
+  "type": "composer-plugin",
   "keywords": [
     "cursor",
     "cursor-rules",
@@ -30,7 +30,11 @@
     "source": "https://github.com/pekral/cursor-rules",
     "docs": "https://github.com/pekral/cursor-rules#readme"
   },
+  "require": {
+    "composer-plugin-api": "^2.0"
+  },
   "require-dev": {
+    "composer/composer": "^2.9",
     "ergebnis/composer-normalize": "^2.49.0",
     "laravel/pint": "^1.27.0",
     "pekral/phpcs-rules": "^0.4.6",
@@ -69,11 +73,13 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "ergebnis/composer-normalize": true,
+      "pekral/cursor-rules": true,
       "pestphp/pest-plugin": true,
       "phpstan/extension-installer": true
     }
   },
   "extra": {
+    "class": "Pekral\\CursorRules\\ComposerPlugin",
     "cursor-rules": {
       "source": "vendor/pekral/cursor-rules/.cursor/rules",
       "target": ".cursor/rules"

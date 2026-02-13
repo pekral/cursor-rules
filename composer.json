@@ -34,9 +34,9 @@
     "composer-plugin-api": "^2.0"
   },
   "require-dev": {
-    "composer/composer": "^2.9",
-    "ergebnis/composer-normalize": "^2.49.0",
-    "laravel/pint": "^1.27.0",
+    "composer/composer": "^2.9.5",
+    "ergebnis/composer-normalize": "^2.50.0",
+    "laravel/pint": "^1.27.1",
     "pekral/phpcs-rules": "^0.4.6",
     "pekral/phpstan-rules": "^0.4.5",
     "pekral/rector-rules": "^0.4.7",
@@ -44,10 +44,10 @@
     "pestphp/pest-plugin": "^4.0",
     "pestphp/pest-plugin-type-coverage": "^4.0.3",
     "phpstan/extension-installer": "^1.4.3",
-    "phpstan/phpstan": "^2.1.38",
-    "phpstan/phpstan-deprecation-rules": "^2.0.3",
+    "phpstan/phpstan": "^2.1.39",
+    "phpstan/phpstan-deprecation-rules": "^2.0.4",
     "phpstan/phpstan-mockery": "^2.0",
-    "phpstan/phpstan-phpunit": "^2.0.12",
+    "phpstan/phpstan-phpunit": "^2.0.15",
     "roave/security-advisories": "dev-latest",
     "squizlabs/php_codesniffer": "^4.0.1"
   },

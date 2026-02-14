@@ -4,7 +4,7 @@
 
 # Cursor Rules for PHP and Laravel
 
-**Cursor rules for PHP and Laravel** — a complete set of `.mdc` rule files and Cursor Agent skills for the Cursor editor. One package for PHP and Laravel cursor rules: coding standards, testing, and conventions. The installer discovers the project root (via `composer.json` lookup from the current directory), mirrors the `rules/` directory into `.cursor/rules`, the `skills/` directory into `.cursor/skills`, and the `agents/` directory into `.cursor/agents`, and copies or symlinks every file into the target project. Use cursor rules for PHP and Laravel to keep every edit aligned with enforced standards, plus optional Agent skills for bug fixing, code review, refactoring, testing, and package review.
+**Cursor rules for PHP and Laravel** — a complete set of `.mdc` rule files and Cursor Agent skills for the Cursor editor. One package for PHP and Laravel cursor rules: coding standards, testing, and conventions. The installer discovers the project root (via `composer.json` lookup from the current directory), mirrors the `rules/` directory into `.cursor/rules` and the `skills/` directory into `.cursor/skills`, and copies or symlinks every file into the target project. Use cursor rules for PHP and Laravel to keep every edit aligned with enforced standards, plus optional Agent skills for bug fixing, code review, refactoring, testing, and package review.
 
 ## Why This Package
 
@@ -21,7 +21,7 @@ composer require pekral/cursor-rules --dev
 vendor/bin/cursor-rules install
 ```
 
-The installer creates `.cursor/rules`, `.cursor/skills` and `.cursor/agents` in the project root. When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules`, `vendor/pekral/cursor-rules/skills` and `vendor/pekral/cursor-rules/agents`; in development it falls back to the local `rules/`, `skills/` and `agents/` directories.
+The installer creates `.cursor/rules` and `.cursor/skills` in the project root. When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`; in development it falls back to the local `rules/` and `skills/` directories.
 
 ### Available Commands
 
@@ -38,9 +38,8 @@ vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
 2. Resolve the rules source (local `rules/` or `vendor/pekral/cursor-rules/rules`).
 3. Create `.cursor/rules` and replicate the full directory tree; copy or symlink each file.
 4. If present, resolve the skills source (local `skills/` or `vendor/pekral/cursor-rules/skills`) and install into `.cursor/skills` the same way.
-5. If present, resolve the agents source (local `agents/` or `vendor/pekral/cursor-rules/agents`) and install into `.cursor/agents` the same way.
-6. Optionally overwrite existing files with `--force`; use `--symlink` to prefer symlinks (fallback to copy on Windows).
-7. Surface explicit errors for missing directories, removal failures, and copy/symlink failures.
+5. Optionally overwrite existing files with `--force`; use `--symlink` to prefer symlinks (fallback to copy on Windows).
+6. Surface explicit errors for missing directories, removal failures, and copy/symlink failures.
 
 ### CLI Switches
 

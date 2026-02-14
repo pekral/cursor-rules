@@ -47,7 +47,7 @@
     "phpstan/phpstan": "^2.1.39",
     "phpstan/phpstan-deprecation-rules": "^2.0.4",
     "phpstan/phpstan-mockery": "^2.0",
-    "phpstan/phpstan-phpunit": "^2.0.15",
+    "phpstan/phpstan-phpunit": "^2.0.16",
     "roave/security-advisories": "dev-latest",
     "squizlabs/php_codesniffer": "^4.0.1"
   },

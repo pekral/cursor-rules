@@ -50,25 +50,6 @@ final class InstallerPath
         // @codeCoverageIgnoreEnd
     }
 
-    public static function resolveAgentsSource(string $root): ?string
-    {
-        $developmentSource = $root . '/agents';
-
-        if (is_dir($developmentSource)) {
-            return $developmentSource;
-        }
-
-        $packageSource = self::getPackageDirectory() . '/agents';
-
-        if (is_dir($packageSource)) {
-            return $packageSource;
-        }
-
-        // @codeCoverageIgnoreStart
-        return null;
-        // @codeCoverageIgnoreEnd
-    }
-
     public static function resolveTargetDirectory(string $root): string
     {
         return $root . '/.cursor/rules';
@@ -77,11 +58,6 @@ final class InstallerPath
     public static function resolveSkillsTargetDirectory(string $root): string
     {
         return $root . '/.cursor/skills';
-    }
-
-    public static function resolveAgentsTargetDirectory(string $root): string
-    {
-        return $root . '/.cursor/agents';
     }
 
     private static function getPackageDirectory(): string

@@ -67,13 +67,6 @@ final class Installer
             $totalCopied += self::installDirectory($skillsSource, $skillsTarget, $force, $symlink);
         }
 
-        $agentsSource = InstallerPath::resolveAgentsSource($root);
-
-        if ($agentsSource !== null && self::listFiles($agentsSource) !== []) {
-            $agentsTarget = InstallerPath::resolveAgentsTargetDirectory($root);
-            $totalCopied += self::installDirectory($agentsSource, $agentsTarget, $force, $symlink);
-        }
-
         echo sprintf('Cursor rules installed (%d files).%s', $totalCopied, PHP_EOL);
 
         return 0;

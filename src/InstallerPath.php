@@ -14,32 +14,38 @@ final class InstallerPath
 
     public static function resolveRulesSource(string $root): string
     {
-        $developmentSource = $root . '/rules';
+        $packageDir = self::getPackageDirectory();
+        $packageSource = $packageDir . '/rules';
 
-        if (is_dir($developmentSource)) {
-            return $developmentSource;
+        if (self::isPackageRoot($root)) {
+            $developmentSource = $root . '/rules';
+
+            if (is_dir($developmentSource)) {
+                return $developmentSource;
+            }
         }
-
-        $packageSource = self::getPackageDirectory() . '/rules';
 
         if (is_dir($packageSource)) {
             return $packageSource;
         }
 
         // @codeCoverageIgnoreStart
-        throw InstallerFailure::missingSource($developmentSource, $packageSource);
+        throw InstallerFailure::missingSource($root . '/rules', $packageSource);
         // @codeCoverageIgnoreEnd
     }
 
     public static function resolveSkillsSource(string $root): ?string
     {
-        $developmentSource = $root . '/skills';
+        $packageDir = self::getPackageDirectory();
+        $packageSource = $packageDir . '/skills';
 
-        if (is_dir($developmentSource)) {
-            return $developmentSource;
+        if (self::isPackageRoot($root)) {
+            $developmentSource = $root . '/skills';
+
+            if (is_dir($developmentSource)) {
+                return $developmentSource;
+            }
         }
-
-        $packageSource = self::getPackageDirectory() . '/skills';
 
         if (is_dir($packageSource)) {
             return $packageSource;
@@ -63,6 +69,19 @@ final class InstallerPath
     private static function getPackageDirectory(): string
     {
         return dirname(__DIR__);
+    }
+
+    private static function isPackageRoot(string $root): bool
+    {
+        $packageDir = self::getPackageDirectory();
+        $resolvedRoot = realpath($root);
+        $resolvedPackage = realpath($packageDir);
+
+        if ($resolvedRoot === false || $resolvedPackage === false) {
+            return $root === $packageDir;
+        }
+
+        return $resolvedRoot === $resolvedPackage;
     }
 
     private static function findProjectRoot(): string

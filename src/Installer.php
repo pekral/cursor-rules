@@ -132,9 +132,7 @@ final class Installer
             throw InstallerFailure::directoryCreationFailed($directory);
         }
 
-        set_error_handler(static fn (): bool => true);
-        $created = mkdir($directory, 0777, true);
-        restore_error_handler();
+        $created = self::runWithErrorSuppression(static fn (): bool => mkdir($directory, 0777, true));
 
         if (!$created && !is_dir($directory)) {
             throw InstallerFailure::directoryCreationFailed($directory);
@@ -168,12 +166,26 @@ final class Installer
             throw InstallerFailure::removalFailed($destination);
         }
 
-        set_error_handler(static fn (): bool => true);
-        $deleted = unlink($destination);
-        restore_error_handler();
+        $deleted = self::runWithErrorSuppression(static fn (): bool => unlink($destination));
 
         if ($deleted === false) {
             throw InstallerFailure::removalFailed($destination);
+        }
+    }
+
+    /**
+     * @template T
+     * @param callable(): T $fn
+     * @return T
+     */
+    private static function runWithErrorSuppression(callable $fn): mixed
+    {
+        set_error_handler(static fn (): bool => true);
+
+        try {
+            return $fn();
+        } finally {
+            restore_error_handler();
         }
     }
 

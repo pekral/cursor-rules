@@ -588,14 +588,17 @@ test('install fails when copy fails due to unwritable destination', function ():
     }
 
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/test.mdc', 'content');
+    $packageRulesDir = __DIR__ . '/../rules';
     $targetDir = $root . '/.cursor/rules';
+    $blockedDir = $targetDir;
     installerEnsureDirectory($targetDir);
-    chmod($targetDir, 0444);
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
+        $blockedDir = installerMirrorDirectories($packageRulesDir, $targetDir) ?? $blockedDir;
+
+        chmod($blockedDir, 0555);
         chdir($root);
         ob_start();
         set_error_handler(static fn (): bool => true);
@@ -605,7 +608,7 @@ test('install fails when copy fails due to unwritable destination', function ():
 
         expect($exitCode)->toBe(1);
     } finally {
-        chmod($targetDir, 0755);
+        chmod($blockedDir, 0755);
 
         if ($originalCwd !== '') {
             chdir($originalCwd);

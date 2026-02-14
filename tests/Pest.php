@@ -87,3 +87,27 @@ function installerCountFiles(string $dir): int
 
     return $count;
 }
+
+function installerMirrorDirectories(string $sourceDir, string $targetDir): ?string
+{
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($sourceDir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST,
+    );
+    $blockedDir = null;
+
+    foreach ($iterator as $fileInfo) {
+        if (!$fileInfo instanceof SplFileInfo || !$fileInfo->isDir()) {
+            continue;
+        }
+
+        $relativePath = ltrim(str_replace($sourceDir, '', $fileInfo->getPathname()), '/');
+        installerEnsureDirectory($targetDir . '/' . $relativePath);
+
+        if ($blockedDir === null && $relativePath !== '') {
+            $blockedDir = $targetDir . '/' . $relativePath;
+        }
+    }
+
+    return $blockedDir;
+}

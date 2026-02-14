@@ -14,33 +14,45 @@ final class InstallerPath
 
     public static function resolveRulesSource(string $root): string
     {
-        $packageDir = self::getPackageDirectory();
-        $packageSource = $packageDir . '/rules';
-
-        if (self::isPackageRoot($root)) {
-            $developmentSource = $root . '/rules';
-
-            if (is_dir($developmentSource)) {
-                return $developmentSource;
-            }
-        }
-
-        if (is_dir($packageSource)) {
-            return $packageSource;
-        }
+        $source = self::resolveSource($root, 'rules');
 
         // @codeCoverageIgnoreStart
-        throw InstallerFailure::missingSource($root . '/rules', $packageSource);
+        if ($source === null) {
+            $packageDir = self::getPackageDirectory();
+
+            throw InstallerFailure::missingSource($root . '/rules', $packageDir . '/rules');
+        }
+
         // @codeCoverageIgnoreEnd
+
+        return $source;
     }
 
     public static function resolveSkillsSource(string $root): ?string
     {
+        return self::resolveSource($root, 'skills');
+    }
+
+    public static function resolveTargetDirectory(string $root): string
+    {
+        return $root . '/.cursor/rules';
+    }
+
+    public static function resolveSkillsTargetDirectory(string $root): string
+    {
+        return $root . '/.cursor/skills';
+    }
+
+    /**
+     * @return string|null path to source directory, or null if not found (skills only)
+     */
+    private static function resolveSource(string $root, string $subdir): ?string
+    {
         $packageDir = self::getPackageDirectory();
-        $packageSource = $packageDir . '/skills';
+        $packageSource = $packageDir . '/' . $subdir;
 
         if (self::isPackageRoot($root)) {
-            $developmentSource = $root . '/skills';
+            $developmentSource = $root . '/' . $subdir;
 
             if (is_dir($developmentSource)) {
                 return $developmentSource;
@@ -54,16 +66,6 @@ final class InstallerPath
         // @codeCoverageIgnoreStart
         return null;
         // @codeCoverageIgnoreEnd
-    }
-
-    public static function resolveTargetDirectory(string $root): string
-    {
-        return $root . '/.cursor/rules';
-    }
-
-    public static function resolveSkillsTargetDirectory(string $root): string
-    {
-        return $root . '/.cursor/skills';
     }
 
     private static function getPackageDirectory(): string

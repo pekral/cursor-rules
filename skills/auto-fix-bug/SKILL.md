@@ -69,8 +69,10 @@ If something fails, fix it before committing.
 
 **Rules:**
 - Follow Conventional Commits.
+- When creating a commit or PR, never add a signature, but leave only the person's signature!
 - For bugfixes default to `fix:` or `fix(scope):`.
 - Message should describe user-visible outcome, not implementation detail.
+- The commit message should be as short as possible but should accurately describe the current changes!
 - Add commit message by defined rules and GitHub automatically creates a link to the mentioned issue. For example, if your issue number is 123 , you can mention it in your PR like this: #123
 - List all the sources you found that helped you fix the error, and always write a simple report on how and why the error was fixed in the current way.
 
@@ -109,6 +111,7 @@ Do not force-push unless the user explicitly asks.
 **Do:**
 - Ensure the PR is open and points to the correct base branch.
 - Ensure the branch contains commit(s) and CI can run.
+- When creating a commit or PR, never add a signature, but leave only the person's signature!
 
 ---
 

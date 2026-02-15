@@ -52,13 +52,7 @@ This skill describes the workflow: **find a Jira issue (e.g. in Code Review stat
 
 ### 3. Load changes vs master
 
-- In the project repo:
-  ```bash
-  git fetch origin <HEAD_REF_NAME>
-  git diff origin/master...origin/<HEAD_REF_NAME> --name-only
-  git diff origin/master...origin/<HEAD_REF_NAME> -- <file paths>
-  ```
-  You now have the list of changed files and the diff to review.
+- In the project repository, always check out the PR branch, check the changes there, and perform a code review according to the defined rules.
 
 ### 4. Load Jira context for the review
 

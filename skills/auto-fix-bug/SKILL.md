@@ -72,6 +72,7 @@ If something fails, fix it before committing.
 - For bugfixes default to `fix:` or `fix(scope):`.
 - Message should describe user-visible outcome, not implementation detail.
 - Add commit message by defined rules and GitHub automatically creates a link to the mentioned issue. For example, if your issue number is 123 , you can mention it in your PR like this: #123
+- List all the sources you found that helped you fix the error, and always write a simple report on how and why the error was fixed in the current way.
 
 **Examples:**
 - `fix(auth): prevent token refresh race condition`

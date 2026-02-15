@@ -62,6 +62,7 @@ Prefer no back-and-forth. If missing, infer from repo conventions; otherwise ask
 **Do:** Run the fastest relevant subset first, then the full suite when reasonable.
 - Tests: single file or targeted, then full.
 - Lints and static analysis if available.
+- Do code review defined in .cursor/skills/code-review/SKILL.md, if there are not critical errors you can continue.
 
 If something fails, fix it before committing.
 

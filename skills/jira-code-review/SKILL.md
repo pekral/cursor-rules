@@ -5,7 +5,9 @@ description: Runs a code review for a PR linked to Jira. Activate when the user 
 
 # Code review for a Jira-linked PR
 
-This skill describes the workflow: **find a Jira issue (e.g. in Code Review status) → get the GitHub PR link → load branch and changes → run a code review** according to `.cursor/skills/code-review/SKILL.md`. Do not modify any code; output only the review.
+This skill describes the workflow: **find a Jira issue (e.g. in Code Review status) → get the GitHub PR link → load branch and changes → run a code review** according to `.cursor/skills/code-review/SKILL.md` and `.cursor/skills/security-review/SKILL.md`. Do not modify any code; output only the review.
+
+Before the code review, switch to the git branch with the assignment and always do the code review on this branch!
 
 ---
 
@@ -63,7 +65,8 @@ This skill describes the workflow: **find a Jira issue (e.g. in Code Review stat
 
 ### 5. Run the code review
 
-- Follow the **full** `.cursor/skills/code-review/SKILL.md` (General, Git Analysis, Large Data, Database/SQL, Architecture, Stability, Security, Tests).
+- Follow the **full** `.cursor/skills/code-review/SKILL.md` and `.cursor/skills/security-review/SKILL.md` (General, Git Analysis, Large Data, Database/SQL, Architecture, Stability, Security, Tests).
+- Analyze the assignment in JIRA + all comments from people who commented on this issue. Once you understand the assignment, verify that the changes relate precisely to the assignment. Be strict!
 - Review **only the diff and changed files** (not the whole repo). Look for:
     - mismatches with the Jira spec (including edge cases and comments),
     - SQL issues (non-SARGable conditions, functions on indexed columns, types),

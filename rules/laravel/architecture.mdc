@@ -1,8 +1,6 @@
 ---
 description: Laravel architecture and conventions
-globs:
-  - app/**/*.php
-  - resources/views/**/*.blade.php
+alwaysApply: true
 ---
 
 ## Layer Responsibilities

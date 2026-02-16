@@ -6,9 +6,7 @@ Resolve this issue (the generated code must be according to @.cursor/skills/clas
 
 Ensure 100% code coverage for the current changes.
 
-If there are any automatic fixes in the project that are called through another layer, such as Phing or composer scripts, run them to ensure automatic bug fixes.
-
-If there are any CI (or local) checks, run them (never run all tests for the entire code base, only for the current changes). Fix all errors, rerun the fix tools, and continue fixing until all errors are fixed. Never attempt to format PHP code outside of these fix tools yourself.
+If there are any automatic fixers in the project that are called through another layer, such as Phing or composer scripts, run them and ensure automatic error correction. If there are any CI (or local) checkers, run them (never run all tests for the entire codebase, only for the current changes). Fix any errors, run the fixers again, and keep fixing until all errors are fixed. Never try to format PHP code outside of these fixers yourself.
 
 If everything is OK, create a pull request according to the pr.mdc rules.
 

@@ -60,19 +60,6 @@ alwaysApply: true
 - Check 100% coverage before refactoring
 - Run tests only for changed files
 
-## SQL / Performance
-- No N+1: use `with()`, `load()`, or JOINs
-- SARGable WHERE clauses (no functions on indexed columns)
-- Seek pagination over OFFSET
-- Never `SELECT *`; fetch only needed columns
-- Use EXPLAIN for new or changed queries: avoid type ALL, high rows, Using filesort, Using temporary
-- Prepared statements with bound parameters; never concatenate user input into SQL
-- Push filtering, sorting, aggregation into SQL; avoid doing it in application code
-- Refactor or split very complex joins when EXPLAIN shows poor plans; when profiling use slow query log and prioritize frequent or longest queries
-- **Indexes:** index columns used in WHERE, JOIN, ORDER BY, GROUP BY; composite index order must match query filter/sort; avoid low-cardinality-only indexes; use covering indexes when a query can be satisfied from the index; drop unused or redundant indexes when changing schema; aim for 3–5 well-chosen indexes per table; prefer parallel index creation on large tables
-- **Transactions:** keep transactions short; avoid holding locks during app logic; batch writes in single transactions where appropriate; reduce lock contention via batching and suitable isolation levels; use `SHOW ENGINE INNODB STATUS` to diagnose lock waits when investigating issues
-- Index JOIN columns on both tables; composite index order matters (left-to-right)
-
 ## Docs
 - Don't comment on what the code does - make the code self-documenting
 - Document APIs, complex algorithms, and non-obvious side effects

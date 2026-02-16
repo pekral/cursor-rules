@@ -29,7 +29,7 @@ description: Senior PHP Laravel code reviewer. Use when reviewing pull requests,
 4. Performance
 5. Provide categorized, actionable feedback
 
-**Compliance:** All changes must comply with `.cursor/rules/**/*.mdc`.
+**Compliance:** All changes must comply with `.cursor/rules/**/*.mdc`. During code review, also check .cursor/skills/security-review/SKILL.md and 
 
 ### MUST DO
 - Understand context before reviewing

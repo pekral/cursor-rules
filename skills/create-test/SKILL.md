@@ -1,5 +1,5 @@
 ---
-name: test-create
+name: create-test
 description: PHP Laravel test creation specialist. Use when the user wants to create, write, or generate tests for PHP/Laravel code. Follows project conventions and ensures 100% coverage.
 ---
 

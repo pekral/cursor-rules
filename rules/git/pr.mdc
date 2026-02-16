@@ -1,0 +1,12 @@
+---
+description: Create pull request in Github
+alwaysApply: true
+---
+
+If you have a link to a GitHub issue, always prepare the commit message so that it links to the issue,
+which will then be able to close the issue after the PR is merged.
+
+Commits and PRs must follow the conventions defined in conventional commits (conventions.mdc). Never sign your name in commits or PRs! For example: Made with [Cursor](https://cursor.com)
+
+If you create a new PR, I want you to add links to all the sources you used for analyzing the assignment to the description. Ideally, as a new comment on the GitHub issue.
+

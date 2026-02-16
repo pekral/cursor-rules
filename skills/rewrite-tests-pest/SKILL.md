@@ -65,6 +65,7 @@ Specialist for converting PHPUnit test classes to PEST syntax. Apply testing rul
    - Convert data providers to `->with()` or `dataset()`.  
    - Move `setUp` logic into `beforeEach()` or into each test; avoid class state.  
    - Keep test data in English; keep names descriptive.
+   - Analyze TestCase::class and use prepared methods avoid of create mocks (mocks are allowed only for services communicate with HTTP clients).
 
 4. **Coverage**  
    - Run tests for changed files.  

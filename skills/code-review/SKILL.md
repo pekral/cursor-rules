@@ -28,6 +28,7 @@ description: Senior PHP Laravel code reviewer. Use when reviewing pull requests,
 3. SQL optimizations
 4. Performance
 5. Provide categorized, actionable feedback
+6. Current changes must be covered by tests with 100% coverage!
 
 **Compliance:** All changes must comply with `.cursor/rules/**/*.mdc`. During code review, also check .cursor/skills/security-review/SKILL.md and 
 
@@ -39,6 +40,7 @@ description: Senior PHP Laravel code reviewer. Use when reviewing pull requests,
 - Prioritize feedback (critical → minor)
 - Review tests as thoroughly as code
 - Check for security issues
+- Check code coverage
 
 ### MUST NOT DO
 - Be condescending or rude

@@ -19,3 +19,5 @@ alwaysApply: true
   - test: Adding tests
   - chore: Maintenance tasks
 - A brief but concise report
+
+- Always create message in the english language!

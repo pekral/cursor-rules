@@ -4,7 +4,7 @@
 
 # Cursor Rules for PHP and Laravel
 
-**Cursor rules for PHP and Laravel** — a complete set of `.mdc` rule files and Cursor Agent skills for the Cursor editor. One package for PHP and Laravel cursor rules: coding standards, testing, and conventions. The installer discovers the project root (via `composer.json` lookup from the current directory), mirrors the `rules/` directory into `.cursor/rules` and the `skills/` directory into `.cursor/skills`, and copies or symlinks every file into the target project. Use cursor rules for PHP and Laravel to keep every edit aligned with enforced standards, plus optional Agent skills for bug fixing, code review, refactoring, testing, and package review.
+**Cursor rules for PHP and Laravel** — a complete set of `.mdc` rule files and Cursor Agent skills for the Cursor editor. One package for PHP and Laravel cursor rules: coding standards, testing, and conventions. The installer discovers the project root (via `composer.json` lookup from the current directory), mirrors the `rules/` directory into `.cursor/rules` and the `skills/` directory into `.cursor/skills`, and copies or symlinks every file into the target project. Use cursor rules for PHP and Laravel to keep every edit aligned with enforced standards, plus comprehensive Agent skills for issue resolution, bug fixing, code review, security analysis, refactoring, testing, and package review.
 
 ## Why This Package
 
@@ -12,6 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
+- **10 comprehensive Agent skills** for automated workflows (v0.5)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -53,27 +54,51 @@ vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
 
 Cursor rules for PHP and Laravel included in this package:
 
-| File                | Description                                        | Scope   |
-|---------------------|----------------------------------------------------|---------|
-| `php-core.mdc`      | PHP project tech stack and core context            | Always  |
-| `php-filament.mdc`  | Filament v4 rules (resources, enums, tests)        | Filament|
-| `php-git.mdc`       | Git and commit conventions for PHP projects        | Always  |
-| `php-laravel.mdc`   | Laravel and PHP architecture and conventions       | Laravel |
-| `php-standards.mdc` | Unified PHP coding standards for Laravel projects  | Always  |
+| File                      | Description                                        | Scope   |
+|---------------------------|----------------------------------------------------|---------|
+| `php/core.mdc`            | PHP project tech stack and core context            | Always  |
+| `php/standards.mdc`       | Unified PHP coding standards for Laravel projects  | Always  |
+| `laravel/architecture.mdc` | Laravel and PHP architecture and conventions       | Laravel |
+| `laravel/filament.mdc`    | Filament v4 rules (resources, enums, tests)        | Filament|
+| `git/conventions.mdc`     | Git and commit conventions for PHP projects        | Always  |
+| `git/pr.mdc`              | Pull request conventions and best practices         | Always  |
+| `sql/optimalize.mdc`     | SQL query optimization and database best practices  | Always  |
+| `security/backend.md`     | Backend security rules and OWASP Top 10 checks     | Always  |
+| `security/frontend.md`    | Frontend security rules (XSS, CSRF, CSP)           | Frontend|
+| `security/mobile.md`      | Mobile-specific security rules and WebView checks  | Mobile  |
 
-All `.mdc` files are ready for automatic injection by Cursor so every PHP and Laravel edit stays aligned with the enforced standards.
+All `.mdc` and `.md` files are ready for automatic injection by Cursor so every PHP and Laravel edit stays aligned with the enforced standards.
 
-## Skills Overview
+## 🎯 Skills Overview — **NEW in v0.5**
 
-Agent skills are installed into `.cursor/skills/` and can be invoked when relevant:
+> **Major Update:** The skills system has been significantly expanded in version 0.5, providing comprehensive automation for common development workflows including issue resolution, code review, security analysis, and testing.
 
-| Skill             | Description                                                                 |
-|-------------------|-----------------------------------------------------------------------------|
-| `auto-fix-bug`    | Fix a reported bug end-to-end: reproduce, add test, fix, open PR.           |
-| `class-refactoring` | Simplify and refactor PHP/Laravel code, improve clarity and consistency.  |
-| `code-review`     | Senior PHP/Laravel code review (pull requests, changes vs base); read-only.|
-| `package-review`  | Review and validate public packages (GitHub, composer.json, docs links).   |
-| `test-create`     | Create or extend PHP/Laravel tests, follow project conventions, 100% coverage. |
+Agent skills are installed into `.cursor/skills/` and can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
+
+### Issue Resolution & Bug Fixing
+
+| Skill                    | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| `resolve-jira-issue`     | End-to-end JIRA issue resolution: analyze, fix bugs, refactor code, perform code and security reviews, ensure 100% test coverage, run CI checks, and create pull requests. Links PRs to JIRA and updates issue status. |
+| `resolve-bugsnag-issue`  | Resolve Bugsnag issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results. |
+| `analyze-problem`        | Analyze problems from issue trackers. Downloads and reviews attachments, provides technical analysis and solutions, and creates human-readable explanations for both technical and non-technical audiences. |
+
+### Code Review & Quality
+
+| Skill                    | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| `code-review-github`     | Performs comprehensive code review for GitHub pull requests. Analyzes code changes, identifies critical and moderate issues, runs tests, and posts review comments. Reviews code quality, security, and adherence to project standards. |
+| `code-review-jira`       | Performs code review for JIRA issues. Analyzes pull requests, identifies critical and moderate issues, runs tests, and posts review comments to GitHub PRs. Reviews code quality, security, and adherence to project standards. |
+| `security-review`        | Performs comprehensive security review following OWASP Top 10 and security best practices. Checks for injection vulnerabilities, authentication flaws, sensitive data exposure, misconfigurations, and provides structured security reports with severity levels. |
+| `class-refactoring`      | Refactors PHP classes following Laravel best practices and SOLID principles. Ensures code quality, maintains functionality, improves testability, and achieves 100% code coverage. Focuses on single responsibility, DRY principle, and clean code structure. |
+
+### Testing & Package Review
+
+| Skill                    | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| `create-test`            | Creates tests following project conventions and patterns. Ensures deterministic tests, 100% code coverage for changes, uses data providers where appropriate, and mocks only external services or exception scenarios. |
+| `rewrite-tests-pest`     | Rewrites existing tests to PEST syntax following project conventions. Ensures DRY principles, uses data providers, maintains 100% coverage, and verifies test functionality. |
+| `package-review`         | Reviews composer.json packages by validating structure, checking required fields, verifying links, and ensuring proper configuration of autoloading, dependencies, and metadata. |
 
 ## Development & Testing
 

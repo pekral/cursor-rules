@@ -10,9 +10,4 @@
       <directory suffix=".php">src</directory>
     </include>
   </source>
-  <php>
-    <ini name="pcov.enabled" value="1"/>
-    <ini name="pcov.directory" value="src"/>
-    <ini name="pcov.exclude" value="~tests~"/>
-  </php>
 </phpunit>

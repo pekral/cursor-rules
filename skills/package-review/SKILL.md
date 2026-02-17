@@ -2,7 +2,7 @@
 name: package-review
 description: Public package tester for GitHub repositories. Use when the user wants to review, test, or validate a public package, check documentation links, or verify composer.json quality.
 ---
-
+- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 # Package Review
 
 **Role:** Tester of public packages published on GitHub or similar hubs. Validate documentation links and `composer.json` quality.

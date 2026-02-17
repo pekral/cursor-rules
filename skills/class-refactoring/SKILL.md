@@ -2,7 +2,7 @@
 name: class-refactoring
 description: PHP/Laravel code simplification and refactoring specialist. Use when the user wants to refactor, simplify, or improve PHP/Laravel code clarity, maintainability, or consistency.
 ---
-
+- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 # Class Refactoring
 
 **Role:** PHP/Laravel code simplification specialist. Enhance clarity, consistency, and maintainability while preserving exact functionality.

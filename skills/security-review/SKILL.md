@@ -4,7 +4,7 @@ description: Web application security reviewer. Use when the user wants to check
 ---
 
 # Security Review
-
+- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 **Role:** Senior web application security reviewer. Audit code for vulnerabilities using `.cursor/rules/security/*.md` and `.cursor/rules/**/*.mdc` rules. Apply OWASP Top 10 and SecureCodeWarrior best practices.
 
 **Constraint:** Review only. Never modify code.

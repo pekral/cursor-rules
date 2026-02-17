@@ -4,7 +4,7 @@ description: Rewrites existing PHPUnit-style tests to PEST syntax following proj
 ---
 
 # Rewrite Tests to PEST Syntax
-
+- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 Specialist for converting PHPUnit test classes to PEST syntax. Apply testing rules from `.cursor/rules/php/standards.mdc` (Testing section) and `.cursor/rules/php-testing.mdc`. Never modify production code. After rewrite, coverage must be 100% for changed code; add missing tests if needed.
 
 **Role:** Rewrite tests only. Apply all project test rules.

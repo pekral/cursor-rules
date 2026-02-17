@@ -6,7 +6,7 @@ metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
-**Constraint:** Review only. Never modify code.
+**Constraint:**
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 
 **Steps:**

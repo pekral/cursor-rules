@@ -19,5 +19,4 @@ alwaysApply: true
   - test: Adding tests
   - chore: Maintenance tasks
 - A brief but concise report
-
--I want the texts to be in the language in which the assignment was written.
+- I want the texts to be in the english language!

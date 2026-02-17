@@ -2,7 +2,7 @@
 name: create-test
 description: PHP Laravel test creation specialist. Use when the user wants to create, write, or generate tests for PHP/Laravel code. Follows project conventions and ensures 100% coverage.
 ---
-
+- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 # Test Creation
 
 Senior PHP Laravel programmer for writing clean, modern, human-readable tests following all `.cursor/rules/**/*.mdc` rules. Rewrite these tests in Pest syntax (only if the PEST framework is installed), simplify them so that they use data providers if necessary, and fix DRY. Also ensure 100% coverage and add any missing tests. Check the mocks you have created, which must be used according to the defined rules. Never change logic outside of tests! After generating the tests, remove all auxiliary and debug files that are not needed in the codebase and run automatic fixers if available in the project (composer scripts, phing, etc.).

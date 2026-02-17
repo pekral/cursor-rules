@@ -10,5 +10,6 @@ Commits and PRs must follow the conventions defined in conventional commits (con
 
 If you create a new PR, I want you to add links to all the sources you used for analyzing the assignment to the description. Ideally, as a new comment on the GitHub issue.
 
-!!Always answer in the language in which the assignment is written!!
+!!I want the texts to be in the language in which the assignment was written!!
 
+Never push changes to main branch! NEVER!

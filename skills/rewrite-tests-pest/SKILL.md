@@ -1,4 +1,7 @@
+**Constraint:** Review only. Never modify code.
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+
+**Steps:**
 - For tests that do not use PEST syntax, I want you to rewrite them in PEST syntax.
 - Follow the rules for writing tests.
 - Correct DRY, use data providers, and try to write tests as simply as possible.

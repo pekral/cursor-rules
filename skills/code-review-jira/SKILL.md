@@ -1,3 +1,9 @@
+**Constraint:** Review only. Never modify code.
+- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- I want the texts to be in the language in which the assignment was written.
+- NEVER CHANGE THE CODE! Generate the output only.
+
+**Steps:**
 - I want you to create @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md for the issue (find it by code or URL) on JIRA (use acli console tool).
 - Find the Git branch and switch to it (if needed pull the latest changes).
 - I want you to fix the bug from JIRA (you have either the ID or a link to JIRA). Use the acli tool or MCP server to get all the information you need about the bug so you can fix it. If you have other resources available that you could use to understand the problem, load them and analyze them.

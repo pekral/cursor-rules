@@ -1,3 +1,9 @@
+**Constraint:** Review only. Never modify code.
+- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- I want the texts to be in the language in which the assignment was written.
+- NEVER CHANGE THE CODE! Generate the output only.
+
+**Steps:**
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want you to create @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md for the issue (find it by code or URL) on GitHub.
 - Find the Git branch and switch to it.

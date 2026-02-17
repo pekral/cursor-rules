@@ -24,6 +24,8 @@ vendor/bin/cursor-rules install
 
 The installer creates `.cursor/rules` and `.cursor/skills` in the project root. When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`; in development it falls back to the local `rules/` and `skills/` directories.
 
+**Important:** By default, the installer only copies missing files and keeps existing content untouched. Use the `--force` flag to overwrite existing files: `vendor/bin/cursor-rules install --force`. This is particularly useful when you want to update rules to their latest versions or when you've made local changes that should be replaced.
+
 ### Available Commands
 
 ```bash
@@ -50,6 +52,41 @@ vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
 | `--symlink`  | Create symlinks when the OS permits; automatically falls back to copy.  |
 | *(default)*  | Only copy missing files and keep existing content untouched.            |
 
+---
+
+# 🎯 Skills Overview — **NEW in v0.5**
+
+> **Major Update:** The skills system has been significantly expanded in version 0.5, providing comprehensive automation for common development workflows including issue resolution, code review, security analysis, and testing.
+
+Agent skills are installed into `.cursor/skills/` and can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
+
+## Issue Resolution & Bug Fixing
+
+| Skill                    | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| `resolve-jira-issue`     | End-to-end JIRA issue resolution: analyze, fix bugs, refactor code, perform code and security reviews, ensure 100% test coverage, run CI checks, and create pull requests. Links PRs to JIRA and updates issue status. |
+| `resolve-bugsnag-issue`  | Resolve Bugsnag issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results. |
+| `analyze-problem`        | Analyze problems from issue trackers. Downloads and reviews attachments, provides technical analysis and solutions, and creates human-readable explanations for both technical and non-technical audiences. |
+
+## Code Review & Quality
+
+| Skill                    | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| `code-review-github`     | Performs comprehensive code review for GitHub pull requests. Analyzes code changes, identifies critical and moderate issues, runs tests, and posts review comments. Reviews code quality, security, and adherence to project standards. |
+| `code-review-jira`       | Performs code review for JIRA issues. Analyzes pull requests, identifies critical and moderate issues, runs tests, and posts review comments to GitHub PRs. Reviews code quality, security, and adherence to project standards. |
+| `security-review`        | Performs comprehensive security review following OWASP Top 10 and security best practices. Checks for injection vulnerabilities, authentication flaws, sensitive data exposure, misconfigurations, and provides structured security reports with severity levels. |
+| `class-refactoring`      | Refactors PHP classes following Laravel best practices and SOLID principles. Ensures code quality, maintains functionality, improves testability, and achieves 100% code coverage. Focuses on single responsibility, DRY principle, and clean code structure. |
+
+## Testing & Package Review
+
+| Skill                    | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| `create-test`            | Creates tests following project conventions and patterns. Ensures deterministic tests, 100% code coverage for changes, uses data providers where appropriate, and mocks only external services or exception scenarios. |
+| `rewrite-tests-pest`     | Rewrites existing tests to PEST syntax following project conventions. Ensures DRY principles, uses data providers, maintains 100% coverage, and verifies test functionality. |
+| `package-review`         | Reviews composer.json packages by validating structure, checking required fields, verifying links, and ensuring proper configuration of autoloading, dependencies, and metadata. |
+
+---
+
 ## Rules Overview
 
 Cursor rules for PHP and Laravel included in this package:
@@ -68,37 +105,6 @@ Cursor rules for PHP and Laravel included in this package:
 | `security/mobile.md`      | Mobile-specific security rules and WebView checks  | Mobile  |
 
 All `.mdc` and `.md` files are ready for automatic injection by Cursor so every PHP and Laravel edit stays aligned with the enforced standards.
-
-## 🎯 Skills Overview — **NEW in v0.5**
-
-> **Major Update:** The skills system has been significantly expanded in version 0.5, providing comprehensive automation for common development workflows including issue resolution, code review, security analysis, and testing.
-
-Agent skills are installed into `.cursor/skills/` and can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
-
-### Issue Resolution & Bug Fixing
-
-| Skill                    | Description                                                                 |
-|--------------------------|-----------------------------------------------------------------------------|
-| `resolve-jira-issue`     | End-to-end JIRA issue resolution: analyze, fix bugs, refactor code, perform code and security reviews, ensure 100% test coverage, run CI checks, and create pull requests. Links PRs to JIRA and updates issue status. |
-| `resolve-bugsnag-issue`  | Resolve Bugsnag issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results. |
-| `analyze-problem`        | Analyze problems from issue trackers. Downloads and reviews attachments, provides technical analysis and solutions, and creates human-readable explanations for both technical and non-technical audiences. |
-
-### Code Review & Quality
-
-| Skill                    | Description                                                                 |
-|--------------------------|-----------------------------------------------------------------------------|
-| `code-review-github`     | Performs comprehensive code review for GitHub pull requests. Analyzes code changes, identifies critical and moderate issues, runs tests, and posts review comments. Reviews code quality, security, and adherence to project standards. |
-| `code-review-jira`       | Performs code review for JIRA issues. Analyzes pull requests, identifies critical and moderate issues, runs tests, and posts review comments to GitHub PRs. Reviews code quality, security, and adherence to project standards. |
-| `security-review`        | Performs comprehensive security review following OWASP Top 10 and security best practices. Checks for injection vulnerabilities, authentication flaws, sensitive data exposure, misconfigurations, and provides structured security reports with severity levels. |
-| `class-refactoring`      | Refactors PHP classes following Laravel best practices and SOLID principles. Ensures code quality, maintains functionality, improves testability, and achieves 100% code coverage. Focuses on single responsibility, DRY principle, and clean code structure. |
-
-### Testing & Package Review
-
-| Skill                    | Description                                                                 |
-|--------------------------|-----------------------------------------------------------------------------|
-| `create-test`            | Creates tests following project conventions and patterns. Ensures deterministic tests, 100% code coverage for changes, uses data providers where appropriate, and mocks only external services or exception scenarios. |
-| `rewrite-tests-pest`     | Rewrites existing tests to PEST syntax following project conventions. Ensures DRY principles, uses data providers, maintains 100% coverage, and verifies test functionality. |
-| `package-review`         | Reviews composer.json packages by validating structure, checking required fields, verifying links, and ensuring proper configuration of autoloading, dependencies, and metadata. |
 
 ## Development & Testing
 

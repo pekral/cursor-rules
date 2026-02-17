@@ -1,3 +1,11 @@
+---
+name: resolve-jira-issue
+description: "Resolves JIRA issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Links PRs to JIRA issues and updates issue status."
+license: MIT
+metadata:
+  author: "Petr Král (pekral.cz)"
+---
+
 **Constraint:** Review only. Never modify code.
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.

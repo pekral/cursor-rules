@@ -1,3 +1,11 @@
+---
+name: security-review
+description: "Performs comprehensive security review following OWASP Top 10 and security best practices. Checks for injection vulnerabilities, authentication flaws, sensitive data exposure, misconfigurations, and provides structured security reports with severity levels."
+license: MIT
+metadata:
+  author: "Petr Král (pekral.cz)"
+---
+
 **Constraint:** Review only. Never modify code.
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.

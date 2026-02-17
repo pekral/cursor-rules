@@ -1,3 +1,11 @@
+---
+name: code-review-jira
+description: "Performs code review for JIRA issues. Analyzes pull requests, identifies critical and moderate issues, runs tests, and posts review comments to GitHub PRs. Reviews code quality, security, and adherence to project standards."
+license: MIT
+metadata:
+  author: "Petr Král (pekral.cz)"
+---
+
 **Constraint:** Review only. Never modify code.
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.

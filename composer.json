@@ -40,7 +40,7 @@
     "pekral/phpcs-rules": "^0.4.7",
     "pekral/phpstan-rules": "^0.4.5",
     "pekral/rector-rules": "^0.4.8",
-    "pestphp/pest": "^4.3.2",
+    "pestphp/pest": "^4.4.1",
     "pestphp/pest-plugin": "^4.0",
     "pestphp/pest-plugin-type-coverage": "^4.0.3",
     "phpstan/extension-installer": "^1.4.3",

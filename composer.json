@@ -92,7 +92,8 @@
     ],
     "build": [
       "@fix",
-      "@check"
+      "@check",
+      "bin/cursor-rules install --force"
     ],
     "check": [
       "echo \"🚀 Running full quality check...\"",

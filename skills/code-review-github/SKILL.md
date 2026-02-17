@@ -1,3 +1,11 @@
+---
+name: code-review-github
+description: "Performs code review for GitHub pull requests. Analyzes code changes, identifies critical and moderate issues, runs tests, and posts review comments. Reviews code quality, security, and adherence to project standards."
+license: MIT
+metadata:
+  author: "Petr Král (pekral.cz)"
+---
+
 **Constraint:** Review only. Never modify code.
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.

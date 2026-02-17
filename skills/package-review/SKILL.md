@@ -1,3 +1,11 @@
+---
+name: package-review
+description: "Reviews composer.json packages by validating structure, checking required fields, verifying links, and ensuring proper configuration of autoloading, dependencies, and metadata."
+license: MIT
+metadata:
+  author: "Petr Král (pekral.cz)"
+---
+
 **Constraint:** Review only. Never modify code.
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 

@@ -12,5 +12,5 @@ metadata:
 
 **Steps:**
 - Log into JIRA, load all issues, and list only those that are to be resolved by AI (they are tagged).
-  Look for tasks labeled "Resolve_by_AI." If you are supposed to search in other places as well, find those other places too.
+  Look for tasks labeled "Resolve_by_AI." If you are supposed to search in other places as well, find those other places too. Only not resolved issues should be listed!
 - Randomly select one and try to resolve it. Use the skill @.cursor/skills/resolve-jira-issue/SKILL.md.

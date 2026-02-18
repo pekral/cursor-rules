@@ -10,6 +10,8 @@ Commits and PRs must follow the conventions defined in conventional commits (con
 
 If you create a new PR, I want you to add links to all the sources you used for analyzing the assignment to the description. Ideally, as a new comment on the GitHub issue.
 
+Send me your suggestions on how to test changes in the application (UI, API, etc.) in a PR. Verify that tests have been written for these suggestions; if not, write "no." Modify existing ones or add missing ones.
+
 !!I want the texts to be in the language in which the assignment was written!!
 
 Never push changes to main branch! NEVER!

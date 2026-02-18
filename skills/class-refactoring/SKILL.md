@@ -12,6 +12,7 @@ metadata:
 **Steps:**
 - Analyze the class and complete the TODO list tasks.
 - Verify code coverage after refactoring.
+- For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.
 - Preserve functionality — change how, not what.
 - Focus on recently modified code unless instructed otherwise.
 - No increase in public API surface without strong justification

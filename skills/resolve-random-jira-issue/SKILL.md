@@ -1,0 +1,16 @@
+---
+name: resolve-random-jira-issue
+description: "Resolves random JIRA issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Links PRs to JIRA issues and updates issue status."
+license: MIT
+metadata:
+  author: "Petr Král (pekral.cz)"
+---
+
+**Constraint:**
+- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- I want the texts to be in the language in which the assignment was written.
+
+**Steps:**
+- Log into JIRA, load all issues, and list only those that are to be resolved by AI (they are tagged).
+  Look for tasks labeled "Resolve_by_AI." If you are supposed to search in other places as well, find those other places too.
+- Randomly select one and try to resolve it. Use the skill @.cursor/skills/resolve-jira-issue/SKILL.md.

@@ -20,6 +20,7 @@ metadata:
 - Stateless PHP classes.
 - Collections over `foreach` where appropriate.
 - PHPDoc for PHPStan analysis.
+- Complex logic commented
 - English comments only.
 - Spatie DTOs instead of arrays (except Job constructors).
 - Laravel helpers over native PHP when appropriate.

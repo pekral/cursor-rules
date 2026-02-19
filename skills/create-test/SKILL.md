@@ -18,4 +18,5 @@ metadata:
 - Mock only external API communication services or if you need simulate exceptions. Do not Constructor mocking!
 - Use data providers when they simplify writing and readability.
 - Make sure of 100% coverage required for changes.
+- After creating or modifying tests, check that they are not flaky.
 - Remove generated coverage after work is done.

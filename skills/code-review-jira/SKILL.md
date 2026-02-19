@@ -10,6 +10,7 @@ metadata:
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
 - NEVER CHANGE THE CODE! Generate the output only.
+- All messages formatted as markdown for output.
 
 **Steps:**
 - I want you to create @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md for the issue (find it by code or URL) on JIRA (use acli console tool).

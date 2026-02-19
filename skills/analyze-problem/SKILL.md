@@ -10,6 +10,7 @@ metadata:
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
 - NEVER CHANGE THE CODE! Generate the output only.
+- All messages formatted as markdown for output.
 
 **Steps:**
 - Analyze the assignment and go through all the attached resources (download their contents via CLI or MCP). There are specific console CLI tools available for issue trackers, so use them. Never use a web browser!

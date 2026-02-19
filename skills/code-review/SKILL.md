@@ -8,6 +8,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - I want the texts to be in the language in which the assignment was written.
 - Identify changes vs main branch (list commits).
 - Understand context before reviewing
+- All messages formatted as markdown for output.
 - NEVER CHANGE THE CODE! Generate the output only.
 
 **Steps:**

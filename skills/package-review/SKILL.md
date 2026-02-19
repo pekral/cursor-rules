@@ -8,6 +8,7 @@ metadata:
 
 **Constraint:**
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- All messages formatted as markdown for output.
 
 **Steps:**
 - Find all links in the documentation.

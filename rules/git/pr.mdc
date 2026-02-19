@@ -14,4 +14,6 @@ Send me your suggestions on how to test changes in the application (UI, API, etc
 
 !!I want the texts to be in the language in which the assignment was written!!
 
+Create PR messages formatted as markdown.
+
 Never push changes to main branch! NEVER!

@@ -21,6 +21,9 @@ metadata:
 - Collections over `foreach` where appropriate.
 - PHPDoc for PHPStan analysis.
 - Complex logic commented
+- No magic numbers
+- No deep nesting
+- Prefer small, focused functions.
 - English comments only.
 - Spatie DTOs instead of arrays (except Job constructors).
 - Laravel helpers over native PHP when appropriate.

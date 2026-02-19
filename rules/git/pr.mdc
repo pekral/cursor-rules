@@ -12,7 +12,7 @@ If you create a new PR, I want you to add links to all the sources you used for 
 
 Send me your suggestions on how to test changes in the application (UI, API, etc.) in a PR. Verify that tests have been written for these suggestions; if not, write "no." Modify existing ones or add missing ones.
 
-!!I want the texts to be in the language in which the assignment was written!!
+!!I want the messages to be in the language in which the assignment was written!! Subject of the PR should be in English!
 
 Create PR messages formatted as markdown.
 

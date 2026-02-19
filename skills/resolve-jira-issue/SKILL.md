@@ -19,7 +19,7 @@ metadata:
 - If everything is OK, create a pull request according to the pr.mdc rules.
 - If there is no link to the issue tracker, add a link to the issue tracker entry to the CR summary and, if possible, link it directly according to the issue tracker recommendations. Be sure to include an HTTP link.
 - I want you to post a comment on the core revision on GitHub, but I want you to post only critical or medium-severity issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue as ready for review.
-- After completing all tasks for GitHub, link the created PR in the JIRA issue, post it as a comment in the JIRA issue, and change the status of the JIRA issue to ready for review.
+- After completing all tasks for GitHub, link the created PR in the JIRA issue, change the status of the JIRA issue to ready for review.
 - Run the tests and let me know if the current changes meet the requirements.  If so, add a new comment to the issue with a recommendation on what to test (briefly). If the requirements are not met or you have found critical errors, just list them for me.
 - I want you to post a comment into the pull request on GitHub regarding the core review, but I want you to only post critical or moderately serious issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue with the label ready for review.
 - If you are not on the main git branch in the project, switch to it.

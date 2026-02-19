@@ -6,6 +6,7 @@ alwaysApply: true
 ## Naming
 - Variables, functions, and classes should reveal their purpose
 - Names should explain why something exists and how it's used
+- Clear naming
 - Classes: PascalCase, always `final`
 - Methods/Variables: camelCase, reveal purpose
 - Routes: kebab-case URLs, dot notation names

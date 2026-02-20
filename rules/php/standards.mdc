@@ -55,6 +55,7 @@ alwaysApply: true
 - In tests, avoid reflection and use mocks instead (even partial ones, if they are effective and easy to read).
 - For new test flows, follow the concept of existing flows, unless they are new tests. Write new tests according to the defined rules.
 - Create deterministic evenrytime!
+- If the test requires test data, always create it via the factory or insert it directly into the specific database. Never mock it or circumvent this case in any other way!
 
 ## Bug-Fix Workflow
 - Write tests BEFORE fixing bugs

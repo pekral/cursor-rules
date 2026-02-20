@@ -1,0 +1,6 @@
+---
+description: Create pull request in Github
+alwaysApply: true
+---
+
+- If you are working outside the main branch, always analyze the commit in the current branch before solving tasks so that you understand the logic and changes for the current branch.

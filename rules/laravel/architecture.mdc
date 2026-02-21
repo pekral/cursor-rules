@@ -78,6 +78,7 @@ alwaysApply: true
 
 ## Livewire
 - In Livewire projects, don't use Livewire Volt. Only Livewire class components.
+- Move all business logic in the Laravel component (not the template) to the action pattern if it is used in the project, and if so, use the service pattern.
 
 ## Queue System and Jobs
 - Queue long-running or external-dependent tasks.

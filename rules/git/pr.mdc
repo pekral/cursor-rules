@@ -16,4 +16,6 @@ Send me your suggestions on how to test changes in the application (UI, API, etc
 
 Create PR messages formatted as markdown.
 
-Never push changes to main branch! NEVER!
+If you are asked to merge a PR, merge this PR into the main branch and close the PR, delete the branch, switch to the main branch locally, and pull all changes. If the PR is already deployed, just switch to the main branch and pull the current changes for the main branch.
+
+Never push direct changes to main branch! NEVER!

@@ -101,3 +101,6 @@ alwaysApply: true
 
 ## Globals
 - Never use globals for example: `global $mockDnsRecords;`!
+
+## Async jobs
+- If you are doing code review for asynchronous jobs in the application, first check how the timeout, tries, etc. are set in the config. These values may not always be set directly in the Jobs.

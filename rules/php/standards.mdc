@@ -98,3 +98,6 @@ alwaysApply: true
 
 ## Coding style
 - Never reformat existing code!
+
+## Globals
+- Never use globals for example: `global $mockDnsRecords;`!

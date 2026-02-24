@@ -51,6 +51,7 @@ alwaysApply: true
 - Descriptive method names, simple human-readable tests
 - Data providers via argument, not PHPDoc
 - Mock only external services (HTTP clients) or for testing catch exceptions
+- Only mock methods that communicate with third-party services or if you need to simulate an exception. Otherwise, avoid mocking!
 - Final test classes, local variables only
 - In tests, avoid reflection and use mocks instead (even partial ones, if they are effective and easy to read).
 - For new test flows, follow the concept of existing flows, unless they are new tests. Write new tests according to the defined rules.

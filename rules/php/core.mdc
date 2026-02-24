@@ -12,3 +12,4 @@ alwaysApply: true
 - Verify before presenting, no speculation
 - Don't ask the user to verify implementations that are visible in the provided context
 - Don't suggest updates or changes to files when there are no actual modifications needed
+- Correct any grammatical errors you find.

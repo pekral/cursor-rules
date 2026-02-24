@@ -17,6 +17,6 @@ metadata:
 - Remove unnecessary mocks.
 - Mock only external API communication services or if you need simulate exceptions. Do not Constructor mocking!
 - Use data providers when they simplify writing and readability.
-- Make sure of 100% coverage required for changes.
+- Make sure of 100% coverage required for changes. Add tests so that 100% coverage is achieved. Prioritize modifying existing test cases; if tests do not exist, add them according to the valid rules for writing tests.
 - After creating or modifying tests, check that they are not flaky.
 - Remove generated coverage after work is done.

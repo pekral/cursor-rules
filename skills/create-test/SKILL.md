@@ -14,6 +14,7 @@ metadata:
 - Never modify production code!
 - Create deterministic everytime!
 - Use existing test patterns, helpers, and conventions.
+- Never generate the covers() method!
 - Remove unnecessary mocks.
 - Mock only external API communication services or if you need simulate exceptions. Do not Constructor mocking!
 - Use data providers when they simplify writing and readability.

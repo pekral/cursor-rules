@@ -53,6 +53,7 @@ alwaysApply: true
 - Always call console commands using Artisan::call(MyCommand::class)
 - Mocking services is only allowed for classes that use external service calls or if it is necessary to simulate an exception throw.
 - Factory: multiple records with the same attributes — When creating multiple instances of a model with the same attributes in your tests, use Model::factory()->count(n)->create([...]) instead of repeatedly calling Model::factory()->create([...]). Do not pass attributes that are not verified by the test (e.g., name); a single call is clearer and consistent with Laravel style.
+- If the PEST test requires calling a method that is in an abstract class, use the notation `test()->methodName()`.
 
 ## Helpers
 - Use Laravel helpers instead of `use` section classes. Examples: use `auth()->id()` instead of `Auth::id()` and adding `Auth` in the `use` section. Other examples: use `redirect()->route()` instead of `Redirect::route()`, or `str()->slug()` instead of `Str::slug()`.

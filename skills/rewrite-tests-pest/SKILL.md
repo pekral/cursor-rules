@@ -16,6 +16,7 @@ metadata:
 - Arrange-act-assert pattern, error cases first
 - **Never use the `describe()` function** in tests. Write tests at the top level using `it()` / `test()` only; do not wrap them in `describe()` blocks.
 - If there are any "shared" helper functions such as `bindSparkpostMailerNever($this->app);`, I want all these functions to be defined in the Pest.php file.
+- If the PEST test requires calling a method that is in an abstract class, use the notation `test()->methodName()`.
 - Correct DRY, use data providers, and try to write tests as simply as possible.
 - After creating or modifying tests, check that they are not flaky.
 - Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them. 

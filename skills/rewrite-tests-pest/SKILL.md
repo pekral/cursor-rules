@@ -14,5 +14,6 @@ metadata:
 - Follow the rules for writing tests.
 - Correct DRY, use data providers, and try to write tests as simply as possible.
 - After creating or modifying tests, check that they are not flaky.
+- Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them. 
 - Tests must have 100% coverage.
 - After writing the tests, verify that they are functional and follow the rules.

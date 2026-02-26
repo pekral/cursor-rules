@@ -16,6 +16,7 @@ metadata:
 - Use existing test patterns, helpers, and conventions.
 - Arrange-act-assert pattern, error cases first
 - **Never use the `describe()` function** in tests. Write tests at the top level using `it()` / `test()` only; do not wrap them in `describe()` blocks.
+- If the PEST test requires calling a method that is in an abstract class, use the notation `test()->methodName()`.
 - Never generate the covers() method!
 - Remove unnecessary mocks.
 - Mock only external API communication services or if you need simulate exceptions. Do not Constructor mocking!

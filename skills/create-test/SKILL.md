@@ -15,6 +15,7 @@ metadata:
 - Create deterministic everytime!
 - Use existing test patterns, helpers, and conventions.
 - Arrange-act-assert pattern, error cases first
+- Before writing tests, always analyze the abstractions that will be used in the tests and always use helper methods if it simplifies the code.
 - **Never use the `describe()` function** in tests. Write tests at the top level using `it()` / `test()` only; do not wrap them in `describe()` blocks.
 - If the PEST test requires calling a method that is in an abstract class, use the notation `test()->methodName()`.
 - Never generate the covers() method!

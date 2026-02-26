@@ -49,7 +49,7 @@ alwaysApply: true
 
 ## Testing
 - Laravel: prefer Http::fake() over Mockery
-- Always call jobs in tests using ::dispatch(), e.g., MyJob::dispatch()
+- **Queue/Bus/Event assertions** — Do not pass a callback (closure) as the second argument to `Queue::assertPushed()`, `Queue::assertNotPushed()`, `Bus::assertDispatched()`, `Bus::assertNotDispatched()`, or `Event::assertDispatched()`. Assert only that the job/event class was pushed or dispatched (and optionally the count). Use `Queue::assertPushed(JobClass::class)` or `Queue::assertPushed(JobClass::class, $count)`; never use a callback to inspect job payload or filter matches.
 - Always call console commands using Artisan::call(MyCommand::class)
 - Mocking services is only allowed for classes that use external service calls or if it is necessary to simulate an exception throw.
 - Factory: multiple records with the same attributes — When creating multiple instances of a model with the same attributes in your tests, use Model::factory()->count(n)->create([...]) instead of repeatedly calling Model::factory()->create([...]). Do not pass attributes that are not verified by the test (e.g., name); a single call is clearer and consistent with Laravel style.

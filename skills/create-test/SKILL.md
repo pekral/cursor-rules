@@ -14,6 +14,7 @@ metadata:
 - Never modify production code!
 - Create deterministic everytime!
 - Use existing test patterns, helpers, and conventions.
+- **Never use the `describe()` function** in tests. Write tests at the top level using `it()` / `test()` only; do not wrap them in `describe()` blocks.
 - Never generate the covers() method!
 - Remove unnecessary mocks.
 - Mock only external API communication services or if you need simulate exceptions. Do not Constructor mocking!

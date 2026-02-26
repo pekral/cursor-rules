@@ -11,6 +11,7 @@ metadata:
 
 **Steps:**
 - For tests that do not use PEST syntax, I want you to rewrite them in PEST syntax.
+- Never generate the covers() method!
 - Follow the rules for writing tests.
 - If there are any "shared" helper functions such as `bindSparkpostMailerNever($this->app);`, I want all these functions to be defined in the Pest.php file.
 - Correct DRY, use data providers, and try to write tests as simply as possible.

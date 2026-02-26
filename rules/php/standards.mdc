@@ -68,6 +68,7 @@ if ($agencyAttributes !== null) {
     }
 ```
 Simplify the tests by dividing them into multiple test cases.
+- Never generate the covers() method!
 
 ## Bug-Fix Workflow
 - Write tests BEFORE fixing bugs

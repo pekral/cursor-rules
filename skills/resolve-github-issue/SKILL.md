@@ -24,3 +24,6 @@ metadata:
 - Write missing tests for current changes and ensure 100% coverage, fix dry and try to simplify the code base so that it is easy to read for humans, but also as simple as possible. These changes will be in a separate commit.
 - After creating the PR, perform a code review @./cursor/skills/code-review-github/SKILL.md for the current task.
 - If you are not on the main git branch in the project, switch to it.
+
+**After completing the tasks**
+- Once you have finished your work and pushed the changes to pr, perform a code review according to your skill level @.cursor/skills/code-review-github.md

@@ -1,0 +1,9 @@
+---
+description: Livewire component rules and conventions
+globs:
+  - app/Livewire/**/*.php
+---
+
+## Best practices
+- Follow existing component patterns and conventions; do not mix frameworks unless the repo already does.
+- Keep UI strings in the repo's expected language.

@@ -1,6 +1,7 @@
 ---
 description: Project tech stack and core context
 alwaysApply: true
+globs: ["*"]
 ---
 
 ## Tech Stack

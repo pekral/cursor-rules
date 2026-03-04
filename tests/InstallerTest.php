@@ -13,10 +13,17 @@ test('run shows help when executed without arguments', function (): void {
 
     expect($exitCode)->toBe(0);
     expect($output)->toContain('Usage:');
+    expect($output)->toContain('--editor=EDITOR');
 });
 
 test('run returns error code for unknown command', function (): void {
     $exitCode = Installer::run(['cursor-rules', 'unknown']);
+
+    expect($exitCode)->toBe(1);
+});
+
+test('run returns error code for invalid editor', function (): void {
+    $exitCode = Installer::run(['cursor-rules', 'install', '--editor=invalid']);
 
     expect($exitCode)->toBe(1);
 });
@@ -232,7 +239,7 @@ test('install copies nested directories', function (): void {
     }
 });
 
-test('install copies skills from development directory', function (): void {
+test('install with default editor copies rules and skills only to .cursor', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/rules/example.mdc', 'rules');
     installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
@@ -245,10 +252,10 @@ test('install copies skills from development directory', function (): void {
         Installer::run(['cursor-rules', 'install']);
         ob_end_clean();
 
-        $installedSkill = $root . '/.cursor/skills/test-skill/SKILL.md';
-
-        expect(is_file($installedSkill))->toBeTrue();
-        expect(file_get_contents($installedSkill))->toBe('skill content');
+        expect(is_file($root . '/.cursor/rules/example.mdc'))->toBeTrue();
+        expect(is_file($root . '/.cursor/skills/test-skill/SKILL.md'))->toBeTrue();
+        expect(is_dir($root . '/.claude/skills'))->toBeFalse();
+        expect(is_dir($root . '/.codex/skills'))->toBeFalse();
     } finally {
         if ($originalCwd !== '') {
             chdir($originalCwd);
@@ -258,34 +265,90 @@ test('install copies skills from development directory', function (): void {
     }
 });
 
-test('install copies all files from rules and skills directories', function (): void {
-    $packageDir = dirname(__DIR__);
-    $rulesSource = $packageDir . '/rules';
-    $skillsSource = $packageDir . '/skills';
-    $expectedRulesCount = installerCountFiles($rulesSource);
-    $expectedSkillsCount = installerCountFiles($skillsSource);
-
+test('install with editor=all copies skills to all target directories', function (): void {
     $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/example.mdc', 'rules');
+    installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
+    $homeBefore = getenv('HOME') ?: getenv('USERPROFILE');
+    putenv('HOME=' . $root);
+    if (getenv('USERPROFILE') !== false) {
+        putenv('USERPROFILE=' . $root);
+    }
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
         chdir($root);
         ob_start();
-        $exitCode = Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=all']);
+        ob_end_clean();
+
+        foreach (InstallerPath::resolveSkillsTargetDirectories($root, InstallerPath::EDITOR_ALL) as $targetDir) {
+            $installedSkill = $targetDir . '/test-skill/SKILL.md';
+            expect(is_file($installedSkill))->toBeTrue('Skills should be installed to ' . $targetDir);
+            expect(file_get_contents($installedSkill))->toBe('skill content');
+        }
+    } finally {
+        if ($homeBefore !== false && $homeBefore !== '') {
+            putenv('HOME=' . $homeBefore);
+            putenv('USERPROFILE=' . $homeBefore);
+        } else {
+            putenv('HOME');
+            putenv('USERPROFILE');
+        }
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install with editor=all copies all files to all rule and skill directories', function (): void {
+    $packageDir = dirname(__DIR__);
+    $rulesSource = $packageDir . '/rules';
+    $skillsSource = $packageDir . '/skills';
+    $expectedRulesCount = installerCountFiles($rulesSource);
+    $expectedSkillsCount = installerCountFiles($skillsSource);
+    $root = installerCreateProjectRoot();
+    $homeBefore = getenv('HOME') ?: getenv('USERPROFILE');
+    putenv('HOME=' . $root);
+    if (getenv('USERPROFILE') !== false) {
+        putenv('USERPROFILE=' . $root);
+    }
+    $rulesTargets = InstallerPath::resolveRulesTargetDirectories($root, InstallerPath::EDITOR_ALL);
+    $skillTargets = InstallerPath::resolveSkillsTargetDirectories($root, InstallerPath::EDITOR_ALL);
+    $expectedTotalFiles = $expectedRulesCount * count($rulesTargets) + $expectedSkillsCount * count($skillTargets);
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        $exitCode = Installer::run(['cursor-rules', 'install', '--editor=all']);
         $output = (string) ob_get_clean();
 
         expect($exitCode)->toBe(0);
 
-        $rulesTarget = $root . '/.cursor/rules';
-        $skillsTarget = $root . '/.cursor/skills';
-        $actualRulesCount = installerCountFiles($rulesTarget);
-        $actualSkillsCount = installerCountFiles($skillsTarget);
+        foreach ($rulesTargets as $rulesTarget) {
+            $actualRulesCount = installerCountFiles($rulesTarget);
+            expect($actualRulesCount)->toBe($expectedRulesCount, 'Rules: all source files in ' . $rulesTarget);
+        }
 
-        expect($actualRulesCount)->toBe($expectedRulesCount, 'Rules: all source files should be copied');
-        expect($actualSkillsCount)->toBe($expectedSkillsCount, 'Skills: all source files should be copied');
-        expect($output)->toContain(sprintf('(%d files)', $expectedRulesCount + $expectedSkillsCount));
+        foreach ($skillTargets as $skillsTarget) {
+            $actualSkillsCount = installerCountFiles($skillsTarget);
+            expect($actualSkillsCount)->toBe($expectedSkillsCount, 'Skills: all source files in ' . $skillsTarget);
+        }
+
+        expect($output)->toContain(sprintf('(%d files)', $expectedTotalFiles));
     } finally {
+        if ($homeBefore !== false && $homeBefore !== '') {
+            putenv('HOME=' . $homeBefore);
+            putenv('USERPROFILE=' . $homeBefore);
+        } else {
+            putenv('HOME');
+            putenv('USERPROFILE');
+        }
         if ($originalCwd !== '') {
             chdir($originalCwd);
         }
@@ -486,6 +549,121 @@ test('resolveSkillsTargetDirectory returns correct path', function (): void {
     $result = InstallerPath::resolveSkillsTargetDirectory('/test/root');
 
     expect($result)->toBe('/test/root/.cursor/skills');
+});
+
+test('resolveAllSkillsTargetDirectories returns project and home skill directories', function (): void {
+    $root = '/test/root';
+    $targets = InstallerPath::resolveAllSkillsTargetDirectories($root);
+
+    expect($targets)->toContain('/test/root/.cursor/skills');
+    expect($targets)->toContain('/test/root/.claude/skills');
+    expect($targets)->toContain('/test/root/.codex/skills');
+    expect(count($targets))->toBeGreaterThanOrEqual(3);
+
+    $home = getenv('HOME') ?: getenv('USERPROFILE');
+    if ($home !== false && $home !== '') {
+        expect($targets)->toContain($home . '/.claude/skills');
+        expect($targets)->toContain($home . '/.codex/skills');
+        expect(count($targets))->toBe(5);
+    }
+});
+
+test('resolveRulesTargetDirectories returns single path for cursor editor', function (): void {
+    $targets = InstallerPath::resolveRulesTargetDirectories('/project', InstallerPath::EDITOR_CURSOR);
+
+    expect($targets)->toBe(['/project/.cursor/rules']);
+});
+
+test('resolveRulesTargetDirectories returns all paths for all editor', function (): void {
+    $targets = InstallerPath::resolveRulesTargetDirectories('/project', InstallerPath::EDITOR_ALL);
+
+    expect($targets)->toBe([
+        '/project/.cursor/rules',
+        '/project/.claude/rules',
+        '/project/.codex/rules',
+    ]);
+});
+
+test('install with editor=claude copies to .claude only', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/example.mdc', 'rules');
+    installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=claude']);
+        ob_end_clean();
+
+        expect(is_file($root . '/.claude/rules/example.mdc'))->toBeTrue();
+        expect(is_file($root . '/.claude/skills/test-skill/SKILL.md'))->toBeTrue();
+        expect(is_dir($root . '/.cursor/rules'))->toBeFalse();
+        expect(is_dir($root . '/.codex/rules'))->toBeFalse();
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install with editor=codex copies to .codex only', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/example.mdc', 'rules');
+    installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=codex']);
+        ob_end_clean();
+
+        expect(is_file($root . '/.codex/rules/example.mdc'))->toBeTrue();
+        expect(is_file($root . '/.codex/skills/test-skill/SKILL.md'))->toBeTrue();
+        expect(is_dir($root . '/.cursor/rules'))->toBeFalse();
+        expect(is_dir($root . '/.claude/rules'))->toBeFalse();
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install from package root installs rules and skills into .cursor by default', function (): void {
+    $packageRoot = dirname(__DIR__);
+    if (!file_exists($packageRoot . '/composer.json') || !is_dir($packageRoot . '/rules')) {
+        expect(true)->toBeTrue();
+
+        return;
+    }
+
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($packageRoot);
+        ob_start();
+        $exitCode = Installer::run(['cursor-rules', 'install']);
+        $output = (string) ob_get_clean();
+
+        expect($exitCode)->toBe(0);
+        expect($output)->toContain('installed');
+        expect(is_dir($packageRoot . '/.cursor/rules'))->toBeTrue();
+        expect(is_dir($packageRoot . '/.cursor/skills'))->toBeTrue();
+        expect(installerCountFiles($packageRoot . '/.cursor/rules'))->toBeGreaterThan(0);
+        expect(installerCountFiles($packageRoot . '/.cursor/skills'))->toBeGreaterThan(0);
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+    }
 });
 
 test('isFilesystemRoot returns true for root paths', function (): void {

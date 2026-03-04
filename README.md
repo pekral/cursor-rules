@@ -22,35 +22,46 @@ composer require pekral/cursor-rules --dev
 vendor/bin/cursor-rules install
 ```
 
-The installer creates `.cursor/rules` and `.cursor/skills` in the project root. When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`; in development it falls back to the local `rules/` and `skills/` directories.
+By default the installer targets **Cursor** only (`.cursor/rules`, `.cursor/skills`). Use `--editor=` to choose the agent:
+
+- **cursor** (default): `.cursor/rules`, `.cursor/skills`
+- **claude**: `.claude/rules`, `.claude/skills`, and when `HOME`/`USERPROFILE` is set also `~/.claude/skills`
+- **codex**: `.codex/rules`, `.codex/skills`, and when `HOME`/`USERPROFILE` is set also `~/.codex/skills`
+- **all**: all of the above (Cursor, Claude, Codex in project + home)
+
+When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`; in development it falls back to the local `rules/` and `skills/` directories.
 
 **Important:** By default, the installer only copies missing files and keeps existing content untouched. Use the `--force` flag to overwrite existing files: `vendor/bin/cursor-rules install --force`. This is particularly useful when you want to update rules to their latest versions or when you've made local changes that should be replaced.
 
 ### Available Commands
 
 ```bash
-vendor/bin/cursor-rules help               # print help
-vendor/bin/cursor-rules install            # copy/symlink everything to the target
-vendor/bin/cursor-rules install --force    # overwrite existing files
-vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
+vendor/bin/cursor-rules help                        # print help
+vendor/bin/cursor-rules install                     # install for Cursor (default)
+vendor/bin/cursor-rules install --editor=claude     # install for Claude
+vendor/bin/cursor-rules install --editor=codex      # install for Codex
+vendor/bin/cursor-rules install --editor=all        # install for Cursor, Claude, and Codex
+vendor/bin/cursor-rules install --force             # overwrite existing files
+vendor/bin/cursor-rules install --symlink          # prefer symlinks (fallback to copy)
 ```
 
 ### Installer Flow
 
 1. Determine the project root by walking up from the current directory until `composer.json` is found.
 2. Resolve the rules source (local `rules/` or `vendor/pekral/cursor-rules/rules`).
-3. Create `.cursor/rules` and replicate the full directory tree; copy or symlink each file.
-4. If present, resolve the skills source (local `skills/` or `vendor/pekral/cursor-rules/skills`) and install into `.cursor/skills` the same way.
+3. Install rules into the target directory(ies) for the chosen editor (see `--editor`).
+4. If present, resolve the skills source and install into the corresponding skill directory(ies).
 5. Optionally overwrite existing files with `--force`; use `--symlink` to prefer symlinks (fallback to copy on Windows).
 6. Surface explicit errors for missing directories, removal failures, and copy/symlink failures.
 
 ### CLI Switches
 
-| Option       | Description                                                             |
-|--------------|-------------------------------------------------------------------------|
-| `--force`    | Overwrite files that already exist in the target directory.             |
-| `--symlink`  | Create symlinks when the OS permits; automatically falls back to copy.  |
-| *(default)*  | Only copy missing files and keep existing content untouched.            |
+| Option            | Description                                                                 |
+|-------------------|-----------------------------------------------------------------------------|
+| `--editor=EDITOR` | Target editor: `cursor` (default), `claude`, `codex`, `all`.               |
+| `--force`         | Overwrite files that already exist in the target directory.                |
+| `--symlink`       | Create symlinks when the OS permits; automatically falls back to copy.     |
+| *(default)*       | Only copy missing files and keep existing content untouched.              |
 
 ---
 
@@ -58,7 +69,7 @@ vendor/bin/cursor-rules install --symlink  # prefer symlinks (fallback to copy)
 
 > **Major Update:** The skills system has been significantly expanded in version 0.5, providing comprehensive automation for common development workflows including issue resolution, code review, security analysis, and testing.
 
-Agent skills are installed into `.cursor/skills/` and can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
+Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
 ## Issue Resolution & Bug Fixing
 
@@ -93,13 +104,13 @@ Cursor rules for PHP and Laravel included in this package:
 
 | File                      | Description                                        | Scope   |
 |---------------------------|----------------------------------------------------|---------|
-| `php/core.mdc`            | PHP project tech stack and core context            | Always  |
-| `php/standards.mdc`       | Unified PHP coding standards for Laravel projects  | Always  |
-| `laravel/architecture.mdc` | Laravel and PHP architecture and conventions       | Laravel |
-| `laravel/filament.mdc`    | Filament v4 rules (resources, enums, tests)        | Filament|
-| `git/conventions.mdc`     | Git and commit conventions for PHP projects        | Always  |
-| `git/pr.mdc`              | Pull request conventions and best practices         | Always  |
-| `sql/optimalize.mdc`     | SQL query optimization and database best practices  | Always  |
+| `php/generated-core.mdc`            | PHP project tech stack and core context            | Always  |
+| `php/generated-standards.mdc`       | Unified PHP coding standards for Laravel projects  | Always  |
+| `laravel/generated-architecture.mdc` | Laravel and PHP architecture and conventions       | Laravel |
+| `laravel/generated-filament.mdc`    | Filament v4 rules (resources, enums, tests)        | Filament|
+| `git/generated-conventions.mdc`     | Git and commit conventions for PHP projects        | Always  |
+| `git/generated-pr.mdc`              | Pull request conventions and best practices         | Always  |
+| `sql/generated-optimalize.mdc`     | SQL query optimization and database best practices  | Always  |
 | `security/backend.md`     | Backend security rules and OWASP Top 10 checks     | Always  |
 | `security/frontend.md`    | Frontend security rules (XSS, CSRF, CSP)           | Frontend|
 | `security/mobile.md`      | Mobile-specific security rules and WebView checks  | Mobile  |

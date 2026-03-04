@@ -1,6 +1,7 @@
 ---
 description: Unified coding standards for PHP/Laravel projects
 alwaysApply: true
+globs: ["*"]
 ---
 
 ## Naming
@@ -27,6 +28,13 @@ alwaysApply: true
 - Always prefer simple classes or functions unless state is truly necessary.
 - When designing architecture, use composition whenever possible.
 - Always prefer simple classes or functions unless state is truly necessary.
+- Use readonly for immutable data
+- Use attributes for metadata
+- Implement SOLID principles
+- Use generators for large datasets
+- Use match expression
+- Active PHP-FIG standards
+- Use Named Arguments!
 
 ## Constants Over Magic Numbers
 - Replace hard-coded values with named constants
@@ -115,6 +123,14 @@ Simplify the tests by dividing them into multiple test cases.
 
 ## Globals
 - Never use globals for example: `global $mockDnsRecords;`!
+- Avoid global variables
 
 ## Async jobs
 - If you are doing code review for asynchronous jobs in the application, first check how the timeout, tries, etc. are set in the config. These values may not always be set directly in the Jobs.
+
+## Exceptions
+- Create specific exceptions
+- Proper exception inheritance
+- Catch specific exceptions
+- Use finally for cleanup
+- Don't suppress errors with @

@@ -1,6 +1,7 @@
 ---
-description: Create pull request in Github
+description: Git workflow — analyze branch/commits when working outside main
 alwaysApply: true
+globs: ["*"]
 ---
 
 - If you are working outside the main branch, always analyze the commit in the current branch before solving tasks so that you understand the logic and changes for the current branch.

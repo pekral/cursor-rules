@@ -32,7 +32,14 @@ final class Installer
                 return 1;
             }
 
-            return self::install($force, $symlink);
+            $editor = self::parseEditor($argv);
+            if ($editor === null) {
+                fwrite(STDERR, 'Invalid --editor value. Allowed: cursor, claude, codex, all.' . PHP_EOL);
+
+                return 1;
+            }
+
+            return self::install($force, $symlink, $editor);
         } catch (InstallerFailure $exception) {
             fwrite(STDERR, $exception->getMessage() . PHP_EOL);
 
@@ -40,31 +47,51 @@ final class Installer
         }
     }
 
+    /**
+     * @param array<int, string> $argv
+     */
+    private static function parseEditor(array $argv): ?string
+    {
+        foreach ($argv as $arg) {
+            if (str_starts_with($arg, '--editor=')) {
+                $value = trim(substr($arg, strlen('--editor=')));
+                $value = strtolower($value);
+
+                return in_array($value, InstallerPath::getAllowedEditors(), true) ? $value : null;
+            }
+        }
+
+        return InstallerPath::EDITOR_CURSOR;
+    }
+
     private static function showHelp(): int
     {
         echo "Usage:\n";
-        echo "  vendor/bin/cursor-rules install [--force] [--symlink]\n\n";
+        echo "  vendor/bin/cursor-rules install [--force] [--symlink] [--editor=EDITOR]\n\n";
         echo "Options:\n";
-        echo "  --force    Overwrite existing files.\n";
-        echo "  --symlink  Create symlinks instead of copying (falls back to copy on Windows).\n";
+        echo "  --force         Overwrite existing files.\n";
+        echo "  --symlink       Create symlinks instead of copying (falls back to copy on Windows).\n";
+        echo "  --editor=EDITOR Target editor: cursor (default), claude, codex, all.\n";
 
         return 0;
     }
 
-    private static function install(bool $force, bool $symlink): int
+    private static function install(bool $force, bool $symlink, string $editor): int
     {
         $root = InstallerPath::resolveProjectRoot();
         $totalCopied = 0;
 
         $rulesSource = InstallerPath::resolveRulesSource($root);
-        $rulesTarget = InstallerPath::resolveTargetDirectory($root);
-        $totalCopied += self::installDirectory($rulesSource, $rulesTarget, $force, $symlink);
+        foreach (InstallerPath::resolveRulesTargetDirectories($root, $editor) as $rulesTarget) {
+            $totalCopied += self::installDirectory($rulesSource, $rulesTarget, $force, $symlink);
+        }
 
         $skillsSource = InstallerPath::resolveSkillsSource($root);
 
         if ($skillsSource !== null) {
-            $skillsTarget = InstallerPath::resolveSkillsTargetDirectory($root);
-            $totalCopied += self::installDirectory($skillsSource, $skillsTarget, $force, $symlink);
+            foreach (InstallerPath::resolveSkillsTargetDirectories($root, $editor) as $skillsTarget) {
+                $totalCopied += self::installDirectory($skillsSource, $skillsTarget, $force, $symlink);
+            }
         }
 
         echo sprintf('Cursor rules installed (%d files).%s', $totalCopied, PHP_EOL);

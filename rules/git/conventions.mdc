@@ -1,6 +1,7 @@
 ---
 description: Git and commit conventions
 alwaysApply: true
+globs: ["*"]
 ---
 
 ## Version Control

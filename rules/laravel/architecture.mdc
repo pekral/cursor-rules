@@ -1,6 +1,7 @@
 ---
 description: Laravel architecture and conventions
 alwaysApply: true
+globs: ["*"]
 ---
 
 ## Layer Responsibilities
@@ -22,6 +23,8 @@ alwaysApply: true
 - Implement proper request validation using Form Requests
 - Aim for "slim" Controllers and put larger logic pieces in Service classes
 - Ensure that every route checks permissions (e.g., auth/can middleware). Every CRUD action validates input.
+- Call actions or service
+- NO Database Queries in Controller!
 
 ## Database / Schema
 - Primary keys on every table; prefer INT over BIGINT unless > ~2B rows
@@ -35,6 +38,12 @@ alwaysApply: true
 - Define relationships, scopes, casts, and accessors in the model.
 - Use enums with `HasLabel`, `HasColor`, `HasIcon` where applicable.
 - No business logic in models.
+- Use Eloquent models and relationships first; avoid raw queries and DB:: unless truly necessary.
+- Use Query Scopes
+- Use withCount for Counts
+- Use Casts for Type Safety
+- Chunking for Large Datasets
+- Don't Query in Loops
 
 ## Migrations
 - Only `up()` methods, no `down()`
@@ -74,6 +83,8 @@ alwaysApply: true
 - Use Laravel's built-in pagination features
 - Implement proper error logging and monitoring
 - Use Laravel's routing system for defining application endpoints
+- Use the Laravel 11/12 structure: configure middleware, exceptions, and routes in bootstrap/app.php; service providers in bootstrap/providers.php; console configuration in routes/console.php.
+- Prefer named routes and route() for URL generation.
 
 ## Dependencies
 - Composer for dependency management

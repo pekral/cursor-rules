@@ -31,6 +31,8 @@ Thumbs.db
 
 
 .cursor/*
+.codex/*
+.claude/*
 composer.lock
 
 

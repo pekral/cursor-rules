@@ -11,6 +11,7 @@ metadata:
 - I want the texts to be in the language in which the assignment was written.
 - NEVER CHANGE THE CODE! Generate the output only.
 - All messages formatted as markdown for output.
+- Be realistic and precise
 
 **Steps:**
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
@@ -92,7 +93,28 @@ metadata:
 - **Low** — Minor improvements for defense in depth (logging gaps, informational leaks).
 
 **Report format:**
-- List each finding with: severity, category (OWASP/SecureCodeWarrior rule), location (file and line), description, and recommended fix.
+- List each finding with: severity, category (OWASP/SecureCodeWarrior rule), location (file and line), description, exploit Scenario (if applicable), and recommended fix.
 - Provide concrete code snippets for fixes where relevant.
 - Summarize total findings by severity at the end.
 - Findings are recommendations; final decisions remain with the human reviewer.
+
+## Example Audit Output Format
+
+Issue: Missing Authorization Check  
+Risk: High
+
+Problem:
+The controller fetches a model by ID without verifying ownership.
+
+Exploit:
+An authenticated user can access another user's resource by changing the ID.
+
+Fix:
+Use policy check or scoped query.
+
+Refactored Example:
+
+```php
+$post = Post::where('user_id', auth()->id())
+    ->findOrFail($id);
+```

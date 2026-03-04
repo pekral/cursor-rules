@@ -6,6 +6,18 @@ namespace Pekral\CursorRules;
 
 final class InstallerPath
 {
+    public const EDITOR_CURSOR = 'cursor';
+    public const EDITOR_CLAUDE = 'claude';
+    public const EDITOR_CODEX = 'codex';
+    public const EDITOR_ALL = 'all';
+
+    /**
+     * @return array<int, string>
+     */
+    public static function getAllowedEditors(): array
+    {
+        return [self::EDITOR_CURSOR, self::EDITOR_CLAUDE, self::EDITOR_CODEX, self::EDITOR_ALL];
+    }
 
     public static function resolveProjectRoot(): string
     {
@@ -58,6 +70,83 @@ final class InstallerPath
     public static function resolveSkillsTargetDirectory(string $root): string
     {
         return $root . '/.cursor/skills';
+    }
+
+    /**
+     * Rules target directories for the given editor.
+     *
+     * @return array<int, string>
+     */
+    public static function resolveRulesTargetDirectories(string $root, string $editor): array
+    {
+        $editor = strtolower($editor);
+
+        if ($editor === self::EDITOR_ALL) {
+            return [
+                $root . '/.cursor/rules',
+                $root . '/.claude/rules',
+                $root . '/.codex/rules',
+            ];
+        }
+
+        $baseDir = match ($editor) {
+            self::EDITOR_CURSOR => '.cursor',
+            self::EDITOR_CLAUDE => '.claude',
+            self::EDITOR_CODEX => '.codex',
+            default => '.cursor',
+        };
+
+        return [$root . '/' . $baseDir . '/rules'];
+    }
+
+    /**
+     * Skill target directories for the given editor.
+     * Includes user home paths for claude/codex when HOME or USERPROFILE is set.
+     *
+     * @return array<int, string>
+     */
+    public static function resolveSkillsTargetDirectories(string $root, string $editor): array
+    {
+        $editor = strtolower($editor);
+        $home = getenv('HOME') ?: getenv('USERPROFILE');
+
+        if ($editor === self::EDITOR_ALL) {
+            $targets = [
+                $root . '/.cursor/skills',
+                $root . '/.claude/skills',
+                $root . '/.codex/skills',
+            ];
+            if ($home !== false && $home !== '') {
+                $targets[] = $home . '/.claude/skills';
+                $targets[] = $home . '/.codex/skills';
+            }
+
+            return array_values(array_unique($targets));
+        }
+
+        $baseDir = match ($editor) {
+            self::EDITOR_CURSOR => '.cursor',
+            self::EDITOR_CLAUDE => '.claude',
+            self::EDITOR_CODEX => '.codex',
+            default => '.cursor',
+        };
+
+        $targets = [$root . '/' . $baseDir . '/skills'];
+        if (($editor === self::EDITOR_CLAUDE || $editor === self::EDITOR_CODEX) && $home !== false && $home !== '') {
+            $targets[] = $home . '/' . $baseDir . '/skills';
+        }
+
+        return array_values(array_unique($targets));
+    }
+
+    /**
+     * All skill target directories for Cursor/Claude/Codex compatibility (editor=all).
+     *
+     * @return array<int, string>
+     */
+    public static function resolveAllSkillsTargetDirectories(string $root): array
+    {
+        return self::resolveSkillsTargetDirectories($root, self::EDITOR_ALL);
     }
 
     private static function getPackageDirectory(): string

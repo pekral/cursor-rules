@@ -10,6 +10,7 @@ metadata:
 **Constraint:**
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
+- If you are not on the main git branch in the project, switch to it.
 
 **Steps:**
 - I want you to fix the bug from Github (you either got an ID or a link to Github). Use the MCP server to get all the necessary information about the bug so you can fix it. If you have other resources available that you could use to understand the problem, load them and analyze them. Use the available CLI tools or MCP servers to load them.

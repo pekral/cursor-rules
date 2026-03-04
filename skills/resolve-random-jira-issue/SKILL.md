@@ -10,6 +10,7 @@ metadata:
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
 - I want the texts to be in the language in which the assignment was written.
+- If you are not on the main git branch in the project, switch to it.
 
 **Steps:**
 - Log into JIRA, load all issues, and list only those that are to be resolved by AI (they are tagged).

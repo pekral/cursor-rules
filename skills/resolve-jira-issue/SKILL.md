@@ -10,6 +10,7 @@ metadata:
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
 - I want the texts to be in the language in which the assignment was written.
+- If you are not on the main git branch in the project, switch to it.
 
 **Steps:**
 - I want you to fix the bug from JIRA (you have either the ID or a link to JIRA). Use the acli tool or MCP server to get all the information you need about the bug so you can fix it. If you have other resources available that you could use to understand the problem, load them and analyze them.
@@ -24,5 +25,8 @@ metadata:
 - Run the tests and let me know if the current changes meet the requirements.  If so, add a new comment to the issue with a recommendation on what to test (briefly). If the requirements are not met or you have found critical errors, just list them for me.
 - Write missing tests for current changes and ensure 100% coverage, fix dry and try to simplify the code base so that it is easy to read for humans, but also as simple as possible. These changes will be in a separate commit.
 - I want you to post a comment into the pull request on GitHub regarding the core review, but I want you to only post critical or moderately serious issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue with the label ready for review.
-- After creating the PR, perform a code review @./cursor/skills/code-review-jira/SKILL.md for the current task.
-- If you are not on the main git branch in the project, switch to it.
+
+- **After completing the tasks**
+- Once you have finished your work and pushed the changes to pr, perform a code review according to your skill level @./cursor/skills/code-review-jira/SKILL.md
+
+

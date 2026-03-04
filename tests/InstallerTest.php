@@ -269,11 +269,14 @@ test('install with editor=all copies skills to all target directories', function
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/rules/example.mdc', 'rules');
     installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
-    $homeBefore = getenv('HOME') ?: getenv('USERPROFILE');
+    $homeEnv = getenv('HOME');
+    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
     putenv('HOME=' . $root);
+
     if (getenv('USERPROFILE') !== false) {
         putenv('USERPROFILE=' . $root);
     }
+
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -289,18 +292,7 @@ test('install with editor=all copies skills to all target directories', function
             expect(file_get_contents($installedSkill))->toBe('skill content');
         }
     } finally {
-        if ($homeBefore !== false && $homeBefore !== '') {
-            putenv('HOME=' . $homeBefore);
-            putenv('USERPROFILE=' . $homeBefore);
-        } else {
-            putenv('HOME');
-            putenv('USERPROFILE');
-        }
-        if ($originalCwd !== '') {
-            chdir($originalCwd);
-        }
-
-        installerRemoveDirectory($root);
+        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
     }
 });
 
@@ -311,11 +303,14 @@ test('install with editor=all copies all files to all rule and skill directories
     $expectedRulesCount = installerCountFiles($rulesSource);
     $expectedSkillsCount = installerCountFiles($skillsSource);
     $root = installerCreateProjectRoot();
-    $homeBefore = getenv('HOME') ?: getenv('USERPROFILE');
+    $homeEnv = getenv('HOME');
+    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
     putenv('HOME=' . $root);
+
     if (getenv('USERPROFILE') !== false) {
         putenv('USERPROFILE=' . $root);
     }
+
     $rulesTargets = InstallerPath::resolveRulesTargetDirectories($root, InstallerPath::EDITOR_ALL);
     $skillTargets = InstallerPath::resolveSkillsTargetDirectories($root, InstallerPath::EDITOR_ALL);
     $expectedTotalFiles = $expectedRulesCount * count($rulesTargets) + $expectedSkillsCount * count($skillTargets);
@@ -342,18 +337,7 @@ test('install with editor=all copies all files to all rule and skill directories
 
         expect($output)->toContain(sprintf('(%d files)', $expectedTotalFiles));
     } finally {
-        if ($homeBefore !== false && $homeBefore !== '') {
-            putenv('HOME=' . $homeBefore);
-            putenv('USERPROFILE=' . $homeBefore);
-        } else {
-            putenv('HOME');
-            putenv('USERPROFILE');
-        }
-        if ($originalCwd !== '') {
-            chdir($originalCwd);
-        }
-
-        installerRemoveDirectory($root);
+        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
     }
 });
 
@@ -560,12 +544,16 @@ test('resolveAllSkillsTargetDirectories returns project and home skill directori
     expect($targets)->toContain('/test/root/.codex/skills');
     expect(count($targets))->toBeGreaterThanOrEqual(3);
 
-    $home = getenv('HOME') ?: getenv('USERPROFILE');
-    if ($home !== false && $home !== '') {
-        expect($targets)->toContain($home . '/.claude/skills');
-        expect($targets)->toContain($home . '/.codex/skills');
-        expect(count($targets))->toBe(5);
+    $homeEnv = getenv('HOME');
+    $home = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
+
+    if ($home === false || $home === '') {
+        return;
     }
+
+    expect($targets)->toContain($home . '/.claude/skills');
+    expect($targets)->toContain($home . '/.codex/skills');
+    expect(count($targets))->toBe(5);
 });
 
 test('resolveRulesTargetDirectories returns single path for cursor editor', function (): void {
@@ -582,6 +570,95 @@ test('resolveRulesTargetDirectories returns all paths for all editor', function 
         '/project/.claude/rules',
         '/project/.codex/rules',
     ]);
+});
+
+test('resolveRulesTargetDirectories returns default path for unknown editor', function (): void {
+    $targets = InstallerPath::resolveRulesTargetDirectories('/project', 'unknown');
+
+    expect($targets)->toBe(['/project/.cursor/rules']);
+});
+
+test('resolveSkillsTargetDirectories returns single path for cursor editor', function (): void {
+    $targets = InstallerPath::resolveSkillsTargetDirectories('/project', InstallerPath::EDITOR_CURSOR);
+
+    expect($targets)->toBe(['/project/.cursor/skills']);
+});
+
+test('resolveSkillsTargetDirectories with editor=cursor and HOME set does not add home paths', function (): void {
+    $homeBefore = getenv('HOME');
+    $userProfileBefore = getenv('USERPROFILE');
+    putenv('HOME=/fake/home');
+    putenv('USERPROFILE=/fake/home');
+
+    try {
+        $targets = InstallerPath::resolveSkillsTargetDirectories('/project', InstallerPath::EDITOR_CURSOR);
+
+        expect($targets)->toBe(['/project/.cursor/skills']);
+    } finally {
+        if ($homeBefore !== false) {
+            putenv('HOME=' . $homeBefore);
+        } else {
+            putenv('HOME');
+        }
+
+        if ($userProfileBefore !== false) {
+            putenv('USERPROFILE=' . $userProfileBefore);
+        } else {
+            putenv('USERPROFILE');
+        }
+    }
+});
+
+test('resolveSkillsTargetDirectories returns default path for unknown editor', function (): void {
+    $targets = InstallerPath::resolveSkillsTargetDirectories('/project', 'unknown');
+
+    expect($targets)->toBe(['/project/.cursor/skills']);
+});
+
+test('resolveSkillsTargetDirectories with editor=all and no HOME returns only project paths', function (): void {
+    $homeBefore = getenv('HOME');
+    $userProfileBefore = getenv('USERPROFILE');
+    putenv('HOME');
+    putenv('USERPROFILE');
+
+    try {
+        $targets = InstallerPath::resolveSkillsTargetDirectories('/project', InstallerPath::EDITOR_ALL);
+
+        expect($targets)->toBe([
+            '/project/.cursor/skills',
+            '/project/.claude/skills',
+            '/project/.codex/skills',
+        ]);
+    } finally {
+        if ($homeBefore !== false) {
+            putenv('HOME=' . $homeBefore);
+        }
+
+        if ($userProfileBefore !== false) {
+            putenv('USERPROFILE=' . $userProfileBefore);
+        }
+    }
+});
+
+test('resolveSkillsTargetDirectories with editor=claude and no HOME returns only project path', function (): void {
+    $homeBefore = getenv('HOME');
+    $userProfileBefore = getenv('USERPROFILE');
+    putenv('HOME');
+    putenv('USERPROFILE');
+
+    try {
+        $targets = InstallerPath::resolveSkillsTargetDirectories('/project', InstallerPath::EDITOR_CLAUDE);
+
+        expect($targets)->toBe(['/project/.claude/skills']);
+    } finally {
+        if ($homeBefore !== false) {
+            putenv('HOME=' . $homeBefore);
+        }
+
+        if ($userProfileBefore !== false) {
+            putenv('USERPROFILE=' . $userProfileBefore);
+        }
+    }
 });
 
 test('install with editor=claude copies to .claude only', function (): void {
@@ -638,6 +715,7 @@ test('install with editor=codex copies to .codex only', function (): void {
 
 test('install from package root installs rules and skills into .cursor by default', function (): void {
     $packageRoot = dirname(__DIR__);
+
     if (!file_exists($packageRoot . '/composer.json') || !is_dir($packageRoot . '/rules')) {
         expect(true)->toBeTrue();
 

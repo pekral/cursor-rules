@@ -6,10 +6,14 @@ namespace Pekral\CursorRules;
 
 final class InstallerPath
 {
-    public const EDITOR_CURSOR = 'cursor';
-    public const EDITOR_CLAUDE = 'claude';
-    public const EDITOR_CODEX = 'codex';
-    public const EDITOR_ALL = 'all';
+
+    public const string EDITOR_CURSOR = 'cursor';
+
+    public const string EDITOR_CLAUDE = 'claude';
+
+    public const string EDITOR_CODEX = 'codex';
+
+    public const string EDITOR_ALL = 'all';
 
     /**
      * @return array<int, string>
@@ -108,7 +112,7 @@ final class InstallerPath
     public static function resolveSkillsTargetDirectories(string $root, string $editor): array
     {
         $editor = strtolower($editor);
-        $home = getenv('HOME') ?: getenv('USERPROFILE');
+        $home = self::resolveHomeDirectory();
 
         if ($editor === self::EDITOR_ALL) {
             $targets = [
@@ -116,10 +120,7 @@ final class InstallerPath
                 $root . '/.claude/skills',
                 $root . '/.codex/skills',
             ];
-            if ($home !== false && $home !== '') {
-                $targets[] = $home . '/.claude/skills';
-                $targets[] = $home . '/.codex/skills';
-            }
+            $targets = self::appendHomeSkillPaths($targets, $home);
 
             return array_values(array_unique($targets));
         }
@@ -132,9 +133,7 @@ final class InstallerPath
         };
 
         $targets = [$root . '/' . $baseDir . '/skills'];
-        if (($editor === self::EDITOR_CLAUDE || $editor === self::EDITOR_CODEX) && $home !== false && $home !== '') {
-            $targets[] = $home . '/' . $baseDir . '/skills';
-        }
+        $targets = self::appendHomeSkillPathForEditor($targets, $home, $baseDir, $editor);
 
         return array_values(array_unique($targets));
     }
@@ -147,6 +146,48 @@ final class InstallerPath
     public static function resolveAllSkillsTargetDirectories(string $root): array
     {
         return self::resolveSkillsTargetDirectories($root, self::EDITOR_ALL);
+    }
+
+    private static function resolveHomeDirectory(): string|false
+    {
+        $homeEnv = getenv('HOME');
+
+        return $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
+    }
+
+    /**
+     * @param array<int, string> $targets
+     * @return array<int, string>
+     */
+    private static function appendHomeSkillPaths(array $targets, string|false $home): array
+    {
+        if ($home === false || $home === '') {
+            return $targets;
+        }
+
+        $targets[] = $home . '/.claude/skills';
+        $targets[] = $home . '/.codex/skills';
+
+        return $targets;
+    }
+
+    /**
+     * @param array<int, string> $targets
+     * @return array<int, string>
+     */
+    private static function appendHomeSkillPathForEditor(array $targets, string|false $home, string $baseDir, string $editor): array
+    {
+        if ($home === false || $home === '') {
+            return $targets;
+        }
+
+        if ($editor !== self::EDITOR_CLAUDE && $editor !== self::EDITOR_CODEX) {
+            return $targets;
+        }
+
+        $targets[] = $home . '/' . $baseDir . '/skills';
+
+        return $targets;
     }
 
     private static function getPackageDirectory(): string

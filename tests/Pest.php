@@ -87,3 +87,20 @@ function installerCountFiles(string $dir): int
 
     return $count;
 }
+
+function installerRestoreEnvAndCleanup(string|false $homeBefore, string $originalCwd, string $root): void
+{
+    if ($homeBefore !== false && $homeBefore !== '') {
+        putenv('HOME=' . $homeBefore);
+        putenv('USERPROFILE=' . $homeBefore);
+    } else {
+        putenv('HOME');
+        putenv('USERPROFILE');
+    }
+
+    if ($originalCwd !== '') {
+        chdir($originalCwd);
+    }
+
+    installerRemoveDirectory($root);
+}

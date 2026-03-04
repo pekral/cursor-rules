@@ -33,6 +33,7 @@ final class Installer
             }
 
             $editor = self::parseEditor($argv);
+
             if ($editor === null) {
                 fwrite(STDERR, 'Invalid --editor value. Allowed: cursor, claude, codex, all.' . PHP_EOL);
 
@@ -82,6 +83,7 @@ final class Installer
         $totalCopied = 0;
 
         $rulesSource = InstallerPath::resolveRulesSource($root);
+
         foreach (InstallerPath::resolveRulesTargetDirectories($root, $editor) as $rulesTarget) {
             $totalCopied += self::installDirectory($rulesSource, $rulesTarget, $force, $symlink);
         }

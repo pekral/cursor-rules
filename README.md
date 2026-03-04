@@ -33,6 +33,17 @@ When the package is required via Composer, sources are read from `vendor/pekral/
 
 **Important:** By default, the installer only copies missing files and keeps existing content untouched. Use the `--force` flag to overwrite existing files: `vendor/bin/cursor-rules install --force`. This is particularly useful when you want to update rules to their latest versions or when you've made local changes that should be replaced.
 
+### Installing rules from GitHub (Cursor only)
+
+You can use this repository as a **Remote Rule** in Cursor without installing the package via Composer:
+
+1. Open **Cursor Settings** → **Rules**.
+2. In the **Project Rules** section, click **Add Rule**.
+3. Select **Remote Rule (Github)**.
+4. Enter the repository URL: `https://github.com/pekral/cursor-rules`.
+
+Cursor will fetch and apply the rules from the repository. Note: this method provides rules only; Agent skills are installed into your project when you use the Composer-based installation above.
+
 ### Available Commands
 
 ```bash

@@ -1,20 +1,21 @@
 ---
 name: analyze-problem
-description: "Analyzes problems from issue trackers. Downloads and reviews attachments, provides technical analysis and solutions, and creates human-readable explanations for both technical and non-technical audiences."
+description: "Analyzes problems from issue trackers. Downloads and reviews attachments, provides technical analysis and solutions, and creates human-readable explanations for technical and non-technical audiences. Use when the user shares an issue link or ID and wants root-cause analysis or fix recommendations. Do not use for implementing fixes, writing code changes, or for non-issue-tracker debugging."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
-**Constraint:**
-- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
-- I want the texts to be in the language in which the assignment was written.
-- NEVER CHANGE THE CODE! Generate the output only.
-- All messages formatted as markdown for output.
+**Constraints**
+- Load all rules from `.cursor/rules/**/*.mdc` before starting.
+- Use the same language as the assignment.
+- Do not change code; produce analysis output only.
+- Format all output as markdown.
 
-**Steps:**
-- Analyze the assignment and go through all the attached resources (download their contents via CLI or MCP). There are specific console CLI tools available for issue trackers, so use them. Never use a web browser!
-- Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker.
-- I want to analyze the error as accurately as possible and write an analysis of how to fix this error and where the problem lies. The output will be prepared for quick and readable orientation for humans.
-- Write to me how I can effectively and simply solve the problem without side effects and disruption to the application's operation.
-- I want one technical output and another for explaining to people who are not programmers, but perhaps product managers.
+**Steps**
+1. Load all rules for the cursor editor from `.cursor/rules/**/*.mdc`.
+2. Analyze the assignment and process all attached resources (download contents via CLI or MCP). Use issue-tracker console CLI tools; do not use a web browser.
+3. Find and analyze attachments for the assignment using MCP servers or CLI tools for the specific issue tracker.
+4. Analyze the error as accurately as possible and write an analysis of how to fix it and where the problem lies. Prepare the output for quick, readable orientation for humans.
+5. Describe how to solve the problem effectively and simply, without side effects or disruption to the application.
+6. Produce two outputs: one technical, and one for non-programmers (e.g. product managers).

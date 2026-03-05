@@ -1,28 +1,26 @@
 ---
 name: create-test
-description: "Creates tests following project conventions and patterns. Ensures deterministic tests, 100% code coverage for changes, uses data providers where appropriate, and mocks only external services or exception scenarios."
+description: "Creates tests following project conventions and patterns. Ensures deterministic tests, 100% code coverage for changes, uses data providers where appropriate, and mocks only external services or exception scenarios. Use when adding or extending tests for new or changed code. Do not use for refactoring production code or for rewriting existing tests to another framework (use rewrite-tests-pest instead)."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
-**Constraint:**
-- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+**Constraints**
+- Load all rules from `.cursor/rules/**/*.mdc` before starting.
+- Do not modify production code.
 
-**Steps:**
-- Locate existing tests or create new ones following project conventions.
-- Never modify production code!
-- Create deterministic everytime!
-- Use existing test patterns, helpers, and conventions.
-- Arrange-act-assert pattern, error cases first
-- Before writing tests, always analyze the abstractions that will be used in the tests and always use helper methods if it simplifies the code.
-- **Never use the `describe()` function** in tests. Write tests at the top level using `it()` / `test()` only; do not wrap them in `describe()` blocks.
-- If the PEST test requires calling a method that is in an abstract class, use the notation `test()->methodName()`.
-- Never generate the covers() method!
-- Remove unnecessary mocks.
-- Mock only external API communication services or if you need simulate exceptions. Do not Constructor mocking!
-- Use data providers when they simplify writing and readability.
-- Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them. 
-- Make sure of 100% coverage required for changes. Add tests so that 100% coverage is achieved. Prioritize modifying existing test cases; if tests do not exist, add them according to the valid rules for writing tests.
-- After creating or modifying tests, check that they are not flaky.
-- Remove generated coverage after work is done.
+**Steps**
+1. Load all rules for the cursor editor from `.cursor/rules/**/*.mdc`.
+2. Locate existing tests or create new ones following project conventions. Create deterministic tests every time.
+3. Use existing test patterns, helpers, and conventions. Apply arrange–act–assert; cover error cases first.
+4. Before writing tests, analyze the abstractions used in the tests and use helper methods when they simplify the code.
+5. Do not use the `describe()` function. Write tests at the top level with `it()` or `test()` only; do not wrap them in `describe()` blocks.
+6. If a PEST test must call a method from an abstract class, use the notation `test()->methodName()`.
+7. Do not generate the `covers()` method. Remove unnecessary mocks.
+8. Mock only external API communication or when simulating exceptions. Do not use constructor mocking.
+9. Use data providers when they simplify writing and readability.
+10. Analyze created tests and similar tests that can be simplified with data providers; then update them.
+11. Ensure 100% coverage for the changed code. Add or adjust tests until 100% coverage is achieved. Prefer modifying existing test cases; if none exist, add tests according to the project test rules.
+12. After creating or modifying tests, verify they are not flaky.
+13. Remove generated coverage artifacts after work is done.

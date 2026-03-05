@@ -1,18 +1,17 @@
 ---
 name: resolve-random-jira-issue
-description: "Resolves random JIRA issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Links PRs to JIRA issues and updates issue status."
+description: "Picks and resolves a random JIRA issue tagged for AI resolution. Uses resolve-jira-issue skill after selection. Use when the user wants to resolve one arbitrary issue from a pool of tagged JIRA issues. Do not use when a specific JIRA issue ID or link is provided (use resolve-jira-issue instead)."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
-**Constraint:**
-- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
-- Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
-- I want the texts to be in the language in which the assignment was written.
-- If you are not on the main git branch in the project, switch to it.
+**Constraints**
+- Load all rules from `.cursor/rules/**/*.mdc` before starting.
+- Use the same language as the assignment.
+- If not on the main git branch, switch to it.
 
-**Steps:**
-- Log into JIRA, load all issues, and list only those that are to be resolved by AI (they are tagged).
-  Look for tasks labeled "Resolve_by_AI." If you are supposed to search in other places as well, find those other places too. Only not resolved issues should be listed!
-- Randomly select one and try to resolve it. Use the skill @.cursor/skills/resolve-jira-issue/SKILL.md.
+**Steps**
+1. Load all rules for the cursor editor from `.cursor/rules/**/*.mdc`.
+2. Log into JIRA and load all issues. List only those tagged for AI resolution (e.g. “Resolve_by_AI”). If the project uses other places for such tags, search those as well. List only unresolved issues.
+3. Randomly select one issue and resolve it using the resolve-jira-issue skill.

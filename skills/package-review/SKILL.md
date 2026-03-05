@@ -1,25 +1,23 @@
 ---
 name: package-review
-description: "Reviews composer.json packages by validating structure, checking required fields, verifying links, and ensuring proper configuration of autoloading, dependencies, and metadata."
+description: "Reviews composer.json packages by validating structure, required fields, links, autoloading, dependencies, and metadata. Use when the user wants a package or composer.json review. Do not use for application-level code review or non-Composer projects."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
-**Constraint:**
-- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
-- All messages formatted as markdown for output.
-- If you are not on the main git branch in the project, switch to it.
+**Constraints**
+- Load all rules from `.cursor/rules/**/*.mdc` before starting.
+- Format all output as markdown.
+- If not on the main git branch, switch to it.
 
-**Steps:**
-- Find all links in the documentation.
-- Verify that each link is functional.
-- Check the quality of the `composer.json` content.
-- Determine whether all important keys are set.
-- Validate that values are correct and complete.
-- Refresh readme.md file for current changes, don`t rewrite all, just only merge or delete file content.
+**Steps**
+1. Load all rules for the cursor editor from `.cursor/rules/**/*.mdc`.
+2. Find all links in the documentation and verify that each link is functional.
+3. Assess the quality of the `composer.json` content. Determine whether all important keys are set and validate that values are correct and complete.
+4. Refresh the readme.md file for current changes; do not rewrite the whole file — only merge or delete content as needed.
 
-**Check presence and correctness:**
+**Check presence and correctness**
 - [ ] `name` — package name in `vendor/package` format
 - [ ] `description` — clear, concise description
 - [ ] `type` — package type (e.g. `library`, `project`)
@@ -28,7 +26,7 @@ metadata:
 - [ ] `require` — dependencies with proper version constraints
 - [ ] `autoload` — PSR-4 autoloading configuration
 
-**Check presence and usefulness:**
+**Check presence and usefulness**
 - [ ] `keywords` — searchable keywords
 - [ ] `homepage` — project homepage URL
 - [ ] `support` — support channels (issues, source, docs)

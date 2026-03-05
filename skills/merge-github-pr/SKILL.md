@@ -1,16 +1,17 @@
 ---
-name: resolve-github-issue
-description: "Merge PRs when they are ready for deployment, one by one"
+name: merge-github-pr
+description: "Merges GitHub pull requests into the main branch when they are ready for deployment. Use when the user wants to merge one or more completed PRs that have passed CI. Do not use for creating PRs, resolving issues, or merging branches with conflicts."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
+**Constraints**
+- Load all rules from `.cursor/rules/**/*.mdc` before starting.
+- Use the same language as the assignment.
+- Do not merge PRs that have conflicts.
 
-**Constraint:**
-- First, load all rules for the cursor editor (.cursor/rules/.*mdc).
-- I want the texts to be in the language in which the assignment was written.
-- Never send PRs that have conflicts
-
-**Steps:**
-- Go through all PRs that have successfully completed the attached CI actions and systematically merge the changes into the main branch. 
+**Steps**
+1. Load all rules for the cursor editor from `.cursor/rules/**/*.mdc`.
+2. Identify all PRs that have successfully completed the attached CI actions.
+3. Merge changes into the main branch systematically, one PR at a time.

@@ -1,27 +1,27 @@
 ---
 name: resolve-bugsnag-issue
-description: "Resolves Bugsnag issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results."
+description: "Resolves Bugsnag issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results. Use when the user provides a Bugsnag issue ID or link. Do not use for GitHub/JIRA issue resolution or merge-only workflows."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
-**Constraint:**
-- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
-- Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
-- I want the texts to be in the language in which the assignment was written.
-- If you are not on the main git branch in the project, switch to it.
+**Constraints**
+- Load all rules from `.cursor/rules/**/*.mdc` before starting.
+- Use the same language as the assignment.
+- If not on the main git branch, switch to it.
 
-**Steps:**
-- I want you to fix the bug from Bugsnag (you either got an ID or a link to Bugsnag). Use the MCP server to get all the necessary information about the bug so you can fix it. If you have other resources available that you could use to understand the problem, load them and analyze them. Use the available CLI tools or MCP servers to load them.
-- Resolve this issue (the generated code must be according to @.cursor/skills/class-refacforing/SKILL.md), then review the code according to @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md for current changes. If you find any critical issues in the new changes, resolve them and perform further iterations of the defined code review (repeat until the bug is fixed).
-- Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker.
-- For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.
-- If there are any automatic fixers in the project that are called through another layer, such as Phing or composer scripts, run them and ensure automatic error correction (find and load local configs for tools if exists). If there are any CI (or local) checkers, run them (never run all tests for the entire codebase, only for the current changes). Fix any errors, run the fixers again, and keep fixing until all errors are fixed. Never try to format PHP code outside of these fixers yourself.
-- If everything is OK create a pull request, create it according to the pr.mdc rules.
-- If there is no link to the issue tracker, add a link to the issue tracker entry to the CR summary and, if possible, link it directly according to the issue tracker recommendations. Be sure to include an HTTP link.
-- I want you to post a comment into the pull request on GitHub regarding the core review, but I want you to only post critical or moderately serious issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue with the label ready for review.
-- Run the tests and let me know if the current changes meet the requirements.  If so, add a new comment to the issue with a recommendation on what to test (briefly). If the requirements are not met or you have found critical errors, just list them for me.
-- Write missing tests for current changes and ensure 100% coverage, fix dry and try to simplify the code base so that it is easy to read for humans, but also as simple as possible. These changes will be in a separate commit.
-- After creating the PR, perform a code review @./cursor/skills/code-review/SKILL.md for the current task.
-- If you are not on the main git branch in the project, switch to it.
+**Steps**
+1. Load all rules for the cursor editor from `.cursor/rules/**/*.mdc`.
+2. Fetch the bug from Bugsnag (by issue ID or link). Use MCP to get all necessary information; load and analyze any other relevant resources.
+3. Resolve the issue: generated code must follow the class-refactoring skill. Then review code per the code-review and security-review skills for current changes. If critical issues are found, fix them and repeat the review until the bug is fixed.
+4. Find and analyze attachments for the assignment using MCP or CLI for the issue tracker.
+5. For all changes in the current branch, analyze code coverage and ensure 100% coverage. Add any missing tests.
+6. If the project has automatic fixers (e.g. Phing or composer scripts), run them and fix errors. Run CI/local checkers (run tests only for current changes). Fix errors, re-run fixers, and repeat until clean. Do not format PHP code manually outside these fixers.
+7. If everything is OK, create a pull request per the pr.mdc rules.
+8. If there is no link to the issue tracker in the PR, add the issue tracker entry link to the CR summary (HTTP link).
+9. Post a comment on the PR with the code review: only critical or moderately serious issues, ideally with affected lines. If none, do not post. If possible, add the label ready for review.
+10. Run tests and report whether the changes meet requirements. If they do, add a comment to the issue with a brief testing recommendation. If not or if critical errors exist, list them.
+11. Add any missing tests for current changes to reach 100% coverage; fix DRY and simplify the codebase. Put these changes in a separate commit.
+12. After creating the PR, perform a code review per the code-review skill.
+13. If not on the main git branch, switch to it.

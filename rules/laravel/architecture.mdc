@@ -25,6 +25,7 @@ globs: ["*"]
 - Ensure that every route checks permissions (e.g., auth/can middleware). Every CRUD action validates input.
 - Call actions or service
 - NO Database Queries in Controller!
+- For validation rule `['required', 'string']` verify that an empty string does not pass.
 
 ## Database / Schema
 - Primary keys on every table; prefer INT over BIGINT unless > ~2B rows

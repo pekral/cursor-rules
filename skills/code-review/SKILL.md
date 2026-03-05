@@ -10,6 +10,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Understand context before reviewing
 - All messages formatted as markdown for output.
 - NEVER CHANGE THE CODE! Generate the output only.
+- Always do security check by defined skill for security!
 
 **Steps:**
 - All changes must comply with `.cursor/rules/**/*.mdc`.

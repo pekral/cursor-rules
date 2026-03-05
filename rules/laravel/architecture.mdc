@@ -103,6 +103,7 @@ globs: ["*"]
 - No heavy logic in constructors (serialization issues).
 - Queue connections and workers are configured for the workload.
 - If you are doing code review for asynchronous jobs in the application, first check how the timeout, tries, etc. are set in the config. These values may not always be set directly in the Jobs.
+- If using in queue job any sql query from repository or direct from model, avoid of offset and limit and prefer last id row
 
 ## Middleware
 - Use middleware for cross-cutting concerns (auth, rate limiting, headers, logging).

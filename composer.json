@@ -97,6 +97,7 @@
     ],
     "check": [
       "echo \"🚀 Running full quality check...\"",
+      "@skill-check",
       "@composer-normalize-check",
       "@phpcs-check",
       "@pint-check",
@@ -152,6 +153,10 @@
     "security-audit": [
       "echo \"🔒 Running Composer security audit...\"",
       "composer audit --format=summary"
+    ],
+    "skill-check": [
+      "echo \"📋 Running skill-check...\"",
+      "npx skill-check check . --no-security-scan"
     ],
     "test:coverage": [
       "echo \"📊 Running coverage tests with PCOV...\"",

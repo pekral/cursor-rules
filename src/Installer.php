@@ -137,6 +137,10 @@ final class Installer
 
         self::ensureDirectoryExists($dirName);
 
+        if (file_exists($dst) && self::isProjectRule($relativePath)) {
+            return false;
+        }
+
         $effectiveForce = $force || self::isSecurityRule($relativePath);
 
         if (file_exists($dst) && !$effectiveForce) {
@@ -144,6 +148,13 @@ final class Installer
         }
 
         return self::installFile($src, $dst, $symlink);
+    }
+
+    private static function isProjectRule(string $relativePath): bool
+    {
+        $normalized = str_replace('\\', '/', $relativePath);
+
+        return $normalized === 'project.mdc';
     }
 
     private static function isSecurityRule(string $relativePath): bool

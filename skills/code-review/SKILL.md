@@ -14,7 +14,6 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Always do security check by defined skill for security!
 
 **Steps:**
-- Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
 - All changes must comply with `.cursor/rules/**/*.mdc`.
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules.
 - Ensure SRP in each class and apply SOLID principles so that the code is readable for developers.

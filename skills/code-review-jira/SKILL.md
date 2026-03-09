@@ -14,6 +14,7 @@ metadata:
 - All messages formatted as markdown for output.
 
 **Steps:**
+- Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
 - I want you to create @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md for the issue (find it by code or URL) on JIRA (use acli console tool).
 - Find the Git branch and switch to it (if needed pull the latest changes).
 - I want you to fix the bug from JIRA (you have either the ID or a link to JIRA). Use the acli tool or MCP server to get all the information you need about the bug so you can fix it. If you have other resources available that you could use to understand the problem, load them and analyze them.

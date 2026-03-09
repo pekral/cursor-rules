@@ -8,6 +8,7 @@ metadata:
 
 **Constraint:**
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- Switch to the main branch and make sure you have the updated main branch. Then switch to the branch where the PR is and, to be on the safe side, update the branch for the PR as well, then continue with the code review.
 - I want the texts to be in the language in which the assignment was written.
 - NEVER CHANGE THE CODE! Generate the output only.
 - All messages formatted as markdown for output.

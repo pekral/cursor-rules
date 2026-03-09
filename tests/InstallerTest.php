@@ -183,6 +183,35 @@ test('install respects force flag', function (): void {
     }
 });
 
+test('install never overwrites existing project.mdc in target', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/project.mdc', 'package default content');
+    $installedFile = $root . '/.cursor/rules/project.mdc';
+    installerWriteFile($installedFile, 'my project-specific content');
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+        expect(file_get_contents($installedFile))->toBe('my project-specific content');
+
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--force']);
+        ob_end_clean();
+        expect(file_get_contents($installedFile))->toBe('my project-specific content');
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
 test('install creates symlinks when requested', function (): void {
     if (installerSymlinkUnsupported()) {
         expect(true)->toBeTrue();

@@ -10,7 +10,7 @@ name: interactive-browser-testing
 ---
 
 **Constraint:**
-
+    Read project.md file
 -   First, load all the rules for the cursor editor
     (.cursor/rules/.\*mdc).
 -   Use the language in which the issue assignment was written.

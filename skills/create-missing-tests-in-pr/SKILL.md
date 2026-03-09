@@ -11,7 +11,7 @@ name: fill-missing-pr-tests
 ---
 
 **Constraint:**
-
+-   Read project.md file
 -   First, load all the rules for the cursor editor
     (.cursor/rules/.\*mdc).
 -   I want the texts to be in the language in which the assignment was

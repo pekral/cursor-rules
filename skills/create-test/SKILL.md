@@ -7,6 +7,7 @@ metadata:
 ---
 
 **Constraint:**
+- Read project.md file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 
 **Steps:**

@@ -24,3 +24,4 @@ metadata:
 - If there are any, I want you to add comments to the PR about where you found these errors. If that is not possible, I want you to create a new comment on the PR with a list of errors from the CR. If you do not find any errors, write that you have done the CR but did not find any serious errors. Every text in English.
 - I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. I do not want to list "What was checked," but only the errors.
 - Run the tests and let me know if the current changes meet the requirements.  If so, add a new comment to the issue with a recommendation on what to test (briefly). If the requirements are not met or you have found critical errors, just list them for me.
+- If is needed use interactive-browser-testing skill for testing

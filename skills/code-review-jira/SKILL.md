@@ -24,3 +24,4 @@ metadata:
 - I don't want to enter technical data into the JIRA issue tracker after code review, but I want to edit the text so that project managers and testers can understand it. 
 - I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. I do not want to list "What was checked," but only the errors.
 - Run the tests and let me know if the current changes meet the requirements.  If so, add a new comment to the issue with a recommendation on what to test (briefly). If the requirements are not met or you have found critical errors, just list them for me.
+- If is needed use interactive-browser-testing skill for testing

@@ -15,6 +15,7 @@ metadata:
 
 **Steps:**
 - Analyze the assignment and go through all the attached resources (download their contents via CLI or MCP). There are specific console CLI tools available for issue trackers, so use them. Never use a web browser!
+- Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker.
 - I want to analyze the error as accurately as possible and write an analysis of how to fix this error and where the problem lies. The output will be prepared for quick and readable orientation for humans.
 - Write to me how I can effectively and simply solve the problem without side effects and disruption to the application's operation.

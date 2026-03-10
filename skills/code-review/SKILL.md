@@ -17,6 +17,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 
 **Steps:**
 - All changes must comply with `.cursor/rules/**/*.mdc`.
+- Read project.md file
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules.
 - Ensure SRP in each class and apply SOLID principles so that the code is readable for developers.
 - Do not duplicate their checks: types, null safety, formatting, style, naming, dead code, automated refactors.

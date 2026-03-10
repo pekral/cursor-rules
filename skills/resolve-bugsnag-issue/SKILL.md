@@ -10,7 +10,7 @@ metadata:
 - Read project.md file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
-- I want the texts to be in the language in which the assignment was written.
+- I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - If you are not on the main git branch in the project, switch to it.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 

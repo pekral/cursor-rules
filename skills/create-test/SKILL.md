@@ -1,6 +1,6 @@
 ---
 name: create-test
-description: "Creates tests following project conventions and patterns. Ensures deterministic tests, 100% code coverage for changes, uses data providers where appropriate, and mocks only external services or exception scenarios."
+description: "Use when creating tests following project conventions and patterns. Ensures deterministic tests, 100% code coverage for changes, uses data providers where appropriate, and mocks only external services or exception scenarios."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"

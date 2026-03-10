@@ -156,7 +156,7 @@
     ],
     "skill-check": [
       "echo \"📋 Running skill-check...\"",
-      "npx skill-check check . --no-security-scan"
+      "npx skill-check check skills --no-security-scan"
     ],
     "test:coverage": [
       "echo \"📊 Running coverage tests with PCOV...\"",

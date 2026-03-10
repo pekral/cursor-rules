@@ -1,6 +1,6 @@
 ---
 name: resolve-github-issue
-description: "Resolves Github issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results."
+description: "Use when resolving Github issues. Fixes bugs, refactors code, performs code and security reviews, ensures 100% test coverage, runs CI checks, and creates pull requests. Updates GitHub issues with review results."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"

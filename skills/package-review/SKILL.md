@@ -1,6 +1,6 @@
 ---
 name: package-review
-description: "Reviews composer.json packages by validating structure, checking required fields, verifying links, and ensuring proper configuration of autoloading, dependencies, and metadata."
+description: "Use when reviewing composer.json packages. Validates structure, checks required fields, verifies links, and ensures proper configuration of autoloading, dependencies, and metadata."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"

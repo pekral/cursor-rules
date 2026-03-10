@@ -14,8 +14,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run skill-check
-        uses: thedaviddias/skill-check@v1.2.0
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          path: skills
-          format: text
+          node-version: "22"
+
+      - name: Run skill-check
+        run: npx skill-check@1.2.0 check skills --no-security-scan --format text

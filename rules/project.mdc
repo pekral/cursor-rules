@@ -3,3 +3,13 @@ description: Base rules for actual project
 alwaysApply: true
 globs: ["*"]
 ---
+
+## General
+
+## Testing API endpoints like human
+
+## Tests
+
+## SQL
+
+## Admin section

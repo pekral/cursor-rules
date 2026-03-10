@@ -35,6 +35,7 @@ name: pr-testing-from-review
     technical notes, logs, stack details, or developer commentary.
 -   For testing api endpoints follow steps defined in project.md section "## Testing API endpoints like human". If you have a definition of the response from the API, check that the response from the test matches the documentation.
 -   Never run automatic tests from codebase!
+-   When testing API endpoints, always find information about the endpoint via MCP (or otherwise). Use all available tools to obtain the necessary parameters for building the URL for the API!
 
 ------------------------------------------------------------------------
 
@@ -114,6 +115,7 @@ Evaluate whether the flow behaves naturally and correctly.
 If the behavior depends on API responses:
 
 -   use `curl` only when necessary
+-   When testing API endpoints, always find information about the endpoint via MCP (or otherwise). Use all available tools to obtain the necessary parameters for building the URL for the API!
 -   verify that the user-visible behavior matches expectations
 -   do not expose raw request/response details in the report
 

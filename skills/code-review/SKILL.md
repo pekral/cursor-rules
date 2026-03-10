@@ -16,6 +16,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Check for any points where the current changes could break the logic. If it is shared functionality, make sure to check these parts of the application as well!
 
 **Steps:**
+- **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
 - All changes must comply with `.cursor/rules/**/*.mdc`.
 - Read project.md file
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules.

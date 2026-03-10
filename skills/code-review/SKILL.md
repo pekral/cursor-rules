@@ -24,7 +24,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Focus only on what tools do not cover: architecture, design, security logic, runtime/operational concerns.
 - Optimizations for processing large amounts of data
 - Security risks
-- SQL optimizations
+- SQL optimizations: when reviewing SQL queries, repositories, migrations, or query builder code, use @.cursor/skills/mysql-problem-solver/SKILL.md for systematic analysis (identify query, inspect schema, EXPLAIN, evaluate indexes, propose safe optimizations).
 - Performance
 - Provide categorized, actionable feedback
 - Current changes must be covered by tests with 100% coverage!

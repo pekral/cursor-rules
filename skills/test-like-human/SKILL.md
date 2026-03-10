@@ -14,6 +14,7 @@ name: pr-testing-from-review
 
 -   Read project.md file!
 -   First load all cursor editor rules (.cursor/rules/.\*mdc).
+-   I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 -   Work only with the **current pull request**.
 -   Testing instructions must be taken only from the PR conversation.
 -   Specifically search for a section named **'Doporučení k testování'**

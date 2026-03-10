@@ -87,3 +87,6 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Give concrete fixes or code snippets where relevant; not only “something is wrong”.
 - Evaluate code in project context and against `.cursor/rules/**/*.mdc`.
 - Findings are recommendations; final decisions remain with the human reviewer.
+
+**After completing the tasks**
+- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!

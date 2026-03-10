@@ -45,3 +45,6 @@ metadata:
 
   **Do not:** 
 - Modify existing tests (unless refactoring requires it for consistency).
+
+**After completing the tasks**
+- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!

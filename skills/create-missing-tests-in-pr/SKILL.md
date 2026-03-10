@@ -55,8 +55,8 @@ name: fill-missing-pr-tests
     with 100% coverage.
 -   If fixers or test-related wrappers exist in the project, use them.
 -   Do not run the whole test suite unless it is required for the
-    changed files workflow.[
--   If the review recommendation is already sa]()tisfied by existing tests,
+    changed files workflow.
+-   If the review recommendation is already satisfied by existing tests,
     do not duplicate test coverage.
 
 **Deliver:**
@@ -78,3 +78,4 @@ Provide a brief markdown summary including:
 -   If something is still missing, clearly describe the blocker or
     uncovered scenario.
 - Ask for create new commit with missing tests
+- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!

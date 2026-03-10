@@ -28,6 +28,6 @@ jobs:
 
       - name: Upload SARIF (annotations)
         if: always() && steps.skill-check.outputs.sarif-file != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ steps.skill-check.outputs.sarif-file }}

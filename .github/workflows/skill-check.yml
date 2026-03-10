@@ -16,7 +16,6 @@ jobs:
 
       - name: Run skill-check
         uses: thedaviddias/skill-check@v1.2.0
-        continue-on-error: true
         with:
           path: .
           format: text

@@ -20,7 +20,7 @@ jobs:
 
       - name: Run skill-check
         id: skill-check
-        uses: thedaviddias/skill-check@v1
+        uses: thedaviddias/skill-check@v1.2.0
         with:
           path: "."
           format: sarif

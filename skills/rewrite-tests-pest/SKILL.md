@@ -24,3 +24,6 @@ metadata:
 - Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them. 
 - Tests must have 100% coverage.
 - After writing the tests, verify that they are functional and follow the rules.
+
+**After completing the tasks**
+- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!

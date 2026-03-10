@@ -118,3 +118,6 @@ Refactored Example:
 $post = Post::where('user_id', auth()->id())
     ->findOrFail($id);
 ```
+
+**After completing the tasks**
+- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!

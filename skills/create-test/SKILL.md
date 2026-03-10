@@ -27,3 +27,6 @@ metadata:
 - Make sure of 100% coverage required for changes. Add tests so that 100% coverage is achieved. Prioritize modifying existing test cases; if tests do not exist, add them according to the valid rules for writing tests.
 - After creating or modifying tests, check that they are not flaky.
 - Remove generated coverage after work is done.
+
+**After completing the tasks**
+- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!

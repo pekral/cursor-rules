@@ -33,7 +33,7 @@ name: interactive-browser-testing
 
 **Steps:**
 
-1.  Load the issue using installed CLI tools or available MCP servers.
+1.  Load the issue using installed CLI tools or available MCP servers. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
 2.  Read the full issue including:
     -   title
     -   description
@@ -210,3 +210,4 @@ Produce a markdown report including:
 -   Highlight the most important mismatch first.
 -   If all relevant scenarios passed, state that the issue appears
     validated in the browser flow.
+-   If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!

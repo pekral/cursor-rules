@@ -1,6 +1,6 @@
 ---
 name: merge-github-pr
-description: "Merge PRs when they are ready for deployment, one by one"
+description: "Use when merging PRs that are ready for deployment, one by one."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"

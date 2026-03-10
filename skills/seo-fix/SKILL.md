@@ -1,5 +1,5 @@
 ---
-name: seo
+name: seo-fix
 description: "Maintains and extends SEO setup (robots.txt, sitemap.xml, meta tags). Use when adding or changing public routes, disallow rules, sitemap entries, canonical/robots/OG tags, or when the user asks about SEO, sitemap, or robots."
 license: MIT
 metadata:

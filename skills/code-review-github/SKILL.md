@@ -16,6 +16,7 @@ metadata:
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 
 **Steps:**
+- **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
 - Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.

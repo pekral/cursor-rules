@@ -15,6 +15,7 @@ metadata:
 - All messages formatted as markdown for output.
 
 **Steps:**
+- **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
 - Find only opened PRs!
 - Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.

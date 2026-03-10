@@ -15,6 +15,7 @@ metadata:
 - All messages formatted as markdown for output.
 
 **Steps:**
+- Find only opened PRs!
 - Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - I want you to create @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md for the issue (find it by code or URL) on JIRA (use acli console tool).

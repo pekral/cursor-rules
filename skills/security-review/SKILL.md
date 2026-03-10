@@ -1,6 +1,6 @@
 ---
 name: security-review
-description: "Performs comprehensive security review following OWASP Top 10 and security best practices. Checks for injection vulnerabilities, authentication flaws, sensitive data exposure, misconfigurations, and provides structured security reports with severity levels."
+description: "Use when performing comprehensive security review. Follows OWASP Top 10 and security best practices. Checks for injection vulnerabilities, authentication flaws, sensitive data exposure, misconfigurations, and provides structured security reports with severity levels."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"

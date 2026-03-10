@@ -1,0 +1,33 @@
+name: Skills Check
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  skill-check:
+    name: Skills Check
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run skill-check
+        id: skill-check
+        uses: thedaviddias/skill-check@v1
+        with:
+          path: "."
+          format: sarif
+          security-scan: "false"
+
+      - name: Upload SARIF (annotations)
+        if: always() && steps.skill-check.outputs.sarif-file != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.skill-check.outputs.sarif-file }}

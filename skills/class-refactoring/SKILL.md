@@ -20,7 +20,7 @@ metadata:
 - Clean, modern, optimized code.
 - Stateless PHP classes.
 - Collections over `foreach` where appropriate.
-- PHPDoc for PHPStan analysis.
+- PHPDoc for PHPStan analysis. PHPDoc content: describe business logic and general purpose; avoid listing method calls or implementation steps.
 - Complex logic commented
 - No magic numbers
 - No deep nesting

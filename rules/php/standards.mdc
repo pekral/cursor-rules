@@ -88,6 +88,12 @@ Simplify the tests by dividing them into multiple test cases.
 - Don't comment on what the code does - make the code self-documenting
 - Document APIs, complex algorithms, and non-obvious side effects
 
+## PHPDoc
+- Prefer general description and business logic over implementation details
+- Class-level PHPDoc: describe the class role in the domain, not a list of methods or internal behavior
+- Method-level PHPDoc: describe intent and business meaning; avoid restating the method name or parameter names
+- Do not use PHPDoc to enumerate method calls or step-by-step solution; keep it high-level and readable for maintainers
+
 ## Single Responsibility
 - Each function should do exactly one thing
 - Functions should be small and focused

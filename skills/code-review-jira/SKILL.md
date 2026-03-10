@@ -1,6 +1,6 @@
 ---
 name: code-review-jira
-description: "Performs code review for JIRA issues. Analyzes pull requests, identifies critical and moderate issues, runs tests, and posts review comments to GitHub PRs. Reviews code quality, security, and adherence to project standards."
+description: "Use when performing code review for JIRA issues. Analyzes pull requests, identifies critical and moderate issues, runs tests, and posts review comments to GitHub PRs. Reviews code quality, security, and adherence to project standards."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"

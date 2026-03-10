@@ -13,6 +13,7 @@ metadata:
 - I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - NEVER CHANGE THE CODE! Generate the output only.
 - All messages formatted as markdown for output.
+- Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 
 **Steps:**
 - Switch locally to the branch in PR and perform code review over changes locally on the filesystem.

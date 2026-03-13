@@ -31,3 +31,4 @@ metadata:
 **After completing the tasks**
 - Once you have finished your work and pushed the changes to pr, perform a code review according to your skill level @.cursor/skills/code-review-github.md
 - If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!
+- If work id done do @.cursor/skills/code-review-github/SKILL.md for actual issue

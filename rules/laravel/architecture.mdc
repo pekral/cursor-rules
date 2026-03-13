@@ -40,8 +40,8 @@ globs: ["*"]
 - Use enums with `HasLabel`, `HasColor`, `HasIcon` where applicable.
 - No business logic in models.
 - Use Eloquent models and relationships first; avoid raw queries and DB:: unless truly necessary.
-- Use Query Scopes
-- Use withCount for Counts
+- Use Query Scopes everytime!
+- Use withCount for Counts!
 - Use Casts for Type Safety
 - Chunking for Large Datasets
 - Don't Query in Loops

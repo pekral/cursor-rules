@@ -32,3 +32,4 @@ metadata:
 
 **After completing the tasks**
 - If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!
+- Based on the discussion in the assignment, is the proposed solution to the problems safe and effective? Analyze the assignment and all discussions related to this task and write me your conclusion!

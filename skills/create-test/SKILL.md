@@ -9,6 +9,8 @@ metadata:
 **Constraint:**
 - Read project.md file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- The generated code must comply with all rules defined for writing tests in @.cursor/rules/php
+/standards.mdc. If the project is written in Laravel, it must also comply with @.cursor/rules/laravel/architecture.mdc.
 
 **Steps:**
 - Locate existing tests or create new ones following project conventions.

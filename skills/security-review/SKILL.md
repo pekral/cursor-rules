@@ -83,6 +83,7 @@ metadata:
 - Check Git history does not contain leaked secrets (check with `git log` search or tools like Gitleaks).
 - Check Use environment variables or secret managers (Vault, AWS Secrets Manager) for sensitive values.
 - Check Rotate any secret found in version control immediately.
+- CHeck Credential stuffing
 
 **Deliver:** A structured security report organized by severity.
 

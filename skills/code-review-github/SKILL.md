@@ -20,7 +20,7 @@ metadata:
 - Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
-- I want you to create @.cursor/skills/code-review/SKILL.md, @.cursor/skills/security-review/SKILL.md and, when the changes involve SQL queries, repositories, migrations, or query builder code, @.cursor/skills/mysql-problem-solver/SKILL.md for the issue (find it by code or URL) on GitHub.
+- Always apply @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md. If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed code), also apply @.cursor/skills/mysql-problem-solver/SKILL.md for those parts; otherwise do not use the SQL skill. Find the issue by code or URL on GitHub.
 - Find the Git branch and switch to it.
 - If possible, find links to the assignment and analyze it so that you understand it and can do a quality CR. Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
 - List findings using exactly three severity levels: **Critical**, **Moderate**, **Minor**.

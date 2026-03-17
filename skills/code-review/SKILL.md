@@ -12,12 +12,14 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Understand context before reviewing
 - All messages formatted as markdown for output.
 - NEVER CHANGE THE CODE! Generate the output only.
-- Always do security check by defined skill for security!
+- Every CR must use @.cursor/skills/security-review/SKILL.md for the current changes.
 - Check for any points where the current changes could break the logic. If it is shared functionality, make sure to check these parts of the application as well!
 
 **Steps:**
 - **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
+- **Security review (every CR):** Always apply @.cursor/skills/security-review/SKILL.md for the current changes.
 - All changes must comply with `.cursor/rules/**/*.mdc`.
+- **SQL analysis (only when changes touch the database):** If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed files), use @.cursor/skills/mysql-problem-solver/SKILL.md for systematic analysis of those parts (identify query, inspect schema, EXPLAIN, evaluate indexes, propose safe optimizations). If there are no such changes, skip this step.
 - When the task has stated requirements or acceptance criteria (from the issue/PR), verify each item against the changes; list any that are not addressed or only partially met.
 - Read project.md file
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules.
@@ -27,7 +29,6 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Focus only on what tools do not cover: architecture, design, security logic, runtime/operational concerns.
 - Optimizations for processing large amounts of data
 - Security risks
-- SQL optimizations: when reviewing SQL queries, repositories, migrations, or query builder code, use @.cursor/skills/mysql-problem-solver/SKILL.md for systematic analysis (identify query, inspect schema, EXPLAIN, evaluate indexes, propose safe optimizations).
 - Performance
 - Provide categorized, actionable feedback
 - Current changes must be covered by tests with 100% coverage!

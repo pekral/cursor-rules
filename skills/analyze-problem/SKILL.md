@@ -1,6 +1,6 @@
 ---
 name: analyze-problem
-description: "Analyzes problems from issue trackers. Downloads and reviews attachments, provides technical analysis and solutions, and creates human-readable explanations for both technical and non-technical audiences."
+description: "Use when analyzing problems from issue trackers. Downloads and reviews attachments, provides technical analysis and solutions, and creates human-readable explanations for both technical and non-technical audiences."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"

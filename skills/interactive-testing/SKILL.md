@@ -1,12 +1,12 @@
 ---
-description: Read issue requirements, derive interactive browser test
-  cases, confirm them with the user, and validate them step by step
-  using the browser tool. Designed for acceptance criteria validation
-  and exploratory UI testing directly from issue descriptions.
+name: interactive-testing
+description: Use when reading issue requirements to derive interactive
+  browser test cases, confirm them with the user, and validate them
+  step by step using the browser tool. Designed for acceptance
+  criteria validation and exploratory UI testing from issue descriptions.
 license: MIT
 metadata:
   author: Petr Král (pekral.cz)
-name: interactive-browser-testing
 ---
 
 **Constraint:**

@@ -1,4 +1,5 @@
 ---
+name: class-refactoring-plan
 description: Plan phased refactoring for current changes using
   class-refactoring context. Use when the user wants a refactoring
   proposal only. Output markdown plan with one phase per commit.
@@ -6,7 +7,6 @@ description: Plan phased refactoring for current changes using
 license: MIT
 metadata:
   author: Petr Král (pekral.cz)
-name: refactoring-plan
 ---
 
 # Refactoring Plan

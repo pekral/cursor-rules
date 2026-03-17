@@ -39,3 +39,6 @@ composer.lock
 build/
 
 coverage.xml
+
+# CI-generated SARIF (skill-check)
+skill-check.sarif.json

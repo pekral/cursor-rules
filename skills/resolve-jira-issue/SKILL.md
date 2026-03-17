@@ -1,6 +1,6 @@
 ---
 name: resolve-jira-issue
-description: "Resolves JIRA issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Links PRs to JIRA issues and updates issue status."
+description: "Use when resolving JIRA issues. Fixes bugs, refactors code, performs code and security reviews, ensures 100% test coverage, runs CI checks, and creates pull requests. Links PRs to JIRA issues and updates issue status."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
@@ -33,5 +33,3 @@ metadata:
 - Once you have finished your work and pushed the changes to pr, perform a code review according to your skill level @./cursor/skills/code-review-jira/SKILL.md
 - If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!
 - If work id done do @.cursor/skills/code-review-jira/SKILL.md for actual issue
-
-

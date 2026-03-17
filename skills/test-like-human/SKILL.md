@@ -1,13 +1,13 @@
 ---
-description: For the current pull request, find the 'Testing
-  Recommendations' section in the PR conversation and test the
-  application like a senior web application tester. Follow the described
-  scenarios, use tools when needed, and produce a human-readable report
-  without technical notes.
+name: test-like-human
+description: Use when testing the current pull request. Find the
+  'Testing Recommendations' section in the PR conversation and test
+  the application like a senior web application tester. Follow the
+  described scenarios, use tools when needed, and produce a human-readable
+  report without technical notes.
 license: MIT
 metadata:
   author: Petr Král (pekral.cz)
-name: pr-testing-from-review
 ---
 
 **Constraint:**

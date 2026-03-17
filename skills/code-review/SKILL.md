@@ -22,6 +22,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules.
 - Ensure SRP in each class and apply SOLID principles so that the code is readable for developers.
 - Do not duplicate their checks: types, null safety, formatting, style, naming, dead code, automated refactors.
+- Do not review: formatting, import order, lint violations, simple typos — tools cover these.
 - Focus only on what tools do not cover: architecture, design, security logic, runtime/operational concerns.
 - Optimizations for processing large amounts of data
 - Security risks

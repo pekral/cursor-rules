@@ -1,6 +1,6 @@
 ---
 name: code-review-github
-description: "Performs code review for GitHub pull requests. Analyzes code changes, identifies critical and moderate issues, runs tests, and posts review comments. Reviews code quality, security, and adherence to project standards."
+description: "Use when performing code review for GitHub pull requests. Analyzes code changes, identifies critical and moderate issues, runs tests, and posts review comments. Reviews code quality, security, and adherence to project standards."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"

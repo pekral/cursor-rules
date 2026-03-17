@@ -1,4 +1,5 @@
 ---
+name: create-issue
 description: Create an issue in a generic issue tracker from the
   provided task description. Use when the user asks to open an issue.
   Preserve the original task content exactly and only improve formatting
@@ -6,7 +7,6 @@ description: Create an issue in a generic issue tracker from the
 license: MIT
 metadata:
   author: Petr Král (pekral.cz)
-name: create-issue
 ---
 
 # Create Issue

@@ -1,6 +1,6 @@
 ---
-name: seo
-description: "Maintains and extends SEO setup (robots.txt, sitemap.xml, meta tags). Use when adding or changing public routes, disallow rules, sitemap entries, canonical/robots/OG tags, or when the user asks about SEO, sitemap, or robots."
+name: seo-fix
+description: "Use when maintaining or extending SEO setup (robots.txt, sitemap.xml, meta tags), adding or changing public routes, disallow rules, sitemap entries, canonical/robots/OG tags, or when the user asks about SEO, sitemap, or robots."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"

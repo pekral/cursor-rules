@@ -1,4 +1,5 @@
 ---
+name: create-missing-tests-in-pr
 description: Reads your pull request code review, verifies that all
   recommended test coverage is implemented in the codebase, and adds
   missing tests using the create-test skill. Use when a PR review
@@ -7,7 +8,6 @@ description: Reads your pull request code review, verifies that all
 license: MIT
 metadata:
   author: Petr Král (pekral.cz)
-name: fill-missing-pr-tests
 ---
 
 **Constraint:**

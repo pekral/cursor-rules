@@ -120,6 +120,7 @@
     ],
     "fix": [
       "echo \"🔧 Running all fixes...\"",
+      "@skill-check-fix",
       "@composer-normalize-fix",
       "@rector-fix",
       "@pint-fix",
@@ -156,7 +157,11 @@
     ],
     "skill-check": [
       "echo \"📋 Running skill-check (SKILL.md linter)...\"",
-      "npx skill-check check . --no-security-scan"
+      "npx skill-check check skills --no-security-scan"
+    ],
+    "skill-check-fix": [
+      "echo \"📋 Running skill-check auto-fix...\"",
+      "npx skill-check check skills --fix --no-security-scan"
     ],
     "test:coverage": [
       "echo \"📊 Running coverage tests with PCOV...\"",

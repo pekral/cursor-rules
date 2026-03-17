@@ -30,4 +30,4 @@ jobs:
         if: always() && steps.skill-check.outputs.sarif-file != ''
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: ${{ steps.skill-check.outputs.sarif-file }}
+          sarif_file: skill-check.sarif.json

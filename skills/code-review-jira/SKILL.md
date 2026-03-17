@@ -28,7 +28,7 @@ metadata:
 - I don't want to enter technical data into the JIRA issue tracker after code review, but I want to edit the text so that project managers and testers can understand it.
 - I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. Format the PR comment as: (1) One-line summary by severity (e.g. "Summary: 2 Critical, 1 Moderate"); (2) List of findings grouped by severity, each with file/line (or file) and a short, actionable recommendation. Do not list "What was checked," only the findings.
 - Run the tests and let me know if the current changes meet the requirements.  If so, add a new comment to the issue with a recommendation on what to test (briefly). If the requirements are not met or you have found critical errors, just list them for me.
-- If is needed use interactive-browser-testing skill for testing
+- If is needed use interactive-testing skill for testing
 
 **After completing the tasks**
 - If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!

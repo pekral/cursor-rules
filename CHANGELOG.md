@@ -13,4 +13,5 @@ All notable changes to `cursor-rules` will be documented in this file.
 - 🐛 **Fixed**: Symfony console v8 compatibility
 - ♻️ **Refactored**: optimize commands and prompts
 - ✨ **Added**: new Agent skills (resolve-github-issue, merge-github-pr, code-review, seo-fix, package-review, and others)
+- ✨ **Added**: new Agent skill `process-code-review` for handling pull request review feedback loops
 - 📝 **Changed**: Update SKILL.md files and rule files (php standards, sql, git, laravel)

@@ -98,6 +98,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | Skill                    | Description                                                                 |
 |--------------------------|-----------------------------------------------------------------------------|
 | `code-review`            | Senior PHP code reviewer. Use when reviewing pull requests, examining code changes vs master branch, or when the user asks for a code review. Read-only review — never modifies code. |
+| `process-code-review`    | Processes feedback from existing pull request reviews: finds latest PR for task, resolves review comments, updates review status comments, and triggers the next review cycle. |
 | `code-review-github`     | Performs comprehensive code review for GitHub pull requests. Analyzes code changes, identifies critical and moderate issues, runs tests, and posts review comments. Reviews code quality, security, and adherence to project standards. |
 | `code-review-jira`       | Performs code review for JIRA issues. Analyzes pull requests, identifies critical and moderate issues, runs tests, and posts review comments to GitHub PRs. Reviews code quality, security, and adherence to project standards. |
 | `security-review`        | Performs comprehensive security review following OWASP Top 10 and security best practices. Checks for injection vulnerabilities, authentication flaws, sensitive data exposure, misconfigurations, and provides structured security reports with severity levels. |

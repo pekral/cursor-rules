@@ -97,7 +97,7 @@ If the instruction involves user interaction:
 
 Use the interactive browser testing skill:
 
-@.cursor/skills/interactive-browser-testing/SKILL.md
+@.cursor/skills/interactive-testing/SKILL.md
 
 Simulate realistic user actions:
 

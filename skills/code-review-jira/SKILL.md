@@ -16,7 +16,7 @@ metadata:
 
 **Steps:**
 - **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
-- Find only opened PRs!
+- Find only opened PRs! If you're searching for a JIRA PR and can't find it using the standard method, check the user comments to see if they include a direct link to the PR (since the PR may not meet the criteria for automatic linking with JIRA).
 - Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - Always apply @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md. If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed code), also apply @.cursor/skills/mysql-problem-solver/SKILL.md for those parts; otherwise do not use the SQL skill. Find the issue by code or URL on JIRA (use acli console tool).

@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Read project.md file.
+- Read project.mdc file.
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - Output in the same language as the user's request.
 - All messages formatted as markdown.

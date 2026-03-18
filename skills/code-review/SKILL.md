@@ -4,7 +4,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 ---
 
 **Constraint:**
-- Read project.md file
+- Read project.mdc file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
 - Switch to the main branch and make sure you have the updated main branch. Then switch to the branch where the PR is and, to be on the safe side, update the branch for the PR as well, then continue with the code review.
@@ -16,12 +16,12 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Check for any points where the current changes could break the logic. If it is shared functionality, make sure to check these parts of the application as well!
 
 **Steps:**
+- Read project.mdc file
 - **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
 - **Security review (every CR):** Always apply @.cursor/skills/security-review/SKILL.md for the current changes.
 - All changes must comply with `.cursor/rules/**/*.mdc`.
 - **SQL analysis (only when changes touch the database):** If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed files), use @.cursor/skills/mysql-problem-solver/SKILL.md for systematic analysis of those parts (identify query, inspect schema, EXPLAIN, evaluate indexes, propose safe optimizations). If there are no such changes, skip this step.
 - When the task has stated requirements or acceptance criteria (from the issue/PR), verify each item against the changes; list any that are not addressed or only partially met.
-- Read project.md file
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules.
 - Ensure SRP in each class and apply SOLID principles so that the code is readable for developers.
 - Do not duplicate their checks: types, null safety, formatting, style, naming, dead code, automated refactors.

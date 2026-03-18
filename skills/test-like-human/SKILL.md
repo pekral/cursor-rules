@@ -12,7 +12,7 @@ metadata:
 
 **Constraint:**
 
--   Read project.md file!
+-   Read project.mdc file!
 -   First load all cursor editor rules (.cursor/rules/.\*mdc).
 -   I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 -   Analyze all comments in the issue tracker and check what needs to be done accordingly. Stick strictly to the assignment and comments!
@@ -33,7 +33,7 @@ metadata:
     testing skills**.
 -   The final output must be written for humans and must not contain
     technical notes, logs, stack details, or developer commentary.
--   For testing api endpoints follow steps defined in project.md section "## Testing API endpoints like human". If you have a definition of the response from the API, check that the response from the test matches the documentation.
+-   For testing api endpoints follow steps defined in project.mdc section "## Testing API endpoints like human". If you have a definition of the response from the API, check that the response from the test matches the documentation.
 -   Never run automatic tests from codebase!
 -   When testing API endpoints, always find information about the endpoint via MCP (or otherwise). Use all available tools to obtain the necessary parameters for building the URL for the API!
 

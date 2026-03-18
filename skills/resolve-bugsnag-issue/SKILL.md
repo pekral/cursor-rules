@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Read project.md file
+- Read project.mdc file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
 - I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.

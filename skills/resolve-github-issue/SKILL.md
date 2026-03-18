@@ -13,7 +13,7 @@ metadata:
 - If you are not on the main git branch in the project, switch to it.
 
 **Steps:**
-- Read project.md file
+- Read project.mdc file
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - I want you to fix the bug from Github (you either got an ID or a link to Github). Use the MCP server to get all the necessary information about the bug so you can fix it. If you have other resources available that you could use to understand the problem, load them and analyze them. Use the available CLI tools or MCP servers to load them. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
 - Resolve this issue (the generated code must be according to @.cursor/skills/class-refactoring/SKILL.md), then review the code according to @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md for current changes. If you find any critical issues in the new changes, resolve them and perform further iterations of the defined code review (repeat until the bug is fixed).

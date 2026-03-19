@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **15 comprehensive Agent skills** for automated workflows (v0.5)
+- **24 comprehensive Agent skills** for automated workflows (v0.5)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -108,6 +108,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 
 | Skill                    | Description                                                                 |
 |--------------------------|-----------------------------------------------------------------------------|
+| `postman-collections`    | Generates or updates Postman collections when API endpoints are created or changed, keeps examples and auth variables in sync, and validates collection importability. |
 | `create-test`            | Creates tests following project conventions and patterns. Ensures deterministic tests, 100% code coverage for changes, uses data providers where appropriate, and mocks only external services or exception scenarios. |
 | `rewrite-tests-pest`     | Rewrites existing tests to PEST syntax following project conventions. Ensures DRY principles, uses data providers, maintains 100% coverage, and verifies test functionality. |
 | `package-review`         | Reviews composer.json packages by validating structure, checking required fields, verifying links, and ensuring proper configuration of autoloading, dependencies, and metadata. |

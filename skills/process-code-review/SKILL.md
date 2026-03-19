@@ -21,7 +21,7 @@ metadata:
 - In the pull request, locate code review output and all review comments (including review threads and general comments).
 - If there is only a generic `CR` comment, treat it as `code review` feedback.
 - Build a checklist from all review findings and map each item to a concrete code or test change.
-- Apply the requested changes and keep scope limited to review feedback.
+- Apply the requested changes and keep scope limited to review feedback. All new or modified production code must follow @.cursor/skills/class-refactoring/SKILL.md.
 - Re-check current changes with @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md.  
 - If review feedback requires additional tests, use @.cursor/skills/create-missing-tests-in-pr/SKILL.md and ensure current changes are fully covered.
 - Run only checks/tests needed for the changed files and fix all errors before continuing.

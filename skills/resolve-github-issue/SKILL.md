@@ -10,7 +10,6 @@ metadata:
 **Constraint:**
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
-- All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
 - If you are not on the main git branch in the project, switch to it.
 
 **Steps:**

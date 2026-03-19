@@ -13,6 +13,7 @@ metadata:
 - All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
 - Never push direct changes to the main branch.
 - If the pull request has merge conflicts with the base branch, stop and report that the code review processing is blocked.
+- For comments posted to JIRA, always use JIRA Wiki Markup (not Markdown) and follow the universal structure from JIRA-focused skills.
 
 **Steps:**
 - Identify the task from the provided issue code or URL.

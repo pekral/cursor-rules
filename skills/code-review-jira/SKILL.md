@@ -14,6 +14,17 @@ metadata:
 - All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
 - NEVER CHANGE THE CODE! Generate the output only.
 - All messages formatted as markdown for output.
+- For comments posted to JIRA, always use JIRA Wiki Markup (not Markdown). Never use fenced code blocks (```), markdown headings (#), or markdown tables.
+
+**Universal JIRA Comment Formatting**
+- Use this output shape for every JIRA update from this skill:
+- `h3. <short status title>`
+- One short business-readable paragraph (non-technical wording)
+- `h4. Findings summary` and bullet list using `*`
+- If needed, `h4. Testing recommendations` and bullet list using `*`
+- Inline references with `{{...}}` (ticket id, endpoint, env, status code)
+- Use `{code}` / `{code:json}` only for short examples; never include markdown fences in JIRA comments
+- Keep comments understandable for project managers and testers, not only developers
 
 **Steps:**
 - **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.

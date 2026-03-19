@@ -41,6 +41,7 @@ metadata:
 - New public route/page: use the public layout and ensure title and meta description are defined for that page.
 
 **After SEO changes**
+- All new or modified production code must follow @.cursor/skills/class-refactoring/SKILL.md.
 - Run existing tests that hit robots, sitemap, or assert head meta. Fix any failing assertions.
 
 **Checklist — new public page**

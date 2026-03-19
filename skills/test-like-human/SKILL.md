@@ -20,6 +20,8 @@ metadata:
 -   Testing instructions must be taken only from the PR conversation.
 -   Specifically search for a section named **'Doporučení k testování'**
     or **'Testing Recommendations'**.
+-   In that section, prefer recommendations that include direct in-app links
+    (full URLs) for fast click-through testing.
 -   Test the application like a **senior tester of web applications who
     is not a programmer**.
 -   Focus on visible behavior, usability, clarity, consistency, and real

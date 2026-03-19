@@ -23,6 +23,7 @@ metadata:
 - One short business-readable paragraph (non-technical wording)
 - `h4. Findings summary` and bullet list using `*`
 - If needed, `h4. Testing recommendations` and bullet list using `*`
+- For every testing recommendation item, include a direct in-app link (full URL) so testers can open the exact screen immediately
 - Inline references with `{{...}}` (ticket id, endpoint, env, status code)
 - Use `{code}` / `{code:json}` only for short examples; never include markdown fences in JIRA comments
 - Keep comments understandable for project managers and testers, not only developers
@@ -42,7 +43,7 @@ metadata:
 - I don't want to enter technical data into the JIRA issue tracker after code review, but I want to edit the text so that project managers and testers can understand it.
 - For simple fixes, include a minimal example using JIRA `{code}` blocks only when it improves clarity.
 - I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. Format the PR comment as: (1) One-line summary by severity (e.g. "Summary: 2 Critical, 1 Moderate"); (2) List of findings grouped by severity, each with file/line (or file) and a short, actionable recommendation. Do not list "What was checked," only the findings.
-- Run the tests and let me know if the current changes meet the requirements.  If so, add a new comment to the issue with a recommendation on what to test (briefly). If the requirements are not met or you have found critical errors, just list them for me.
+- Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
 - If is needed use interactive-testing skill for testing
 
 **After completing the tasks**

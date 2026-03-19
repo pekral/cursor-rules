@@ -13,6 +13,44 @@ metadata:
 - All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
 - If you are not on the main git branch in the project, switch to it.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
+- For comments posted to JIRA, always use JIRA Wiki Markup (not Markdown). Never use fenced code blocks (```), markdown headings (#), or markdown tables.
+
+**Universal JIRA Comment Formatting**
+- Use this structure for every JIRA comment type (status update, testing recommendation, CR summary, implementation summary):
+- Title: `h3. <short title>`
+- Short context paragraph (1-3 lines, plain text)
+- Optional sections with `h4. <section title>`
+- Bullets with `* item`
+- Inline code/paths/endpoints in monospace using `{{...}}`
+- Code examples only via `{code[:language]}` blocks
+- Tables only with JIRA table syntax (`||` header row, `|` data row)
+- Keep one empty line between blocks for readability
+
+Example of the final JIRA comment body:
+```text
+h3. Implementation summary
+
+Feature is ready for review. Main behavior was validated locally.
+
+h4. What changed
+* Added validation for {{subscriber_data}} payload.
+* Added guard for {{allow_resubscribe}} transition from {{2 -> 1}}.
+
+h4. API example
+{code:json}
+{
+  "allow_resubscribe": true,
+  "subscriber_data": [
+    {"email": "user@example.com", "status": 1}
+  ]
+}
+{code}
+
+h4. Testing recommendations
+* Verify update for an existing contact.
+* Verify skipped unknown contact appears in response {{errors}}.
+* Verify rate-limit handling (HTTP {{429}} with {{Retry-After}}).
+```
 
 **Steps:**
 - Read project.mdc file

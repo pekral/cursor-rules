@@ -10,6 +10,7 @@ metadata:
 - Read project.mdc file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
+- All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
 - Never push direct changes to the main branch.
 - If the pull request has merge conflicts with the base branch, stop and report that the code review processing is blocked.
 

@@ -20,6 +20,7 @@ metadata:
 - Short context paragraph (1-3 lines, plain text)
 - Optional sections with `h4. <section title>`
 - Bullets with `* item`
+- For testing recommendations, include direct in-app links as full URLs in each bullet item
 - Inline code/paths/endpoints in monospace using `{{...}}`
 - Code examples only via `{code[:language]}` blocks
 - Tables only with JIRA table syntax (`||` header row, `|` data row)
@@ -63,7 +64,7 @@ h4. Testing recommendations
 - If there is no link to the issue tracker, add a link to the issue tracker entry to the CR summary and, if possible, link it directly according to the issue tracker recommendations. Be sure to include an HTTP link.
 - I want you to post a comment on the core revision on GitHub, but I want you to post only critical or medium-severity issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue as ready for review.
 - After completing all tasks for GitHub, link the created PR in the JIRA issue, change the status of the JIRA issue to ready for review.
-- Run the tests and let me know if the current changes meet the requirements.  If so, add a new comment to the issue with a recommendation on what to test (briefly). If the requirements are not met or you have found critical errors, just list them for me.
+- Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
 - Write missing tests for current changes and ensure 100% coverage, fix dry and try to simplify the code base so that it is easy to read for humans, but also as simple as possible. These changes will be in a separate commit.
 - I want you to post a comment into the pull request on GitHub regarding the core review, but I want you to only post critical or moderately serious issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue with the label ready for review.
 

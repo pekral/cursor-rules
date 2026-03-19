@@ -20,6 +20,7 @@ final class Installer
         $command = $argv[1] ?? 'help';
         $force = in_array('--force', $argv, true);
         $symlink = in_array('--symlink', $argv, true);
+        $prune = in_array('--prune', $argv, true);
 
         try {
             if ($command === 'help') {
@@ -40,7 +41,7 @@ final class Installer
                 return 1;
             }
 
-            return self::install($force, $symlink, $editor);
+            return self::install($force, $symlink, $prune, $editor);
         } catch (InstallerFailure $exception) {
             fwrite(STDERR, $exception->getMessage() . PHP_EOL);
 
@@ -68,37 +69,63 @@ final class Installer
     private static function showHelp(): int
     {
         echo "Usage:\n";
-        echo "  vendor/bin/cursor-rules install [--force] [--symlink] [--editor=EDITOR]\n\n";
+        echo "  vendor/bin/cursor-rules install [--force] [--symlink] [--prune] [--editor=EDITOR]\n\n";
         echo "Options:\n";
         echo "  --force         Overwrite existing files.\n";
         echo "  --symlink       Create symlinks instead of copying (falls back to copy on Windows).\n";
+        echo "  --prune         Remove files in target that no longer exist in source.\n";
         echo "  --editor=EDITOR Target editor: cursor (default), claude, codex, all.\n";
 
         return 0;
     }
 
-    private static function install(bool $force, bool $symlink, string $editor): int
+    private static function install(bool $force, bool $symlink, bool $prune, string $editor): int
     {
         $root = InstallerPath::resolveProjectRoot();
-        $totalCopied = 0;
 
         $rulesSource = InstallerPath::resolveRulesSource($root);
-
-        foreach (InstallerPath::resolveRulesTargetDirectories($root, $editor) as $rulesTarget) {
-            $totalCopied += self::installDirectory($rulesSource, $rulesTarget, $force, $symlink);
-        }
+        [$rulesCopied, $rulesPruned] = self::syncDirectories(
+            $rulesSource,
+            InstallerPath::resolveRulesTargetDirectories($root, $editor),
+            $force,
+            $symlink,
+            $prune,
+        );
 
         $skillsSource = InstallerPath::resolveSkillsSource($root);
+        [$skillsCopied, $skillsPruned] = $skillsSource !== null
+            ? self::syncDirectories(
+                $skillsSource,
+                InstallerPath::resolveSkillsTargetDirectories($root, $editor),
+                $force,
+                $symlink,
+                $prune,
+            )
+            : [0, 0];
 
-        if ($skillsSource !== null) {
-            foreach (InstallerPath::resolveSkillsTargetDirectories($root, $editor) as $skillsTarget) {
-                $totalCopied += self::installDirectory($skillsSource, $skillsTarget, $force, $symlink);
+        echo sprintf('Cursor rules installed (%d files, %d pruned).%s', $rulesCopied + $skillsCopied, $rulesPruned + $skillsPruned, PHP_EOL);
+
+        return 0;
+    }
+
+    /**
+     * @param array<int, string> $targets
+     * @return array{int, int}
+     */
+    private static function syncDirectories(string $source, array $targets, bool $force, bool $symlink, bool $prune): array
+    {
+        $copied = 0;
+        $pruned = 0;
+
+        foreach ($targets as $target) {
+            $copied += self::installDirectory($source, $target, $force, $symlink);
+
+            if ($prune) {
+                $pruned += InstallerPruner::pruneDirectory($source, $target);
             }
         }
 
-        echo sprintf('Cursor rules installed (%d files).%s', $totalCopied, PHP_EOL);
-
-        return 0;
+        return [$copied, $pruned];
     }
 
     private static function installDirectory(string $source, string $targetDir, bool $force, bool $symlink): int

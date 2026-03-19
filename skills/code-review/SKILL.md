@@ -7,6 +7,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Read project.mdc file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
+- If this skill generates a Code Review report, always load existing review reports/comments first (if available) and never repeat the same previously reported finding.
 - Switch to the main branch and make sure you have the updated main branch. Then switch to the branch where the PR is and, to be on the safe side, update the branch for the PR as well, then continue with the code review.
 - Identify changes vs main branch (list commits).
 - Understand context before reviewing
@@ -18,6 +19,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 **Steps:**
 - Read project.mdc file
 - **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
+- Before writing findings, collect previous CR reports from the related PR/issue discussion and build a dedup list by problem signature (file/scope + risk + root cause). Do not repeat already reported findings unless severity or impact changed.
 - **Security review (every CR):** Always apply @.cursor/skills/security-review/SKILL.md for the current changes.
 - All changes must comply with `.cursor/rules/**/*.mdc`.
 - **SQL analysis (only when changes touch the database):** If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed files), use @.cursor/skills/mysql-problem-solver/SKILL.md for systematic analysis of those parts (identify query, inspect schema, EXPLAIN, evaluate indexes, propose safe optimizations). If there are no such changes, skip this step.
@@ -87,6 +89,10 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Laravel: prefer `Http::fake()` over Mockery.
 
 **Deliver:** Brief summary: issues, risks, improvements. No code changes. Use exactly three severity levels (**Critical**, **Moderate**, **Minor**) for each finding; end with a one-line summary (e.g. "Summary: 1 Critical, 2 Moderate, 3 Minor").
+- Output format must match the target tracker requirements:
+  - GitHub/Markdown outputs: use clear markdown sections with severity grouping.
+  - JIRA outputs: use JIRA Wiki Markup (no markdown headings/fences/tables).
+- For simple fixes, include a short code suggestion/snippet as part of the recommendation.
 
 **Review best practices:**
 - Give concrete fixes or code snippets where relevant; not only “something is wrong”.

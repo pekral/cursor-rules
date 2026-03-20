@@ -47,6 +47,7 @@ metadata:
 -   Never use describe() in tests.
 -   Mock only external services or exception scenarios.
 -   Remove unnecessary mocks if found while updating tests.
+-   After generating or modifying tests, verify that all new tests comply with the testing rules in `@.cursor/rules/php/standards.mdc`. Check mock usage specifically: mock only external services (HTTP clients) or to simulate exceptions; remove any constructor mocks, unnecessary mocks, or mocks that can be replaced with real service logic.
 -   Use data providers where they improve readability and simplify
     repeated test cases.
 -   After adding or updating tests, run only the necessary tests for the

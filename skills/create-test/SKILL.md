@@ -28,6 +28,7 @@ metadata:
 - Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them. 
 - Make sure of 100% coverage required for changes. Add tests so that 100% coverage is achieved. Prioritize modifying existing test cases; if tests do not exist, add them according to the valid rules for writing tests.
 - After creating or modifying tests, check that they are not flaky.
+- After generating or modifying tests, verify that all new tests comply with the testing rules in `@.cursor/rules/php/standards.mdc`. Check mock usage specifically: mock only external services (HTTP clients) or to simulate exceptions; remove any constructor mocks, unnecessary mocks, or mocks that can be replaced with real service logic.
 - Remove generated coverage after work is done.
 
 **After completing the tasks**

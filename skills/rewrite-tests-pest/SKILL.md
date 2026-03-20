@@ -24,6 +24,7 @@ metadata:
 - Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them. 
 - Tests must have 100% coverage.
 - After writing the tests, verify that they are functional and follow the rules.
+- After generating or modifying tests, verify that all new tests comply with the testing rules in `@.cursor/rules/php/standards.mdc`. Check mock usage specifically: mock only external services (HTTP clients) or to simulate exceptions; remove any constructor mocks, unnecessary mocks, or mocks that can be replaced with real service logic.
 
 **After completing the tasks**
 - If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!

@@ -1,0 +1,37 @@
+---
+description: Architecture rules for projects using pekral/arch-app-services package. Apply only when this package is present in vendor.
+alwaysApply: false
+globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/Services/**", "app/Repositories/**", "app/ModelManagers/**"]
+---
+
+## Architecture
+
+- Follow `pekral/arch-app-services` architecture strictly (source of truth: package README + `vendor/pekral/arch-app-services/examples`).
+- Mandatory flow for PHP orchestration: **Controller/Job/Command/Listener -> Action -> ModelService -> Repository (read) / ModelManager (write)**.
+- All classes implementing the Action pattern must be stored under `app/Actions/**/` (domain-based subfolders are required; do not place Actions in Controllers, Services, Jobs, or other directories).
+- For new orchestration in Jobs, Controller actions, and Console Commands, delegation to an Action class from `app/Actions/**/` is mandatory.
+- `app/Actions/` — one use case per class, `final readonly`, constructor DI only, **single public entry point `__invoke()`** (no additional public business methods).
+- Actions are orchestration-only: validation, DTO/data transformation, and delegation. **No direct Eloquent storage/query calls** and no `DB::` queries in Actions.
+- `app/Services/` (especially classes extending `BaseModelService`) orchestrate repository + model manager contracts; keep them stateless and focused. Service naming follows package convention (`*ModelService` for model services).
+- `app/Repositories/` — read-only access layer (querying, filtering, pagination, optional cache wrapper); no writes, no side effects.
+- `app/ModelManagers/` — write-only persistence layer (create/update/delete/bulk operations); no read querying.
+- `app/Dto/` — typed DTOs for data exchange/validation; avoid raw untyped arrays across layer boundaries.
+- CR is **strict**: any new or changed backend flow that bypasses this concept must be requested for changes. Legacy untouched code is carve-out only; touched flows must be aligned.
+- Multitenancy remains mandatory in every layer: each Account is isolated and all reads/writes must be account-scoped.
+
+## Actions (preferred for generated / new code)
+
+- Prefer the **Action** pattern when writing or generating new PHP features: **one class = one use case**, placed under `app/Actions/{Domain}/`, class name suffixed with `Action` (e.g. `GetSubscriberEmailLogAction`).
+- Actions are **`final readonly`** with **constructor injection**; expose a **single entry point**, typically **`__invoke(...)`** with an explicit return type.
+- Actions **orchestrate** only: delegate reads to `Repositories`, writes to `ModelManagers`, and **shared or heavy domain logic** to `Services` — keep Actions small and composable.
+- Do not bundle unrelated operations in one Action; extract reusable logic into Services so multiple Actions can share it.
+- Jobs, console commands, and event listeners should stay thin and invoke Actions (or Services when no natural single Action exists) instead of inlining business flow.
+
+## Code review (CR)
+
+- **Always enforce the Action pattern** when reviewing PHP changes: new or materially changed server-side flows must go through `app/Actions/{Domain}/…Action` (thin entry points — controllers, jobs, Artisan commands, event listeners — only validate/bind input and call an Action or existing Service).
+- For **new Jobs**, **actions in Controllers**, and **Console Commands**, using an Action-pattern class is mandatory. The orchestration must be delegated to a dedicated Action in `app/Actions/**/`.
+- If a new Job / Controller action / Console Command does not use the Action pattern, mark this finding as **critical severity** in the CR report.
+- **Request changes** if a PR introduces multi-step orchestration, branching business rules, or repeated controller/job logic without an Action; extracting or reusing an Action is the default fix.
+- **Legacy carve-out**: do not block a CR solely to rewrite untouched surrounding code; still require Actions for **new** behavior and for **refactored** paths you touch.
+- **Exceptions** (no Action required): trivial pass-through, pure DTO mapping with no domain rules, config-only changes, or frontend-only diffs with no new PHP orchestration.

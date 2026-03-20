@@ -17,7 +17,11 @@ metadata:
 **Steps:**
 - Analyze all comments in the issue tracker and check what needs to be done accordingly. Stick strictly to the assignment and comments!
 - I want you to fix the bug from Bugsnag (you either got an ID or a link to Bugsnag). Use the MCP server to get all the necessary information about the bug so you can fix it. If you have other resources available that you could use to understand the problem, load them and analyze them. Use the available CLI tools or MCP servers to load them. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
-- First, analyze the task to determine whether it’s a bug or not. If it is a bug, first reproduce the error in your tests, and then fix it! Only in this case should you follow TDD!
+- Bugsnag issues always represent runtime errors or exceptions and are therefore always treated as bugs. Follow strict TDD:
+  1. Write a test that reproduces the reported failure (the test must fail before any fix is applied).
+  2. Run the test and confirm it fails — do not proceed until you see the red failure.
+  3. Implement the minimal fix that makes the test pass.
+  4. Run the test again and confirm it is green.
 - Resolve this issue (the generated code must be according to @.cursor/skills/class-refactoring/SKILL.md), then review the code according to @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md for current changes. If you find any critical issues in the new changes, resolve them and perform further iterations of the defined code review (repeat until the bug is fixed).
 - Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker.
 - For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.

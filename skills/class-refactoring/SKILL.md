@@ -27,6 +27,7 @@ metadata:
 - Prefer small, focused functions.
 - English comments only.
 - Spatie DTOs instead of arrays (except Job constructors).
+- **`?array` is forbidden:** Any use of `?array` as a type hint must be replaced with a typed collection, DTO, or explicit `array<Type>|null`. Vague nullable arrays hide structure and break static analysis.
 - Laravel helpers over native PHP when appropriate.
 - DRY principle — eliminate duplicates.
 - Remove obvious comments; keep PHPStan-relevant docs.

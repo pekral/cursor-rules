@@ -56,7 +56,16 @@ h4. Testing recommendations
 - Read project.mdc file
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - I want you to fix the bug from JIRA (you have either the ID or a link to JIRA). Use the acli tool or MCP server to get all the information you need about the bug so you can fix it. If you have other resources available that you could use to understand the problem, load them and analyze them. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
-- First, analyze the task to determine whether it’s a bug or not. If it is a bug, first reproduce the error in your tests, and then fix it! Only in this case should you follow TDD!
+- Classify the task type before writing any code:
+  - **Bug**: the issue describes existing functionality that behaves incorrectly (e.g. wrong output, exception, regression, data corruption). Issue types such as `Bug` or `Defect`, or labels such as `bug`, `fix`, or `regression` are strong signals.
+  - **Feature**: the issue requests new behaviour that does not exist yet.
+  - If the classification is unclear, treat the task as a feature.
+- If the task is a **bug**, follow strict TDD:
+  1. Write a test that reproduces the reported failure (the test must fail before any fix is applied).
+  2. Run the test and confirm it fails — do not proceed until you see the red failure.
+  3. Implement the minimal fix that makes the test pass.
+  4. Run the test again and confirm it is green.
+- If the task is a **feature**, implement it directly without the failing-test-first requirement.
 - Resolve this issue (the generated code must be according to @.cursor/skills/class-refactoring/SKILL.md), then review the code according to @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md for current changes. If you find any critical issues in the new changes, resolve them and perform further iterations of the defined code review (repeat until the bug is fixed).
 - Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker.
 - For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.

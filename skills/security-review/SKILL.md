@@ -122,3 +122,23 @@ $post = Post::where('user_id', auth()->id())
 
 **After completing the tasks**
 - If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!
+
+## Additional checks from 2023-2026 threat trends
+
+- Check **Identity attack resistance (ATO)** on login and recovery flows: anti-automation controls for credential stuffing/spraying, per-account and per-IP throttling, step-up challenge, and safe lockout behavior.
+- Check **Password reset and OTP hardening**: reset/OTP tokens are single-use, short-lived, and protected by retry limits and abuse detection.
+- Check **BOLA/IDOR regression coverage**: every endpoint with object identifiers has a negative authorization test proving out-of-scope IDs return `403/404`.
+- Check **Unrestricted resource consumption (OWASP API4:2023)**: expensive endpoints have limits (rate, quota, pagination bounds, payload size), and return `429` when limits are exceeded.
+- Check **File upload hardening**: extension allowlist, content-type verification by actual file signature, random file names, storage outside webroot, and path traversal protections.
+- Check **Unsafe deserialization and parser abuse**: no deserialization of untrusted input (`unserialize`, unsafe object parsers, unsafe binary formats) without strict type allowlists and validation.
+- Check **Fail-secure exception handling (OWASP A10:2025)**: exception paths do not bypass authz/authn and default to deny/abort.
+- Check **Security logging vocabulary and coverage**: security-critical events (login lifecycle, MFA changes, role changes, admin actions, exports) are logged with a consistent schema and are alertable.
+- Check **Exploitability-driven remediation priority** for CVE findings using:
+  - `CVSS` severity,
+  - `EPSS` probability,
+  - `CISA KEV` presence,
+  - real exposure (internet-facing/reachable path),
+  - asset criticality.
+- Check **Urgency thresholds for patching**: findings with KEV + internet exposure, or very high exploitability score, are escalated to immediate hotfix workflow.
+- Check **Supply chain release controls**: SBOM generation per release, SCA in CI, policy-based build failure for high-risk exploitable dependencies, and lockfile change review.
+- Check **Secret leak response readiness**: if leaked secrets are detected, incident flow includes immediate revocation/rotation and audit of dependent systems.

@@ -1,7 +1,7 @@
 ---
 description: Architecture rules for projects using pekral/arch-app-services package. Apply only when this package is present in vendor.
 alwaysApply: false
-globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/ModelManagers/**"]
+globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/ModelManagers/**", "app/Http/Controllers/**", "app/Jobs/**", "app/Console/Commands/**", "app/Listeners/**"]
 ---
 
 ## Architecture

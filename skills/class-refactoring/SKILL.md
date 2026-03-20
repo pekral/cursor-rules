@@ -43,6 +43,7 @@ metadata:
 - Method signatures must remain expressive and minimal.
 - Match test variable names to actual use cases.
 - New tests must cover relevant code.
+- After generating or modifying tests, verify that all new tests comply with the testing rules in `@.cursor/rules/php/standards.mdc`. Check mock usage specifically: mock only external services (HTTP clients) or to simulate exceptions; remove any constructor mocks, unnecessary mocks, or mocks that can be replaced with real service logic.
 - Remove coverage files after verification.
 
   **Do not:** 

@@ -36,7 +36,7 @@ globs: ["*"]
 - Implement proper request validation using Form Requests
 - Aim for "slim" Controllers and put larger logic pieces in Service classes
 - Ensure that every route checks permissions (e.g., auth/can middleware). Every CRUD action validates input.
-- Call actions or service
+- Call actions or service using direct invocation syntax: `$action($params)` (never `$action->__invoke($params)`)
 - NO Database Queries in Controller!
 - For validation rule `['required', 'string']` verify that an empty string does not pass.
 

@@ -42,7 +42,8 @@ metadata:
 - **Actions must not contain inline validation logic**: do not throw `ValidationException` directly or call `Validator::make()` inside Actions. Extract all validation into a dedicated Data Validator class under `app/DataValidators/{Domain}/`.
 - Data Validators are `final readonly` classes with constructor DI and a single `validate()` method that throws `ValidationException` on failure.
 - Actions call the Data Validator before proceeding with business orchestration.
-- Entry point method must become thin and only delegate to Action.
+- Entry point method must become thin and only delegate to Action using direct invocation syntax `$action($params)`.
+- **Invokeable call convention:** Always use `$action($params)` to call Actions — never use `$action->__invoke($params)`. PHP natively routes the call to `__invoke()`, making the explicit form redundant.
 - Add or update PHPDoc where needed so PHPStan can infer intent/types without ambiguity (especially DTO shapes, iterable generics, and non-obvious contracts).
 
 **Steps:**
@@ -50,7 +51,7 @@ metadata:
 2. Create a dedicated Action (one use case = one Action) in the correct domain folder under `app/Actions/**`.
 3. Move orchestration from controller method into Action `__invoke(...)`.
 4. Keep reads in Repository and writes in ModelManager; if missing, introduce or reuse proper layer classes.
-5. Update controller method to dependency-inject and call the Action only.
+5. Update controller method to dependency-inject and call the Action using direct invocation syntax `$action($params)` (never `$action->__invoke($params)`).
 6. Keep account/multitenancy scope intact in all delegated calls.
 7. Ensure method signatures and returned response format stay backward compatible.
 8. Add or update PHPDoc to satisfy static analysis quality for touched PHP code.

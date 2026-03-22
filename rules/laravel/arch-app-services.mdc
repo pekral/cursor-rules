@@ -12,6 +12,7 @@ globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/DataValidat
 - All classes implementing the Action pattern must be stored under `app/Actions/**/` (domain-based subfolders are required; do not place Actions in Controllers, Services, Jobs, or other directories).
 - For new orchestration in Jobs, Controller actions, and Console Commands, delegation to an Action class from `app/Actions/**/` is mandatory.
 - `app/Actions/` — one use case per class, `final readonly`, constructor DI only, **single public entry point `__invoke()`** (no additional public business methods).
+- **Invokeable call syntax:** Always call Action classes using direct invocation `$action($params)` instead of `$action->__invoke($params)`. PHP automatically routes `$action(...)` to `__invoke(...)` on invokeable classes — the explicit `->__invoke()` form is redundant and less readable.
 - Actions are orchestration-only: validation, DTO/data transformation, and delegation. **No direct Eloquent storage/query calls** and no `DB::` queries in Actions.
 - `app/Services/` (especially classes extending `BaseModelService`) orchestrate repository + model manager contracts; keep them stateless and focused. Service naming follows package convention (`*ModelService` for model services).
 - `app/Repositories/` — read-only access layer (querying, filtering, pagination, optional cache wrapper); no writes, no side effects.
@@ -46,5 +47,6 @@ globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/DataValidat
 - If a new Job / Controller action / Console Command does not use the Action pattern, mark this finding as **critical severity** in the CR report.
 - **Request changes** if a PR introduces multi-step orchestration, branching business rules, or repeated controller/job logic without an Action; extracting or reusing an Action is the default fix.
 - **Inline validation in Actions is forbidden**: if an Action throws `ValidationException` directly or calls `Validator::make()` inline, flag it as **critical severity**. Validation must be delegated to a dedicated Data Validator class.
+- **Invokeable call syntax in CR**: if code calls an Action via `->__invoke()` instead of direct invocation `$action(...)`, flag it as **Moderate** and recommend the shorter form.
 - **Legacy carve-out**: do not block a CR solely to rewrite untouched surrounding code; still require Actions for **new** behavior and for **refactored** paths you touch.
 - **Exceptions** (no Action required): trivial pass-through, pure DTO mapping with no domain rules, config-only changes, or frontend-only diffs with no new PHP orchestration.

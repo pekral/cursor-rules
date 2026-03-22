@@ -30,6 +30,7 @@ metadata:
 - **`?array` is forbidden:** Any use of `?array` as a type hint must be replaced with a typed collection, DTO, or explicit `array<Type>|null`. Vague nullable arrays hide structure and break static analysis.
 - Laravel helpers over native PHP when appropriate.
 - DRY principle — eliminate duplicates.
+- **Validation rules as traits:** Extract reusable validation rules into traits in `App\Concerns` (e.g. `PasswordValidationRules`). Use these traits in FormRequest classes instead of duplicating rule arrays.
 - Remove obvious comments; keep PHPStan-relevant docs.
 - Single Responsibility Principle.
 - Extract private methods if body exceeds ~30 lines.

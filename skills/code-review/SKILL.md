@@ -22,6 +22,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Before writing findings, collect previous CR reports from the related PR/issue discussion and build a dedup list by problem signature (file/scope + risk + root cause). Do not repeat already reported findings unless severity or impact changed.
 - **Security review (every CR):** Always apply @.cursor/skills/security-review/SKILL.md for the current changes.
 - All changes must comply with `.cursor/rules/**/*.mdc`.
+- **All business logic is allowed only in classes that follow the action pattern!**
 - **Action pattern (only when `vendor/pekral/arch-app-services` exists):** Apply @.cursor/skills/refactor-entry-point-to-action/SKILL.md rules when reviewing PHP entry points (controllers, jobs, commands, listeners). If a new or changed entry point contains orchestration logic without an Action class, flag it as **Critical**.
 - **SQL analysis (only when changes touch the database):** If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed files), use @.cursor/skills/mysql-problem-solver/SKILL.md for systematic analysis of those parts (identify query, inspect schema, EXPLAIN, evaluate indexes, propose safe optimizations). If there are no such changes, skip this step.
 - When the task has stated requirements or acceptance criteria (from the issue/PR), verify each item against the changes; list any that are not addressed or only partially met.

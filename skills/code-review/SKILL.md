@@ -82,6 +82,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Naming: purpose-revealing; PascalCase/camelCase/kebab-case per type.
 - Single responsibility; DTOs not `array<mixed>`; DRY; clear interfaces; no magic numbers (use constants).
 - **`?array` is forbidden (**Critical**):** Any use of `?array` as a type hint is an error. Replace with a typed collection, DTO, or explicit `array<Type>|null`. Vague nullable arrays hide structure and break static analysis.
+- **Invokeable call syntax (**Moderate**):** If code calls an Action (or any invokeable class) via `->__invoke()` instead of direct invocation `$action(...)`, flag as **Moderate** and recommend the shorter form.
 - Do not re-check style, types, or issues that PHPStan/Rector/PHPCS/Pint already report.
 - Unnecessary complexity; large functions; repeated logic; oversized classes; mixed responsibilities.
 - Recommend: simplify structure, improve cohesion, split large units.

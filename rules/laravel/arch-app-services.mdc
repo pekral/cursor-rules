@@ -6,6 +6,7 @@ globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/ModelManage
 
 ## Architecture
 
+- **All business logic is allowed only in classes that follow the action pattern!**
 - Follow `pekral/arch-app-services` architecture strictly (source of truth: package README + `vendor/pekral/arch-app-services/examples`).
 - Mandatory flow for PHP orchestration: **Controller/Job/Command/Listener -> Action -> ModelService -> Repository (read) / ModelManager (write)**.
 - All classes implementing the Action pattern must be stored under `app/Actions/**/` (domain-based subfolders are required; do not place Actions in Controllers, Services, Jobs, or other directories).

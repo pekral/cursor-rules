@@ -5,6 +5,7 @@ globs: ["*"]
 ---
 
 ## Layer Responsibilities
+- **All business logic is allowed only in classes that follow the action pattern!**
 - **Controllers**: Slim, delegate to Services, accept FormRequest only, Do not contain business logic.
 - **Services**: All business logic, return DTOs or models, use Single Responsibility, Keep services stateless. Dont read and write operations in one service method.
 - **Repositories**: Read-only, no writes, no business rules

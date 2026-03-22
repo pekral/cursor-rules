@@ -30,6 +30,7 @@ metadata:
   - `Respect project.mdc Action architecture rules.`
 
 **Mandatory Action pattern requirements:**
+- **All business logic is allowed only in classes that follow the action pattern!**
 - Mandatory flow: `Controller/Job/Command/Listener -> Action -> ModelService -> Repository (read) / ModelManager (write)`.
 - New Action must be placed under `app/Actions/**` in a domain-specific subfolder.
 - Action class must be `final readonly`.

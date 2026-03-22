@@ -35,6 +35,7 @@ metadata:
 - Extract private methods if body exceeds ~30 lines.
 - No single-use variables.
 - Extract intention-revealing private methods
+- **All business logic is allowed only in classes that follow the action pattern!**
 - **Action pattern (only when `vendor/pekral/arch-app-services` exists):** Apply @.cursor/skills/refactor-entry-point-to-action/SKILL.md when the refactored class is a controller, job, command, or listener that contains orchestration logic.
 - Separate orchestration layer from business logic
 - Split by responsibility

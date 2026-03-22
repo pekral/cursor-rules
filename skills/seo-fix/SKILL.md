@@ -42,6 +42,7 @@ metadata:
 
 **After SEO changes**
 - All new or modified production code must follow @.cursor/skills/class-refactoring/SKILL.md.
+- If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
 - Run existing tests that hit robots, sitemap, or assert head meta. Fix any failing assertions.
 
 **Checklist — new public page**

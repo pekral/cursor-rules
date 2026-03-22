@@ -50,6 +50,7 @@ metadata:
 -   After generating or modifying tests, verify that all new tests comply with the testing rules in `@.cursor/rules/php/standards.mdc`. Check mock usage specifically: mock only external services (HTTP clients) or to simulate exceptions; remove any constructor mocks, unnecessary mocks, or mocks that can be replaced with real service logic.
 -   Use data providers where they improve readability and simplify
     repeated test cases.
+-   If new database migrations exist in the current branch, run them (`php artisan migrate`) before running tests.
 -   After adding or updating tests, run only the necessary tests for the
     current changes.
 -   If coverage tooling exists, verify that current changes are covered

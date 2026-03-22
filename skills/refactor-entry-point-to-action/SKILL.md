@@ -59,7 +59,8 @@ metadata:
 9. Run an internal architecture-first code review of the generated changes (no third-party reporting in this iteration).
 10. If the review finds critical or medium issues, fix them immediately and repeat the review until no such findings remain.
 11. If PHP files changed, run required project checks/fixers and resolve all issues.
-12. Add or update tests to fully cover touched logic and preserve behavior.
+12. If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
+13. Add or update tests to fully cover touched logic and preserve behavior.
 
 **Do not:**
 - Do not place validation logic (throwing `ValidationException`, calling `Validator::make()`) directly in Action classes — use Data Validators.

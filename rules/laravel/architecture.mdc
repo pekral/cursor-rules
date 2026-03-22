@@ -8,6 +8,7 @@ globs: ["*"]
 - **All business logic is allowed only in classes that follow the action pattern!**
 - **Controllers**: Slim, delegate to Services, accept FormRequest only, Do not contain business logic.
 - **Services**: All business logic, return DTOs or models, use Single Responsibility, Keep services stateless. Dont read and write operations in one service method.
+- **BaseModelService pattern (only when `vendor/pekral/arch-app-services` exists):** All services that primarily work with a specific Eloquent Model must extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()`. Services that do not primarily serve a single model must be refactored into Action pattern classes.
 - **Repositories**: Read-only, no writes, no business rules
 - **ModelManagers**: Write-only, store data to DB
 - **Data Builders**: Transform/prepare DTOs, never query DB

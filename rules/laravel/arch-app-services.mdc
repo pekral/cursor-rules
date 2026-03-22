@@ -15,6 +15,7 @@ globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/DataValidat
 - **Invokeable call syntax:** Always call Action classes using direct invocation `$action($params)` instead of `$action->__invoke($params)`. PHP automatically routes `$action(...)` to `__invoke(...)` on invokeable classes — the explicit `->__invoke()` form is redundant and less readable.
 - Actions are orchestration-only: validation, DTO/data transformation, and delegation. **No direct Eloquent storage/query calls** and no `DB::` queries in Actions.
 - `app/Services/` (especially classes extending `BaseModelService`) orchestrate repository + model manager contracts; keep them stateless and focused. Service naming follows package convention (`*ModelService` for model services).
+- **BaseModelService pattern:** All services that primarily work with a specific Eloquent Model must extend `BaseModelService` (see `vendor/pekral/arch-app-services/examples/Services/User/UserModelService.php`). The extending class must implement `getModelManager()`, `getRepository()`, and `getModelClass()`. Services that do not primarily serve a single model must be refactored into Action pattern classes instead.
 - `app/Repositories/` — read-only access layer (querying, filtering, pagination, optional cache wrapper); no writes, no side effects.
 - `app/ModelManagers/` — write-only persistence layer (create/update/delete/bulk operations); no read querying.
 - `app/Dto/` — typed DTOs for data exchange/validation; avoid raw untyped arrays across layer boundaries.
@@ -47,6 +48,7 @@ globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/DataValidat
 - If a new Job / Controller action / Console Command does not use the Action pattern, mark this finding as **critical severity** in the CR report.
 - **Request changes** if a PR introduces multi-step orchestration, branching business rules, or repeated controller/job logic without an Action; extracting or reusing an Action is the default fix.
 - **Inline validation in Actions is forbidden**: if an Action throws `ValidationException` directly or calls `Validator::make()` inline, flag it as **critical severity**. Validation must be delegated to a dedicated Data Validator class.
+- **BaseModelService enforcement**: if a service primarily works with a specific Eloquent Model but does not extend `BaseModelService`, flag it as **critical severity**. If a service does not primarily serve a single model but exists as a plain service class instead of an Action, flag it as **moderate severity**.
 - **Invokeable call syntax in CR**: if code calls an Action via `->__invoke()` instead of direct invocation `$action(...)`, flag it as **Moderate** and recommend the shorter form.
 - **Legacy carve-out**: do not block a CR solely to rewrite untouched surrounding code; still require Actions for **new** behavior and for **refactored** paths you touch.
 - **Exceptions** (no Action required): trivial pass-through, pure DTO mapping with no domain rules, config-only changes, or frontend-only diffs with no new PHP orchestration.

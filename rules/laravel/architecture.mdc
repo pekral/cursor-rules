@@ -15,6 +15,11 @@ globs: ["*"]
 - **Events**: Slim, delegate to Services
 - **Commands**: Slim, delegate to Services
 
+## Validation Rules
+- Store reusable validation rules as traits in the `App\Concerns` namespace (e.g. `PasswordValidationRules`).
+- Each trait should provide focused, well-typed methods that return validation rule arrays with proper PHPDoc generics.
+- Use these traits in FormRequest classes and anywhere validation rules are needed to ensure DRY and consistent validation across the application.
+
 ## Controllers
 - Inject services by method injection
 - Plural names (ContactsController)

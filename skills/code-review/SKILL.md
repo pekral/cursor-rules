@@ -58,6 +58,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Short transactions; batch writes in one transaction where appropriate.
 - Use `SHOW ENGINE INNODB STATUS` to diagnose lock waits when investigating issues.
 - Controllers: slim; delegate to Services; accept FormRequest only; never `validate()` in controller.
+- **Validation rules as traits:** Reusable validation rules must be stored as traits in `App\Concerns`. Duplicated rule arrays across FormRequests should be flagged as **Moderate**.
 - Services: hold business logic; return DTOs or models.
 - Repositories: read-only. ModelManagers: write-only.
 - Jobs, Events, Commands: slim; delegate to Services.

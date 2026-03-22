@@ -14,6 +14,7 @@ metadata:
 - Analyze the class and complete the TODO list tasks.
 - Verify code coverage after refactoring.
 - For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.
+- If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
 - Preserve functionality — change how, not what.
 - Focus on recently modified code unless instructed otherwise.
 - No increase in public API surface without strong justification

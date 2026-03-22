@@ -23,6 +23,7 @@ metadata:
 - After creating or modifying tests, check that they are not flaky.
 - Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them. 
 - Tests must have 100% coverage.
+- If new database migrations exist in the current branch, run them (`php artisan migrate`) before running tests.
 - After writing the tests, verify that they are functional and follow the rules.
 - After generating or modifying tests, verify that all new tests comply with the testing rules in `@.cursor/rules/php/standards.mdc`. Check mock usage specifically: mock only external services (HTTP clients) or to simulate exceptions; remove any constructor mocks, unnecessary mocks, or mocks that can be replaced with real service logic.
 

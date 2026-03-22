@@ -1,7 +1,7 @@
 ---
 description: Architecture rules for projects using pekral/arch-app-services package. Apply only when this package is present in vendor.
 alwaysApply: false
-globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/ModelManagers/**", "app/Http/Controllers/**", "app/Jobs/**", "app/Console/Commands/**", "app/Listeners/**"]
+globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/DataValidators/**", "app/ModelManagers/**", "app/Http/Controllers/**", "app/Jobs/**", "app/Console/Commands/**", "app/Listeners/**"]
 ---
 
 ## Architecture
@@ -28,11 +28,23 @@ globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/ModelManage
 - Do not bundle unrelated operations in one Action; extract reusable logic into Services so multiple Actions can share it.
 - Jobs, console commands, and event listeners should stay thin and invoke Actions (or Services when no natural single Action exists) instead of inlining business flow.
 
+## Data Validators
+
+- **All validation logic inside Actions must be encapsulated in a dedicated Data Validator class** (pekral arch data validator pattern).
+- Actions must not throw `ValidationException` directly — delegate validation to a Data Validator.
+- Actions must not call `Validator::make()` inline — move such logic into a Data Validator class.
+- Data Validators are single-responsibility classes that validate input data and throw `ValidationException` when validation fails.
+- Data Validators are placed under `app/DataValidators/{Domain}/` with the suffix `DataValidator` (e.g. `StoreProjectDataValidator`).
+- Data Validator classes must be `final readonly` with constructor DI and a single public method (e.g. `validate()`).
+- Reusable validation rules remain as traits in `App\Concerns` and can be used inside Data Validators.
+- Actions call the Data Validator before orchestrating business logic.
+
 ## Code review (CR)
 
 - **Always enforce the Action pattern** when reviewing PHP changes: new or materially changed server-side flows must go through `app/Actions/{Domain}/…Action` (thin entry points — controllers, jobs, Artisan commands, event listeners — only validate/bind input and call an Action or existing Service).
 - For **new Jobs**, **actions in Controllers**, and **Console Commands**, using an Action-pattern class is mandatory. The orchestration must be delegated to a dedicated Action in `app/Actions/**/`.
 - If a new Job / Controller action / Console Command does not use the Action pattern, mark this finding as **critical severity** in the CR report.
 - **Request changes** if a PR introduces multi-step orchestration, branching business rules, or repeated controller/job logic without an Action; extracting or reusing an Action is the default fix.
+- **Inline validation in Actions is forbidden**: if an Action throws `ValidationException` directly or calls `Validator::make()` inline, flag it as **critical severity**. Validation must be delegated to a dedicated Data Validator class.
 - **Legacy carve-out**: do not block a CR solely to rewrite untouched surrounding code; still require Actions for **new** behavior and for **refactored** paths you touch.
 - **Exceptions** (no Action required): trivial pass-through, pure DTO mapping with no domain rules, config-only changes, or frontend-only diffs with no new PHP orchestration.

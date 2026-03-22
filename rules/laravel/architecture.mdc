@@ -20,6 +20,13 @@ globs: ["*"]
 - Each trait should provide focused, well-typed methods that return validation rule arrays with proper PHPDoc generics.
 - Use these traits in FormRequest classes and anywhere validation rules are needed to ensure DRY and consistent validation across the application.
 
+## Data Validators (when `vendor/pekral/arch-app-services` exists)
+- Validation logic that throws exceptions (e.g. `ValidationException::withMessages()`) or calls `Validator::make()` must not be placed directly in Action classes.
+- Extract such validation into dedicated Data Validator classes under `app/DataValidators/{Domain}/`.
+- Data Validators are `final readonly`, have constructor DI, and expose a single `validate()` method.
+- Actions call the Data Validator before proceeding with orchestration.
+- Reusable validation rule traits from `App\Concerns` can be used inside Data Validators.
+
 ## Controllers
 - Inject services by method injection
 - Plural names (ContactsController)

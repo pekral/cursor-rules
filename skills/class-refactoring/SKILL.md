@@ -38,6 +38,7 @@ metadata:
 - Extract intention-revealing private methods
 - **All business logic is allowed only in classes that follow the action pattern!**
 - **Action pattern (only when `vendor/pekral/arch-app-services` exists):** Apply @.cursor/skills/refactor-entry-point-to-action/SKILL.md when the refactored class is a controller, job, command, or listener that contains orchestration logic.
+- **Data Validator extraction (only when `vendor/pekral/arch-app-services` exists):** If an Action class contains inline validation logic (throwing `ValidationException` directly or calling `Validator::make()`), extract it into a dedicated Data Validator class under `app/DataValidators/{Domain}/`.
 - Separate orchestration layer from business logic
 - Split by responsibility
 - Centralize business rules

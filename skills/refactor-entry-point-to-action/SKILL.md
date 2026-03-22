@@ -38,7 +38,10 @@ metadata:
 - Action must stay clean and simple: minimal orchestration surface, no duplicated branches, no dead paths.
 - Action should be as optimized as possible for readability and runtime (avoid redundant mapping, calls, or temporary structures).
 - No direct Eloquent queries and no `DB::` calls inside the Action.
-- Action orchestrates only: validation/mapping/delegation; heavy shared logic belongs to Services.
+- Action orchestrates only: data validator invocation, mapping, and delegation; heavy shared logic belongs to Services.
+- **Actions must not contain inline validation logic**: do not throw `ValidationException` directly or call `Validator::make()` inside Actions. Extract all validation into a dedicated Data Validator class under `app/DataValidators/{Domain}/`.
+- Data Validators are `final readonly` classes with constructor DI and a single `validate()` method that throws `ValidationException` on failure.
+- Actions call the Data Validator before proceeding with business orchestration.
 - Entry point method must become thin and only delegate to Action.
 - Add or update PHPDoc where needed so PHPStan can infer intent/types without ambiguity (especially DTO shapes, iterable generics, and non-obvious contracts).
 
@@ -57,6 +60,7 @@ metadata:
 12. Add or update tests to fully cover touched logic and preserve behavior.
 
 **Do not:**
+- Do not place validation logic (throwing `ValidationException`, calling `Validator::make()`) directly in Action classes — use Data Validators.
 - Do not keep business branching/orchestration in the controller method.
 - Do not place Action classes outside `app/Actions/**`.
 - Do not create multiple public business methods in an Action.

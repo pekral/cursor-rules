@@ -8,7 +8,7 @@ globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/DataValidat
 
 - **All business logic is allowed only in classes that follow the action pattern!**
 - Follow `pekral/arch-app-services` architecture strictly (source of truth: package README + `vendor/pekral/arch-app-services/examples`).
-- Mandatory flow for PHP orchestration: **Controller/Job/Command/Listener -> Action -> ModelService -> Repository (read) / ModelManager (write)**.
+- Mandatory flow for PHP orchestration: **Controller/Job/Command/Listener/Livewire Component -> Action -> ModelService -> Repository (read) / ModelManager (write)**.
 - All classes implementing the Action pattern must be stored under `app/Actions/**/` (domain-based subfolders are required; do not place Actions in Controllers, Services, Jobs, or other directories).
 - For new orchestration in Jobs, Controller actions, and Console Commands, delegation to an Action class from `app/Actions/**/` is mandatory.
 - `app/Actions/` — one use case per class, `final readonly`, constructor DI only, **single public entry point `__invoke()`** (no additional public business methods).
@@ -28,7 +28,7 @@ globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/DataValidat
 - Actions are **`final readonly`** with **constructor injection**; expose a **single entry point**, typically **`__invoke(...)`** with an explicit return type.
 - Actions **orchestrate** only: delegate reads to `Repositories`, writes to `ModelManagers`, and **shared or heavy domain logic** to `Services` — keep Actions small and composable.
 - Do not bundle unrelated operations in one Action; extract reusable logic into Services so multiple Actions can share it.
-- Jobs, console commands, and event listeners should stay thin and invoke Actions (or Services when no natural single Action exists) instead of inlining business flow.
+- Jobs, console commands, event listeners, and **Livewire components** should stay thin and invoke Actions (or Services when no natural single Action exists) instead of inlining business flow.
 
 ## Data Validators
 
@@ -43,9 +43,9 @@ globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/DataValidat
 
 ## Code review (CR)
 
-- **Always enforce the Action pattern** when reviewing PHP changes: new or materially changed server-side flows must go through `app/Actions/{Domain}/…Action` (thin entry points — controllers, jobs, Artisan commands, event listeners — only validate/bind input and call an Action or existing Service).
-- For **new Jobs**, **actions in Controllers**, and **Console Commands**, using an Action-pattern class is mandatory. The orchestration must be delegated to a dedicated Action in `app/Actions/**/`.
-- If a new Job / Controller action / Console Command does not use the Action pattern, mark this finding as **critical severity** in the CR report.
+- **Always enforce the Action pattern** when reviewing PHP changes: new or materially changed server-side flows must go through `app/Actions/{Domain}/…Action` (thin entry points — controllers, jobs, Artisan commands, event listeners, Livewire components — only validate/bind input and call an Action or existing Service).
+- For **new Jobs**, **actions in Controllers**, **Console Commands**, and **Livewire component methods**, using an Action-pattern class is mandatory. The orchestration must be delegated to a dedicated Action in `app/Actions/**/`.
+- If a new Job / Controller action / Console Command / Livewire component method does not use the Action pattern, mark this finding as **critical severity** in the CR report.
 - **Request changes** if a PR introduces multi-step orchestration, branching business rules, or repeated controller/job logic without an Action; extracting or reusing an Action is the default fix.
 - **Inline validation in Actions is forbidden**: if an Action throws `ValidationException` directly or calls `Validator::make()` inline, flag it as **critical severity**. Validation must be delegated to a dedicated Data Validator class.
 - **BaseModelService enforcement**: if a service primarily works with a specific Eloquent Model but does not extend `BaseModelService`, flag it as **critical severity**. If a service does not primarily serve a single model but exists as a plain service class instead of an Action, flag it as **moderate severity**.

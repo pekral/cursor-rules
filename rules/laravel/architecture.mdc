@@ -115,8 +115,12 @@ $intercomServiceMock = Mockery::mock(IntercomService::class);
 - Composer for dependency management
 
 ## Livewire
-- In Livewire projects, don't use Livewire Volt. Only Livewire class components.
-- Move all business logic in the Laravel component (not the template) to the action pattern if it is used in the project, and if so, use the service pattern.
+- **Never use single-file (Volt) components.** Every Livewire component must be split into a PHP class (`app/Livewire/`) and a Blade view (`resources/views/livewire/`).
+- Livewire components are **entry points** (like controllers, jobs, commands, listeners): they must delegate all business logic to Action classes following the Action pattern.
+- Mandatory flow: `Livewire Component -> Action -> ModelService -> Repository (read) / ModelManager (write)`.
+- No direct Eloquent queries or `DB::` calls in Livewire components.
+- Keep component methods slim — validate input and delegate to Actions/Services.
+- See `.cursor/rules/laravel/livewire.mdc` for full Livewire conventions.
 
 ## Queue System and Jobs
 - Queue long-running or external-dependent tasks.

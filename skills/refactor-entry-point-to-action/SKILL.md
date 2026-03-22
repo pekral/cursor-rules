@@ -15,7 +15,7 @@ metadata:
 - After generating or updating code, run immediate internal code review focused on architecture and fix findings ASAP.
 
 **Use when:**
-- A controller entry point (or job/command/listener entry point) contains orchestration logic and must be migrated to Action pattern.
+- A controller entry point (or job/command/listener/**Livewire component** entry point) contains orchestration logic and must be migrated to Action pattern.
 - You want to run this skill manually in Cursor for a specific entry point method.
 
 **Manual invocation in Cursor:**
@@ -31,7 +31,7 @@ metadata:
 
 **Mandatory Action pattern requirements:**
 - **All business logic is allowed only in classes that follow the action pattern!**
-- Mandatory flow: `Controller/Job/Command/Listener -> Action -> ModelService -> Repository (read) / ModelManager (write)`.
+- Mandatory flow: `Controller/Job/Command/Listener/Livewire Component -> Action -> ModelService -> Repository (read) / ModelManager (write)`.
 - New Action must be placed under `app/Actions/**` in a domain-specific subfolder.
 - Action class must be `final readonly`.
 - Action must expose exactly one public business entry point: `__invoke(...)` with explicit return type.
@@ -44,6 +44,7 @@ metadata:
 - Data Validators are `final readonly` classes with constructor DI and a single `validate()` method that throws `ValidationException` on failure.
 - Actions call the Data Validator before proceeding with business orchestration.
 - Entry point method must become thin and only delegate to Action using direct invocation syntax `$action($params)`.
+- **Livewire components** are entry points: component action methods (e.g. `save()`, `submit()`, `delete()`) must delegate to Action classes. The component class lives in `app/Livewire/` with a separate Blade view in `resources/views/livewire/`. Single-file (Volt) components are forbidden.
 - **Invokeable call convention:** Always use `$action($params)` to call Actions — never use `$action->__invoke($params)`. PHP natively routes the call to `__invoke()`, making the explicit form redundant.
 - Add or update PHPDoc where needed so PHPStan can infer intent/types without ambiguity (especially DTO shapes, iterable generics, and non-obvious contracts).
 

@@ -39,6 +39,7 @@ metadata:
 - Action should be as optimized as possible for readability and runtime (avoid redundant mapping, calls, or temporary structures).
 - No direct Eloquent queries and no `DB::` calls inside the Action.
 - Action orchestrates only: data validator invocation, mapping, and delegation; heavy shared logic belongs to Services.
+- **BaseModelService pattern:** When delegating to Services, ensure model-oriented services extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()` (see `vendor/pekral/arch-app-services/examples/Services/User/UserModelService.php`). Services that do not primarily serve a single model must be refactored into Action pattern classes instead.
 - **Actions must not contain inline validation logic**: do not throw `ValidationException` directly or call `Validator::make()` inside Actions. Extract all validation into a dedicated Data Validator class under `app/DataValidators/{Domain}/`.
 - Data Validators are `final readonly` classes with constructor DI and a single `validate()` method that throws `ValidationException` on failure.
 - Actions call the Data Validator before proceeding with business orchestration.

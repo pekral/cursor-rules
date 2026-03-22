@@ -39,6 +39,7 @@ metadata:
 - **All business logic is allowed only in classes that follow the action pattern!**
 - **Invokeable call convention:** When calling Action classes, always use direct invocation `$action($params)` — never `$action->__invoke($params)`.
 - **Action pattern (only when `vendor/pekral/arch-app-services` exists):** Apply @.cursor/skills/refactor-entry-point-to-action/SKILL.md when the refactored class is a controller, job, command, or listener that contains orchestration logic.
+- **BaseModelService pattern (only when `vendor/pekral/arch-app-services` exists):** All services that primarily work with a specific Eloquent Model must extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()` (see `vendor/pekral/arch-app-services/examples/Services/User/UserModelService.php`). Services that do not primarily serve a single model must be refactored into Action pattern classes.
 - **Data Validator extraction (only when `vendor/pekral/arch-app-services` exists):** If an Action class contains inline validation logic (throwing `ValidationException` directly or calling `Validator::make()`), extract it into a dedicated Data Validator class under `app/DataValidators/{Domain}/`.
 - Separate orchestration layer from business logic
 - Split by responsibility

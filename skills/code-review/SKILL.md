@@ -20,6 +20,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Read project.mdc file
 - **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
 - Before writing findings, collect previous CR reports from the related PR/issue discussion and build a dedup list by problem signature (file/scope + risk + root cause). Do not repeat already reported findings unless severity or impact changed.
+- **Plan Alignment Analysis:** Compare the implementation against the original issue description, planning documents, or step description. Identify deviations from the planned approach, architecture, or requirements. Assess whether deviations are justified improvements or problematic departures. Verify that all planned functionality has been implemented — list any missing or only partially met items.
 - **Security review (every CR):** Always apply @.cursor/skills/security-review/SKILL.md for the current changes.
 - All changes must comply with `.cursor/rules/**/*.mdc`.
 - **All business logic is allowed only in classes that follow the action pattern!**
@@ -30,6 +31,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - When the task has stated requirements or acceptance criteria (from the issue/PR), verify each item against the changes; list any that are not addressed or only partially met.
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules.
 - Ensure SRP in each class and apply SOLID principles so that the code is readable for developers.
+- **Type safety and defensive programming:** Check for proper error handling robustness, type safety, and defensive programming patterns. Verify guard clauses, null checks, and safe return types.
 - Do not duplicate their checks: types, null safety, formatting, style, naming, dead code, automated refactors.
 - Do not review: formatting, import order, lint violations, simple typos — tools cover these.
 - Focus only on what tools do not cover: architecture, design, security logic, runtime/operational concerns.
@@ -100,6 +102,12 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
   - GitHub/Markdown outputs: use clear markdown sections with severity grouping.
   - JIRA outputs: use JIRA Wiki Markup (no markdown headings/fences/tables).
 - For simple fixes, include a short code suggestion/snippet as part of the recommendation.
+
+**Communication protocol:**
+- Always acknowledge what was done well before highlighting issues.
+- If you find significant deviations from the plan or requirements, explicitly flag them and ask for confirmation.
+- If you identify issues with the original plan or requirements themselves, recommend updates.
+- For implementation problems, provide clear guidance on fixes needed with code examples.
 
 **Review best practices:**
 - Give concrete fixes or code snippets where relevant; not only “something is wrong”.

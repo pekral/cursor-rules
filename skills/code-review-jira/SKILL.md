@@ -33,6 +33,7 @@ metadata:
 - First, find the open pull requests that are automatically linked to JIRA via the branch name. If you can’t find a PR by the branch name, review all the comments in the issue and locate the relevant PR.  Always check only the open pull requests and ignore the rest!
 - Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
 - Before writing findings, collect prior review comments/reports from the PR timeline and JIRA discussion. Build a dedup list by problem signature (file/scope + root cause + risk) and skip findings already reported unless severity/impact changed.
+- **Plan Alignment Analysis:** Compare the implementation against the original issue description, planning documents, or step description. Identify deviations from the planned approach, architecture, or requirements. Assess whether deviations are justified improvements or problematic departures. Verify that all planned functionality has been implemented — list any missing or only partially met items.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - Always apply @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md. If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed code), also apply @.cursor/skills/mysql-problem-solver/SKILL.md for those parts; otherwise do not use the SQL skill. Find the issue by code or URL on JIRA (use acli console tool).
 - **All business logic is allowed only in classes that follow the action pattern!**
@@ -49,6 +50,12 @@ metadata:
 - I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. Format the PR comment as: (1) One-line summary by severity (e.g. "Summary: 2 Critical, 1 Moderate"); (2) List of findings grouped by severity, each with file/line (or file) and a short, actionable recommendation. Do not list "What was checked," only the findings.
 - Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
 - If is needed use interactive-testing skill for testing
+
+**Communication protocol:**
+- Always acknowledge what was done well before highlighting issues.
+- If you find significant deviations from the plan or requirements, explicitly flag them and ask for confirmation.
+- If you identify issues with the original plan or requirements themselves, recommend updates.
+- For implementation problems, provide clear guidance on fixes needed with code examples.
 
 **After completing the tasks**
 - If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!

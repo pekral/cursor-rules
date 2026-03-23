@@ -206,3 +206,5 @@ The final report must:
 Summarize:
 
 -   which scenarios failed or were unclear (with technical info)
+
+-   Post the final human-readable test report as a comment to the **related issue** in the issue tracker (GitHub issue, JIRA ticket, etc.). Use available CLI tools or MCP servers to post it. The comment must be written in the language of the task assignment.

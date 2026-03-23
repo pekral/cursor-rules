@@ -27,7 +27,7 @@ metadata:
 - No deep nesting
 - Prefer small, focused functions.
 - English comments only.
-- Spatie DTOs instead of arrays (except Job constructors).
+- Spatie DTOs (Spatie Laravel Data) instead of arrays (except Job constructors). Use PHP attributes for property mapping — never override `from()` manually. Apply `#[MapInputName(SnakeCaseMapper::class)]` at class level for snake_case-to-camelCase input mapping, or `#[MapName(SnakeCaseMapper::class)]` when the DTO is also serialized to output.
 - **`?array` is forbidden:** Any use of `?array` as a type hint must be replaced with a typed collection, DTO, or explicit `array<Type>|null`. Vague nullable arrays hide structure and break static analysis.
 - Laravel helpers over native PHP when appropriate.
 - DRY principle — eliminate duplicates.

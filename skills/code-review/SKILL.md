@@ -67,6 +67,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - **Invokeable controller rule (**Critical**):** Any controller method that is not a standard CRUD method (`index`, `create`, `store`, `show`, `edit`, `update`, `destroy`) must be a dedicated single-action invokeable controller exposing only `__invoke()`. A resource controller must not contain non-CRUD methods — flag as **Critical** if found.
 - **Validation rules as traits:** Reusable validation rules must be stored as traits in `App\Concerns`. Duplicated rule arrays across FormRequests should be flagged as **Moderate**.
 - Services: hold business logic; return DTOs or models.
+- **DTO attribute syntax (**Moderate**):** If a Spatie Laravel Data DTO overrides `from()` solely to rename input keys, or uses manual array mapping instead of `#[MapInputName(SnakeCaseMapper::class)]` / `#[MapName(SnakeCaseMapper::class)]` attributes, flag as **Moderate** and suggest the declarative attribute approach.
 - Repositories: read-only. ModelManagers: write-only.
 - Jobs, Events, Commands: slim; delegate to Services.
 - New controller actions must have corresponding Request classes.

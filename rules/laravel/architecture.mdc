@@ -30,9 +30,6 @@ globs: ["*"]
 
 ## Controllers
 - Inject services by method injection
-- Plural names (ContactsController)
-- CRUD methods only (index, create, store, show, edit, update, destroy)
-- Extract new controller for non-CRUD actions
 - Never call `validate()` inside controller
 - Implement proper request validation using Form Requests
 - Aim for "slim" Controllers and put larger logic pieces in Service classes
@@ -40,6 +37,18 @@ globs: ["*"]
 - Call actions or service using direct invocation syntax: `$action($params)` (never `$action->__invoke($params)`)
 - NO Database Queries in Controller!
 - For validation rule `['required', 'string']` verify that an empty string does not pass.
+
+### Resource (CRUD) Controllers
+- Use for standard CRUD operations only: `index`, `create`, `store`, `show`, `edit`, `update`, `destroy`
+- Plural names (e.g. `ContactsController`, `OrdersController`)
+- No additional non-CRUD methods — extract any non-CRUD action into its own single-action controller
+
+### Single-Action (Invokeable) Controllers
+- **All non-CRUD controller actions must be implemented as single-action invokeable controllers** with only one public method `__invoke()`
+- Named after the specific action they perform (e.g. `ApproveOrderController`, `PublishPostController`, `SendInvoiceController`)
+- Placed in the same `app/Http/Controllers/` namespace hierarchy, optionally in domain subfolders (e.g. `app/Http/Controllers/Orders/ApproveOrderController.php`)
+- Registered with a single route pointing directly to the class: `Route::post('/orders/{order}/approve', ApproveOrderController::class)`
+- Must be slim entry points — delegate all orchestration to an Action class following the Action pattern
 
 ## Database / Schema
 - Primary keys on every table; prefer INT over BIGINT unless > ~2B rows

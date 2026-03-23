@@ -21,6 +21,32 @@ globs: ["*"]
 - Each trait should provide focused, well-typed methods that return validation rule arrays with proper PHPDoc generics.
 - Use these traits in FormRequest classes and anywhere validation rules are needed to ensure DRY and consistent validation across the application.
 
+## DTOs (Spatie Laravel Data)
+- Use Spatie Laravel Data DTOs (`Spatie\LaravelData\Data`) for all typed data exchange between layers; never pass raw `array<mixed>`.
+- **Use PHP attributes for property mapping** — never override `from()` or use manual array mapping to rename keys. Prefer attribute-based configuration for a clean, declarative syntax:
+  - `#[MapInputName(SnakeCaseMapper::class)]` — map all incoming snake_case keys to camelCase properties globally (class-level).
+  - `#[MapName(SnakeCaseMapper::class)]` — map both input and output; use when the DTO is also serialized back (e.g. API responses).
+  - `#[MapInputName('some_key')]` — map a single specific input key to a differently named property.
+  - `#[WithoutValidation]` — skip validation for a specific property.
+  - `#[Computed]` — mark a property as computed (not filled from input).
+- DTO classes are `final readonly` with public constructor properties; no setters.
+- Place DTOs under `app/Dto/{Domain}/` with a `Data` suffix (e.g. `UserData`, `OrderItemData`).
+- Example:
+```php
+use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+
+#[MapInputName(SnakeCaseMapper::class)]
+final class CreateUserData extends Data
+{
+    public function __construct(
+        public readonly string $firstName,
+        public readonly string $lastName,
+        public readonly string $emailAddress,
+    ) {}
+}
+```
+
 ## Data Validators (when `vendor/pekral/arch-app-services` exists)
 - Validation logic that throws exceptions (e.g. `ValidationException::withMessages()`) or calls `Validator::make()` must not be placed directly in Action classes.
 - Extract such validation into dedicated Data Validator classes under `app/DataValidators/{Domain}/`.

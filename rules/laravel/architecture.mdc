@@ -134,6 +134,15 @@ $intercomServiceMock = Mockery::mock(IntercomService::class);
 - If you are doing code review for asynchronous jobs in the application, first check how the timeout, tries, etc. are set in the config. These values may not always be set directly in the Jobs.
 - If using in queue job any sql query from repository or direct from model, avoid of offset and limit and prefer last id row
 
+## Concurrency and Race Conditions
+- Never use read-modify-write patterns in PHP without an atomicity guard (DB transaction + `lockForUpdate()`, or atomic DB operation like `increment()`/`decrement()`).
+- Use `DB::transaction()` with `lockForUpdate()` for any operation that reads and then writes the same record under concurrent load.
+- Prefer atomic DB operations: `increment()`, `decrement()`, `updateOrInsert()` with a unique index.
+- Every `firstOrCreate()` / `updateOrCreate()` call must be backed by a unique DB index — without it, concurrent requests can insert duplicate rows.
+- Jobs that mutate shared records must be idempotent and implement `ShouldBeUnique` or use an idempotency key to prevent duplicate processing on retry.
+- Use `Cache::lock($key)->get(fn() => ...)` to prevent cache stampede on expensive computations.
+- Never rely on application-level uniqueness checks (e.g. `if (!exists) create`) — they are not atomic. Use unique DB constraints instead.
+
 ## Middleware
 - Use middleware for cross-cutting concerns (auth, rate limiting, headers, logging).
 - Register middleware in the appropriate group or route.

@@ -8,6 +8,7 @@ metadata:
 
 **Constraint:**
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- **Before starting the review**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin reviewing.
 - I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - NEVER CHANGE THE CODE! Generate the output only.
 - All messages formatted as markdown for output.

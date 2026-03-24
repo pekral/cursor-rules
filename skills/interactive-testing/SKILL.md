@@ -14,6 +14,7 @@ metadata:
 -   First, load all the rules for the cursor editor
     (.cursor/rules/.\*mdc).
 -   Use the language in which the issue assignment was written.
+-   **Before starting to test**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin testing.
 -   Read the issue first and derive test cases only from the issue
     description, comments, attachments, linked documentation, and
     acceptance criteria.

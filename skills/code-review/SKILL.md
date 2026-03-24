@@ -7,6 +7,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Read project.mdc file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
+- **Before starting the review**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin reviewing.
 - Always load existing CR reports/comments from the issue tracker and related PR (using available CLI tools or MCP servers) before generating a new CR report, and never repeat a previously reported finding.
 - Switch to the main branch and make sure you have the updated main branch. Then switch to the branch where the PR is and, to be on the safe side, update the branch for the PR as well, then continue with the code review.
 - Identify changes vs main branch (list commits).

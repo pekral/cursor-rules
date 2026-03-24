@@ -27,7 +27,7 @@ metadata:
 - I want you to post a comment into the pull request on GitHub regarding the core review, but I want you to only post critical or moderately serious issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue with the label ready for review.
 - Run the tests and let me know if the current changes meet the requirements.  If so, add a new comment to the issue with a recommendation on what to test (briefly). If the requirements are not met or you have found critical errors, just list them for me.
 - Write missing tests for current changes and ensure 100% coverage, fix dry and try to simplify the code base so that it is easy to read for humans, but also as simple as possible. These changes will be in a separate commit.
-- After creating the PR, perform a code review @.cursor/skills/code-review/SKILL.md for the current task.
+- After creating the PR, perform a code review @.cursor/skills/code-review-github/SKILL.md for the current task.
 - If you are not on the main git branch in the project, switch to it.
 
 **After completing the tasks**

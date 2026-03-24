@@ -33,10 +33,10 @@ metadata:
 - Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
 - Write missing tests for current changes and ensure 100% coverage, fix dry and try to simplify the code base so that it is easy to read for humans, but also as simple as possible. These changes will be in a separate commit.
 - After generating or modifying tests, verify that all new tests comply with the testing rules in `@.cursor/rules/php/standards.mdc`. Check mock usage specifically: mock only external services (HTTP clients) or to simulate exceptions; remove any constructor mocks, unnecessary mocks, or mocks that can be replaced with real service logic.
-- After creating the PR, perform a code review @.cursor/skills/code-review-github/SKILL.md for the current task.
+- After creating the PR, perform a code review @.cursor/skills/code-review/SKILL.md for the current task.
 - If you are not on the main git branch in the project, switch to it.
 
 **After completing the tasks**
-- Once you have finished your work and pushed the changes to pr, perform a code review according to your skill level @.cursor/skills/code-review-github/SKILL.md
+- Once you have finished your work and pushed the changes to pr, perform a code review according to your skill level @.cursor/skills/code-review/SKILL.md
 - If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!
-- If work is done do @.cursor/skills/code-review-github/SKILL.md for actual issue
+- If work is done do @.cursor/skills/code-review/SKILL.md for actual issue

@@ -14,14 +14,21 @@ metadata:
 - For tests that do not use PEST syntax, I want you to rewrite them in PEST syntax.
 - Never generate the covers() method!
 - Follow the rules for writing tests.
+- Create deterministic every time!
 - Arrange-act-assert pattern, error cases first
 - Before writing tests, always analyze the abstractions that will be used in the tests and always use helper methods if it simplifies the code.
 - **Never use the `describe()` function** in tests. Write tests at the top level using `it()` / `test()` only; do not wrap them in `describe()` blocks.
 - If there are any "shared" helper functions such as `bindSparkpostMailerNever($this->app);`, I want all these functions to be defined in the Pest.php file.
 - If the PEST test requires calling a method that is in an abstract class, use the notation `test()->methodName()`.
+- Test classes must be `final`; use only local variables inside tests.
+- Remove unnecessary mocks.
+- Mock only external API communication services or if you need to simulate exceptions. Do not use constructor mocking!
+- In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
+- If the test requires test data, always create it via the factory or insert it directly into the specific database. Never mock it or circumvent this in any other way!
+- Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases instead.
 - Correct DRY, use data providers, and try to write tests as simply as possible.
 - After creating or modifying tests, check that they are not flaky.
-- Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them. 
+- Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them.
 - Tests must have 100% coverage.
 - If new database migrations exist in the current branch, run them (`php artisan migrate`) before running tests.
 - After writing the tests, verify that they are functional and follow the rules.

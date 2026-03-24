@@ -31,8 +31,12 @@ Write one minimal test showing expected behavior.
 
 - One behavior per test.
 - Clear, descriptive name that describes the behavior.
-- Real code paths — mock only external services (HTTP clients) or to simulate exceptions.
+- Real code paths — mock only external services (HTTP clients) or to simulate exceptions. Do not use constructor mocking!
 - Arrange-act-assert pattern, error cases first.
+- Test classes must be `final`; use only local variables inside tests.
+- In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
+- If the test requires test data, always create it via the factory or insert it directly into the specific database. Never mock it or circumvent this in any other way!
+- Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases instead.
 - Use data providers when they simplify writing and readability.
 - Never generate the `covers()` method.
 

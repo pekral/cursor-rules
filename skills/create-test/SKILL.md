@@ -15,17 +15,21 @@ metadata:
 **Steps:**
 - Locate existing tests or create new ones following project conventions.
 - Never modify production code!
-- Create deterministic everytime!
+- Create deterministic every time!
 - Use existing test patterns, helpers, and conventions.
 - Arrange-act-assert pattern, error cases first
 - Before writing tests, always analyze the abstractions that will be used in the tests and always use helper methods if it simplifies the code.
 - **Never use the `describe()` function** in tests. Write tests at the top level using `it()` / `test()` only; do not wrap them in `describe()` blocks.
 - If the PEST test requires calling a method that is in an abstract class, use the notation `test()->methodName()`.
 - Never generate the covers() method!
+- Test classes must be `final`; use only local variables inside tests.
 - Remove unnecessary mocks.
-- Mock only external API communication services or if you need simulate exceptions. Do not Constructor mocking!
+- Mock only external API communication services or if you need to simulate exceptions. Do not use constructor mocking!
+- In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
+- If the test requires test data, always create it via the factory or insert it directly into the specific database. Never mock it or circumvent this in any other way!
+- Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases instead.
 - Use data providers when they simplify writing and readability.
-- Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them. 
+- Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them.
 - Make sure of 100% coverage required for changes. Add tests so that 100% coverage is achieved. Prioritize modifying existing test cases; if tests do not exist, add them according to the valid rules for writing tests.
 - If new database migrations exist in the current branch, run them (`php artisan migrate`) before running tests.
 - After creating or modifying tests, check that they are not flaky.

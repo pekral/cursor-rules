@@ -29,6 +29,7 @@ metadata:
 - English comments only.
 - Spatie DTOs (Spatie Laravel Data) instead of arrays (except Job constructors). Use PHP attributes for property mapping — never override `from()` manually. Apply `#[MapInputName(SnakeCaseMapper::class)]` at class level for snake_case-to-camelCase input mapping, or `#[MapName(SnakeCaseMapper::class)]` when the DTO is also serialized to output.
 - **`?array` is forbidden:** Any use of `?array` as a type hint must be replaced with a typed collection, DTO, or explicit `array<Type>|null`. Vague nullable arrays hide structure and break static analysis.
+- **PHP array key type safety:** When refactoring associative arrays with dynamic keys, apply safe key strategies: use stable prefixed keys (`'user:' . $id`, `'postal:' . $postalCode`, `'ext:' . $externalReference`); prefer a dedicated collection or value object when the key is domain-significant; prefer `list<T>` when the structure is a list, not a map; prefer explicit validation or normalization before using external values as array keys; where relevant, prefer `array<non-decimal-int-string, T>` over misleading `array<string, T>`.
 - Laravel helpers over native PHP when appropriate.
 - DRY principle — eliminate duplicates.
 - **Validation rules as traits:** Extract reusable validation rules into traits in `App\Concerns` (e.g. `PasswordValidationRules`). Use these traits in FormRequest classes instead of duplicating rule arrays.

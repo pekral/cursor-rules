@@ -13,6 +13,7 @@ metadata:
 - I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
 - Always load existing CR reports/comments in the PR and related tracker discussion before generating a new CR report, and never repeat a previously reported finding.
+- **Before starting the review**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin reviewing.
 - NEVER CHANGE THE CODE! Generate the output only.
 - All messages formatted as markdown for output.
 - For comments posted to JIRA, always use JIRA Wiki Markup (not Markdown). Never use fenced code blocks (```), markdown headings (#), or markdown tables.

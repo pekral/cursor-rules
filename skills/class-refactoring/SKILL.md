@@ -31,6 +31,7 @@ metadata:
 - **`?array` is forbidden:** Any use of `?array` as a type hint must be replaced with a typed collection, DTO, or explicit `array<Type>|null`. Vague nullable arrays hide structure and break static analysis.
 - **PHP array key type safety:** When refactoring associative arrays with dynamic keys, apply safe key strategies: use stable prefixed keys (`'user:' . $id`, `'postal:' . $postalCode`, `'ext:' . $externalReference`); prefer a dedicated collection or value object when the key is domain-significant; prefer `list<T>` when the structure is a list, not a map; prefer explicit validation or normalization before using external values as array keys; where relevant, prefer `array<non-decimal-int-string, T>` over misleading `array<string, T>`.
 - Laravel helpers over native PHP when appropriate.
+- When changing Eloquent models, migrations, or factories, do not duplicate column defaults that already exist in the database schema; see `@.cursor/rules/laravel/architecture.mdc` (Schema defaults, Migrations).
 - DRY principle — eliminate duplicates.
 - **Validation rules as traits:** Extract reusable validation rules into traits in `App\Concerns` (e.g. `PasswordValidationRules`). Use these traits in FormRequest classes instead of duplicating rule arrays.
 - Remove obvious comments; keep PHPStan-relevant docs.

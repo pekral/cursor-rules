@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **24 comprehensive Agent skills** for automated workflows (v0.5)
+- **25 comprehensive Agent skills** for automated workflows (v0.5)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -91,6 +91,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `resolve-github-issue`   | Resolves GitHub issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results. |
 | `resolve-bugsnag-issue`  | Resolve Bugsnag issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results. |
 | `merge-github-pr`        | Merge PRs when they are ready for deployment, one by one. |
+| `merge-github-prs`       | Merge multiple PRs in sequence only when CI is successful and there are no merge conflicts. |
 | `analyze-problem`        | Analyze problems from issue trackers. Downloads and reviews attachments, provides technical analysis and solutions, and creates human-readable explanations for both technical and non-technical audiences. |
 
 ## Code Review & Quality

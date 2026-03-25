@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **25 comprehensive Agent skills** for automated workflows (v0.5)
+- **26 comprehensive Agent skills** for automated workflows (v0.5)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -104,6 +104,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `code-review-jira`       | Performs code review for JIRA issues. Analyzes pull requests, identifies critical and moderate issues, runs tests, and posts review comments to GitHub PRs. Reviews code quality, security, and adherence to project standards. |
 | `security-review`        | Performs comprehensive security review following OWASP Top 10 and security best practices. Checks for injection vulnerabilities, authentication flaws, sensitive data exposure, misconfigurations, and provides structured security reports with severity levels. |
 | `class-refactoring`      | Refactors PHP classes following Laravel best practices and SOLID principles. Ensures code quality, maintains functionality, improves testability, and achieves 100% code coverage. Focuses on single responsibility, DRY principle, and clean code structure. |
+| `smartest-project-addition` | Proposes exactly one highest-value and radically useful project addition, including impact, risk, and minimal rollout plan. |
 
 ## Testing, Package & SEO
 

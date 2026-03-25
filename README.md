@@ -90,8 +90,8 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `resolve-random-jira-issue` | Resolves random JIRA issues: fix bugs, refactor, code and security review, 100% test coverage, CI checks, create PRs. Links PRs to JIRA and updates issue status. |
 | `resolve-github-issue`   | Resolves GitHub issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results. |
 | `resolve-bugsnag-issue`  | Resolve Bugsnag issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results. |
-| `merge-github-pr`        | Merge PRs when they are ready for deployment, one by one. |
-| `merge-github-prs`       | Merge multiple PRs in sequence only when CI is successful and there are no merge conflicts. |
+| `merge-github-pr`        | Merge PRs when they are ready for deployment, one by one; allows merge when GitHub Actions did not start jobs solely due to billing/spending limits (see skill). |
+| `merge-github-prs`       | Merge multiple PRs in sequence when checks pass and there are no conflicts; same billing CI exception as `merge-github-pr`. |
 | `analyze-problem`        | Analyze problems from issue trackers. Downloads and reviews attachments, provides technical analysis and solutions, and creates human-readable explanations for both technical and non-technical audiences. |
 
 ## Code Review & Quality

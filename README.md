@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **27 comprehensive Agent skills** for automated workflows (v0.5)
+- **28 comprehensive Agent skills** for automated workflows (v0.5)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -116,6 +116,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `rewrite-tests-pest`     | Rewrites existing tests to PEST syntax following project conventions. Ensures DRY principles, uses data providers, maintains 100% coverage, and verifies test functionality. |
 | `package-review`         | Reviews composer.json packages by validating structure, checking required fields, verifying links, and ensuring proper configuration of autoloading, dependencies, and metadata. |
 | `seo-fix`                | Maintains and extends SEO setup (robots.txt, sitemap.xml, meta tags). Use when adding or changing public routes, disallow rules, sitemap entries, canonical/robots/OG tags, or when the user asks about SEO, sitemap, or robots. |
+| `seo-geo`                | SEO plus GEO (AI search citation optimization): audits, keywords, structured data strategy, content patterns, platform notes; pairs with `seo-fix` for Laravel implementation. |
 
 ---
 

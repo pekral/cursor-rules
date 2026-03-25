@@ -56,3 +56,6 @@ metadata:
 - Test added or updated so robots response contains that `Disallow`.
 - Area uses private (app/auth) layout with noindex,nofollow.
 - Area not included in sitemap.
+
+**Related**
+- For GEO (generative engines), AI-search citation strategy, keyword research, and JSON-LD/content patterns beyond robots/sitemap wiring, use @.cursor/skills/seo-geo/SKILL.md.

@@ -20,3 +20,4 @@ All notable changes to `cursor-rules` will be documented in this file.
 - 📝 **Changed**: Update SKILL.md files and rule files (php standards, sql, git, laravel)
 - 📝 **Changed**: Laravel testing rules and test-writing skills require Eloquent rows in tests to be created only via model factories (#147)
 - 📝 **Changed**: Laravel rules and test-writing skills clarify database schema defaults as source of truth—avoid duplicating them in PHP/factories (#152)
+- 📝 **Changed**: Laravel testing rules and test-writing skills require queueing jobs in tests via `JobClass::dispatch()` only (#153)

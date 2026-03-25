@@ -28,6 +28,7 @@ metadata:
 - In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
 - If the test requires persisted Laravel Eloquent rows, create them only via `Model::factory()` (see `@.cursor/rules/laravel/architecture.mdc` Testing). For other test data, follow `@.cursor/rules/php/standards.mdc`. Never mock it or circumvent this in any other way!
 - In Laravel factories, do not set attributes whose values are already defined by a database column default unless the test explicitly needs a different value (see `@.cursor/rules/laravel/architecture.mdc` Schema defaults and Testing).
+- In Laravel tests, dispatch queue jobs only via `JobClass::dispatch(...)` (see `@.cursor/rules/laravel/architecture.mdc` Testing — Dispatching jobs in tests).
 - Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases instead.
 - Use data providers when they simplify writing and readability.
 - Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them.

@@ -97,7 +97,7 @@ How to execute:
 
 1.  Identify the entry point of the changed code (action class, model method, service, command, etc.) from the PR diff or description.
 2.  Use `php artisan tinker` (or an equivalent CLI client) to set up the scenario:
-    -   create or load the required model instances / test data
+    -   create or load the required model instances / test data (for Eloquent, prefer `Model::factory()`)
     -   invoke the changed class or method directly
     -   inspect the return value and the resulting database state
 3.  Verify that:

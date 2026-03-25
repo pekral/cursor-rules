@@ -35,7 +35,7 @@ Write one minimal test showing expected behavior.
 - Arrange-act-assert pattern, error cases first.
 - Test classes must be `final`; use only local variables inside tests.
 - In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
-- If the test requires test data, always create it via the factory or insert it directly into the specific database. Never mock it or circumvent this in any other way!
+- If the test requires persisted Laravel Eloquent rows, create them only via `Model::factory()` (see `@.cursor/rules/laravel/architecture.mdc` Testing). For other test data, follow `@.cursor/rules/php/standards.mdc`. Never mock it or circumvent this in any other way!
 - Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases instead.
 - Use data providers when they simplify writing and readability.
 - Never generate the `covers()` method.

@@ -18,3 +18,4 @@ All notable changes to `cursor-rules` will be documented in this file.
 - ✨ **Added**: new Agent skill `smartest-project-addition` for single high-impact innovation prompt outcomes
 - ✨ **Added**: new Agent skill `understand-propose-implement-verify` for strict problem-solving workflow
 - 📝 **Changed**: Update SKILL.md files and rule files (php standards, sql, git, laravel)
+- 📝 **Changed**: Laravel testing rules and test-writing skills require Eloquent rows in tests to be created only via model factories (#147)

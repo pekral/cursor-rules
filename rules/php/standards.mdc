@@ -65,7 +65,7 @@ globs: ["*"]
 - In tests, avoid reflection and use mocks instead (even partial ones, if they are effective and easy to read).
 - For new test flows, follow the concept of existing flows, unless they are new tests. Write new tests according to the defined rules.
 - Create deterministic evenrytime!
-- If the test requires test data, always create it via the factory or insert it directly into the specific database. Never mock it or circumvent this case in any other way!
+- In Laravel tests, persisted rows for Eloquent models must be created only via model factories; see Laravel Testing rules in `laravel/architecture.mdc`. For non-Laravel projects or data that is not backed by an Eloquent model, create test data via factories where they exist, or insert directly into the database when no factory applies. Never mock it or circumvent this case in any other way!
 - The test will not contain conditions such as
 ```php
 if ($agencyAttributes !== null) {

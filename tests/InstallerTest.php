@@ -295,6 +295,73 @@ test('install with default editor copies rules and skills only to .cursor', func
     }
 });
 
+test('install injects humanizer instruction into installed skills', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/skills/humanize/SKILL.md', "---\nname: humanize\ndescription: test skill\n---\n\n# Body");
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        $installedSkill = $root . '/.cursor/skills/humanize/SKILL.md';
+        $installedContents = file_get_contents($installedSkill);
+        $installedContents = $installedContents !== false ? $installedContents : '';
+
+        expect($installedContents)->toContain('https://github.com/blader/humanizer');
+        expect($installedContents)->toContain('## Output Humanization');
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install does not duplicate humanizer instruction in installed skills', function (): void {
+    $root = installerCreateProjectRoot();
+    $skillWithHumanizer = <<<'MD'
+---
+name: humanize
+description: test skill
+---
+
+## Output Humanization
+- Use [blader/humanizer](https://github.com/blader/humanizer) for all skill outputs to keep the text natural and human-friendly.
+MD;
+
+    installerWriteFile(
+        $root . '/skills/humanize/SKILL.md',
+        $skillWithHumanizer . PHP_EOL,
+    );
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        $installedSkill = $root . '/.cursor/skills/humanize/SKILL.md';
+        $installedContents = file_get_contents($installedSkill);
+        $installedContents = $installedContents !== false ? $installedContents : '';
+        preg_match_all('/https:\/\/github\.com\/blader\/humanizer/', $installedContents, $matches);
+
+        expect(count($matches[0]))->toBe(1);
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
 test('install with editor=all copies skills to all target directories', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/rules/example.mdc', 'rules');
@@ -319,7 +386,10 @@ test('install with editor=all copies skills to all target directories', function
         foreach (InstallerPath::resolveSkillsTargetDirectories($root, InstallerPath::EDITOR_ALL) as $targetDir) {
             $installedSkill = $targetDir . '/test-skill/SKILL.md';
             expect(is_file($installedSkill))->toBeTrue('Skills should be installed to ' . $targetDir);
-            expect(file_get_contents($installedSkill))->toBe('skill content');
+            $installedContents = file_get_contents($installedSkill);
+            $installedContents = $installedContents !== false ? $installedContents : '';
+            expect($installedContents)->toContain('skill content');
+            expect($installedContents)->toContain('https://github.com/blader/humanizer');
         }
     } finally {
         installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
@@ -1130,6 +1200,52 @@ test('InstallerPruner handles unwritable parent directory when removing empty di
         expect(true)->toBeTrue();
     } finally {
         chmod($root . '/target', 0755);
+        installerRemoveDirectory($root);
+    }
+});
+
+test('copySkillDefinitionWithHumanizer throws when source file is unreadable', function (): void {
+    $reflection = new ReflectionClass(Installer::class);
+    $method = $reflection->getMethod('copySkillDefinitionWithHumanizer');
+    $method->setAccessible(true);
+
+    set_error_handler(static fn (): bool => true);
+
+    try {
+        expect(
+            fn (): mixed => $method->invoke(
+                null,
+                '/non-existent/SKILL.md',
+                '/tmp/target-skill.md',
+            ),
+        )->toThrow(InstallerFailure::class);
+    } finally {
+        restore_error_handler();
+    }
+});
+
+test('copySkillDefinitionWithHumanizer throws when destination write fails', function (): void {
+    $root = installerCreateProjectRoot();
+    $sourceFile = $root . '/source/SKILL.md';
+    installerWriteFile($sourceFile, "---\nname: test\ndescription: test\n---");
+    $destinationFile = $root . '/missing/target/SKILL.md';
+
+    $reflection = new ReflectionClass(Installer::class);
+    $method = $reflection->getMethod('copySkillDefinitionWithHumanizer');
+    $method->setAccessible(true);
+
+    try {
+        set_error_handler(static fn (): bool => true);
+
+        expect(
+            fn (): mixed => $method->invoke(
+                null,
+                $sourceFile,
+                $destinationFile,
+            ),
+        )->toThrow(InstallerFailure::class);
+    } finally {
+        restore_error_handler();
         installerRemoveDirectory($root);
     }
 });

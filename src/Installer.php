@@ -12,6 +12,11 @@ use SplFileInfo;
 final class Installer
 {
 
+    private const string HUMANIZER_URL = 'https://github.com/blader/humanizer';
+
+    private const string HUMANIZER_INSTRUCTION = '- Use [blader/humanizer](https://github.com/blader/humanizer) '
+        . 'for all skill outputs to keep the text natural and human-friendly.';
+
     /**
      * @param array<int, string> $argv
      */
@@ -212,6 +217,12 @@ final class Installer
     {
         self::removeExistingTarget($dst);
 
+        if (self::isSkillDefinitionFile($dst)) {
+            self::copySkillDefinitionWithHumanizer($src, $dst);
+
+            return true;
+        }
+
         if ($symlink && self::canSymlink()) {
             if (!symlink($src, $dst)) {
                 // @codeCoverageIgnoreStart
@@ -223,6 +234,35 @@ final class Installer
         }
 
         return true;
+    }
+
+    private static function isSkillDefinitionFile(string $path): bool
+    {
+        return basename($path) === 'SKILL.md';
+    }
+
+    private static function copySkillDefinitionWithHumanizer(string $src, string $dst): void
+    {
+        $sourceContents = file_get_contents($src);
+
+        if ($sourceContents === false) {
+            throw InstallerFailure::fileCopyFailed($src, $dst);
+        }
+
+        $updatedContents = self::ensureHumanizerInstruction($sourceContents);
+
+        if (file_put_contents($dst, $updatedContents) === false) {
+            throw InstallerFailure::fileCopyFailed($src, $dst);
+        }
+    }
+
+    private static function ensureHumanizerInstruction(string $contents): string
+    {
+        if (str_contains($contents, self::HUMANIZER_URL)) {
+            return $contents;
+        }
+
+        return rtrim($contents) . PHP_EOL . PHP_EOL . '## Output Humanization' . PHP_EOL . self::HUMANIZER_INSTRUCTION . PHP_EOL;
     }
 
     private static function removeExistingTarget(string $destination): void

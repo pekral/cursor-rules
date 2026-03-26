@@ -12,6 +12,11 @@ use SplFileInfo;
 final class Installer
 {
 
+    private const string HUMANIZER_SECTION_HEADING = '## Output Humanization';
+
+    private const string HUMANIZER_DIRECTIVE = '- Use [blader/humanizer](https://github.com/blader/humanizer)'
+        . ' for all skill outputs to keep the text natural and human-friendly.';
+
     /**
      * @param array<int, string> $argv
      */
@@ -222,7 +227,42 @@ final class Installer
             self::copy($src, $dst);
         }
 
+        self::appendHumanizerDirectiveIfNeeded($dst);
+
         return true;
+    }
+
+    private static function appendHumanizerDirectiveIfNeeded(string $destination): void
+    {
+        if (!self::isSkillMarkdown($destination) || is_link($destination)) {
+            return;
+        }
+
+        $contents = file_get_contents($destination);
+
+        if ($contents === false || str_contains($contents, self::HUMANIZER_DIRECTIVE)) {
+            return;
+        }
+
+        $normalized = rtrim($contents);
+
+        if ($normalized !== '') {
+            $normalized .= PHP_EOL . PHP_EOL;
+        }
+
+        $updated = $normalized
+            . self::HUMANIZER_SECTION_HEADING . PHP_EOL
+            . self::HUMANIZER_DIRECTIVE
+            . PHP_EOL;
+
+        file_put_contents($destination, $updated);
+    }
+
+    private static function isSkillMarkdown(string $path): bool
+    {
+        $normalized = str_replace('\\', '/', $path);
+
+        return str_ends_with($normalized, '/SKILL.md');
     }
 
     private static function removeExistingTarget(string $destination): void

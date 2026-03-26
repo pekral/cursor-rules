@@ -319,10 +319,69 @@ test('install with editor=all copies skills to all target directories', function
         foreach (InstallerPath::resolveSkillsTargetDirectories($root, InstallerPath::EDITOR_ALL) as $targetDir) {
             $installedSkill = $targetDir . '/test-skill/SKILL.md';
             expect(is_file($installedSkill))->toBeTrue('Skills should be installed to ' . $targetDir);
-            expect(file_get_contents($installedSkill))->toBe('skill content');
+            expect(file_get_contents($installedSkill))->toContain('skill content');
         }
     } finally {
         installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
+    }
+});
+
+test('install appends output humanization directive to installed skill', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/skills/test-skill/SKILL.md', "# Skill Title\n\nSkill body.");
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        $installedSkill = $root . '/.cursor/skills/test-skill/SKILL.md';
+        $contents = file_get_contents($installedSkill);
+
+        expect($contents)->toContain('## Output Humanization');
+        expect($contents)->toContain(
+            '- Use [blader/humanizer](https://github.com/blader/humanizer) for all skill outputs to keep the text natural and human-friendly.',
+        );
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install does not duplicate output humanization directive in installed skill', function (): void {
+    $root = installerCreateProjectRoot();
+    $humanizerLine = '- Use [blader/humanizer](https://github.com/blader/humanizer)'
+        . ' for all skill outputs to keep the text natural and human-friendly.';
+    installerWriteFile(
+        $root . '/skills/test-skill/SKILL.md',
+        "# Skill Title\n\n## Output Humanization\n{$humanizerLine}\n",
+    );
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        $installedSkill = $root . '/.cursor/skills/test-skill/SKILL.md';
+        $contents = file_get_contents($installedSkill);
+
+        expect(substr_count((string) $contents, '## Output Humanization'))->toBe(1);
+        expect(substr_count((string) $contents, '[blader/humanizer](https://github.com/blader/humanizer)'))->toBe(1);
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
     }
 });
 

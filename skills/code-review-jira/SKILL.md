@@ -21,8 +21,7 @@ metadata:
 **Universal JIRA Comment Formatting**
 - Use this output shape for every JIRA update from this skill:
 - `h3. <short status title>`
-- One short business-readable paragraph (non-technical wording)
-- `h4. Findings summary` and bullet list using `*`
+- `h4. Findings` and bullet list using `*`
 - If needed, `h4. Testing recommendations` and bullet list using `*`
 - For every testing recommendation item, include a direct in-app link (full URL) so testers can open the exact screen immediately
 - Inline references with `{{...}}` (ticket id, endpoint, env, status code)
@@ -48,15 +47,15 @@ metadata:
 - I want you to fix the bug from JIRA (you have either the ID or a link to JIRA). Use the acli console tool first to retrieve all the information you need about the bug (including comments and attachments). If acli is not available, use the JIRA MCP server if available. If neither is available, stop and display a message stating that at least one of these tools must be installed to use the skill. If you have other resources available that you could use to understand the problem, load them and analyze them.
 - If possible, find links to the assignment and analyze it so that you understand it and can do a quality CR. Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
 - List findings using exactly three severity levels: **Critical**, **Moderate**, **Minor**.
-- If there are any, I want you to add comments to the PR about where you found these errors. If that is not possible, I want you to create a new comment on the PR with a list of errors from the CR. If you do not find any errors, write that you have done the CR but did not find any serious errors. Every text in English.
+- If there are any findings, add comments to the PR about where you found these errors. If that is not possible, create a new comment on the PR with the list of findings. If you do not find any issues, post a short comment stating that **no findings were identified**. Every text in English.
 - I don't want to enter technical data into the JIRA issue tracker after code review, but I want to edit the text so that project managers and testers can understand it.
 - For simple fixes, include a minimal example using JIRA `{code}` blocks only when it improves clarity.
-- I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. Format the PR comment as: (1) One-line summary by severity (e.g. "Summary: 2 Critical, 1 Moderate"); (2) List of findings grouped by severity, each with file/line (or file) and a short, actionable recommendation. Do not list "What was checked," only the findings.
+- I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. The PR comment must contain **only findings** grouped by severity (Critical → Moderate → Minor), each with file/line (or file) and a short, actionable recommendation. Do not include any summary, “what was checked”, or praise.
 - Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
 - If is needed use interactive-testing skill for testing
 
 **Communication protocol:**
-- Always acknowledge what was done well before highlighting issues.
+- Do not include praise/positive feedback; output must contain only findings.
 - If you find significant deviations from the plan or requirements, explicitly flag them and ask for confirmation.
 - If you identify issues with the original plan or requirements themselves, recommend updates.
 - For implementation problems, provide clear guidance on fixes needed with code examples.

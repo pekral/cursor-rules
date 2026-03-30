@@ -20,8 +20,10 @@ globs: ["*"]
 
 ## Structure
 - Single responsibility per function
+- Avoid "god classes" — do not mix unrelated responsibilities in one class
 - Hide implementation, expose clear interfaces
 - Move nested conditionals into named functions
+- Prefer pure-ish methods/functions: minimize side effects, keep I/O at the edges, and make behavior depend primarily on inputs
 - Use DTOs for typed data exchange (never `array<mixed>`)
 - Custom exceptions when necessary
 - When designing architecture, use composition whenever possible.

@@ -55,7 +55,11 @@ h4. Testing recommendations
 **Steps:**
 - Read project.mdc file
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
-- I want you to fix the bug from JIRA (you have either the ID or a link to JIRA). Use the acli tool or MCP server to get all the information you need about the bug so you can fix it. If you have other resources available that you could use to understand the problem, load them and analyze them. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
+- I want you to fix the bug from JIRA (you have either the ID or a link to JIRA).
+  Use the acli console tool first to retrieve all issue details (including comments and attachments).
+  If acli is not available, use the JIRA MCP server if available.
+  If neither acli nor a JIRA MCP server is available, stop and display a message stating that at least one of these tools must be installed to use the skill.
+  If you have other resources available that you could use to understand the problem, load them and analyze them.
 - Classify the task type before writing any code:
   - **Bug**: the issue describes existing functionality that behaves incorrectly (e.g. wrong output, exception, regression, data corruption). Issue types such as `Bug` or `Defect`, or labels such as `bug`, `fix`, or `regression` are strong signals.
   - **Feature**: the issue requests new behaviour that does not exist yet.

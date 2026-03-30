@@ -15,6 +15,6 @@ metadata:
 - For comments posted to JIRA, always use JIRA Wiki Markup (not Markdown) and follow the universal structure from JIRA-focused skills.
 
 **Steps:**
-- Log into JIRA, load all issues, and list only those that are to be resolved by AI (they are tagged).
-  Look for tasks labeled "Resolve_by_AI." If you are supposed to search in other places as well, find those other places too. Only not resolved issues should be listed! If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
+- Log into JIRA and load all issues using the acli console tool first. If acli is not available, use the JIRA MCP server if available. If neither is available, stop and display a message stating that at least one of these tools must be installed to use the skill.
+  List only those issues that are to be resolved by AI (they are tagged). Look for tasks labeled "Resolve_by_AI." If you are supposed to search in other places as well, find those other places too. Only not resolved issues should be listed!
 - Randomly select one and try to resolve it. Use the skill @.cursor/skills/resolve-jira-issue/SKILL.md.

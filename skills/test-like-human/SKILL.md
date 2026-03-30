@@ -23,7 +23,8 @@ metadata:
 -   Do not invent additional requirements outside the PR instructions unless needed to verify suspicious behavior.
 -   API checks may use `curl` if needed. Interactive UI testing must use the existing **interactive browser testing skill**.
 -   For testing API endpoints follow steps defined in project.mdc section "## Testing API endpoints like human". Never run automatic tests from codebase!
--   When testing API endpoints, always find information about the endpoint via MCP (or otherwise). Use all available tools to obtain the necessary parameters for building the URL for the API!
+-   When testing API endpoints, always load the project's API documentation first if it is available (e.g., OpenAPI/Swagger spec, Postman collection, README API section, API docs website).
+    If no API documentation is available, find information about the endpoint via MCP (or otherwise). Use all available tools to obtain the necessary parameters for building the URL for the API!
 -   The final output must be written for humans: no technical notes, terminal logs, stack details, or developer commentary.
 
 ------------------------------------------------------------------------
@@ -33,12 +34,16 @@ metadata:
 1.  Load the current pull request using CLI tools or MCP servers.
 2.  Read the PR conversation: PR description, review comments, and discussion threads.
 3.  Locate the **"Doporučení k testování" / "Testing Recommendations"** section and extract all testing instructions.
-4.  Determine the **testing approach** for each instruction:
+4.  If at least one extracted instruction requires API testing, first try to load the project's API documentation:
+    -   Prefer local docs in the repo first (e.g., OpenAPI/Swagger JSON/YAML, Postman collection, or a README/API docs section).
+    -   If local docs are not present, use MCP servers or installed CLI tools to locate API reference documentation.
+    -   If no documentation can be found, proceed using MCP/other tools to discover endpoints as needed.
+5.  Determine the **testing approach** for each instruction:
     -   **UI scenario** → use interactive browser testing skill
     -   **API scenario** → use `curl` or equivalent
     -   **Backend / code execution scenario** → use `php artisan tinker` or the project's equivalent CLI client
     -   **CLI scenario** → run the required terminal command
-5.  Convert them into realistic **user scenarios** and think like a senior tester:
+6.  Convert them into realistic **user scenarios** and think like a senior tester:
     -   what the user tries to achieve
     -   what could confuse the user
     -   where the flow could fail
@@ -67,7 +72,7 @@ Evaluate whether the flow behaves naturally and correctly.
 If the behavior depends on API responses:
 
 -   use `curl` only when necessary
--   always find endpoint information via MCP or other available tools
+-   always load API documentation first if it is available; otherwise find endpoint information via MCP or other available tools
 -   verify that the user-visible behavior matches expectations
 -   do not expose raw request/response details in the report
 

@@ -28,7 +28,11 @@ metadata:
 - If review feedback requires additional tests, use @.cursor/skills/create-missing-tests-in-pr/SKILL.md and ensure current changes are fully covered.
 - If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
 - Run only checks/tests needed for the changed files and fix all errors before continuing.
-- Commit all changes and push the branch. If no pull request exists for the current branch, create one according to @.cursor/rules/git/pr.mdc rules — link it to the original issue and follow the PR description format (title in English, body in the language of the assignment).
+- Run the issue-tracker-specific code review skill before PR creation:
+  - GitHub issue flow: run @.cursor/skills/code-review-github/SKILL.md
+  - JIRA issue flow: run @.cursor/skills/code-review-jira/SKILL.md
+- Fix all Critical and Moderate findings from that review and repeat the same review skill until no Critical or Moderate findings remain.
+- Commit all changes and push the branch. If no pull request exists for the current branch, create one according to @.cursor/rules/git/pr.mdc rules — link it to the original issue and follow the PR description format (title in English, body in the language of the assignment). Do not create a new PR before the CR cycle is clean.
 - Update the review result comment in the pull request:
 - mark resolved points as checked items when possible, or
 - format resolved points as underlined text when checkbox updates are not possible.

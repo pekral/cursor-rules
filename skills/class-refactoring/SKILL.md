@@ -9,6 +9,7 @@ metadata:
 **Constraint:**
 - Read project.mdc file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- Always apply @.cursor/skills/smartest-project-addition/SKILL.md to select the single highest-impact refactoring direction before implementing changes.
 
 **Steps:**
 - Analyze the class and complete the TODO list tasks.

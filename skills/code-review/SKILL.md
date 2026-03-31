@@ -6,6 +6,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 **Constraint:**
 - Read project.mdc file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- Always apply @.cursor/skills/smartest-project-addition/SKILL.md internally to identify one highest-impact, low-risk addition candidate; include it only if it maps to a real finding and keep the final output in the required findings-only format.
 - I want the texts to be in the language in which the assignment was written.
 - **Before starting the review**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin reviewing.
 - Always load existing CR reports/comments from the issue tracker and related PR (using available CLI tools or MCP servers) before generating a new CR report, and never repeat a previously reported finding.

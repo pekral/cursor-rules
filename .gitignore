@@ -30,9 +30,9 @@ Thumbs.db
 /tests/output/
 
 
-.cursor/*
-.codex/*
-.claude/*
+/.cursor/
+/.codex/
+/.claude/
 composer.lock
 
 

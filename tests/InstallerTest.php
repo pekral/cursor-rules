@@ -40,6 +40,13 @@ test('package directory points to correct location', function (): void {
     expect(is_dir($securityRulesDir))->toBeTrue();
 });
 
+test('gitignore ignores local cursor and claude directories', function (): void {
+    $gitignore = file_get_contents(__DIR__ . '/../.gitignore');
+
+    expect($gitignore)->toContain('/.cursor/');
+    expect($gitignore)->toContain('/.claude/');
+});
+
 test('resolveRulesSource prefers development directory', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/rules/test.mdc', 'content');

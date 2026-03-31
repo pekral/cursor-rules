@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **23 comprehensive Agent skills** for automated workflows (v0.5)
+- **28 comprehensive Agent skills** for automated workflows (v0.6)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -76,46 +76,59 @@ vendor/bin/cursor-rules install --symlink          # prefer symlinks (fallback t
 
 ---
 
-# 🎯 Skills Overview — **NEW in v0.5**
+# 🎯 Skills Overview — **v0.6**
 
-> **Major Update:** The skills system has been significantly expanded in version 0.5, providing comprehensive automation for common development workflows including issue resolution, code review, security analysis, and testing.
+> Current release includes 28 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
-## Issue Resolution & Bug Fixing
+## Issue Resolution & Delivery
 
-| Skill                    | Description                                                                 |
-|--------------------------|-----------------------------------------------------------------------------|
-| `resolve-jira-issue`     | End-to-end JIRA issue resolution: analyze, fix bugs, refactor code, perform code and security reviews, ensure 100% test coverage, run CI checks, and create pull requests. Links PRs to JIRA and updates issue status. |
-| `resolve-random-jira-issue` | Resolves random JIRA issues: fix bugs, refactor, code and security review, 100% test coverage, CI checks, create PRs. Links PRs to JIRA and updates issue status. |
-| `resolve-github-issue`   | Resolves GitHub issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results. |
-| `resolve-bugsnag-issue`  | Resolve Bugsnag issues by fixing bugs, refactoring code, performing code and security reviews, ensuring 100% test coverage, running CI checks, and creating pull requests. Updates GitHub issues with review results. |
-| `merge-github-pr`        | Merge PRs when they are ready for deployment, one by one. |
-| `analyze-problem`        | Analyze problems from issue trackers. Downloads and reviews attachments, provides technical analysis and solutions, and creates human-readable explanations for both technical and non-technical audiences. |
+| Skill | Description |
+|---|---|
+| `analyze-problem` | Analyze problems from issue trackers, including attachments, technical context, and human-readable outputs. |
+| `resolve-bugsnag-issue` | End-to-end Bugsnag issue resolution with fixes, review loops, coverage checks, and PR creation. |
+| `resolve-github-issue` | End-to-end GitHub issue resolution with fixes, review loops, coverage checks, and PR creation. |
+| `resolve-jira-issue` | End-to-end JIRA issue resolution with fixes, review loops, coverage checks, and PR creation. |
+| `resolve-random-jira-issue` | Pick and resolve a random JIRA issue with the full quality workflow. |
+| `merge-github-pr` | Merge one GitHub PR that is ready for deployment. |
+| `create-issue` | Create a tracker issue from provided task text while preserving original meaning and structure. |
 
-## Code Review & Quality
+## Code Review, Security & Architecture
 
-| Skill                    | Description                                                                 |
-|--------------------------|-----------------------------------------------------------------------------|
-| `code-review`            | Senior PHP code reviewer. Use when reviewing pull requests, examining code changes vs master branch, or when the user asks for a code review. Read-only review — never modifies code. |
-| `process-code-review`    | Processes feedback from existing pull request reviews: finds latest PR for task, resolves review comments, updates review status comments, and triggers the next review cycle. |
-| `code-review-github`     | Performs comprehensive code review for GitHub pull requests. Analyzes code changes, identifies critical and moderate issues, runs tests, and posts review comments. Reviews code quality, security, and adherence to project standards. |
-| `code-review-jira`       | Performs code review for JIRA issues. Analyzes pull requests, identifies critical and moderate issues, runs tests, and posts review comments to GitHub PRs. Reviews code quality, security, and adherence to project standards. |
-| `security-review`        | Performs comprehensive security review following OWASP Top 10 and security best practices. Checks for injection vulnerabilities, authentication flaws, sensitive data exposure, misconfigurations, and provides structured security reports with severity levels. |
-| `class-refactoring`      | Refactors PHP classes following Laravel best practices and SOLID principles. Ensures code quality, maintains functionality, improves testability, and achieves 100% code coverage. Focuses on single responsibility, DRY principle, and clean code structure. |
-| `smartest-project-addition` | Proposes exactly one highest-value and radically useful project addition, including impact, risk, and minimal rollout plan. |
-| `understand-propose-implement-verify` | Enforces a strict four-step workflow: understand the problem, propose solution, implement, and verify correctness. |
+| Skill | Description |
+|---|---|
+| `code-review` | Senior PHP code review focused on architecture, risk, and behavior (read-only). |
+| `code-review-github` | Review GitHub pull requests with severity-based findings and review comments. |
+| `code-review-jira` | Review JIRA-linked changes with GitHub PR comments and structured findings. |
+| `process-code-review` | Process existing review feedback, resolve comments, and prepare next review cycle. |
+| `security-review` | OWASP-focused security review (injection, auth, exposure, misconfigurations). |
+| `class-refactoring` | Refactor PHP classes using SOLID and Laravel best practices with testability focus. |
+| `race-condition-review` | Review shared-state and concurrency paths for race conditions and atomicity gaps. |
+| `refactor-entry-point-to-action` | Refactor controller/job/command/listener entry-point logic into Action classes. |
+| `smartest-project-addition` | Propose one high-impact, low-risk project improvement. |
+| `understand-propose-implement-verify` | Enforce a strict 4-step loop: understand, propose, implement, verify. |
 
-## Testing, Package & SEO
+## Testing & Quality Automation
 
-| Skill                    | Description                                                                 |
-|--------------------------|-----------------------------------------------------------------------------|
-| `postman-collections`    | Generates or updates Postman collections when API endpoints are created or changed, keeps examples and auth variables in sync, and validates collection importability. |
-| `create-test`            | Creates tests following project conventions and patterns. Ensures deterministic tests, 100% code coverage for changes, uses data providers where appropriate, and mocks only external services or exception scenarios. |
-| `rewrite-tests-pest`     | Rewrites existing tests to PEST syntax following project conventions. Ensures DRY principles, uses data providers, maintains 100% coverage, and verifies test functionality. |
-| `package-review`         | Reviews composer.json packages by validating structure, checking required fields, verifying links, and ensuring proper configuration of autoloading, dependencies, and metadata. |
-| `seo-fix`                | Maintains and extends SEO setup (robots.txt, sitemap.xml, meta tags). Use when adding or changing public routes, disallow rules, sitemap entries, canonical/robots/OG tags, or when the user asks about SEO, sitemap, or robots. |
-| `seo-geo`                | SEO plus GEO (AI search citation optimization): audits, keywords, structured data strategy, content patterns, platform notes; pairs with `seo-fix` for Laravel implementation. |
+| Skill | Description |
+|---|---|
+| `create-test` | Add tests following project rules with deterministic behavior and high coverage. |
+| `create-missing-tests-in-pr` | Validate review recommendations and add missing tests for current PR changes. |
+| `rewrite-tests-pest` | Rewrite tests to PEST style while preserving behavior and conventions. |
+| `test-like-human` | Validate PR behavior from user perspective using scenario-driven testing. |
+| `test-driven-development` | Enforce strict red-green-refactor flow for bugfixes and features. |
+| `postman-collections` | Create or update Postman collections for changed API endpoints. |
+
+## Platform, Data & SEO
+
+| Skill | Description |
+|---|---|
+| `composer-update` | Analyze composer updates, conflicts, and changelog impact. |
+| `package-review` | Review `composer.json` and package metadata/configuration quality. |
+| `mysql-problem-solver` | Diagnose and optimize MySQL queries, indexes, and execution plans. |
+| `seo-fix` | Implement and maintain Laravel SEO assets (robots/sitemap/meta/canonical). |
+| `seo-geo` | Improve SEO + GEO (AI search visibility and citation-readiness). |
 
 ---
 
@@ -132,6 +145,7 @@ Cursor rules for PHP and Laravel included in this package:
 | `git/general.mdc`      | Git workflow — analyze branch/commits when outside main    | Always   |
 | `git/pr.mdc`           | Create pull request in Github                              | Always   |
 | `laravel/architecture.mdc` | Laravel architecture and conventions                   | Laravel  |
+| `laravel/arch-app-services.mdc` | BaseModelService/Data Validator conventions for `pekral/arch-app-services` projects | Laravel |
 | `laravel/filament.mdc` | Filament v4 specific rules                                 | Filament |
 | `laravel/livewire.mdc` | Livewire component rules and conventions                   | Livewire |
 | `sql/optimalize.mdc`   | SQL query optimization, index design, schema standards     | Always   |

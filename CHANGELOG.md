@@ -14,7 +14,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 - ♻️ **Refactored**: optimize commands and prompts
 - ✨ **Added**: new Agent skills (resolve-github-issue, merge-github-pr, code-review, seo-fix, package-review, and others)
 - ✨ **Added**: new Agent skill `process-code-review` for handling pull request review feedback loops
-- ✨ **Added**: new Agent skill `merge-github-prs` for batch-merging PRs with successful checks and no conflicts
+- 🗑️ **Removed**: obsolete Agent skills (`class-refactoring-plan`, `composer-install`, `interactive-testing`, `merge-github-prs`, `resolve-random-github-issue`) and `skills/ANALYZA-SKILLS.md`
 - ✨ **Added**: new Agent skill `smartest-project-addition` for single high-impact innovation prompt outcomes
 - ✨ **Added**: new Agent skill `understand-propose-implement-verify` for strict problem-solving workflow
 - 📝 **Changed**: Update SKILL.md files and rule files (php standards, sql, git, laravel)

@@ -40,7 +40,7 @@ metadata:
 - I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. The PR comment must contain **only findings** grouped by severity (Critical → Moderate → Minor), each with file/line (or file) and a short, actionable recommendation. Do not include any summary, “what was checked”, or praise.
 - Use readable Markdown with clear section separators and include short code suggestions for simple fixes when helpful.
 - Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
-- If is needed use interactive-testing skill for testing
+- If needed, use browser-based testing via available browser MCP tools
 
 **Communication protocol:**
 - Do not include praise/positive feedback; output must contain only findings.

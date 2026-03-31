@@ -21,7 +21,7 @@ metadata:
 -   Test the application like a **senior tester of web applications who is not a programmer but works in a dev team and has access to developer tools**. Focus on visible behavior, usability, clarity, consistency, and real user experience. Do not focus on implementation details, internal architecture, or framework behavior — these must not appear in the final report.
 -   When the change is primarily backend (models, services, actions, jobs, commands), verify the behavior by executing the relevant code paths directly via `php artisan tinker` or an equivalent CLI client — do not limit testing to the UI when a deeper verification is possible and useful.
 -   Do not invent additional requirements outside the PR instructions unless needed to verify suspicious behavior.
--   API checks may use `curl` if needed. Interactive UI testing must use the existing **interactive browser testing skill**.
+-   API checks may use `curl` if needed. Interactive UI testing must use the available browser MCP tools.
 -   For testing API endpoints follow steps defined in project.mdc section "## Testing API endpoints like human". Never run automatic tests from codebase!
 -   When testing API endpoints, always load the project's API documentation first if it is available (e.g., OpenAPI/Swagger spec, Postman collection, README API section, API docs website).
     If no API documentation is available, find information about the endpoint via MCP (or otherwise). Use all available tools to obtain the necessary parameters for building the URL for the API!
@@ -39,7 +39,7 @@ metadata:
     -   If local docs are not present, use MCP servers or installed CLI tools to locate API reference documentation.
     -   If no documentation can be found, proceed using MCP/other tools to discover endpoints as needed.
 5.  Determine the **testing approach** for each instruction:
-    -   **UI scenario** → use interactive browser testing skill
+    -   **UI scenario** → use browser MCP tools
     -   **API scenario** → use `curl` or equivalent
     -   **Backend / code execution scenario** → use `php artisan tinker` or the project's equivalent CLI client
     -   **CLI scenario** → run the required terminal command
@@ -54,7 +54,7 @@ metadata:
 
 **UI Testing**
 
-If the instruction involves user interaction, use @.cursor/skills/interactive-testing/SKILL.md.
+If the instruction involves user interaction, use available browser MCP tools (navigation, snapshot, click, fill, wait, assert).
 
 Simulate realistic user actions:
 

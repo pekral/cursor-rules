@@ -12,6 +12,9 @@ metadata:
 
 **Constraint:**
 
+-   For all GitHub operations, prefer GitHub CLI (`gh`) as the primary tool.
+-   If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
+-   If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
 -   Read project.mdc file!
 -   First load all cursor editor rules (.cursor/rules/.\*mdc).
 -   I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
@@ -31,7 +34,9 @@ metadata:
 
 **Steps:**
 
-1.  Load the current pull request using CLI tools or MCP servers.
+1.  Load the current pull request using GitHub CLI (`gh`) first. If
+    `gh` is not available, use a GitHub MCP server. If neither is
+    available, stop and return a failed result about missing GitHub tools.
 2.  Read the PR conversation: PR description, review comments, and discussion threads.
 3.  Locate the **"Doporučení k testování" / "Testing Recommendations"** section and extract all testing instructions.
 4.  If at least one extracted instruction requires API testing, first try to load the project's API documentation:

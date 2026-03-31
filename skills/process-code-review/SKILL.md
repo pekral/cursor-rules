@@ -7,6 +7,9 @@ metadata:
 ---
 
 **Constraint:**
+- For all GitHub operations, prefer GitHub CLI (`gh`) as the primary tool.
+- If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
+- If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
 - Read project.mdc file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
@@ -16,7 +19,7 @@ metadata:
 
 **Steps:**
 - Identify the task from the provided issue code or URL.
-- Find the latest pull request for that task using available CLI tools or MCP servers.
+- Find the latest pull request for that task using GitHub CLI (`gh`) first; if `gh` is not available, use a GitHub MCP server; if neither is available, stop and return a failed result about missing GitHub tools.
 - In the pull request, locate code review output and all review comments (including review threads and general comments).
 - If there is only a generic `CR` comment, treat it as `code review` feedback.
 - Build a checklist from all review findings and map each item to a concrete code or test change.

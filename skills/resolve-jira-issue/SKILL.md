@@ -13,6 +13,7 @@ metadata:
 - If you are not on the main git branch in the project, switch to it.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - For comments posted to JIRA, always use JIRA Wiki Markup (not Markdown). Never use fenced code blocks (```), markdown headings (#), or markdown tables.
+- Pull request creation is mandatory for every resolved JIRA issue. After checks pass, automatically push the branch and create a GitHub PR, then link it back to the JIRA issue. Do not finish without a PR URL.
 
 **Universal JIRA Comment Formatting**
 - Use this structure for every JIRA comment type (status update, testing recommendation, CR summary, implementation summary):
@@ -75,7 +76,7 @@ h4. Testing recommendations
 - For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.
 - If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
 - If there are any automatic fixers in the project that are called through another layer, such as Phing or composer scripts, run them and ensure automatic error correction (find and load local configs for tools if exists). If there are any CI (or local) checkers, run them (never run all tests for the entire codebase, only for the current changes). Fix any errors, run the fixers again, and keep fixing until all errors are fixed. Never try to format PHP code outside of these fixers yourself.
-- If everything is OK, create a pull request according to the pr.mdc rules.
+- If everything is OK, automatically push the branch and create a GitHub pull request according to the pr.mdc rules. This step is mandatory; do not wait for additional confirmation.
 - If there is no link to the issue tracker, add a link to the issue tracker entry to the CR summary and, if possible, link it directly according to the issue tracker recommendations. Be sure to include an HTTP link.
 - I want you to post a comment on the core revision on GitHub, but I want you to post only critical or medium-severity issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue as ready for review.
 - After completing all tasks for GitHub, link the created PR in the JIRA issue, change the status of the JIRA issue to ready for review.

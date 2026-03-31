@@ -11,6 +11,9 @@ metadata:
 ---
 
 **Constraint:**
+-   For all GitHub operations, prefer GitHub CLI (`gh`) as the primary tool.
+-   If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
+-   If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
 -   Read project.mdc file
 -   First, load all the rules for the cursor editor
     (.cursor/rules/.\*mdc).
@@ -29,8 +32,9 @@ metadata:
 
 **Steps:**
 
--   Load the current pull request context using available CLI tools or
-    MCP servers.
+-   Load the current pull request context using GitHub CLI (`gh`) first.
+    If `gh` is not available, use a GitHub MCP server. If neither is
+    available, stop and return a failed result about missing GitHub tools.
 -   Read your existing code review for the pull request.
 -   Extract all recommendations related to missing tests, missing
     scenarios, edge cases, regression coverage, and coverage gaps.

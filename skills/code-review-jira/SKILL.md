@@ -7,6 +7,9 @@ metadata:
 ---
 
 **Constraint:**
+- For all GitHub operations, prefer GitHub CLI (`gh`) as the primary tool.
+- If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
+- If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
 - Read project.mdc file
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - Always apply @.cursor/skills/smartest-project-addition/SKILL.md internally to identify one highest-impact, low-risk addition candidate; include it only if it maps to a real finding and keep the final output in the required findings-only format.

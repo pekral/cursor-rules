@@ -8,6 +8,9 @@ metadata:
 
 
 **Constraint:**
+- For all GitHub operations, prefer GitHub CLI (`gh`) as the primary tool.
+- If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
+- If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
 - If you are not on the main git branch in the project, switch to it.
@@ -16,7 +19,7 @@ metadata:
 **Steps:**
 - Read project.mdc file
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
-- I want you to fix the bug from Github (you either got an ID or a link to Github). Use the MCP server to get all the necessary information about the bug so you can fix it. If you have other resources available that you could use to understand the problem, load them and analyze them. Use the available CLI tools or MCP servers to load them. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
+- I want you to fix the bug from Github (you either got an ID or a link to Github). Use GitHub CLI (`gh`) first to get all the necessary information about the bug so you can fix it. If `gh` is not available, use a GitHub MCP server. If neither is available, stop and return a failed result explaining missing GitHub tools.
 - Classify the task type before writing any code:
   - **Bug**: the issue describes existing functionality that behaves incorrectly (e.g. wrong output, exception, regression, data corruption). Labels such as `bug`, `fix`, or `regression` are strong signals.
   - **Feature**: the issue requests new behaviour that does not exist yet.

@@ -99,6 +99,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Unnecessary complexity; large functions; repeated logic; oversized classes; mixed responsibilities.
 - Recommend: simplify structure, improve cohesion, split large units.
 - Rank issues by impact (highest technical debt first) when listing findings.
+- Explicitly detect and report **DRY violations** (duplicated logic, duplicated validation rules, repeated branching/condition blocks, and copy-pasted code paths) as findings with actionable refactoring recommendations.
 - Issues static analysis may not fully trace: business-logic flaws, missing authorization checks, data flow to sensitive sinks.
 - Coverage for changed files only (target 100% for changes). Run tests only for changed files.
 - New code is tested: arrange-act-assert; error cases first; descriptive names; data providers via argument; mock only external services.

@@ -22,3 +22,4 @@ All notable changes to `cursor-rules` will be documented in this file.
 - 📝 **Changed**: Laravel rules and test-writing skills clarify database schema defaults as source of truth—avoid duplicating them in PHP/factories (#152)
 - 📝 **Changed**: Laravel testing rules and test-writing skills require queueing jobs in tests via `JobClass::dispatch()` only (#153)
 - ✨ **Added**: new Agent skill `seo-geo` for SEO and generative-engine optimization strategy (#164)
+- ✨ **Added**: new Agent skill `create-jira-issue-from-pr` for creating JIRA-ready issue drafts from GitHub PR review context while preserving original task text (#205)

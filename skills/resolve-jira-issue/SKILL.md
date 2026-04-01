@@ -75,6 +75,7 @@ h4. Testing recommendations
   4. Run the test again and confirm it is green.
 - If the task is a **feature**, implement it directly without the failing-test-first requirement.
 - Resolve this issue (the generated code must be according to @.cursor/skills/class-refactoring/SKILL.md), then review the code according to @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md for current changes. If you find any critical issues in the new changes, resolve them and perform further iterations of the defined code review (repeat until the bug is fixed).
+- For Action-pattern refactors during issue resolution: if an Action calls a Service or Facade method that is used only once in the entire codebase, move the business logic from that Service/Facade method directly into the Action and remove the original Service/Facade method.
 - Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker.
 - For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.
 - If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.

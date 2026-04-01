@@ -16,6 +16,7 @@ metadata:
 - Switch to the main branch and make sure you have the updated main branch. Then switch to the branch where the PR is and, to be on the safe side, update the branch for the PR as well, then continue with the code review.
 - I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
+- Explicitly detect and report **DRY violations** (duplicated logic, duplicated validation rules, repeated branching/condition blocks, and copy-pasted code paths) in every CR result.
 - Always load existing CR reports/comments in the PR and related tracker discussion before generating a new CR report, and never repeat a previously reported finding.
 - **Before starting the review**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin reviewing.
 - NEVER CHANGE THE CODE! Generate the output only.

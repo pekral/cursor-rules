@@ -1057,6 +1057,22 @@ test('race-condition-review skill is referenced only by code review skills', fun
     }
 });
 
+test('dry review rule is referenced by all code review flow skills', function (): void {
+    $packageDir = dirname(__DIR__);
+    $requiredPhrase = 'DRY violations';
+    $expectedFiles = [
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+        $packageDir . '/skills/process-code-review/SKILL.md',
+    ];
+
+    foreach ($expectedFiles as $expectedFile) {
+        $content = file_get_contents($expectedFile);
+        expect($content)->toContain($requiredPhrase);
+    }
+});
+
 test('install with prune on non-existent target directory does nothing', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/skills/some-skill/SKILL.md', 'content');

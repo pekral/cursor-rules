@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **29 comprehensive Agent skills** for automated workflows (v0.6.1)
+- **30 comprehensive Agent skills** for automated workflows (v0.6.1)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -78,7 +78,7 @@ vendor/bin/cursor-rules install --symlink          # prefer symlinks (fallback t
 
 # 🎯 Skills Overview — **v0.6.1**
 
-> Current release includes 29 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
+> Current release includes 30 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -94,6 +94,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `answer-pr-questions` | Find unanswered current issue/PR questions and generate short PM/client-friendly unified answers. |
 | `merge-github-pr` | Merge one GitHub PR that is ready for deployment. |
 | `create-issue` | Create a tracker issue from provided task text while preserving original meaning and structure. |
+| `create-tracker-issue-from-cr-comments` | Draft a tracker-ready issue from technical CR comments while preserving original assignment text. |
 
 ## Code Review, Security & Architecture
 

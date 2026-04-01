@@ -1,6 +1,6 @@
 ---
 name: security-review
-description: "Use when performing comprehensive security review. Follows OWASP Top 10 and security best practices. Checks for injection vulnerabilities, authentication flaws, sensitive data exposure, misconfigurations, and provides structured security reports with severity levels."
+description: "Use when performing comprehensive security review for Laravel/PHP projects. Follows OWASP Top 10 and incident-response hardening checks (packages, malware/webshells, configuration, uploads, credentials), and provides structured reports with severity levels."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
@@ -12,79 +12,86 @@ metadata:
 - I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - NEVER CHANGE THE CODE! Generate the output only.
 - All messages formatted as markdown for output.
-- Be realistic and precise
+- Be realistic and precise.
+- Never reveal secret values; only report secret categories and exposure risk.
 
 **Steps:**
 - First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
 - Review all security rules in `.cursor/rules/security/*.md`.
 - Review all project rules in `.cursor/rules/**/*.mdc`.
 - Focus on security risks that static analysis tools cannot detect: business-logic flaws, missing authorization, data flow to sensitive sinks.
-- Check Injection vulnerabilities (SQL, command, LDAP, XSS)
-- Check Authentication and authorization flaws
-- Check Sensitive data exposure
-- Check API security misconfigurations
-- Check Frontend-specific vulnerabilities (XSS, clickjacking, open redirects)
-- Check Mobile-specific vulnerabilities (WebView, insecure storage)
-- Check All user inputs are validated and sanitized before processing.
-- Check Error handling does not reveal sensitive information (stack traces, internal paths, database details).
-- Check No hardcoded secrets (credentials, API keys) in source code or configuration files.
-- Check All queries use parameterized queries or ORM — no string concatenation with user input.
-- Check Database users follow the principle of least privilege.
-- Check Sensitive data is encrypted at rest and in transit.
-- Check Content Security Policy (CSP) headers are set.
-- Check Cookies use `HttpOnly`, `Secure`, and `SameSite` attributes.
-- Check CORS policies are strict and allow only trusted domains.
-- Check Anti-CSRF tokens are present for state-changing operations (when using cookie-based auth).
-- Check `Origin` and `Referer` headers are validated for non-GET requests.
-- Check Authentication and integrity checks on all API requests.
-- Check Rate limiting is applied.
-- Check Security headers are enforced.
-- Check Errors do not reveal sensitive details to end users.
-- Check Access and actions are logged for monitoring and auditing.
-- Check utbound requests are restricted to necessary services only.
-- Check Allowlists define permitted destinations (not blocklists).
-- Check User-supplied URLs are validated and sanitized before use.
-- Check Request timeouts and rate limits are implemented.
-- Check No use of `innerHTML`, `outerHTML`, or `document.write` with dynamic content.
-- Check Dynamic content is sanitized with `DOMPurify` or equivalent before DOM insertion.
-- Check CSP headers restrict script sources and disable unsafe inline scripts.
-- Check Input validation uses allow-lists and well-defined patterns.
-- Check User inputs are sanitized before applying to style properties.
-- Check Dynamic inline styles are avoided where possible.
-- Check CSP uses style nonces or hashes for inline CSS.
-- Check `X-Frame-Options` is set to `DENY` or `Content-Security-Policy: frame-ancestors 'none'`.
-- Check Frame-busting logic is present.
-- Check `SameSite` cookie attributes reduce CSRF exposure across frames.
-- Check User input is never used directly in redirects.
-- Check Redirect destinations use allowlists or fixed URLs.
-- Check Redirect URLs are validated to ensure trusted locations.
-- Check External links use `rel="noopener noreferrer"`.
-- Check WebView access is limited to trusted URLs.
-- Check JavaScript is disabled by default in WebViews.
-- Check HTTPS is enforced in WebViews.
-- Check WebView data (cache, cookies) is cleared regularly.
-- Check nput data is validated before execution in WebViews.
-- Check CSP restricts resource types in WebViews.
-- Check Sensitive data is not stored in plain text on the device.
-- Check No hardcoded secrets in the mobile codebase.
-- Check Parameterized queries are used for local database operations.
-- Check A01 Broken Access Control** — Authorization checks on every sensitive action; server-side validation; no trust in client-only flags.
-- Check **A02 Cryptographic Failures** — Sensitive data encrypted at rest and in transit; no weak algorithms; proper key management.
-- Check **A03 Injection** — Parameterized queries; output encoding; no raw user input in SQL, commands, or HTML.
-- Check **A04 Insecure Design** — Threat modeling; secure defaults; defense in depth.
-- Check **A05 Security Misconfiguration** — Security headers; CORS; error handling; no default credentials.
-- Check **A06 Vulnerable Components** — Dependencies up to date; known vulnerabilities checked.
-- Check **A07 Authentication Failures** — Strong password policies; MFA where applicable; secure session management; token rotation.
-- Check **A08 Data Integrity Failures** — Input validation; signed updates; CI/CD pipeline security.
-- Check **A09 Logging Failures** — Security events logged; logs do not contain sensitive data; monitoring and alerting in place.
-- Check **A10 SSRF** — Outbound requests validated; allowlists for external services; no unvalidated user-supplied URLs.
-- Check No hardcoded secrets (API keys, passwords, tokens) in source code, config files, or environment templates.
-- Check `.env` files are excluded from version control (`.gitignore`).
-- Check `.env.example` contains only placeholder values — never real credentials.
-- Check Git history does not contain leaked secrets (check with `git log` search or tools like Gitleaks).
-- Check Use environment variables or secret managers (Vault, AWS Secrets Manager) for sensitive values.
-- Check Rotate any secret found in version control immediately.
-- CHeck Credential stuffing
+- Check injection vulnerabilities (SQL, command, LDAP, XSS).
+- Check authentication and authorization flaws.
+- Check sensitive data exposure.
+- Check API security misconfigurations.
+- Check frontend-specific vulnerabilities (XSS, clickjacking, open redirects).
+- Check mobile-specific vulnerabilities (WebView, insecure storage).
+- Check that all user input is validated and sanitized before processing.
+- Check that error handling does not reveal sensitive information (stack traces, internal paths, DB details).
+- Check for hardcoded secrets (credentials, API keys, tokens) in source code or configuration.
+- Check that all DB queries use parameterized APIs or ORM (no string concatenation with user input).
+- Check least privilege for database and service accounts.
+- Check encryption in transit and at rest for sensitive data.
+- Check CSP, CORS, CSRF, rate limiting, session/cookie flags (`HttpOnly`, `Secure`, `SameSite`), and security headers.
+- Check outbound request controls (allowlists, URL validation, timeouts).
+- Check logging and monitoring of security-relevant events without leaking sensitive data.
+- Check OWASP coverage:
+  - **A01 Broken Access Control**
+  - **A02 Cryptographic Failures**
+  - **A03 Injection**
+  - **A04 Insecure Design**
+  - **A05 Security Misconfiguration**
+  - **A06 Vulnerable and Outdated Components**
+  - **A07 Identification and Authentication Failures**
+  - **A08 Software and Data Integrity Failures**
+  - **A09 Security Logging and Monitoring Failures**
+  - **A10 SSRF**
+- Check secret hygiene:
+  - `.env` not committed,
+  - `.env.example` contains placeholders only,
+  - git history checked for leaks,
+  - rotate any exposed secret immediately.
+- Check identity attack resistance (credential stuffing/spraying throttles, abuse detection, safe lockout).
+- Check password reset/OTP hardening (single use, short lifetime, retry limits).
+- Check BOLA/IDOR regression coverage on identifier-based endpoints.
+- Check API resource consumption limits (OWASP API4:2023).
+- Check file upload hardening (allowlist, MIME/signature checks, random names, storage outside webroot).
+- Check unsafe deserialization/parser abuse (`unserialize`, risky parsers) and fail-secure exception behavior.
+- Check supply chain controls (SCA in CI, lockfile review, SBOM where applicable).
+
+## Laravel/PHP Incident-Response Audit Extension
+
+When the target is Laravel/PHP, include the following phases in the audit:
+
+### Phase 1: Vulnerable Package Detection
+- Analyze `composer.lock` and run `composer audit` (if available).
+- Flag `intervention/image` versions lower than v3 as **Critical** (known path traversal risk).
+- Check if vulnerable packages are direct or transitive dependencies.
+- Evaluate safe upgrade strategy and potential breaking changes.
+
+### Phase 2: Malware and Webshell Detection
+- Search for PHP files in upload/public storage locations where execution should not be possible.
+- Flag suspicious filenames and patterns (random 5-char names, common malware filenames, double extensions, temporary PHP droppers).
+- Scan for dangerous PHP execution patterns (`eval`, `base64_decode`, `exec`, `system`, `shell_exec`, `assert`, etc.) in suspicious contexts.
+- Check miner indicators (files/process names such as `xmrig`, `minerd`, `stmept`) and known pool references.
+- Inspect `.htaccess` files for injected redirects, proxy directives, or shell-related artifacts.
+
+### Phase 3: Configuration Security Check
+- Verify `storage/app/public/.htaccess` blocks PHP execution.
+- Verify `public/.htaccess` blocks PHP execution in public file areas and protects sensitive files.
+- Review upload code for risky patterns (for example: `editableSvgs(true)`, unsafe filename preservation, weak MIME/extension checks).
+- Inspect credential exposure risk in environment/config files without printing actual secret values.
+
+### Phase 4: Server-Level Checks (When Access Exists)
+- Verify web server/PHP processes run as unprivileged users.
+- Audit risky sudoers entries (`NOPASSWD: ALL`).
+- Check cron jobs for persistence/backdoor behavior.
+- Check active suspicious processes and unusual open ports associated with miners/backdoors.
+
+### Phase 5: Hardening Recommendations
+- Propose safe hardening snippets for Apache/Nginx (deny PHP in upload/storage paths, add security headers, deny sensitive file patterns).
+- For potentially breaking dependency remediations, provide a migration plan and impact notes.
+- Never auto-apply changes in this skill; provide explicit, actionable recommendations only.
 
 **Deliver:** A structured security report organized by severity.
 
@@ -121,8 +128,27 @@ $post = Post::where('user_id', auth()->id())
     ->findOrFail($id);
 ```
 
-**After completing the tasks**
-- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!
+## Report Template for Laravel/PHP Projects
+
+```markdown
+## Security Audit Report - <Project Name>
+
+### Critical
+- ...
+
+### High
+- ...
+
+### Medium
+- ...
+
+### Low
+- ...
+
+### Action Items
+1. [ ] ...
+2. [ ] ...
+```
 
 ## Additional checks from 2023-2026 threat trends
 

@@ -94,7 +94,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `answer-pr-questions` | Find unanswered current issue/PR questions and generate short PM/client-friendly unified answers. |
 | `merge-github-pr` | Merge one GitHub PR that is ready for deployment. |
 | `create-issue` | Create a tracker issue from provided task text while preserving original meaning and structure. |
-| `create-tracker-issue-from-cr-comments` | Draft a tracker-ready issue from technical CR comments while preserving original assignment text. |
+| `create-jira-issue-from-pr` | Draft a JIRA-ready issue from GitHub PR review context while preserving original assignment text. |
 
 ## Code Review, Security & Architecture
 

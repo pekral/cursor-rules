@@ -46,6 +46,7 @@ metadata:
 - Use readable Markdown with clear section separators and include short code suggestions for simple fixes when helpful.
 - Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
 - If needed, use browser-based testing via available browser MCP tools
+- If all **Critical** and **Moderate** findings from the current CR cycle are resolved, run @.cursor/skills/test-like-human/SKILL.md before closing the review flow (when the changes are testable).
 
 **Communication protocol:**
 - Do not include praise/positive feedback; output must contain only findings.
@@ -54,5 +55,5 @@ metadata:
 - For implementation problems, provide clear guidance on fixes needed with code examples.
 
 **After completing the tasks**
-- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!
+- Keep @.cursor/skills/test-like-human/SKILL.md as a required final step only after **Critical** and **Moderate** findings are resolved and the changes are testable.
 - Based on the discussion in the assignment, is the proposed solution to the problems safe and effective? Analyze the assignment and all discussions related to this task and write me your conclusion!

@@ -123,7 +123,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Findings are recommendations; final decisions remain with the human reviewer.
 
 **After completing the tasks**
-- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!
+- If all **Critical** and **Moderate** findings from the current CR cycle are resolved, then (and only then) run @.cursor/skills/test-like-human/SKILL.md when the changes can be tested.
 
 ## Output Humanization
 - Use [blader/humanizer](https://github.com/blader/humanizer) for all skill outputs to keep the text natural and human-friendly.

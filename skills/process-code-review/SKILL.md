@@ -32,6 +32,7 @@ metadata:
   - GitHub issue flow: run @.cursor/skills/code-review-github/SKILL.md
   - JIRA issue flow: run @.cursor/skills/code-review-jira/SKILL.md
 - Fix all Critical and Moderate findings from that review and repeat the same review skill until no Critical or Moderate findings remain.
+- After the CR loop is clean (no **Critical** or **Moderate** findings), run @.cursor/skills/test-like-human/SKILL.md when the change can be tested.
 - Commit all changes and push the branch. If no pull request exists for the current branch, create one according to @.cursor/rules/git/pr.mdc rules — link it to the original issue and follow the PR description format (title in English, body in the language of the assignment). Do not create a new PR before the CR cycle is clean.
 - Update the review result comment in the pull request:
 - mark resolved points as checked items when possible, or

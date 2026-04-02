@@ -78,7 +78,7 @@ vendor/bin/cursor-rules install --symlink          # prefer symlinks (fallback t
 
 # 🎯 Skills Overview — **v0.6.1**
 
-> Current release includes 30 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
+> Current release includes 31 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -129,6 +129,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `composer-update` | Analyze composer updates, conflicts, and changelog impact. |
 | `package-review` | Review `composer.json` and package metadata/configuration quality. |
 | `mysql-problem-solver` | Diagnose and optimize MySQL queries, indexes, and execution plans. |
+| `laravel-telescope` | Analyze Laravel Telescope request data from URL, match entries in DB, and propose concrete optimizations. |
 | `seo-fix` | Implement and maintain Laravel SEO assets (robots/sitemap/meta/canonical). |
 | `seo-geo` | Improve SEO + GEO (AI search visibility and citation-readiness). |
 

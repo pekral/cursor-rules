@@ -1073,6 +1073,32 @@ test('dry review rule is referenced by all code review flow skills', function ()
     }
 });
 
+test('mysql-problem-solver skill is referenced by all code review flow skills', function (): void {
+    $packageDir = dirname(__DIR__);
+    $requiredPhrase = '@.cursor/skills/mysql-problem-solver/SKILL.md';
+    $expectedFiles = [
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+        $packageDir . '/skills/process-code-review/SKILL.md',
+    ];
+
+    foreach ($expectedFiles as $expectedFile) {
+        $content = file_get_contents($expectedFile);
+        expect($content)->toContain($requiredPhrase);
+    }
+});
+
+test('mysql-problem-solver enforces severities and production guard', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = file_get_contents($packageDir . '/skills/mysql-problem-solver/SKILL.md');
+
+    expect($content)->toContain('Critical');
+    expect($content)->toContain('Moderate');
+    expect($content)->toContain('Mirror');
+    expect($content)->toContain('Never run this skill against production environments or production databases.');
+});
+
 test('install with prune on non-existent target directory does nothing', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/skills/some-skill/SKILL.md', 'content');

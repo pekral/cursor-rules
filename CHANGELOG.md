@@ -23,3 +23,4 @@ All notable changes to `cursor-rules` will be documented in this file.
 - 📝 **Changed**: Laravel testing rules and test-writing skills require queueing jobs in tests via `JobClass::dispatch()` only (#153)
 - ✨ **Added**: new Agent skill `seo-geo` for SEO and generative-engine optimization strategy (#164)
 - ✨ **Added**: new Agent skill `create-jira-issue-from-pr` for creating JIRA-ready issue drafts from GitHub PR review context while preserving original task text (#205)
+- 📝 **Changed**: code-review flow skills now enforce `mysql-problem-solver` usage and include SQL Critical/Moderate findings, and `mysql-problem-solver` now enforces EXPLAIN for all analyzed queries with severity classification and production guardrails (#210)

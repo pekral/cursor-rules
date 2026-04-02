@@ -1,6 +1,6 @@
 ---
 name: mysql-problem-solver
-description: "Use when you need to analyze and solve MySQL performance or query design problems directly from a real codebase or database environment. Inspects SQL queries, table structure, index usage, and uses terminal tools (mysql, EXPLAIN) when possible. For pragmatic diagnosis of slow queries, joins, indexes, and filtering in existing applications."
+description: "Use when you need to analyze and solve MySQL performance or query design problems directly from a real codebase or database environment. Inspects SQL queries, table structure, index usage, always runs EXPLAIN for each SQL query, and reports findings as Critical, Moderate, or Mirror."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
@@ -8,7 +8,7 @@ metadata:
 
 ## Purpose
 
-Use this skill when you need to analyze and solve MySQL performance or query design problems directly from a real codebase or database environment. The skill is designed for practical investigation, not theoretical advice. It should inspect SQL queries, review table structure, evaluate index usage, and use available terminal tools such as `mysql` and `EXPLAIN` whenever possible.
+Use this skill when you need to analyze and solve MySQL performance or query design problems directly from a real codebase or database environment. The skill is designed for practical investigation, not theoretical advice. It should inspect SQL queries, review table structure, evaluate index usage, print real SQL dumps, and run `EXPLAIN` for every analyzed SQL query.
 
 This skill is intended for situations where the model should behave like a pragmatic senior engineer who is diagnosing slow queries, suspicious joins, missing indexes, or poor filtering strategies inside an existing application.
 
@@ -40,8 +40,9 @@ Do not use this skill when:
 - the database is not MySQL-compatible
 - the user only wants a generic explanation without code or query analysis
 - there is no query, schema, migration, repository, model, or terminal/database access to inspect
+- the only available database environment is production
 
-If the environment does not allow database access, the skill should still perform a static review, but it must clearly say that conclusions are limited because `EXPLAIN`, schema inspection, and real index verification were not executed.
+If the environment does not allow database access, the skill should still perform a static review, but it must clearly say that conclusions are limited because `EXPLAIN`, schema inspection, and real index verification were not executed. This skill must never be executed against production data.
 
 ---
 
@@ -68,15 +69,17 @@ The skill should not block on perfect input. It should inspect whatever is avail
 The skill must try to achieve these goals in order:
 
 1. Understand what query or query pattern is being analyzed.
-2. Load the relevant table structure if possible.
-3. Identify indexes already available.
-4. Run `EXPLAIN` using terminal tools if possible.
-5. Detect likely performance issues.
-6. Propose concrete optimizations.
-7. Suggest or generate safe index changes only when justified.
-8. Explain trade-offs, especially write amplification, duplicate indexes, and over-indexing.
-9. If appropriate, propose a rewritten SQL query or Laravel query builder version.
-10. Summarize findings in a concise report with action items.
+2. Print a real SQL dump for each analyzed query (Laravel: prefer `php artisan tinker` to capture the generated SQL and bindings when available).
+3. Load the relevant table structure if possible.
+4. Identify indexes already available.
+5. Run `EXPLAIN` for every analyzed SQL query.
+6. Classify each finding as **Critical**, **Moderate**, or **Mirror**.
+7. Detect likely performance issues.
+8. Propose concrete optimizations.
+9. Suggest or generate safe index changes only when justified.
+10. Explain trade-offs, especially write amplification, duplicate indexes, and over-indexing.
+11. If appropriate, propose a rewritten SQL query or Laravel query builder version.
+12. Summarize findings in a concise report with action items.
 
 ---
 
@@ -101,7 +104,21 @@ Look for:
 
 If the input is Laravel code, reconstruct the effective SQL as faithfully as possible.
 
-### 2. Inspect table structure
+### 2. Print a real SQL dump
+
+For each analyzed query, always print the real SQL statement that is actually executed.
+
+- Raw SQL input: print the query as provided.
+- Laravel/Eloquent/query builder: generate SQL dump from runtime when possible.
+- Include bindings next to SQL so placeholders are interpretable.
+
+Laravel guidance:
+
+- Prefer `php artisan tinker` and dump SQL via `toSql()` and bindings.
+- If available, capture runtime SQL from Telescope/Debugbar/query log to verify generated statements.
+- If runtime dump is not possible, reconstruct SQL statically and clearly mark it as reconstructed.
+
+### 3. Inspect table structure
 
 If terminal or DB access is available, inspect the relevant tables before proposing changes.
 
@@ -115,9 +132,9 @@ SHOW INDEX FROM table_name;
 
 If the codebase contains migrations, read them too, because the schema in code may reveal intent or upcoming changes.
 
-### 3. Use EXPLAIN through terminal tools
+### 4. Use EXPLAIN through terminal tools
 
-If MySQL access is available, run `EXPLAIN` on the real query. Use terminal tools whenever possible.
+Run `EXPLAIN` for every analyzed SQL query. Use terminal tools whenever possible.
 
 Examples:
 
@@ -127,7 +144,7 @@ mysql -e "EXPLAIN FORMAT=TRADITIONAL SELECT ..."
 mysql -e "EXPLAIN FORMAT=JSON SELECT ..."
 ```
 
-If the environment supports it and the query is a `SELECT`, prefer richer output when useful.
+If the environment supports it and the query is a `SELECT`, prefer richer output when useful. If `EXPLAIN` cannot be executed, explicitly mark that query as unverifiable and treat confidence as low.
 
 The skill should inspect at least these parts of `EXPLAIN` output:
 
@@ -142,7 +159,7 @@ The skill should inspect at least these parts of `EXPLAIN` output:
 
 Treat these as diagnostic signals, not absolute truth.
 
-### 4. Evaluate index usage
+### 5. Evaluate index usage
 
 Check whether the query actually benefits from existing indexes.
 
@@ -163,7 +180,7 @@ The skill must distinguish between:
 - index exists but only partially helps
 - query shape prevents efficient index usage
 
-### 5. Detect common MySQL problems
+### 6. Detect common MySQL problems
 
 The skill should actively look for these issues:
 
@@ -181,7 +198,7 @@ The skill should actively look for these issues:
 - N+1 patterns caused by application code
 - unbounded scans caused by missing limits or weak predicates
 
-### 6. Propose safe optimizations
+### 7. Propose safe optimizations
 
 Only after inspection should the skill propose improvements.
 
@@ -199,7 +216,7 @@ Possible outputs include:
 
 Every recommendation should include a reason.
 
-### 7. Prefer realistic index advice
+### 8. Prefer realistic index advice
 
 When suggesting indexes, follow these rules:
 
@@ -211,7 +228,7 @@ When suggesting indexes, follow these rules:
 - mention when a proposed index helps reads but hurts writes
 - avoid recommending every filtered column as a standalone index
 
-### 8. Produce a final report
+### 9. Produce a final report
 
 End with a practical report that includes:
 
@@ -236,6 +253,9 @@ Use this response structure:
 ### Query under review
 ...
 
+### SQL dump (real or reconstructed)
+...
+
 ### Tables inspected
 ...
 
@@ -246,6 +266,13 @@ Use this response structure:
 ...
 
 ### Problems found
+#### Critical
+- ...
+
+#### Moderate
+- ...
+
+#### Mirror
 - ...
 
 ### Recommended optimizations
@@ -266,6 +293,7 @@ Use this response structure:
 ```
 
 If terminal access or DB credentials are unavailable, explicitly say that `EXPLAIN` and live schema verification could not be performed.
+If the environment is production-only, stop and report that this skill must not run on production.
 
 ---
 
@@ -276,7 +304,8 @@ The skill must behave according to these rules:
 - Be practical and direct.
 - Prefer investigation over assumptions.
 - Use terminal tools for real verification whenever available.
-- Use `EXPLAIN` whenever database access is possible.
+- Always print a real SQL dump for each analyzed query (or clearly mark it as reconstructed).
+- Run `EXPLAIN` for every analyzed SQL query.
 - Read schema before recommending indexes.
 - Do not invent database structure that was not observed.
 - Do not claim an index is missing until you have checked schema, migrations, or user-provided index output.
@@ -284,6 +313,8 @@ The skill must behave according to these rules:
 - Keep recommendations scoped to the observed problem.
 - If multiple queries are involved, analyze them one by one.
 - If the issue appears to be application-level rather than SQL-level, say so clearly.
+- Classify every finding as **Critical**, **Moderate**, or **Mirror**.
+- Never run this skill against production environments or production databases.
 
 ---
 
@@ -308,6 +339,15 @@ mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABA
 mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" -e "SHOW CREATE TABLE users\G"
 mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" -e "EXPLAIN SELECT ..."
 ```
+
+Laravel SQL dump examples in Tinker:
+
+```php
+User::query()->where('email', 'like', '%@example.com')->toSql();
+User::query()->where('email', 'like', '%@example.com')->getBindings();
+```
+
+Before executing DB commands, verify environment is local/development/test/staging and not production.
 
 If credentials are unavailable or access fails, continue with static analysis and state that runtime verification could not be completed.
 
@@ -358,9 +398,11 @@ If useful, the skill may provide both:
 A good result from this skill should:
 
 - identify the real bottleneck instead of giving generic SQL advice
+- include a SQL dump for every analyzed query
 - validate schema and index usage whenever possible
-- use `EXPLAIN` through available terminal tools
+- run `EXPLAIN` for every analyzed SQL query
 - provide actionable optimization steps
+- classify findings as **Critical**, **Moderate**, and **Mirror**
 - avoid fake certainty
 - stay consistent with a senior-engineer review style
 

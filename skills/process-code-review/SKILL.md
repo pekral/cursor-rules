@@ -25,13 +25,14 @@ metadata:
 - Build a checklist from all review findings and map each item to a concrete code or test change.
 - Ensure the checklist explicitly contains all reported **DRY violations** and tracks their resolution before triggering the next CR cycle.
 - Apply the requested changes and keep scope limited to review feedback. All new or modified production code must follow @.cursor/skills/class-refactoring/SKILL.md.
-- Re-check current changes with @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md.  
+- Re-check current changes with @.cursor/skills/code-review/SKILL.md and @.cursor/skills/security-review/SKILL.md. If changes include database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries), apply @.cursor/skills/mysql-problem-solver/SKILL.md as part of the CR loop.
 - If review feedback requires additional tests, use @.cursor/skills/create-missing-tests-in-pr/SKILL.md and ensure current changes are fully covered.
 - If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
 - Run only checks/tests needed for the changed files and fix all errors before continuing.
 - Run the issue-tracker-specific code review skill before PR creation:
   - GitHub issue flow: run @.cursor/skills/code-review-github/SKILL.md
   - JIRA issue flow: run @.cursor/skills/code-review-jira/SKILL.md
+- Ensure that all SQL findings with severity **Critical** or **Moderate** reported by @.cursor/skills/mysql-problem-solver/SKILL.md are included and resolved before moving to the next CR cycle.
 - Fix all Critical and Moderate findings from that review and repeat the same review skill until no Critical or Moderate findings remain.
 - After the CR loop is clean (no **Critical** or **Moderate** findings), run @.cursor/skills/test-like-human/SKILL.md when the change can be tested.
 - Commit all changes and push the branch. If no pull request exists for the current branch, create one according to @.cursor/rules/git/pr.mdc rules — link it to the original issue and follow the PR description format (title in English, body in the language of the assignment). Do not create a new PR before the CR cycle is clean.

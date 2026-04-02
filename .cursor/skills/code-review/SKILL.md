@@ -30,7 +30,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - **Livewire component structure (only in Livewire projects):** Livewire components must be split into a PHP class (`app/Livewire/`) and a Blade view (`resources/views/livewire/`). Single-file (Volt) components are forbidden — flag as **Critical**. Business logic in Livewire component methods must be delegated to Action classes — flag inline business logic as **Critical**.
 - **Data Validator pattern (only when `vendor/pekral/arch-app-services` exists):** If an Action class throws `ValidationException` directly or calls `Validator::make()` inline instead of delegating to a dedicated Data Validator class, flag it as **Critical**. Validation logic must be encapsulated in `app/DataValidators/{Domain}/` classes.
 - **BaseModelService pattern (only when `vendor/pekral/arch-app-services` exists):** All services that primarily work with a specific Eloquent Model must extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()`. If a service works with a model but does not extend `BaseModelService`, flag it as **Critical**. If a service does not primarily serve a single model but exists as a plain service class, flag it as **Moderate** and recommend refactoring to an Action pattern class.
-- **SQL analysis (only when changes touch the database):** If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed files), use @.cursor/skills/mysql-problem-solver/SKILL.md for systematic analysis of those parts (identify query, inspect schema, EXPLAIN, evaluate indexes, propose safe optimizations). If there are no such changes, skip this step.
+- **SQL analysis (only when changes touch the database):** If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed files), use @.cursor/skills/mysql-problem-solver/SKILL.md for systematic analysis of those parts (real SQL dump, schema check from migrations and/or dev/test DB, EXPLAIN for every query, index evaluation, safe optimizations). If there are no such changes, skip this step.
 - **Race condition review (when shared state is modified):** If the changes contain any of the following signals — read-modify-write sequences, shared counters/balances/stock/quotas, `firstOrCreate`/`updateOrCreate`, retried or re-dispatched jobs that mutate shared records, cache write-back patterns, or bulk read-then-write operations — apply @.cursor/skills/race-condition-review/SKILL.md. If none of these signals are present, skip this step.
 - When the task has stated requirements or acceptance criteria (from the issue/PR), verify each item against the changes; list any that are not addressed or only partially met.
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules.
@@ -48,6 +48,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Include code examples in suggestions
 - Praise good patterns
 - Use exactly three severity levels for every finding: **Critical**, **Moderate**, **Minor**. Assign each finding to one level.
+- Every SQL finding returned by @.cursor/skills/mysql-problem-solver/SKILL.md must be mapped into the same severity model (**Critical**, **Moderate**, **Minor**) and included in the final CR findings list.
 - Prioritize feedback (Critical → Moderate → Minor)
 - Review tests as thoroughly as code
 - Check code coverage (must be 100% for changed files)
@@ -109,6 +110,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 
 **Deliver:** Vypiš **pouze nálezy** (chyby/problémy/risks) se stručným návrhem řešení. Žádné shrnutí, žádné “co bylo zkontrolováno”, žádná chvála.
 - Použij přesně tři úrovně závažnosti pro každý nález: **Critical**, **Moderate**, **Minor**.
+- Nevynechávej SQL nálezy: všechny SQL problémy se závažností **Critical** nebo **Moderate** musí být vždy ve výstupu.
 - Výstup seskup podle závažnosti (Critical → Moderate → Minor).
 - Každý nález musí mít: **lokaci** (soubor + řádek, nebo minimálně soubor), **dopad/riziko** a **konkrétní doporučení opravy** (u jednoduchých fixů klidně krátký snippet).
 - Pokud nejsou žádné nálezy, napiš jen informaci, že nebyly nalezeny žádné problémy.

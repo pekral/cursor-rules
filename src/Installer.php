@@ -22,10 +22,11 @@ final class Installer
      */
     public static function run(array $argv): int
     {
-        $command = $argv[1] ?? 'help';
-        $force = in_array('--force', $argv, true);
-        $symlink = in_array('--symlink', $argv, true);
-        $prune = in_array('--prune', $argv, true);
+        $normalizedArgv = InstallerPath::normalizeCliArguments($argv);
+        $command = $normalizedArgv[1] ?? 'help';
+        $force = in_array('--force', $normalizedArgv, true);
+        $symlink = in_array('--symlink', $normalizedArgv, true);
+        $prune = in_array('--prune', $normalizedArgv, true);
 
         try {
             if ($command === 'help') {
@@ -38,7 +39,7 @@ final class Installer
                 return 1;
             }
 
-            $editor = self::parseEditor($argv);
+            $editor = self::parseEditor($normalizedArgv);
 
             if ($editor === null) {
                 fwrite(STDERR, 'Invalid --editor value. Allowed: cursor, claude, codex, all.' . PHP_EOL);

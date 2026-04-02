@@ -783,6 +783,34 @@ test('install with editor=claude copies to .claude only', function (): void {
     }
 });
 
+test('install supports combined force and editor flags for claude', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/example.mdc', 'new rules');
+    installerWriteFile($root . '/skills/test-skill/SKILL.md', 'new skill');
+    installerWriteFile($root . '/.claude/rules/example.mdc', 'old rules');
+    installerWriteFile($root . '/.claude/skills/test-skill/SKILL.md', 'old skill');
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--force--editor=claude']);
+        ob_end_clean();
+
+        expect(file_get_contents($root . '/.claude/rules/example.mdc'))->toBe('new rules');
+        expect(file_get_contents($root . '/.claude/skills/test-skill/SKILL.md'))->toContain('new skill');
+        expect(is_dir($root . '/.cursor/rules'))->toBeFalse();
+        expect(is_dir($root . '/.codex/rules'))->toBeFalse();
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
 test('install with editor=codex copies to .codex only', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/rules/example.mdc', 'rules');

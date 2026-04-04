@@ -32,6 +32,7 @@ metadata:
 - **`?array` is forbidden:** Any use of `?array` as a type hint must be replaced with a typed collection, DTO, or explicit `array<Type>|null`. Vague nullable arrays hide structure and break static analysis.
 - **PHP array key type safety:** When refactoring associative arrays with dynamic keys, apply safe key strategies: use stable prefixed keys (`'user:' . $id`, `'postal:' . $postalCode`, `'ext:' . $externalReference`); prefer a dedicated collection or value object when the key is domain-significant; prefer `list<T>` when the structure is a list, not a map; prefer explicit validation or normalization before using external values as array keys; where relevant, prefer `array<non-decimal-int-string, T>` over misleading `array<string, T>`.
 - Laravel helpers over native PHP when appropriate.
+- **Laravel AI SDK:** When implementing AI features in a Laravel project, always use the [Laravel AI SDK](https://laravel.com/docs/13.x/ai-sdk). Never call AI provider APIs directly (e.g., raw OpenAI PHP client) when the Laravel AI SDK covers the use case.
 - When changing Eloquent models, migrations, or factories, do not duplicate column defaults that already exist in the database schema; see `@.cursor/rules/laravel/architecture.mdc` (Schema defaults, Migrations).
 - When changing Laravel tests that queue jobs, dispatch only via `JobClass::dispatch(...)` per `@.cursor/rules/laravel/architecture.mdc` Testing.
 - DRY principle — eliminate duplicates.

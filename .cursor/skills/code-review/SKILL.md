@@ -106,6 +106,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Identify missing test variations.
 - For new or changed behavior, suggest concrete test scenarios where coverage is missing or unclear (e.g. "Unit: method X with null/empty input"; "Integration: POST without auth must return 401"). This supports testing readiness alongside coverage metrics.
 - Laravel: prefer `Http::fake()` over Mockery.
+- **Laravel AI SDK (**Critical**):** If a Laravel project implements AI features (e.g., LLM calls, embeddings, agents) without using the [Laravel AI SDK](https://laravel.com/docs/13.x/ai-sdk) — for example by calling AI provider APIs directly via raw HTTP or a non-Laravel SDK — flag it as **Critical** and recommend migrating to the Laravel AI SDK.
 
 **Deliver:** Vypiš **pouze nálezy** (chyby/problémy/risks) se stručným návrhem řešení. Žádné shrnutí, žádné “co bylo zkontrolováno”, žádná chvála.
 - Použij přesně tři úrovně závažnosti pro každý nález: **Critical**, **Moderate**, **Minor**.

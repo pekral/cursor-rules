@@ -28,6 +28,20 @@ final class InstallerPath
         return self::findProjectRoot();
     }
 
+    /**
+     * Splits combined CLI flags (e.g. --force--editor=claude) into separate arguments.
+     *
+     * @param array<int, string> $argv
+     * @return array<int, string>
+     */
+    public static function normalizeCliArguments(array $argv): array
+    {
+        $rawArguments = implode(' ', $argv);
+        $parts = preg_split('/\s+|(?=--(?:force|symlink|prune|editor=))/', trim($rawArguments), -1, PREG_SPLIT_NO_EMPTY);
+
+        return is_array($parts) && $parts !== [] ? $parts : $argv;
+    }
+
     public static function resolveRulesSource(string $root): string
     {
         $developmentSource = $root . '/rules';

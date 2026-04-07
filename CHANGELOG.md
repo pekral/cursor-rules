@@ -4,6 +4,8 @@ All notable changes to `cursor-rules` will be documented in this file.
 
 ## [Unreleased]
 
+- 🐛 **Fixed**: CR skills now systematically review all open PRs per issue instead of only one (#227)
+
 ## [0.6.2] - 2026-04-07
 
 - 📝 **Changed**: consolidate CHANGELOG (single [Unreleased] section, remove duplicate blocks)

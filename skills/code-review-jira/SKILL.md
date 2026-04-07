@@ -27,8 +27,9 @@ metadata:
 - Keep comments understandable for project managers and testers, not only developers
 
 **Steps:**
-- **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
-- First, find the open pull requests that are automatically linked to JIRA via the branch name. If you can’t find a PR by the branch name, review all the comments in the issue and locate the relevant PR.  Always check only the open pull requests and ignore the rest!
+- First, find all open pull requests that are automatically linked to JIRA via the branch name. If you can’t find a PR by the branch name, review all the comments in the issue and locate the relevant PRs. Always check only the open pull requests and ignore the rest!
+- **Multiple PRs per issue:** If the issue has more than one open pull request, perform a separate code review for each open PR sequentially. Review each PR independently on its own branch, post findings to the corresponding PR, and produce a per-PR summary. After all PRs are reviewed, provide a consolidated overview listing each PR with its result (clean / has findings).
+- **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review for that PR; cancel and report that the CR was skipped due to conflicts. Continue with the next PR.
 - Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
 - Before writing findings, collect prior review comments/reports from the PR timeline and JIRA discussion. Build a dedup list by problem signature (file/scope + root cause + risk) and skip findings already reported unless severity/impact changed.
 - **Plan Alignment Analysis:** Compare the implementation against the original issue description, planning documents, or step description. Identify deviations from the planned approach, architecture, or requirements. Assess whether deviations are justified improvements or problematic departures. Verify that all planned functionality has been implemented — list any missing or only partially met items.

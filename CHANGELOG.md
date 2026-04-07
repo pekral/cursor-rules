@@ -8,6 +8,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 - 🐛 **Fixed**: JIRA skills now consistently prefer `acli` console tool via shared `jira-operations.mdc` rule (#228)
 - 🐛 **Fixed**: CR no longer flags custom named static constructors (`fromModel()`, `fromRequest()`) on Spatie DTOs as issues (#230)
 - 🐛 **Fixed**: CR skills now include mandatory regression analysis to verify changes don't break existing functionality outside ticket scope (#233)
+- 🐛 **Fixed**: `code-review` skill now enforces English-only output — Czech Deliver/Communication sections translated (#235)
 
 ## [0.6.2] - 2026-04-07
 

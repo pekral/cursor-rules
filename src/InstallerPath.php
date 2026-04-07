@@ -55,7 +55,7 @@ final class InstallerPath
         // @codeCoverageIgnoreEnd
     }
 
-    public static function resolveSkillsSource(string $root): ?string
+    public static function resolveSkillsSource(): ?string
     {
         $packageSource = self::getPackageDirectory() . '/skills';
 

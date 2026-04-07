@@ -98,7 +98,7 @@ final class Installer
             $prune,
         );
 
-        $skillsSource = InstallerPath::resolveSkillsSource($root);
+        $skillsSource = InstallerPath::resolveSkillsSource();
         [$skillsCopied, $skillsPruned] = $skillsSource !== null
             ? self::syncDirectories(
                 $skillsSource,

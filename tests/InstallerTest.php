@@ -79,7 +79,7 @@ test('resolveSkillsSource always uses package directory', function (): void {
     $packageDir = dirname(__DIR__);
 
     try {
-        $source = InstallerPath::resolveSkillsSource($root);
+        $source = InstallerPath::resolveSkillsSource();
 
         expect($source)->toBe($packageDir . '/skills');
     } finally {
@@ -93,7 +93,7 @@ test('resolveSkillsSource ignores skills directory in project root', function ()
     $packageDir = dirname(__DIR__);
 
     try {
-        $source = InstallerPath::resolveSkillsSource($root);
+        $source = InstallerPath::resolveSkillsSource();
 
         expect($source)->toBe($packageDir . '/skills');
     } finally {
@@ -513,7 +513,7 @@ test('resolveSkillsSource falls back to package when development directory does 
     installerEnsureDirectory($root);
 
     try {
-        $result = InstallerPath::resolveSkillsSource($root);
+        $result = InstallerPath::resolveSkillsSource();
         $packageDir = dirname(__DIR__);
 
         expect($result)->toBe($packageDir . '/skills');

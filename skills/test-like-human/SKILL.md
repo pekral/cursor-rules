@@ -14,6 +14,7 @@ metadata:
 
 -   Apply @rules/base-constraints.mdc
 -   Apply @rules/github-operations.mdc
+-   Apply @rules/jira-operations.mdc
 -   Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 -   **Before starting to test**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin testing.
 -   Work only with the **current pull request**. Testing instructions must be taken only from the PR conversation.
@@ -161,5 +162,5 @@ Produce a human-readable markdown report containing:
 
 **After completing the tasks**
 
--   Post the final human-readable test report as a comment to the **related issue** in the issue tracker (GitHub issue, JIRA ticket, etc.). For GitHub, use `gh` CLI; for JIRA, prefer `acli` console tool (fallback to JIRA MCP server). The comment must be written in the language of the task assignment.
+-   Post the final human-readable test report as a comment to the **related issue** in the issue tracker (GitHub issue, JIRA ticket, etc.) using the preferred tool for the tracker (see @rules/github-operations.mdc and @rules/jira-operations.mdc). The comment must be written in the language of the task assignment.
 -   Summarize which scenarios failed or were unclear (with technical info for the developer).

@@ -16,13 +16,16 @@ use Composer\Script\ScriptEvents;
 final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
 {
 
+    private ?Composer $composer = null;
+
     // phpcs:disable SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
-    // phpcs:disable SlevomatCodingStandard.Functions.DisallowEmptyFunction.EmptyFunction
 
     public function activate(Composer $composer, IOInterface $io): void
     {
-        // Required by PluginInterface
+        $this->composer = $composer;
     }
+
+    // phpcs:disable SlevomatCodingStandard.Functions.DisallowEmptyFunction.EmptyFunction
 
     public function deactivate(Composer $composer, IOInterface $io): void
     {
@@ -39,7 +42,12 @@ final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
 
     public function runInstaller(): void
     {
-        Installer::run(['cursor-rules', 'install', '--force']);
+        if (!$this->isAutoInstallEnabled()) {
+            return;
+        }
+
+        $editor = $this->resolveEditorFromConfig();
+        Installer::run(['cursor-rules', 'install', '--force', '--editor=' . $editor]);
     }
 
     /**
@@ -51,6 +59,38 @@ final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
             ScriptEvents::POST_INSTALL_CMD => 'runInstaller',
             ScriptEvents::POST_UPDATE_CMD => 'runInstaller',
         ];
+    }
+
+    private function isAutoInstallEnabled(): bool
+    {
+        $config = $this->getCursorRulesConfig();
+
+        return ($config['auto-install'] ?? false) === true;
+    }
+
+    private function resolveEditorFromConfig(): string
+    {
+        $config = $this->getCursorRulesConfig();
+        $editor = $config['editor'] ?? InstallerPath::EDITOR_CURSOR;
+
+        return in_array($editor, InstallerPath::getAllowedEditors(), true)
+            ? $editor
+            : InstallerPath::EDITOR_CURSOR;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getCursorRulesConfig(): array
+    {
+        if ($this->composer === null) {
+            return [];
+        }
+
+        $extra = $this->composer->getPackage()->getExtra();
+        $config = $extra['cursor-rules'] ?? [];
+
+        return is_array($config) ? array_change_key_case($config, CASE_LOWER) : [];
     }
 
 }

@@ -29,9 +29,31 @@ By default the installer targets **Cursor** only (`.cursor/rules`, `.cursor/skil
 - **codex**: `.codex/rules`, `.codex/skills`, and when `HOME`/`USERPROFILE` is set also `~/.codex/skills`
 - **all**: all of the above (Cursor, Claude, Codex in project + home)
 
-When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`; in development it falls back to the local `rules/` and `skills/` directories.
+When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`.
 
 **Important:** By default, the installer only copies missing files and keeps existing content untouched. Use the `--force` flag to overwrite existing files: `vendor/bin/cursor-rules install --force`. This is particularly useful when you want to update rules to their latest versions or when you've made local changes that should be replaced. The file `.cursor/rules/project.mdc` is never overwritten once it exists in the target project, so you can safely customize it for your project.
+
+### Automatic Installation via Composer Plugin
+
+By default, the Composer plugin does **not** auto-install rules on `composer install` or `composer update`. To enable automatic installation, add the following to your project's `composer.json`:
+
+```json
+{
+  "extra": {
+    "cursor-rules": {
+      "auto-install": true,
+      "editor": "claude"
+    }
+  }
+}
+```
+
+| Option         | Description                                              | Default   |
+|----------------|----------------------------------------------------------|-----------|
+| `auto-install` | Enable automatic install on `composer install/update`.   | `false`   |
+| `editor`       | Target editor for auto-install (`cursor`, `claude`, `codex`, `all`). | `cursor` |
+
+If you prefer manual control, simply call `vendor/bin/cursor-rules install` in your Composer `post-update-cmd` scripts with the desired flags.
 
 ### Installing rules from GitHub (Cursor only)
 

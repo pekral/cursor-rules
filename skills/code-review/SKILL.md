@@ -56,7 +56,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Use `SHOW ENGINE INNODB STATUS` to diagnose lock waits when investigating issues.
 - Controllers: slim; delegate to Services; accept FormRequest only; never `validate()` in controller.
 - Services: hold business logic; return DTOs or models.
-- **DTO attribute syntax (**Moderate**):** If a Spatie Laravel Data DTO overrides `from()` solely to rename input keys, or uses manual array mapping instead of `#[MapInputName(SnakeCaseMapper::class)]` / `#[MapName(SnakeCaseMapper::class)]` attributes, flag as **Moderate** and suggest the declarative attribute approach.
+- **DTO attribute syntax (**Moderate**):** If a Spatie Laravel Data DTO overrides `from()` solely to rename input keys, or uses manual array mapping instead of `#[MapInputName(SnakeCaseMapper::class)]` / `#[MapName(SnakeCaseMapper::class)]` attributes, flag as **Moderate** and suggest the declarative attribute approach. Custom named static constructors (e.g. `fromModel()`, `fromRequest()`, `fromArray()`) that perform domain-specific data transformation beyond simple key renaming are a valid pattern and must not be flagged.
 - Repositories: read-only. ModelManagers: write-only.
 - Jobs, Events, Commands: slim; delegate to Services.
 - New controller actions must have corresponding Request classes.

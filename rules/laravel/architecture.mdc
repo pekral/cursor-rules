@@ -23,7 +23,7 @@ globs: ["*"]
 
 ## DTOs (Spatie Laravel Data)
 - Use Spatie Laravel Data DTOs (`Spatie\LaravelData\Data`) for all typed data exchange between layers; never pass raw `array<mixed>`.
-- **Use PHP attributes for property mapping** — never override `from()` or use manual array mapping to rename keys. Prefer attribute-based configuration for a clean, declarative syntax:
+- **Use PHP attributes for property mapping** — never override `from()` solely to rename keys or perform manual array mapping. Prefer attribute-based configuration for a clean, declarative syntax. Custom named static constructors (e.g. `fromModel()`, `fromRequest()`, `fromArray()`) are allowed and encouraged when they provide a clear, domain-specific transformation that goes beyond simple key renaming:
   - `#[MapInputName(SnakeCaseMapper::class)]` — map all incoming snake_case keys to camelCase properties globally (class-level).
   - `#[MapName(SnakeCaseMapper::class)]` — map both input and output; use when the DTO is also serialized back (e.g. API responses).
   - `#[MapInputName('some_key')]` — map a single specific input key to a differently named property.

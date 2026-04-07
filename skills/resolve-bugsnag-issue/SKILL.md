@@ -41,6 +41,6 @@ metadata:
 - If you are not on the main git branch in the project, switch to it.
 
 **After completing the tasks**
-- Once you have finished your work and pushed the changes to pr, perform a code review according to your skill level @skills/code-review/SKILL.md
+- Once you have finished your work and pushed the changes to pr, perform a code review according to your skill level @skills/code-review-github/SKILL.md
 - If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!
 - If the work is done, run @skills/code-review-github/SKILL.md for the current issue.

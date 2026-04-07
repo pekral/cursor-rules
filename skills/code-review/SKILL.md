@@ -7,6 +7,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Apply @rules/skills/base-constraints.mdc
 - Apply @rules/skills/review-only.mdc
 - Always apply @skills/smartest-project-addition/SKILL.md internally to identify one highest-impact, low-risk addition candidate; include it only if it maps to a real finding and keep the final output in the required findings-only format.
+- All CR output (findings, recommendations, comments) must be written in English.
 - Identify changes vs main branch (list commits).
 - Understand context before reviewing
 - Every CR must use @skills/security-review/SKILL.md for the current changes.
@@ -95,16 +96,16 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - For new or changed behavior, suggest concrete test scenarios where coverage is missing or unclear (e.g. "Unit: method X with null/empty input"; "Integration: POST without auth must return 401"). This supports testing readiness alongside coverage metrics.
 - Laravel: prefer `Http::fake()` over Mockery.
 
-**Deliver:** Vypiš **pouze nálezy** (chyby/problémy/risks) se stručným návrhem řešení. Žádné shrnutí, žádné “co bylo zkontrolováno”, žádná chvála.
-- Použij přesně tři úrovně závažnosti pro každý nález: **Critical**, **Moderate**, **Minor**.
-- Výstup seskup podle závažnosti (Critical → Moderate → Minor).
-- Každý nález musí mít: **lokaci** (soubor + řádek, nebo minimálně soubor), **dopad/riziko** a **konkrétní doporučení opravy** (u jednoduchých fixů klidně krátký snippet).
-- Pokud nejsou žádné nálezy, napiš jen informaci, že nebyly nalezeny žádné problémy.
+**Deliver:** Output **only findings** (bugs/issues/risks) with a brief suggested fix. No summary, no “what was checked”, no praise.
+- Use exactly three severity levels for every finding: **Critical**, **Moderate**, **Minor**.
+- Group output by severity (Critical → Moderate → Minor).
+- Each finding must include: **location** (file + line, or at least file), **impact/risk**, and a **concrete fix recommendation** (include a short snippet for simple fixes).
+- If there are no findings, simply state that no issues were found.
 
 **Communication protocol:**
-- Neuváděj pozitivní hodnocení ani “well done” pasáže; výstup má obsahovat jen nálezy.
-- Pokud najdeš významné odchylky od zadání/požadavků, zalistuj je jako nálezy se závažností a doporučením.
-- Pro implementační problémy dávej jasné kroky k opravě (a krátký příklad kódu, když to zrychlí fix).
+- Do not include positive feedback or “well done” passages; output must contain only findings.
+- If you find significant deviations from the requirements/specification, list them as findings with severity and recommendation.
+- For implementation problems, provide clear steps to fix (and a short code example when it speeds up the fix).
 
 **Review best practices:**
 - Give concrete fixes or code snippets where relevant; not only “something is wrong”.

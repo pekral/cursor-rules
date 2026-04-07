@@ -47,25 +47,12 @@ test('gitignore ignores local cursor and claude directories', function (): void 
     expect($gitignore)->toContain('/.claude/');
 });
 
-test('resolveRulesSource prefers development directory', function (): void {
+test('resolveRulesSource always uses package directory', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/test.mdc', 'content');
+    $packageDir = dirname(__DIR__);
 
     try {
         $source = InstallerPath::resolveRulesSource($root);
-
-        expect($source)->toBe($root . '/rules');
-    } finally {
-        installerRemoveDirectory($root);
-    }
-});
-
-test('resolveRulesSource falls back to package directory', function (): void {
-    $root = installerCreateProjectRoot();
-
-    try {
-        $source = InstallerPath::resolveRulesSource($root);
-        $packageDir = dirname(__DIR__);
 
         expect($source)->toBe($packageDir . '/rules');
     } finally {
@@ -73,25 +60,26 @@ test('resolveRulesSource falls back to package directory', function (): void {
     }
 });
 
-test('resolveSkillsSource prefers development directory', function (): void {
+test('resolveRulesSource ignores rules directory in project root', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/skills/test/SKILL.md', 'content');
+    installerWriteFile($root . '/rules/test.mdc', 'foreign content');
+    $packageDir = dirname(__DIR__);
 
     try {
-        $source = InstallerPath::resolveSkillsSource($root);
+        $source = InstallerPath::resolveRulesSource($root);
 
-        expect($source)->toBe($root . '/skills');
+        expect($source)->toBe($packageDir . '/rules');
     } finally {
         installerRemoveDirectory($root);
     }
 });
 
-test('resolveSkillsSource falls back to package directory', function (): void {
+test('resolveSkillsSource always uses package directory', function (): void {
     $root = installerCreateProjectRoot();
+    $packageDir = dirname(__DIR__);
 
     try {
-        $source = InstallerPath::resolveSkillsSource($root);
-        $packageDir = dirname(__DIR__);
+        $source = InstallerPath::resolveSkillsSource();
 
         expect($source)->toBe($packageDir . '/skills');
     } finally {
@@ -99,9 +87,23 @@ test('resolveSkillsSource falls back to package directory', function (): void {
     }
 });
 
-test('install copies rules from development directory', function (): void {
+test('resolveSkillsSource ignores skills directory in project root', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/example.mdc', 'dev content');
+    installerWriteFile($root . '/skills/test/SKILL.md', 'foreign content');
+    $packageDir = dirname(__DIR__);
+
+    try {
+        $source = InstallerPath::resolveSkillsSource();
+
+        expect($source)->toBe($packageDir . '/skills');
+    } finally {
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install ignores rules directory in project root and uses package source', function (): void {
+    $root = installerCreateProjectRoot();
+    installerWriteFile($root . '/rules/example.mdc', 'foreign content');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -111,11 +113,13 @@ test('install copies rules from development directory', function (): void {
         $exitCode = Installer::run(['cursor-rules', 'install']);
         ob_end_clean();
 
-        $installedFile = $root . '/.cursor/rules/example.mdc';
-
         expect($exitCode)->toBe(0);
-        expect(is_file($installedFile))->toBeTrue();
-        expect(file_get_contents($installedFile))->toBe('dev content');
+
+        $foreignFile = $root . '/.cursor/rules/example.mdc';
+        expect(is_file($foreignFile))->toBeFalse();
+
+        $installedDir = $root . '/.cursor/rules';
+        expect(is_dir($installedDir))->toBeTrue();
     } finally {
         if ($originalCwd !== '') {
             chdir($originalCwd);
@@ -164,9 +168,7 @@ test('install copies rules from package when no development directory', function
 
 test('install respects force flag', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/force.mdc', 'new content');
-    $installedFile = $root . '/.cursor/rules/force.mdc';
-    installerWriteFile($installedFile, 'existing content');
+    $installedFile = $root . '/.cursor/rules/php/core.mdc';
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -176,12 +178,20 @@ test('install respects force flag', function (): void {
         ob_start();
         Installer::run(['cursor-rules', 'install']);
         ob_end_clean();
-        expect(file_get_contents($installedFile))->toBe('existing content');
+        $originalContent = file_get_contents($installedFile);
+        expect($originalContent)->toBeString();
+
+        file_put_contents($installedFile, 'modified content');
+
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+        expect(file_get_contents($installedFile))->toBe('modified content');
 
         ob_start();
         Installer::run(['cursor-rules', 'install', '--force']);
         ob_end_clean();
-        expect(file_get_contents($installedFile))->toBe('new content');
+        expect(file_get_contents($installedFile))->toBe($originalContent);
     } finally {
         if ($originalCwd !== '') {
             chdir($originalCwd);
@@ -228,7 +238,6 @@ test('install creates symlinks when requested', function (): void {
     }
 
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/link.mdc', 'link content');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -238,10 +247,10 @@ test('install creates symlinks when requested', function (): void {
         Installer::run(['cursor-rules', 'install', '--symlink']);
         ob_end_clean();
 
-        $target = $root . '/.cursor/rules/link.mdc';
+        $target = $root . '/.cursor/rules/php/core.mdc';
 
         expect(is_link($target))->toBeTrue();
-        expect(file_get_contents($target))->toBe('link content');
+        expect(file_get_contents($target))->not->toBeEmpty();
     } finally {
         if ($originalCwd !== '') {
             chdir($originalCwd);
@@ -253,7 +262,6 @@ test('install creates symlinks when requested', function (): void {
 
 test('install copies nested directories', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/nested/deep/example.mdc', 'nested content');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -263,10 +271,10 @@ test('install copies nested directories', function (): void {
         Installer::run(['cursor-rules', 'install']);
         ob_end_clean();
 
-        $installedFile = $root . '/.cursor/rules/nested/deep/example.mdc';
+        $installedFile = $root . '/.cursor/rules/laravel/architecture.mdc';
 
         expect(is_file($installedFile))->toBeTrue();
-        expect(file_get_contents($installedFile))->toBe('nested content');
+        expect(file_get_contents($installedFile))->not->toBeEmpty();
     } finally {
         if ($originalCwd !== '') {
             chdir($originalCwd);
@@ -278,8 +286,6 @@ test('install copies nested directories', function (): void {
 
 test('install with default editor copies rules and skills only to .cursor', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/example.mdc', 'rules');
-    installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -289,8 +295,8 @@ test('install with default editor copies rules and skills only to .cursor', func
         Installer::run(['cursor-rules', 'install']);
         ob_end_clean();
 
-        expect(is_file($root . '/.cursor/rules/example.mdc'))->toBeTrue();
-        expect(is_file($root . '/.cursor/skills/test-skill/SKILL.md'))->toBeTrue();
+        expect(is_file($root . '/.cursor/rules/php/core.mdc'))->toBeTrue();
+        expect(is_file($root . '/.cursor/skills/code-review/SKILL.md'))->toBeTrue();
         expect(is_dir($root . '/.claude/skills'))->toBeFalse();
         expect(is_dir($root . '/.codex/skills'))->toBeFalse();
     } finally {
@@ -304,8 +310,6 @@ test('install with default editor copies rules and skills only to .cursor', func
 
 test('install with editor=all copies skills to all target directories', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/example.mdc', 'rules');
-    installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
     $homeEnv = getenv('HOME');
     $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
     putenv('HOME=' . $root);
@@ -324,9 +328,9 @@ test('install with editor=all copies skills to all target directories', function
         ob_end_clean();
 
         foreach (InstallerPath::resolveSkillsTargetDirectories($root, InstallerPath::EDITOR_ALL) as $targetDir) {
-            $installedSkill = $targetDir . '/test-skill/SKILL.md';
+            $installedSkill = $targetDir . '/code-review/SKILL.md';
             expect(is_file($installedSkill))->toBeTrue('Skills should be installed to ' . $targetDir);
-            expect(file_get_contents($installedSkill))->toContain('skill content');
+            expect(file_get_contents($installedSkill))->not->toBeEmpty();
         }
     } finally {
         installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
@@ -335,7 +339,6 @@ test('install with editor=all copies skills to all target directories', function
 
 test('install appends output humanization directive to installed skill', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/skills/test-skill/SKILL.md', "# Skill Title\n\nSkill body.");
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -345,7 +348,7 @@ test('install appends output humanization directive to installed skill', functio
         Installer::run(['cursor-rules', 'install']);
         ob_end_clean();
 
-        $installedSkill = $root . '/.cursor/skills/test-skill/SKILL.md';
+        $installedSkill = $root . '/.cursor/skills/code-review/SKILL.md';
         $contents = file_get_contents($installedSkill);
 
         expect($contents)->toContain('## Output Humanization');
@@ -363,12 +366,6 @@ test('install appends output humanization directive to installed skill', functio
 
 test('install does not duplicate output humanization directive in installed skill', function (): void {
     $root = installerCreateProjectRoot();
-    $humanizerLine = '- Use [blader/humanizer](https://github.com/blader/humanizer)'
-        . ' for all skill outputs to keep the text natural and human-friendly.';
-    installerWriteFile(
-        $root . '/skills/test-skill/SKILL.md',
-        "# Skill Title\n\n## Output Humanization\n{$humanizerLine}\n",
-    );
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -378,7 +375,7 @@ test('install does not duplicate output humanization directive in installed skil
         Installer::run(['cursor-rules', 'install']);
         ob_end_clean();
 
-        $installedSkill = $root . '/.cursor/skills/test-skill/SKILL.md';
+        $installedSkill = $root . '/.cursor/skills/code-review/SKILL.md';
         $contents = file_get_contents($installedSkill);
 
         expect(substr_count((string) $contents, '## Output Humanization'))->toBe(1);
@@ -490,8 +487,7 @@ test('install fails when target path is a file instead of directory', function (
 
 test('install fails when destination is directory that cannot be removed', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/test.mdc', 'content');
-    $targetDir = $root . '/.cursor/rules/test.mdc';
+    $targetDir = $root . '/.cursor/rules/php/core.mdc';
     installerEnsureDirectory($targetDir);
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
@@ -517,7 +513,7 @@ test('resolveSkillsSource falls back to package when development directory does 
     installerEnsureDirectory($root);
 
     try {
-        $result = InstallerPath::resolveSkillsSource($root);
+        $result = InstallerPath::resolveSkillsSource();
         $packageDir = dirname(__DIR__);
 
         expect($result)->toBe($packageDir . '/skills');
@@ -535,8 +531,7 @@ test('resolveProjectRoot returns current working directory', function (): void {
 
 test('install fails when rules subdirectory path is a file', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/subdir/test.mdc', 'content');
-    $targetSubdir = $root . '/.cursor/rules/subdir';
+    $targetSubdir = $root . '/.cursor/rules/php';
     installerEnsureDirectory(dirname($targetSubdir));
     file_put_contents($targetSubdir, 'blocking file');
     $cwd = getcwd();
@@ -560,10 +555,6 @@ test('install fails when rules subdirectory path is a file', function (): void {
 
 test('install copies security rules from rules/security directory', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/example.mdc', 'rules');
-    installerWriteFile($root . '/rules/security/backend.md', 'backend security');
-    installerWriteFile($root . '/rules/security/frontend.md', 'frontend security');
-    installerWriteFile($root . '/rules/security/mobile.md', 'mobile security');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -576,11 +567,11 @@ test('install copies security rules from rules/security directory', function ():
         $securityDir = $root . '/.cursor/rules/security';
 
         expect(is_file($securityDir . '/backend.md'))->toBeTrue();
-        expect(file_get_contents($securityDir . '/backend.md'))->toBe('backend security');
+        expect(file_get_contents($securityDir . '/backend.md'))->not->toBeEmpty();
         expect(is_file($securityDir . '/frontend.md'))->toBeTrue();
-        expect(file_get_contents($securityDir . '/frontend.md'))->toBe('frontend security');
+        expect(file_get_contents($securityDir . '/frontend.md'))->not->toBeEmpty();
         expect(is_file($securityDir . '/mobile.md'))->toBeTrue();
-        expect(file_get_contents($securityDir . '/mobile.md'))->toBe('mobile security');
+        expect(file_get_contents($securityDir . '/mobile.md'))->not->toBeEmpty();
     } finally {
         if ($originalCwd !== '') {
             chdir($originalCwd);
@@ -592,14 +583,10 @@ test('install copies security rules from rules/security directory', function ():
 
 test('install always force-copies security rules even without force flag', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/example.mdc', 'rules');
-    installerWriteFile($root . '/rules/security/backend.md', 'new security content');
-    $securityFile = $root . '/.cursor/rules/security/backend.md';
-    installerWriteFile($securityFile, 'old security content');
-    $regularFile = $root . '/.cursor/rules/example.mdc';
-    installerWriteFile($regularFile, 'old rules content');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
+    $packageDir = dirname(__DIR__);
+    $originalSecurityContent = file_get_contents($packageDir . '/rules/security/backend.md');
 
     try {
         chdir($root);
@@ -608,7 +595,17 @@ test('install always force-copies security rules even without force flag', funct
         Installer::run(['cursor-rules', 'install']);
         ob_end_clean();
 
-        expect(file_get_contents($securityFile))->toBe('new security content');
+        $securityFile = $root . '/.cursor/rules/security/backend.md';
+        $regularFile = $root . '/.cursor/rules/php/core.mdc';
+
+        file_put_contents($securityFile, 'old security content');
+        file_put_contents($regularFile, 'old rules content');
+
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        expect(file_get_contents($securityFile))->toBe($originalSecurityContent);
         expect(file_get_contents($regularFile))->toBe('old rules content');
     } finally {
         if ($originalCwd !== '') {
@@ -759,8 +756,6 @@ test('resolveSkillsTargetDirectories with editor=claude and no HOME returns only
 
 test('install with editor=claude copies to .claude only', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/example.mdc', 'rules');
-    installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -770,8 +765,8 @@ test('install with editor=claude copies to .claude only', function (): void {
         Installer::run(['cursor-rules', 'install', '--editor=claude']);
         ob_end_clean();
 
-        expect(is_file($root . '/.claude/rules/example.mdc'))->toBeTrue();
-        expect(is_file($root . '/.claude/skills/test-skill/SKILL.md'))->toBeTrue();
+        expect(is_file($root . '/.claude/rules/php/core.mdc'))->toBeTrue();
+        expect(is_file($root . '/.claude/skills/code-review/SKILL.md'))->toBeTrue();
         expect(is_dir($root . '/.cursor/rules'))->toBeFalse();
         expect(is_dir($root . '/.codex/rules'))->toBeFalse();
     } finally {
@@ -785,21 +780,26 @@ test('install with editor=claude copies to .claude only', function (): void {
 
 test('install supports combined force and editor flags for claude', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/example.mdc', 'new rules');
-    installerWriteFile($root . '/skills/test-skill/SKILL.md', 'new skill');
-    installerWriteFile($root . '/.claude/rules/example.mdc', 'old rules');
-    installerWriteFile($root . '/.claude/skills/test-skill/SKILL.md', 'old skill');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
+    $packageDir = dirname(__DIR__);
+    $originalContent = file_get_contents($packageDir . '/rules/php/core.mdc');
 
     try {
         chdir($root);
+
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=claude']);
+        ob_end_clean();
+
+        $ruleFile = $root . '/.claude/rules/php/core.mdc';
+        file_put_contents($ruleFile, 'old rules');
+
         ob_start();
         Installer::run(['cursor-rules', 'install', '--force--editor=claude']);
         ob_end_clean();
 
-        expect(file_get_contents($root . '/.claude/rules/example.mdc'))->toBe('new rules');
-        expect(file_get_contents($root . '/.claude/skills/test-skill/SKILL.md'))->toContain('new skill');
+        expect(file_get_contents($ruleFile))->toBe($originalContent);
         expect(is_dir($root . '/.cursor/rules'))->toBeFalse();
         expect(is_dir($root . '/.codex/rules'))->toBeFalse();
     } finally {
@@ -813,8 +813,6 @@ test('install supports combined force and editor flags for claude', function ():
 
 test('install with editor=codex copies to .codex only', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/example.mdc', 'rules');
-    installerWriteFile($root . '/skills/test-skill/SKILL.md', 'skill content');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -824,8 +822,8 @@ test('install with editor=codex copies to .codex only', function (): void {
         Installer::run(['cursor-rules', 'install', '--editor=codex']);
         ob_end_clean();
 
-        expect(is_file($root . '/.codex/rules/example.mdc'))->toBeTrue();
-        expect(is_file($root . '/.codex/skills/test-skill/SKILL.md'))->toBeTrue();
+        expect(is_file($root . '/.codex/rules/php/core.mdc'))->toBeTrue();
+        expect(is_file($root . '/.codex/skills/code-review/SKILL.md'))->toBeTrue();
         expect(is_dir($root . '/.cursor/rules'))->toBeFalse();
         expect(is_dir($root . '/.claude/rules'))->toBeFalse();
     } finally {
@@ -916,8 +914,7 @@ test('install fails when copy fails due to unwritable destination', function ():
     }
 
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/test.mdc', 'content');
-    $targetDir = $root . '/.cursor/rules';
+    $targetDir = $root . '/.cursor/rules/php';
     installerEnsureDirectory($targetDir);
     chmod($targetDir, 0444);
     $cwd = getcwd();
@@ -954,19 +951,23 @@ test('run shows prune option in help output', function (): void {
 
 test('install with prune removes files from target that no longer exist in source', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/skills/current-skill/SKILL.md', 'current skill');
-    installerWriteFile($root . '/.cursor/skills/current-skill/SKILL.md', 'current skill');
-    installerWriteFile($root . '/.cursor/skills/orphaned-skill/SKILL.md', 'orphaned content');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
         chdir($root);
+
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        installerWriteFile($root . '/.cursor/skills/orphaned-skill/SKILL.md', 'orphaned content');
+
         ob_start();
         Installer::run(['cursor-rules', 'install', '--prune']);
         ob_end_clean();
 
-        expect(is_file($root . '/.cursor/skills/current-skill/SKILL.md'))->toBeTrue();
+        expect(is_file($root . '/.cursor/skills/code-review/SKILL.md'))->toBeTrue();
         expect(is_file($root . '/.cursor/skills/orphaned-skill/SKILL.md'))->toBeFalse();
         expect(is_dir($root . '/.cursor/skills/orphaned-skill'))->toBeFalse();
     } finally {
@@ -980,7 +981,6 @@ test('install with prune removes files from target that no longer exist in sourc
 
 test('install without prune keeps orphaned files in target', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/skills/current-skill/SKILL.md', 'current skill');
     installerWriteFile($root . '/.cursor/skills/orphaned-skill/SKILL.md', 'orphaned content');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
@@ -1003,19 +1003,23 @@ test('install without prune keeps orphaned files in target', function (): void {
 
 test('install with prune also removes rules that no longer exist in source', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/active.mdc', 'active rule');
-    installerWriteFile($root . '/.cursor/rules/active.mdc', 'active rule');
-    installerWriteFile($root . '/.cursor/rules/removed.mdc', 'removed rule');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
         chdir($root);
+
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        installerWriteFile($root . '/.cursor/rules/removed.mdc', 'removed rule');
+
         ob_start();
         Installer::run(['cursor-rules', 'install', '--prune']);
         ob_end_clean();
 
-        expect(is_file($root . '/.cursor/rules/active.mdc'))->toBeTrue();
+        expect(is_file($root . '/.cursor/rules/php/core.mdc'))->toBeTrue();
         expect(is_file($root . '/.cursor/rules/removed.mdc'))->toBeFalse();
     } finally {
         if ($originalCwd !== '') {
@@ -1028,14 +1032,18 @@ test('install with prune also removes rules that no longer exist in source', fun
 
 test('install with prune reports pruned file count in output', function (): void {
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/skills/keep-skill/SKILL.md', 'keep');
-    installerWriteFile($root . '/.cursor/skills/keep-skill/SKILL.md', 'keep');
-    installerWriteFile($root . '/.cursor/skills/drop-skill/SKILL.md', 'drop');
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
     try {
         chdir($root);
+
+        ob_start();
+        Installer::run(['cursor-rules', 'install']);
+        ob_end_clean();
+
+        installerWriteFile($root . '/.cursor/skills/drop-skill/SKILL.md', 'drop');
+
         ob_start();
         Installer::run(['cursor-rules', 'install', '--prune']);
         $output = (string) ob_get_clean();
@@ -1131,9 +1139,8 @@ test('install fails when existing file cannot be removed', function (): void {
     }
 
     $root = installerCreateProjectRoot();
-    installerWriteFile($root . '/rules/test.mdc', 'new content');
-    $targetDir = $root . '/.cursor/rules';
-    $targetFile = $targetDir . '/test.mdc';
+    $targetDir = $root . '/.cursor/rules/php';
+    $targetFile = $targetDir . '/core.mdc';
     installerWriteFile($targetFile, 'old content');
     chmod($targetDir, 0555);
     $cwd = getcwd();

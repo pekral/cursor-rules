@@ -1,0 +1,11 @@
+---
+description: Base constraints shared by all skills
+globs:
+alwaysApply: false
+---
+
+## Base Skill Constraints
+
+- Read project.mdc file.
+- First, load all the rules for the cursor editor (rules/.*mdc).
+- I want the texts to be in the language in which the assignment was written.

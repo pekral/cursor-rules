@@ -7,20 +7,13 @@ metadata:
 ---
 
 **Constraint:**
-- For all GitHub operations, prefer GitHub CLI (`gh`) as the primary tool.
-- If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
-- If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
-- Read project.mdc file
-- First, load all the rules for the cursor editor (rules/.*mdc).
+- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/skills/review-only.mdc
+- Apply @rules/skills/github-operations.mdc
 - Always apply @skills/smartest-project-addition/SKILL.md internally to identify one highest-impact, low-risk addition candidate; include it only if it maps to a real finding and keep the final output in the required findings-only format.
-- Switch to the main branch and make sure you have the updated main branch. Then switch to the branch where the PR is and, to be on the safe side, update the branch for the PR as well, then continue with the code review.
-- I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
+- Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
 - Explicitly detect and report **DRY violations** (duplicated logic, duplicated validation rules, repeated branching/condition blocks, and copy-pasted code paths) in every CR result.
-- Always load existing CR reports/comments in the PR and related tracker discussion before generating a new CR report, and never repeat a previously reported finding.
-- **Before starting the review**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin reviewing.
-- NEVER CHANGE THE CODE! Generate the output only.
-- All messages formatted as markdown for output.
 - For comments posted to JIRA, always use JIRA Wiki Markup (not Markdown). Never use fenced code blocks (```), markdown headings (#), or markdown tables.
 
 **Universal JIRA Comment Formatting**
@@ -44,11 +37,7 @@ metadata:
   Retrieve the JIRA issue (by code or URL) using the acli console tool first. If acli is not available, use the JIRA MCP server if available. If neither is available, stop and display a message stating that at least one of these tools must be installed to use the skill.
 - **Race condition review (when shared state is modified):** If the changes contain any of the following signals — read-modify-write sequences, shared counters/balances/stock/quotas, `firstOrCreate`/`updateOrCreate`, retried or re-dispatched jobs that mutate shared records, cache write-back patterns, or bulk read-then-write operations — apply @skills/race-condition-review/SKILL.md. If none of these signals are present, skip this step.
 - **I/O bottleneck review (when changes touch file, storage, or external I/O):** If the changes include any of the following signals — synchronous file reads/writes on large or unbounded files, blocking HTTP calls without timeouts, storage operations executed in the request lifecycle, large file responses not streamed, or export/import operations loading all records into memory — flag each occurrence and recommend the appropriate async/streaming pattern. If none of these signals are present, skip this step.
-- **All business logic is allowed only in classes that follow the action pattern!**
-- **Action pattern (only when `vendor/pekral/arch-app-services` exists):** Apply @skills/refactor-entry-point-to-action/SKILL.md rules when reviewing PHP entry points (controllers, jobs, commands, listeners, **Livewire components**). Flag violations as **Critical** in the CR report.
-- **Livewire component structure (only in Livewire projects):** Livewire components must be split into a PHP class (`app/Livewire/`) and a Blade view (`resources/views/livewire/`). Single-file (Volt) components are forbidden — flag as **Critical**. Business logic in Livewire component methods must be delegated to Action classes — flag inline business logic as **Critical**.
-- **Data Validator pattern (only when `vendor/pekral/arch-app-services` exists):** If an Action throws `ValidationException` directly or calls `Validator::make()` inline, flag it as **Critical**. Validation must be delegated to a Data Validator class in `app/DataValidators/{Domain}/`.
-- **BaseModelService pattern (only when `vendor/pekral/arch-app-services` exists):** All services that primarily work with a specific Eloquent Model must extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()`. If a service works with a model but does not extend `BaseModelService`, flag it as **Critical**. If a service does not primarily serve a single model but exists as a plain service class, flag it as **Moderate** and recommend refactoring to an Action pattern class.
+- Apply @rules/skills/architecture-patterns.mdc
 - Find the Git branch and switch to it (if needed pull the latest changes).
 - I want you to fix the bug from JIRA (you have either the ID or a link to JIRA). Use the acli console tool first to retrieve all the information you need about the bug (including comments and attachments). If acli is not available, use the JIRA MCP server if available. If neither is available, stop and display a message stating that at least one of these tools must be installed to use the skill. If you have other resources available that you could use to understand the problem, load them and analyze them.
 - If possible, find links to the assignment and analyze it so that you understand it and can do a quality CR. Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.

@@ -7,13 +7,9 @@ metadata:
 ---
 
 **Constraint:**
-- For all GitHub operations, prefer GitHub CLI (`gh`) as the primary tool.
-- If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
-- If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
-- Read project.mdc file
-- First, load all the rules for the cursor editor (rules/.*mdc).
+- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/skills/github-operations.mdc
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
-- I want the texts to be in the language in which the assignment was written.
 - If you are not on the main git branch in the project, switch to it.
 - For comments posted to JIRA, always use JIRA Wiki Markup (not Markdown) and follow the universal structure from JIRA-focused skills.
 - Pull request creation is mandatory for every resolved JIRA issue selected by this skill. Do not finish without a GitHub PR URL linked to the selected JIRA issue.

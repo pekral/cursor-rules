@@ -7,16 +7,13 @@ metadata:
 ---
 
 **Constraint:**
-- First, load all the rules for the cursor editor (rules/.*mdc).
-- **Before starting the review**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin reviewing.
-- I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
-- NEVER CHANGE THE CODE! Generate the output only.
-- All messages formatted as markdown for output.
+- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/skills/review-only.mdc
+- Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - Be realistic and precise.
 - Never reveal secret values; only report secret categories and exposure risk.
 
 **Steps:**
-- First, load all the rules for the cursor editor (rules/.*mdc).
 - Review all security rules in `rules/security/*.md`.
 - Review all project rules in `rules/**/*.mdc`.
 - Focus on security risks that static analysis tools cannot detect: business-logic flaws, missing authorization, data flow to sensitive sinks.

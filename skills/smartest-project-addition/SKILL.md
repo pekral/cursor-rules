@@ -7,9 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Read project.mdc file
-- First, load all the rules for the cursor editor (rules/.*mdc).
-- I want the texts to be in the language in which the assignment was written.
+- Apply @rules/skills/base-constraints.mdc
 - Focus on exactly one proposal with the highest impact.
 - Do not return multiple alternatives in the final recommendation.
 - Do not implement code unless explicitly requested.

@@ -28,7 +28,7 @@ Write one minimal test showing expected behavior.
 
 - One behavior per test.
 - Clear, descriptive name that describes the behavior.
-- Real code paths — mock only external services (HTTP clients) or to simulate exceptions. Do not use constructor mocking!
+- Real code paths — mock only external services (HTTP clients) or to simulate exceptions. Do not use constructor mocking! **Prefer partial mocks** (`Mockery::mock(Service::class)->makePartial()`) so real methods run and only needed methods are overridden.
 - Arrange-act-assert pattern, error cases first.
 - In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
 - In Livewire component tests, prefer `set()` for form state updates instead of `fill()` to avoid one round-trip per field and keep the suite fast.

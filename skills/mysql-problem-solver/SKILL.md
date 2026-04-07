@@ -336,19 +336,19 @@ If useful, the skill may provide both:
 ## Example prompts
 
 ```text
-@.cursor/skills/mysql-problem-solver analyze this query and check whether indexes are used effectively
+@.claude/skills/mysql-problem-solver analyze this query and check whether indexes are used effectively
 ```
 
 ```text
-@.cursor/skills/mysql-problem-solver inspect OrderRepository and use EXPLAIN if terminal access is available
+@.claude/skills/mysql-problem-solver inspect OrderRepository and use EXPLAIN if terminal access is available
 ```
 
 ```text
-@.cursor/skills/mysql-problem-solver review this slow MySQL query, inspect table structure, and propose safe index changes
+@.claude/skills/mysql-problem-solver review this slow MySQL query, inspect table structure, and propose safe index changes
 ```
 
 ```text
-@.cursor/skills/mysql-problem-solver analyze the Laravel query in this service, reconstruct the SQL, inspect indexes, and optimize it
+@.claude/skills/mysql-problem-solver analyze the Laravel query in this service, reconstruct the SQL, inspect indexes, and optimize it
 ```
 
 ---
@@ -365,4 +365,4 @@ A good result from this skill should:
 - stay consistent with a senior-engineer review style
 
 **After completing the tasks**
-- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!
+- If according to @.claude/skills/test-like-human/SKILL.md the changes can be tested, do it!

@@ -215,15 +215,15 @@ The skill must not:
 ## Example prompts
 
 ```text
-@.cursor/skills/laravel-telescope/SKILL.md Analyze this Telescope URL and find the same request in DB.
+@.claude/skills/laravel-telescope/SKILL.md Analyze this Telescope URL and find the same request in DB.
 ```
 
 ```text
-@.cursor/skills/laravel-telescope/SKILL.md Compare Telescope request details with telescope_entries and propose optimizations.
+@.claude/skills/laravel-telescope/SKILL.md Compare Telescope request details with telescope_entries and propose optimizations.
 ```
 
 ```text
-@.cursor/skills/laravel-telescope/SKILL.md Investigate this slow endpoint from Telescope and produce a practical optimization plan.
+@.claude/skills/laravel-telescope/SKILL.md Investigate this slow endpoint from Telescope and produce a practical optimization plan.
 ```
 
 ---
@@ -239,7 +239,7 @@ A good result from this skill should:
 - document limitations when runtime access is incomplete
 
 **After completing the tasks**
-- If according to @.cursor/skills/test-like-human/SKILL.md the changes can be tested, do it!
+- If according to @.claude/skills/test-like-human/SKILL.md the changes can be tested, do it!
 
 ## Output Humanization
 - Use [blader/humanizer](https://github.com/blader/humanizer) for all skill outputs to keep the text natural and human-friendly.

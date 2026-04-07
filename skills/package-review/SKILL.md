@@ -8,7 +8,7 @@ metadata:
 
 **Constraint:**
 - Read project.mdc file
-- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- First, load all the rules for the cursor editor (.claude/rules/.*mdc).
 - All messages formatted as markdown for output.
 - If you are not on the main git branch in the project, switch to it.
 

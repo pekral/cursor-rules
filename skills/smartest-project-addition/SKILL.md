@@ -8,7 +8,7 @@ metadata:
 
 **Constraint:**
 - Read project.mdc file
-- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
+- First, load all the rules for the cursor editor (.claude/rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
 - Focus on exactly one proposal with the highest impact.
 - Do not return multiple alternatives in the final recommendation.

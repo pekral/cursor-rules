@@ -16,7 +16,7 @@ metadata:
 -   If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
 -   If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
 -   Read project.mdc file!
--   First load all cursor editor rules (.cursor/rules/.\*mdc).
+-   First load all cursor editor rules (.claude/rules/.\*mdc).
 -   I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 -   **Before starting to test**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin testing.
 -   Work only with the **current pull request**. Testing instructions must be taken only from the PR conversation.

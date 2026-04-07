@@ -44,12 +44,6 @@ final class InstallerPath
 
     public static function resolveRulesSource(string $root): string
     {
-        $developmentSource = $root . '/rules';
-
-        if (is_dir($developmentSource)) {
-            return $developmentSource;
-        }
-
         $packageSource = self::getPackageDirectory() . '/rules';
 
         if (is_dir($packageSource)) {
@@ -57,18 +51,12 @@ final class InstallerPath
         }
 
         // @codeCoverageIgnoreStart
-        throw InstallerFailure::missingSource($developmentSource, $packageSource);
+        throw InstallerFailure::missingSource($root . '/rules', $packageSource);
         // @codeCoverageIgnoreEnd
     }
 
     public static function resolveSkillsSource(string $root): ?string
     {
-        $developmentSource = $root . '/skills';
-
-        if (is_dir($developmentSource)) {
-            return $developmentSource;
-        }
-
         $packageSource = self::getPackageDirectory() . '/skills';
 
         if (is_dir($packageSource)) {

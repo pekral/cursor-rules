@@ -7,8 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/github-operations.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/github-operations.mdc
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
 - Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - If you are not on the main git branch in the project, switch to it.
@@ -27,7 +27,7 @@ metadata:
 - For Action-pattern refactors during issue resolution: if an Action calls a Service or Facade method that is used only once in the entire codebase, move the business logic from that Service/Facade method directly into the Action and remove the original Service/Facade method.
 - Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker.
 - For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.
-- Apply @rules/skills/testing-conventions.mdc
+- Apply @rules/testing-conventions.mdc
 - If there are any automatic fixers in the project that are called through another layer, such as Phing or composer scripts, run them and ensure automatic error correction (find and load local configs for tools if exists). If there are any CI (or local) checkers, run them (never run all tests for the entire codebase, only for the current changes). Fix any errors, run the fixers again, and keep fixing until all errors are fixed. Never try to format PHP code outside of these fixers yourself.
 - Before creating a PR, run @skills/code-review-github/SKILL.md for the current changes and treat it as mandatory CR.
 - Fix all Critical and Moderate findings from that CR directly in code/tests, then run @skills/code-review-github/SKILL.md again.

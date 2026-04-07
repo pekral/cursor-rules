@@ -7,8 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/testing-conventions.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/testing-conventions.mdc
 
 **Steps:**
 - For tests that do not use PEST syntax, I want you to rewrite them in PEST syntax.

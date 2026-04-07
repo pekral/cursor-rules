@@ -7,8 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/review-only.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/review-only.mdc
 - Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - Be realistic and precise.
 - Never reveal secret values; only report secret categories and exposure risk.

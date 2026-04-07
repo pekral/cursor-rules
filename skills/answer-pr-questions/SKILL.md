@@ -9,8 +9,8 @@ metadata:
 # Answer PR Questions
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/github-operations.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/github-operations.mdc
 - Analyze both issue and pull request discussions from the provided link.
 - Work only with questions relevant to the current PR and current issue state.
 - Ignore questions that were already clearly answered in the same issue/PR context.

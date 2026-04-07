@@ -7,8 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/github-operations.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/github-operations.mdc
 - Never send PRs that have conflicts
 
 **Steps:**

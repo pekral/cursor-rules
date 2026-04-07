@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/base-constraints.mdc
 - All messages formatted as markdown for output.
 - If you are not on the main git branch in the project, switch to it.
 

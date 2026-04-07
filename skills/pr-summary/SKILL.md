@@ -7,8 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/github-operations.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/github-operations.mdc
 - Write the summary in singular first person (one developer made the changes).
 - The output must be formatted in markdown.
 - Focus on the "why" and business impact, not on implementation details.

@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/base-constraints.mdc
 - Focus on exactly one proposal with the highest impact.
 - Do not return multiple alternatives in the final recommendation.
 - Do not implement code unless explicitly requested.

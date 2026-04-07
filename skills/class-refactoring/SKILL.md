@@ -7,10 +7,10 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/base-constraints.mdc
 - Always apply @skills/smartest-project-addition/SKILL.md to select the single highest-impact refactoring direction before implementing changes.
-- Apply @rules/skills/architecture-patterns.mdc
-- Apply @rules/skills/testing-conventions.mdc
+- Apply @rules/architecture-patterns.mdc
+- Apply @rules/testing-conventions.mdc
 
 **Steps:**
 - Analyze the class and complete the TODO list tasks.

@@ -7,11 +7,11 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/github-operations.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/github-operations.mdc
 - Never push direct changes to the main branch.
 - If the pull request has merge conflicts with the base branch, stop and report that the code review processing is blocked.
-- Apply @rules/skills/jira-operations.mdc
+- Apply @rules/jira-operations.mdc
 
 **Steps:**
 - Identify the task from the provided issue code or URL.

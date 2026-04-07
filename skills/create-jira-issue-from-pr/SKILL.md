@@ -11,9 +11,9 @@ metadata:
 # Create JIRA Issue From PR
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/github-operations.mdc
-- Apply @rules/skills/jira-operations.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/github-operations.mdc
+- Apply @rules/jira-operations.mdc
 - Never use a web browser for issue and PR analysis when CLI/MCP tools are available.
 - Keep the original assignment text unchanged; only improve formatting and structure.
 

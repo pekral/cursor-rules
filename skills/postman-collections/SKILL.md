@@ -8,7 +8,7 @@ metadata:
 
 **Constraint:**
 - Read `project.mdc` file.
-- First, load all the rules for the cursor editor (`.claude/rules/.*mdc`).
+- First, load all the rules for the cursor editor (`rules/.*mdc`).
 - I want the texts to be in the language in which the assignment was written.
 - All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
 - Never generate fake endpoints; only use endpoints that exist in code, route config, or API schema.

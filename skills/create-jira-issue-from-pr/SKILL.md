@@ -15,7 +15,7 @@ metadata:
 - For JIRA issue creation, prefer JIRA CLI in the local environment.
 - If a required CLI is not available, use an available MCP server fallback.
 - If neither CLI nor MCP fallback is available for a required system, stop and return a failed result explaining missing tools.
-- First, load all rules for the cursor editor (`.claude/rules/.*mdc`) and read `project.mdc`.
+- First, load all rules for the cursor editor (`rules/.*mdc`) and read `project.mdc`.
 - Output must be in the language in which the assignment was written.
 - Never use a web browser for issue and PR analysis when CLI/MCP tools are available.
 - Keep the original assignment text unchanged; only improve formatting and structure.

@@ -158,7 +158,7 @@ $intercomServiceMock = Mockery::mock(IntercomService::class);
 - Mandatory flow: `Livewire Component -> Action -> ModelService -> Repository (read) / ModelManager (write)`.
 - No direct Eloquent queries or `DB::` calls in Livewire components.
 - Keep component methods slim — validate input and delegate to Actions/Services.
-- See `.claude/rules/laravel/livewire.mdc` for full Livewire conventions.
+- See `rules/laravel/livewire.mdc` for full Livewire conventions.
 
 ## Queue System and Jobs
 - Queue long-running or external-dependent tasks.

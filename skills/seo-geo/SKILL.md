@@ -8,11 +8,11 @@ metadata:
 
 **Constraint:**
 - Read project.mdc file
-- First, load all the rules for the cursor editor (.claude/rules/.*mdc).
+- First, load all the rules for the cursor editor (rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
 - All messages formatted as markdown for output.
 - Do not rely on bundled scripts or external example files; use project code, public URLs, and available tools (e.g. WebSearch, HTTP fetch) only.
-- For **implementing** `robots.txt`, `sitemap.xml`, route-level meta, canonical, and OG tags in a Laravel/PHP codebase, follow @.claude/skills/seo-fix/SKILL.md. Use this skill for **strategy, audits, GEO content patterns, and schema design** that complements that implementation work.
+- For **implementing** `robots.txt`, `sitemap.xml`, route-level meta, canonical, and OG tags in a Laravel/PHP codebase, follow @skills/seo-fix/SKILL.md. Use this skill for **strategy, audits, GEO content patterns, and schema design** that complements that implementation work.
 
 **Steps:**
 
@@ -57,5 +57,5 @@ metadata:
 - Produce a concise markdown report: current status (meta, schema, robots, sitemap, AI bot access), prioritized recommendations, GEO tactics applied or proposed, and validation links/tests to run in the project.
 
 **After completing the tasks**
-- If code changes to robots, sitemap, or layouts are required, hand off implementation steps to @.claude/skills/seo-fix/SKILL.md and keep tests green.
+- If code changes to robots, sitemap, or layouts are required, hand off implementation steps to @skills/seo-fix/SKILL.md and keep tests green.
 - Summarize what was audited, what to change first, and what to validate after deploy.

@@ -82,7 +82,7 @@ vendor/bin/cursor-rules install --symlink          # prefer symlinks (fallback t
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
-> **Note:** Skill files internally reference `.claude/` paths (e.g. `@.claude/rules/…`, `@.claude/skills/…`). Use `--editor=claude` or `--editor=all` for full compatibility.
+> **Note:** Skill files use relative paths (e.g. `@rules/…`, `@skills/…`) without any editor-specific prefix, so they work with any supported editor (`--editor=cursor`, `--editor=claude`, `--editor=codex`, `--editor=all`).
 
 ## Issue Resolution & Delivery
 

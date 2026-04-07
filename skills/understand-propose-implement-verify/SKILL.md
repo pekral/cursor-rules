@@ -8,7 +8,7 @@ metadata:
 
 **Constraint:**
 - Read project.mdc file
-- First, load all the rules for the cursor editor (.claude/rules/.*mdc).
+- First, load all the rules for the cursor editor (rules/.*mdc).
 - I want the texts to be in the language in which the assignment was written.
 - Always follow this order: understand -> propose -> implement -> verify.
 - Reuse existing project skills whenever they already solve a phase better than ad-hoc work.

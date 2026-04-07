@@ -15,8 +15,8 @@ metadata:
 
 **Steps:**
 - Identify the task from the provided issue code or URL.
-- Find the latest pull request for that task.
-- In the pull request, locate code review output and all review comments (including review threads and general comments).
+- Find all open pull requests for that task. If there are multiple open PRs, process each one sequentially — apply the full review-feedback resolution cycle to each PR independently before moving to the next.
+- In each pull request, locate code review output and all review comments (including review threads and general comments).
 - If there is only a generic `CR` comment, treat it as `code review` feedback.
 - Build a checklist from all review findings and map each item to a concrete code or test change.
 - Ensure the checklist explicitly contains all reported **DRY violations** and tracks their resolution before triggering the next CR cycle.

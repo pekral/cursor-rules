@@ -79,11 +79,7 @@
     }
   },
   "extra": {
-    "class": "Pekral\\CursorRules\\ComposerPlugin",
-    "cursor-rules": {
-      "source": "vendor/pekral/cursor-rules/.cursor/rules",
-      "target": ".cursor/rules"
-    }
+    "class": "Pekral\\CursorRules\\ComposerPlugin"
   },
   "scripts": {
     "analyse": [

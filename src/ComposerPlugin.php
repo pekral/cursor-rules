@@ -16,13 +16,16 @@ use Composer\Script\ScriptEvents;
 final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
 {
 
+    private ?Composer $composer = null;
+
     // phpcs:disable SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter
-    // phpcs:disable SlevomatCodingStandard.Functions.DisallowEmptyFunction.EmptyFunction
 
     public function activate(Composer $composer, IOInterface $io): void
     {
-        // Required by PluginInterface
+        $this->composer = $composer;
     }
+
+    // phpcs:disable SlevomatCodingStandard.Functions.DisallowEmptyFunction.EmptyFunction
 
     public function deactivate(Composer $composer, IOInterface $io): void
     {
@@ -39,7 +42,12 @@ final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
 
     public function runInstaller(): void
     {
-        Installer::run(['cursor-rules', 'install', '--force']);
+        if (!$this->isAutoInstallEnabled()) {
+            return;
+        }
+
+        $editor = $this->resolveEditorFromConfig();
+        Installer::run(['cursor-rules', 'install', '--force', '--editor=' . $editor]);
     }
 
     /**
@@ -51,6 +59,31 @@ final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
             ScriptEvents::POST_INSTALL_CMD => 'runInstaller',
             ScriptEvents::POST_UPDATE_CMD => 'runInstaller',
         ];
+    }
+
+    private function isAutoInstallEnabled(): bool
+    {
+        if ($this->composer === null) {
+            return false;
+        }
+
+        $extra = $this->composer->getPackage()->getExtra();
+
+        return ($extra['cursor-rules']['auto-install'] ?? false) === true;
+    }
+
+    private function resolveEditorFromConfig(): string
+    {
+        if ($this->composer === null) {
+            return InstallerPath::EDITOR_CURSOR;
+        }
+
+        $extra = $this->composer->getPackage()->getExtra();
+        $editor = $extra['cursor-rules']['editor'] ?? InstallerPath::EDITOR_CURSOR;
+
+        return in_array($editor, InstallerPath::getAllowedEditors(), true)
+            ? $editor
+            : InstallerPath::EDITOR_CURSOR;
     }
 
 }

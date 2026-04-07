@@ -79,7 +79,7 @@ final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<mixed>
      */
     private function getCursorRulesConfig(): array
     {
@@ -90,12 +90,7 @@ final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
         $extra = $this->composer->getPackage()->getExtra();
         $config = $extra['cursor-rules'] ?? [];
 
-        if (!is_array($config)) {
-            return [];
-        }
-
-        /** @var array<string, mixed> $config */
-        return $config;
+        return is_array($config) ? array_change_key_case($config, CASE_LOWER) : [];
     }
 
 }

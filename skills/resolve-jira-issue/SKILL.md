@@ -9,10 +9,10 @@ metadata:
 **Constraint:**
 - Apply @rules/skills/base-constraints.mdc
 - Apply @rules/skills/github-operations.mdc
+- Apply @rules/skills/jira-operations.mdc
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
 - If you are not on the main git branch in the project, switch to it.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
-- For comments posted to JIRA, always use JIRA Wiki Markup (not Markdown). Never use fenced code blocks (```), markdown headings (#), or markdown tables.
 - Pull request creation is mandatory for every resolved JIRA issue. After checks pass, automatically push the branch and create a GitHub PR, then link it back to the JIRA issue. Do not finish without a PR URL.
 
 **Universal JIRA Comment Formatting**
@@ -56,9 +56,7 @@ h4. Testing recommendations
 **Steps:**
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - I want you to fix the bug from JIRA (you have either the ID or a link to JIRA).
-  Use the acli console tool first to retrieve all issue details (including comments and attachments).
-  If acli is not available, use the JIRA MCP server if available.
-  If neither acli nor a JIRA MCP server is available, stop and display a message stating that at least one of these tools must be installed to use the skill.
+  Use the preferred JIRA tool (see @rules/skills/jira-operations.mdc) to retrieve all issue details (including comments and attachments).
   If you have other resources available that you could use to understand the problem, load them and analyze them.
 - Classify the task type before writing any code:
   - **Bug**: the issue describes existing functionality that behaves incorrectly (e.g. wrong output, exception, regression, data corruption). Issue types such as `Bug` or `Defect`, or labels such as `bug`, `fix`, or `regression` are strong signals.

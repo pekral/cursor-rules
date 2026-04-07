@@ -13,7 +13,7 @@ metadata:
 **Constraint:**
 - Apply @rules/skills/base-constraints.mdc
 - Apply @rules/skills/github-operations.mdc
-- For JIRA issue creation, prefer JIRA CLI in the local environment. If not available, use an available MCP server fallback. If neither is available, stop and return a failed result explaining missing tools.
+- Apply @rules/skills/jira-operations.mdc
 - Never use a web browser for issue and PR analysis when CLI/MCP tools are available.
 - Keep the original assignment text unchanged; only improve formatting and structure.
 

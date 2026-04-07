@@ -161,5 +161,5 @@ Produce a human-readable markdown report containing:
 
 **After completing the tasks**
 
--   Post the final human-readable test report as a comment to the **related issue** in the issue tracker (GitHub issue, JIRA ticket, etc.). Use available CLI tools or MCP servers to post it. The comment must be written in the language of the task assignment.
+-   Post the final human-readable test report as a comment to the **related issue** in the issue tracker (GitHub issue, JIRA ticket, etc.). For GitHub, use `gh` CLI; for JIRA, prefer `acli` console tool (fallback to JIRA MCP server). The comment must be written in the language of the task assignment.
 -   Summarize which scenarios failed or were unclear (with technical info for the developer).

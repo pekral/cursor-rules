@@ -10,11 +10,11 @@ metadata:
 - Apply @rules/skills/base-constraints.mdc
 - Apply @rules/skills/review-only.mdc
 - Apply @rules/skills/github-operations.mdc
+- Apply @rules/skills/jira-operations.mdc
 - Always apply @skills/smartest-project-addition/SKILL.md internally to identify one highest-impact, low-risk addition candidate; include it only if it maps to a real finding and keep the final output in the required findings-only format.
 - Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
 - Explicitly detect and report **DRY violations** (duplicated logic, duplicated validation rules, repeated branching/condition blocks, and copy-pasted code paths) in every CR result.
-- For comments posted to JIRA, always use JIRA Wiki Markup (not Markdown). Never use fenced code blocks (```), markdown headings (#), or markdown tables.
 
 **Universal JIRA Comment Formatting**
 - Use this output shape for every JIRA update from this skill:
@@ -35,12 +35,12 @@ metadata:
 - **Plan Alignment Analysis:** Compare the implementation against the original issue description, planning documents, or step description. Identify deviations from the planned approach, architecture, or requirements. Assess whether deviations are justified improvements or problematic departures. Verify that all planned functionality has been implemented — list any missing or only partially met items.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - Always apply @skills/code-review/SKILL.md and @skills/security-review/SKILL.md. If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed code), also apply @skills/mysql-problem-solver/SKILL.md for those parts; otherwise do not use the SQL skill.
-  Retrieve the JIRA issue (by code or URL) using the acli console tool first. If acli is not available, use the JIRA MCP server if available. If neither is available, stop and display a message stating that at least one of these tools must be installed to use the skill.
+  Retrieve the JIRA issue (by code or URL) using the preferred JIRA tool (see @rules/skills/jira-operations.mdc).
 - **Race condition review (when shared state is modified):** If the changes contain any of the following signals — read-modify-write sequences, shared counters/balances/stock/quotas, `firstOrCreate`/`updateOrCreate`, retried or re-dispatched jobs that mutate shared records, cache write-back patterns, or bulk read-then-write operations — apply @skills/race-condition-review/SKILL.md. If none of these signals are present, skip this step.
 - **I/O bottleneck review (when changes touch file, storage, or external I/O):** If the changes include any of the following signals — synchronous file reads/writes on large or unbounded files, blocking HTTP calls without timeouts, storage operations executed in the request lifecycle, large file responses not streamed, or export/import operations loading all records into memory — flag each occurrence and recommend the appropriate async/streaming pattern. If none of these signals are present, skip this step.
 - Apply @rules/skills/architecture-patterns.mdc
 - Find the Git branch and switch to it (if needed pull the latest changes).
-- I want you to fix the bug from JIRA (you have either the ID or a link to JIRA). Use the acli console tool first to retrieve all the information you need about the bug (including comments and attachments). If acli is not available, use the JIRA MCP server if available. If neither is available, stop and display a message stating that at least one of these tools must be installed to use the skill. If you have other resources available that you could use to understand the problem, load them and analyze them.
+- I want you to fix the bug from JIRA (you have either the ID or a link to JIRA). Use the preferred JIRA tool (see @rules/skills/jira-operations.mdc) to retrieve all the information you need about the bug (including comments and attachments). If you have other resources available that you could use to understand the problem, load them and analyze them.
 - If possible, find links to the assignment and analyze it so that you understand it and can do a quality CR. Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
 - List findings using exactly three severity levels: **Critical**, **Moderate**, **Minor**.
 - If there are any findings, add comments to the PR about where you found these errors. If that is not possible, create a new comment on the PR with the list of findings. If you do not find any issues, post a short comment stating that **no findings were identified**. Every text in English.

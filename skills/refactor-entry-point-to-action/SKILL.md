@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- First, load all rules for Cursor editor (`.cursor/rules/.*mdc`).
+- First, load all rules for Cursor editor (`rules/.*mdc`).
 - Read `project.mdc` and all architecture rules that define Action pattern requirements before writing any code.
 - Keep all texts in the language used in the assignment.
 - Preserve behavior: refactor orchestration location, not business result.

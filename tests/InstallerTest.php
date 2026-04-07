@@ -1052,7 +1052,7 @@ test('install with prune reports pruned file count in output', function (): void
 
 test('race-condition-review skill is referenced only by code review skills', function (): void {
     $packageDir = dirname(__DIR__);
-    $needle = '@.cursor/skills/race-condition-review/SKILL.md';
+    $needle = '@skills/race-condition-review/SKILL.md';
     $skillFiles = [];
     $iterator = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($packageDir . '/skills', FilesystemIterator::SKIP_DOTS),

@@ -5,8 +5,8 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 
 **Constraint:**
 - Read project.mdc file
-- First, load all the rules for the cursor editor (.cursor/rules/.*mdc).
-- Always apply @.cursor/skills/smartest-project-addition/SKILL.md internally to identify one highest-impact, low-risk addition candidate; include it only if it maps to a real finding and keep the final output in the required findings-only format.
+- First, load all the rules for the cursor editor (rules/.*mdc).
+- Always apply @skills/smartest-project-addition/SKILL.md internally to identify one highest-impact, low-risk addition candidate; include it only if it maps to a real finding and keep the final output in the required findings-only format.
 - I want the texts to be in the language in which the assignment was written.
 - **Before starting the review**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin reviewing.
 - Always load existing CR reports/comments from the issue tracker and related PR (using available CLI tools or MCP servers) before generating a new CR report, and never repeat a previously reported finding.
@@ -15,7 +15,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Understand context before reviewing
 - All messages formatted as markdown for output.
 - NEVER CHANGE THE CODE! Generate the output only.
-- Every CR must use @.cursor/skills/security-review/SKILL.md for the current changes.
+- Every CR must use @skills/security-review/SKILL.md for the current changes.
 - Check for any points where the current changes could break the logic. If it is shared functionality, make sure to check these parts of the application as well!
 
 **Steps:**
@@ -23,15 +23,15 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
 - Before writing findings, collect previous CR reports from the related PR/issue discussion and build a dedup list by problem signature (file/scope + risk + root cause). Do not repeat already reported findings unless severity or impact changed.
 - **Plan Alignment Analysis:** Compare the implementation against the original issue description, planning documents, or step description. Identify deviations from the planned approach, architecture, or requirements. Assess whether deviations are justified improvements or problematic departures. Verify that all planned functionality has been implemented — list any missing or only partially met items.
-- **Security review (every CR):** Always apply @.cursor/skills/security-review/SKILL.md for the current changes.
-- All changes must comply with `.cursor/rules/**/*.mdc`.
+- **Security review (every CR):** Always apply @skills/security-review/SKILL.md for the current changes.
+- All changes must comply with `rules/**/*.mdc`.
 - **All business logic is allowed only in classes that follow the action pattern!**
-- **Action pattern (only when `vendor/pekral/arch-app-services` exists):** Apply @.cursor/skills/refactor-entry-point-to-action/SKILL.md rules when reviewing PHP entry points (controllers, jobs, commands, listeners, **Livewire components**). If a new or changed entry point contains orchestration logic without an Action class, flag it as **Critical**.
+- **Action pattern (only when `vendor/pekral/arch-app-services` exists):** Apply @skills/refactor-entry-point-to-action/SKILL.md rules when reviewing PHP entry points (controllers, jobs, commands, listeners, **Livewire components**). If a new or changed entry point contains orchestration logic without an Action class, flag it as **Critical**.
 - **Livewire component structure (only in Livewire projects):** Livewire components must be split into a PHP class (`app/Livewire/`) and a Blade view (`resources/views/livewire/`). Single-file (Volt) components are forbidden — flag as **Critical**. Business logic in Livewire component methods must be delegated to Action classes — flag inline business logic as **Critical**.
 - **Data Validator pattern (only when `vendor/pekral/arch-app-services` exists):** If an Action class throws `ValidationException` directly or calls `Validator::make()` inline instead of delegating to a dedicated Data Validator class, flag it as **Critical**. Validation logic must be encapsulated in `app/DataValidators/{Domain}/` classes.
 - **BaseModelService pattern (only when `vendor/pekral/arch-app-services` exists):** All services that primarily work with a specific Eloquent Model must extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()`. If a service works with a model but does not extend `BaseModelService`, flag it as **Critical**. If a service does not primarily serve a single model but exists as a plain service class, flag it as **Moderate** and recommend refactoring to an Action pattern class.
-- **SQL analysis (only when changes touch the database):** If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed files), use @.cursor/skills/mysql-problem-solver/SKILL.md for systematic analysis of those parts (identify query, inspect schema, EXPLAIN, evaluate indexes, propose safe optimizations). If there are no such changes, skip this step.
-- **Race condition review (when shared state is modified):** If the changes contain any of the following signals — read-modify-write sequences, shared counters/balances/stock/quotas, `firstOrCreate`/`updateOrCreate`, retried or re-dispatched jobs that mutate shared records, cache write-back patterns, or bulk read-then-write operations — apply @.cursor/skills/race-condition-review/SKILL.md. If none of these signals are present, skip this step.
+- **SQL analysis (only when changes touch the database):** If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed files), use @skills/mysql-problem-solver/SKILL.md for systematic analysis of those parts (identify query, inspect schema, EXPLAIN, evaluate indexes, propose safe optimizations). If there are no such changes, skip this step.
+- **Race condition review (when shared state is modified):** If the changes contain any of the following signals — read-modify-write sequences, shared counters/balances/stock/quotas, `firstOrCreate`/`updateOrCreate`, retried or re-dispatched jobs that mutate shared records, cache write-back patterns, or bulk read-then-write operations — apply @skills/race-condition-review/SKILL.md. If none of these signals are present, skip this step.
 - When the task has stated requirements or acceptance criteria (from the issue/PR), verify each item against the changes; list any that are not addressed or only partially met.
 - Understand what has changed and pay attention to the structural quality of the code defined in the rules.
 - Ensure SRP in each class and apply SOLID principles so that the code is readable for developers.
@@ -121,8 +121,8 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 
 **Review best practices:**
 - Give concrete fixes or code snippets where relevant; not only “something is wrong”.
-- Evaluate code in project context and against `.cursor/rules/**/*.mdc`.
+- Evaluate code in project context and against `rules/**/*.mdc`.
 - Findings are recommendations; final decisions remain with the human reviewer.
 
 **After completing the tasks**
-- If all **Critical** and **Moderate** findings from the current CR cycle are resolved, then (and only then) run @.cursor/skills/test-like-human/SKILL.md when the changes can be tested.
+- If all **Critical** and **Moderate** findings from the current CR cycle are resolved, then (and only then) run @skills/test-like-human/SKILL.md when the changes can be tested.

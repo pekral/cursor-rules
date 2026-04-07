@@ -12,7 +12,7 @@ metadata:
 - For all GitHub operations, prefer GitHub CLI (`gh`) as the primary tool.
 - If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
 - If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
-- First, load all the rules for the cursor editor (`.cursor/rules/.*mdc`).
+- First, load all the rules for the cursor editor (`rules/.*mdc`).
 - Read `project.mdc` before starting.
 - Analyze both issue and pull request discussions from the provided link.
 - Work only with questions relevant to the current PR and current issue state.

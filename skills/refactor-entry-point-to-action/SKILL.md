@@ -7,9 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- First, load all rules for Cursor editor (`rules/.*mdc`).
-- Read `project.mdc` and all architecture rules that define Action pattern requirements before writing any code.
-- Keep all texts in the language used in the assignment.
+- Apply @rules/skills/base-constraints.mdc
+- Read all architecture rules that define Action pattern requirements before writing any code.
 - Preserve behavior: refactor orchestration location, not business result.
 - In this iteration, do not report code review output to any third-party service.
 - After generating or updating code, run immediate internal code review focused on architecture and fix findings ASAP.

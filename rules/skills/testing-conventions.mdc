@@ -1,0 +1,17 @@
+---
+description: Shared testing conventions for skills that generate or modify tests
+globs:
+alwaysApply: false
+---
+
+## Testing Conventions
+
+- The generated code must comply with all rules defined for writing tests in @rules/php/standards.mdc. If the project is written in Laravel, it must also comply with @rules/laravel/architecture.mdc.
+- Test classes must be `final`; use only local variables inside tests.
+- Never use the `describe()` function in tests. Write tests at the top level using `it()` / `test()` only; do not wrap them in `describe()` blocks.
+- If the test requires persisted Laravel Eloquent rows, create them only via `Model::factory()` (see `@rules/laravel/architecture.mdc` Testing). For other test data, follow `@rules/php/standards.mdc`. Never mock it or circumvent this in any other way!
+- In Laravel factories, do not set attributes whose values are already defined by a database column default unless the test explicitly needs a different value (see `@rules/laravel/architecture.mdc` Schema defaults and Testing).
+- In Laravel tests, dispatch queue jobs only via `JobClass::dispatch(...)` (see `@rules/laravel/architecture.mdc` Testing — Dispatching jobs in tests).
+- Mock only external services (HTTP clients) or to simulate exceptions; remove any constructor mocks, unnecessary mocks, or mocks that can be replaced with real service logic.
+- After generating or modifying tests, verify that all new tests comply with the testing rules in `@rules/php/standards.mdc`.
+- If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.

@@ -7,9 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Read project.mdc file
-- First, load all the rules for the cursor editor (rules/.*mdc).
-- I want the texts to be in the language in which the assignment was written.
+- Apply @rules/skills/base-constraints.mdc
 - All messages formatted as markdown for output.
 - Adapt to the project’s framework and structure; locate where robots, sitemap, and head meta are implemented in the codebase.
 

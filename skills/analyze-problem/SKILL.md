@@ -7,9 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- Read project.mdc file
-- First, load all the rules for the cursor editor (rules/.*mdc).
-- I want the texts to be in the language in which the task was assigned. Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
+- Apply @rules/skills/base-constraints.mdc
+- Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - NEVER CHANGE THE CODE! Generate the output only.
 - All messages formatted as markdown for output.
 

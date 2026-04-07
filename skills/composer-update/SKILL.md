@@ -7,9 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Read project.mdc file.
-- First, load all the rules for the cursor editor (rules/.*mdc).
-- Output in the same language as the user's request.
+- Apply @rules/skills/base-constraints.mdc
 - All messages formatted as markdown.
 
 **Trigger:**

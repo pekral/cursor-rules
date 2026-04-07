@@ -14,11 +14,8 @@ metadata:
 -   For all GitHub operations, prefer GitHub CLI (`gh`) as the primary tool.
 -   If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
 -   If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
--   Read project.mdc file
--   First, load all the rules for the cursor editor
-    (rules/.\*mdc).
--   I want the texts to be in the language in which the assignment was
-    written.
+-   Apply @rules/skills/base-constraints.mdc
+-   Apply @rules/skills/testing-conventions.mdc
 -   If you are not on the main git branch in the project, switch to it.
 -   This task is based on the existing pull request review.
 -   First read your existing code review for the current pull request
@@ -49,19 +46,10 @@ metadata:
     required.
 -   Create deterministic every time!
 -   Make sure tests are deterministic and not flaky.
--   Never use describe() in tests.
--   Test classes must be `final`; use only local variables inside tests.
--   Mock only external services or exception scenarios. Do not use constructor mocking!
--   Remove unnecessary mocks if found while updating tests.
 -   In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
--   If the test requires persisted Laravel Eloquent rows, create them only via `Model::factory()` (see `@rules/laravel/architecture.mdc` Testing). For other test data, follow `@rules/php/standards.mdc`. Never mock it or circumvent this in any other way!
--   In Laravel factories, do not set attributes whose values are already defined by a database column default unless the test explicitly needs a different value (see `@rules/laravel/architecture.mdc` Schema defaults and Testing).
--   In Laravel tests, dispatch queue jobs only via `JobClass::dispatch(...)` (see `@rules/laravel/architecture.mdc` Testing — Dispatching jobs in tests).
 -   Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases instead.
--   After generating or modifying tests, verify that all new tests comply with the testing rules in `@rules/php/standards.mdc`. Check mock usage specifically: mock only external services (HTTP clients) or to simulate exceptions; remove any constructor mocks, unnecessary mocks, or mocks that can be replaced with real service logic.
 -   Use data providers where they improve readability and simplify
     repeated test cases.
--   If new database migrations exist in the current branch, run them (`php artisan migrate`) before running tests.
 -   After adding or updating tests, run only the necessary tests for the
     current changes.
 -   If coverage tooling exists, verify that current changes are covered

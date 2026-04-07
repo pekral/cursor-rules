@@ -9,16 +9,12 @@ metadata:
 # Answer PR Questions
 
 **Constraint:**
-- For all GitHub operations, prefer GitHub CLI (`gh`) as the primary tool.
-- If `gh` is not available or cannot be used, use an available GitHub MCP server as fallback.
-- If neither `gh` nor a GitHub MCP server is available, stop and return a failed result explaining that required GitHub tools are missing.
-- First, load all the rules for the cursor editor (`rules/.*mdc`).
-- Read `project.mdc` before starting.
+- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/skills/github-operations.mdc
 - Analyze both issue and pull request discussions from the provided link.
 - Work only with questions relevant to the current PR and current issue state.
 - Ignore questions that were already clearly answered in the same issue/PR context.
 - Output must be understandable for non-programmers (project manager or client).
-- Output must be in the language in which the assignment was written.
 
 **Steps:**
 - Open the provided issue link and identify its current branch/related PR.

@@ -7,10 +7,9 @@ metadata:
 ---
 
 **Constraint:**
-- NEVER CHANGE THE CODE! Generate the output only.
-- All messages formatted as markdown for output.
+- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/skills/review-only.mdc
 - Be realistic and precise — only flag genuine concurrency risks, not hypothetical ones.
-- I want the texts to be in the language in which the task was assigned.
 
 **When to apply this skill:**
 Apply this skill when the changed code contains any of the following signals:

@@ -13,5 +13,6 @@ alwaysApply: false
 - In Laravel factories, do not set attributes whose values are already defined by a database column default unless the test explicitly needs a different value (see `@rules/laravel/architecture.mdc` Schema defaults and Testing).
 - In Laravel tests, dispatch queue jobs only via `JobClass::dispatch(...)` (see `@rules/laravel/architecture.mdc` Testing — Dispatching jobs in tests).
 - Mock only external services (HTTP clients) or to simulate exceptions; remove any constructor mocks, unnecessary mocks, or mocks that can be replaced with real service logic.
+- **Prefer partial mocks** over full mocks whenever possible. Partial mocks keep real method implementations and only override the methods you need to control, making tests more realistic and less brittle. Use `Mockery::mock(Service::class)->makePartial()` or `$this->partialMock(Service::class)` in Laravel.
 - After generating or modifying tests, verify that all new tests comply with the testing rules in `@rules/php/standards.mdc`.
 - If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.

@@ -91,7 +91,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Explicitly detect and report **DRY violations** (duplicated logic, duplicated validation rules, repeated branching/condition blocks, and copy-pasted code paths) as findings with actionable refactoring recommendations.
 - Issues static analysis may not fully trace: business-logic flaws, missing authorization checks, data flow to sensitive sinks.
 - Coverage for changed files only (target 100% for changes). Run tests only for changed files.
-- New code is tested: arrange-act-assert; error cases first; descriptive names; data providers via argument; mock only external services.
+- New code is tested: arrange-act-assert; error cases first; descriptive names; data providers via argument; mock only external services. **Prefer partial mocks** over full mocks — flag full mocks as **Minor** when a partial mock would suffice.
 - Identify missing test variations.
 - For new or changed behavior, suggest concrete test scenarios where coverage is missing or unclear (e.g. "Unit: method X with null/empty input"; "Integration: POST without auth must return 401"). This supports testing readiness alongside coverage metrics.
 - Laravel: prefer `Http::fake()` over Mockery.

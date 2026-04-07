@@ -11,6 +11,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 - 🐛 **Fixed**: `code-review` skill now enforces English-only output — Czech Deliver/Communication sections translated (#235)
 - 🔧 **Changed**: move shared rule files from `rules/skills/` to `rules/`, update all skill references (#238)
 - 🐛 **Fixed**: `create-missing-tests-in-pr` and `test-like-human` skills now use shared `github-operations.mdc` / `jira-operations.mdc` rules instead of inline preferences (#237)
+- 🐛 **Fixed**: all mock rules now prefer partial mocks (`makePartial()`) over full mocks (#241)
 
 ## [0.6.2] - 2026-04-07
 

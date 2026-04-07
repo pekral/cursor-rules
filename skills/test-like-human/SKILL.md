@@ -12,8 +12,8 @@ metadata:
 
 **Constraint:**
 
--   Apply @rules/skills/base-constraints.mdc
--   Apply @rules/skills/github-operations.mdc
+-   Apply @rules/base-constraints.mdc
+-   Apply @rules/github-operations.mdc
 -   Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 -   **Before starting to test**, analyze all comments and discussions in the issue so that you fully understand what the final state should be and what logic should have been created. Only then begin testing.
 -   Work only with the **current pull request**. Testing instructions must be taken only from the PR conversation.

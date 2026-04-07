@@ -4,8 +4,8 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/review-only.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/review-only.mdc
 - Always apply @skills/smartest-project-addition/SKILL.md internally to identify one highest-impact, low-risk addition candidate; include it only if it maps to a real finding and keep the final output in the required findings-only format.
 - All CR output (findings, recommendations, comments) must be written in English.
 - Identify changes vs main branch (list commits).
@@ -20,7 +20,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - **Regression analysis:** For every changed file, check whether the modifications could break existing functionality that is NOT part of the ticket scope. Trace callers and dependents of changed methods/classes. If a change alters shared logic (helpers, services, traits, base classes, interfaces), verify that all consumers still behave correctly. Flag any regression risk as a finding — even if the new code is correct in isolation, breaking unrelated features is **Critical**.
 - **Security review (every CR):** Always apply @skills/security-review/SKILL.md for the current changes.
 - All changes must comply with `rules/**/*.mdc`.
-- Apply @rules/skills/architecture-patterns.mdc
+- Apply @rules/architecture-patterns.mdc
 - **SQL analysis (only when changes touch the database):** If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed files), use @skills/mysql-problem-solver/SKILL.md for systematic analysis of those parts (identify query, inspect schema, EXPLAIN, evaluate indexes, propose safe optimizations). If there are no such changes, skip this step.
 - **Race condition review (when shared state is modified):** If the changes contain any of the following signals — read-modify-write sequences, shared counters/balances/stock/quotas, `firstOrCreate`/`updateOrCreate`, retried or re-dispatched jobs that mutate shared records, cache write-back patterns, or bulk read-then-write operations — apply @skills/race-condition-review/SKILL.md. If none of these signals are present, skip this step.
 - When the task has stated requirements or acceptance criteria (from the issue/PR), verify each item against the changes; list any that are not addressed or only partially met.

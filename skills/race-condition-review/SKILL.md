@@ -7,8 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/review-only.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/review-only.mdc
 - Be realistic and precise — only flag genuine concurrency risks, not hypothetical ones.
 
 **When to apply this skill:**

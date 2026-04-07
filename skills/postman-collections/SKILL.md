@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/base-constraints.mdc
 - All comments or outputs posted to GitHub (issues, pull requests, review comments, and PR descriptions) must be written in English.
 - Never generate fake endpoints; only use endpoints that exist in code, route config, or API schema.
 - Keep secrets out of collections (tokens, passwords, API keys must be variables, never hard-coded values).

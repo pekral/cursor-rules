@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/base-constraints.mdc
 - All messages formatted as markdown for output.
 - Do not rely on bundled scripts or external example files; use project code, public URLs, and available tools (e.g. WebSearch, HTTP fetch) only.
 - For **implementing** `robots.txt`, `sitemap.xml`, route-level meta, canonical, and OG tags in a Laravel/PHP codebase, follow @skills/seo-fix/SKILL.md. Use this skill for **strategy, audits, GEO content patterns, and schema design** that complements that implementation work.

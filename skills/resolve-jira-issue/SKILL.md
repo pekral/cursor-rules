@@ -7,9 +7,9 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/github-operations.mdc
-- Apply @rules/skills/jira-operations.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/github-operations.mdc
+- Apply @rules/jira-operations.mdc
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
 - If you are not on the main git branch in the project, switch to it.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
@@ -56,7 +56,7 @@ h4. Testing recommendations
 **Steps:**
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - I want you to fix the bug from JIRA (you have either the ID or a link to JIRA).
-  Use the preferred JIRA tool (see @rules/skills/jira-operations.mdc) to retrieve all issue details (including comments and attachments).
+  Use the preferred JIRA tool (see @rules/jira-operations.mdc) to retrieve all issue details (including comments and attachments).
   If you have other resources available that you could use to understand the problem, load them and analyze them.
 - Classify the task type before writing any code:
   - **Bug**: the issue describes existing functionality that behaves incorrectly (e.g. wrong output, exception, regression, data corruption). Issue types such as `Bug` or `Defect`, or labels such as `bug`, `fix`, or `regression` are strong signals.
@@ -72,7 +72,7 @@ h4. Testing recommendations
 - For Action-pattern refactors during issue resolution: if an Action calls a Service or Facade method that is used only once in the entire codebase, move the business logic from that Service/Facade method directly into the Action and remove the original Service/Facade method.
 - Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker.
 - For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.
-- Apply @rules/skills/testing-conventions.mdc
+- Apply @rules/testing-conventions.mdc
 - If there are any automatic fixers in the project that are called through another layer, such as Phing or composer scripts, run them and ensure automatic error correction (find and load local configs for tools if exists). If there are any CI (or local) checkers, run them (never run all tests for the entire codebase, only for the current changes). Fix any errors, run the fixers again, and keep fixing until all errors are fixed. Never try to format PHP code outside of these fixers yourself.
 - Before creating a PR, run @skills/code-review-jira/SKILL.md for the current changes and treat it as mandatory CR for JIRA flow.
 - Fix all Critical and Moderate findings from that CR directly in code/tests, then run @skills/code-review-jira/SKILL.md again.

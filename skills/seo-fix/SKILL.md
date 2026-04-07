@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/base-constraints.mdc
 - All messages formatted as markdown for output.
 - Adapt to the project’s framework and structure; locate where robots, sitemap, and head meta are implemented in the codebase.
 

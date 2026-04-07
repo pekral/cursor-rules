@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/base-constraints.mdc
 - Always follow this order: understand -> propose -> implement -> verify.
 - Reuse existing project skills whenever they already solve a phase better than ad-hoc work.
 

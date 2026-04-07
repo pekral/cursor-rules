@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/base-constraints.mdc
 - Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - NEVER CHANGE THE CODE! Generate the output only.
 - All messages formatted as markdown for output.

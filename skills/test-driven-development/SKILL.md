@@ -7,8 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/testing-conventions.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/testing-conventions.mdc
 - All tests must follow the conventions defined in @skills/create-test/SKILL.md.
 
 **Core principle:** If you did not watch the test fail, you do not know if it tests the right thing.

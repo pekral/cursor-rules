@@ -7,8 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
-- Apply @rules/skills/testing-conventions.mdc
+- Apply @rules/base-constraints.mdc
+- Apply @rules/testing-conventions.mdc
 
 **Steps:**
 - Locate existing tests or create new ones following project conventions.

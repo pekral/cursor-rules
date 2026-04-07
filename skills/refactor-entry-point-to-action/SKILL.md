@@ -7,7 +7,7 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/skills/base-constraints.mdc
+- Apply @rules/base-constraints.mdc
 - Read all architecture rules that define Action pattern requirements before writing any code.
 - Preserve behavior: refactor orchestration location, not business result.
 - In this iteration, do not report code review output to any third-party service.

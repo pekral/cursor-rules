@@ -25,6 +25,7 @@ metadata:
 - Use data providers when they simplify writing and readability.
 - Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them.
 - Make sure of 100% coverage required for changes. Add tests so that 100% coverage is achieved. Prioritize modifying existing test cases; if tests do not exist, add them according to the valid rules for writing tests.
+- Check that the tests are written according to the test-writing guidelines and ensure 100% coverage; fix dry; use data providers to simplify the tests
 - After creating or modifying tests, check that they are not flaky.
 - Remove generated coverage after work is done.
 

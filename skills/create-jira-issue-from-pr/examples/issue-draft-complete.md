@@ -4,35 +4,35 @@ Source PR: #87 — refactor(api): restructure validation layer
 
 ---
 
-## Cíl
+## Goal
 
-Restrukturalizovat validační vrstvu API tak, aby byly validace konzistentní napříč všemi endpointy a snížil se počet duplicitních pravidel.
+Restructure the API validation layer so that validations are consistent across all endpoints and reduce the number of duplicate rules.
 
-## Původní zadání (beze změn)
+## Original Assignment (unchanged)
 
-Potřebujeme sjednotit validaci vstupů na API. Momentálně každý controller validuje po svém a jsou tam duplicity. Viz komentáře v PR.
+We need to unify input validation on the API. Currently each controller validates on its own and there are duplicates. See comments in PR.
 
-## Technický kontext z PR
+## Technical Context from PR
 
-- PR diff ukazuje nekonzistentní validaci v `src/Controllers/UserController.php` a `src/Controllers/OrderController.php`
-- Review od @senior-dev identifikoval chybějící validaci na `PATCH /orders/{id}` endpointu
-- Testy ve `tests/Validation/` pokrývají pouze happy path scénáře
+- PR diff shows inconsistent validation in `src/Controllers/UserController.php` and `src/Controllers/OrderController.php`
+- Review from @senior-dev identified missing validation on the `PATCH /orders/{id}` endpoint
+- Tests in `tests/Validation/` cover only happy path scenarios
 
-## Požadavky pro implementaci
+## Implementation Requirements
 
-- [ ] Vytvořit sdílené validační pravidla v `src/Validation/Rules/`
-- [ ] Nahradit inline validaci ve všech controllerech sdílenými pravidly
-- [ ] Přidat validaci na `PATCH /orders/{id}` endpoint
-- [ ] Doplnit testy pro chybové scénáře (nevalidní vstup, chybějící povinná pole)
+- [ ] Create shared validation rules in `src/Validation/Rules/`
+- [ ] Replace inline validation in all controllers with shared rules
+- [ ] Add validation to the `PATCH /orders/{id}` endpoint
+- [ ] Add tests for error scenarios (invalid input, missing required fields)
 
-## Akceptační kritéria
+## Acceptance Criteria
 
-- [ ] Žádný controller neobsahuje inline validační pravidla
-- [ ] Všechny API endpointy vrací 422 s popisem chyby při nevalidním vstupu
-- [ ] Test coverage validační vrstvy je minimálně 80%
-- [ ] Existující API kontrakty se nezměnily (zpětná kompatibilita)
+- [ ] No controller contains inline validation rules
+- [ ] All API endpoints return 422 with error description for invalid input
+- [ ] Test coverage of the validation layer is at least 80%
+- [ ] Existing API contracts have not changed (backward compatibility)
 
-## Poznámky
+## Notes
 
-- Zdroj: https://github.com/org/repo/pull/87
-- Výstup je naformátovaný pro JIRA issue, původní zadání zůstalo obsahově beze změn.
+- Source: https://github.com/org/repo/pull/87
+- Output is formatted for JIRA issue, original assignment content remains unchanged.

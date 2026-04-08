@@ -2,13 +2,13 @@
 
 ## Verbatim Section Integrity
 
-- The original assignment text in the "Původní zadání" section MUST be byte-identical to the source
+- The original assignment text in the "Original Assignment" section MUST be byte-identical to the source
 - Do not fix typos, grammar, or formatting in the verbatim section
 - If the original text contains markdown, preserve it exactly
 
 ## PR Comment Coverage
 
-- Every unresolved PR review comment must map to at least one item in "Požadavky pro implementaci"
+- Every unresolved PR review comment must map to at least one item in "Implementation Requirements"
 - Already-resolved or duplicate requests must be excluded
 - If a comment is ambiguous, include it with a note rather than silently dropping it
 

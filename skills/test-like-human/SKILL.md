@@ -40,7 +40,7 @@ metadata:
 
 1. Load the current pull request using `scripts/load-pr.sh <PR>` first. If `gh` is not available, use a GitHub MCP server. If neither is available, stop and return a failed result about missing GitHub tools.
 2. Read the PR conversation using `scripts/pr-comments.sh <PR>`: PR description, review comments, and discussion threads.
-3. Locate the **"Doporučení k testování" / "Testing Recommendations"** section and extract all testing instructions. Prefer recommendations that include direct in-app links (full URLs) for fast click-through testing.
+3. Locate the **"Testing Recommendations"** section and extract all testing instructions. Prefer recommendations that include direct in-app links (full URLs) for fast click-through testing.
 4. If at least one extracted instruction requires API testing, first try to load the project's API documentation per `references/api-testing-guide.md`.
 5. Determine the **testing approach** for each instruction per `references/testing-approach-rules.md`.
 6. Convert instructions into realistic **user scenarios** per the scenario design rules in `references/testing-approach-rules.md`.

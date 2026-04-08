@@ -4,29 +4,29 @@ Source PR: #203 — fix(ui): correct button alignment on mobile
 
 ---
 
-## Cíl
+## Goal
 
-Opravit zarovnání tlačítek na mobilních zařízeních, aby odpovídalo návrhu v designu.
+Fix button alignment on mobile devices to match the design mockup.
 
-## Původní zadání (beze změn)
+## Original Assignment (unchanged)
 
-Tlačítka na mobilní verzi nejsou zarovnaná podle Figma návrhu.
+Buttons on the mobile version are not aligned according to the Figma mockup.
 
-## Technický kontext z PR
+## Technical Context from PR
 
-- PR obsahuje CSS úpravu v `src/styles/buttons.module.css`
-- Žádné review komentáře nebyly přidány
+- PR contains a CSS fix in `src/styles/buttons.module.css`
+- No review comments were added
 
-## Požadavky pro implementaci
+## Implementation Requirements
 
-- [ ] Zarovnat tlačítka podle Figma návrhu na breakpointu < 768px
+- [ ] Align buttons according to the Figma mockup at breakpoint < 768px
 
-## Akceptační kritéria
+## Acceptance Criteria
 
-- [ ] Tlačítka jsou vizuálně zarovnána podle Figma návrhu na mobilních zařízeních
-- [ ] Zarovnání neovlivňuje desktop verzi
+- [ ] Buttons are visually aligned according to the Figma mockup on mobile devices
+- [ ] Alignment does not affect the desktop version
 
-## Poznámky
+## Notes
 
-- Zdroj: https://github.com/org/repo/pull/203
-- Výstup je naformátovaný pro JIRA issue, původní zadání zůstalo obsahově beze změn.
+- Source: https://github.com/org/repo/pull/203
+- Output is formatted for JIRA issue, original assignment content remains unchanged.

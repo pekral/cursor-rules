@@ -4,37 +4,37 @@ Source PR: #145 — feat(reports): add PDF export for monthly summaries
 
 ---
 
-## Cíl
+## Goal
 
-Přidat možnost exportu měsíčních souhrnů do PDF formátu podle přiloženého vzoru.
+Add the ability to export monthly summaries to PDF format according to the attached template.
 
-## Původní zadání (beze změn)
+## Original Assignment (unchanged)
 
-Zákazníci potřebují exportovat měsíční souhrny do PDF. Vzor je v příloze (screenshot). Export musí obsahovat hlavičku s logem firmy a tabulku s přehledem.
+Customers need to export monthly summaries to PDF. The template is in the attachment (screenshot). The export must include a header with the company logo and a summary table.
 
-## Technický kontext z PR
+## Technical Context from PR
 
-- PR přidává nový `PdfExportService` v `src/Services/Export/`
-- Screenshot v PR ukazuje požadovaný layout: hlavička s logem, tabulka s 5 sloupci
-- Review od @tech-lead požaduje lazy loading pro velké datasety (> 1000 řádků)
-- Příloha (screenshot) úspěšně stažena a analyzována
+- PR adds a new `PdfExportService` in `src/Services/Export/`
+- Screenshot in PR shows the required layout: header with logo, table with 5 columns
+- Review from @tech-lead requires lazy loading for large datasets (> 1000 rows)
+- Attachment (screenshot) successfully downloaded and analyzed
 
-## Požadavky pro implementaci
+## Implementation Requirements
 
-- [ ] Implementovat `PdfExportService` s podporou hlavičky a tabulkového layoutu
-- [ ] Přidat lazy loading pro datasety nad 1000 řádků
-- [ ] Integrovat logo firmy do hlavičky exportu
-- [ ] Přidat endpoint `GET /reports/monthly/{id}/pdf`
+- [ ] Implement `PdfExportService` with header and table layout support
+- [ ] Add lazy loading for datasets over 1000 rows
+- [ ] Integrate company logo into the export header
+- [ ] Add endpoint `GET /reports/monthly/{id}/pdf`
 
-## Akceptační kritéria
+## Acceptance Criteria
 
-- [ ] PDF export obsahuje hlavičku s logem a tabulku podle vzoru
-- [ ] Export datasetu s 5000 řádky se dokončí do 10 sekund
-- [ ] PDF je validní a otevře se v běžných prohlížečích (Chrome, Firefox)
-- [ ] Endpoint vrací 404 pro neexistující report
+- [ ] PDF export contains header with logo and table according to template
+- [ ] Export of a dataset with 5000 rows completes within 10 seconds
+- [ ] PDF is valid and opens in common browsers (Chrome, Firefox)
+- [ ] Endpoint returns 404 for non-existent report
 
-## Poznámky
+## Notes
 
-- Zdroj: https://github.com/org/repo/pull/145
-- Příloha (screenshot layoutu) byla analyzována a požadavky z ní jsou zahrnuty výše.
-- Výstup je naformátovaný pro JIRA issue, původní zadání zůstalo obsahově beze změn.
+- Source: https://github.com/org/repo/pull/145
+- Attachment (layout screenshot) was analyzed and requirements from it are included above.
+- Output is formatted for JIRA issue, original assignment content remains unchanged.

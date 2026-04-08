@@ -55,37 +55,37 @@ metadata:
 
 | Field | Required | Description |
 |---|---|---|
-| Cíl (Goal) | Yes | Brief summary understandable for non-technical audience |
-| Původní zadání | Yes | Verbatim original assignment text, unchanged |
-| Technický kontext z PR | Yes | Summary of relevant technical findings from PR |
-| Požadavky pro implementaci | Yes | Checklist of concrete implementation requirements |
-| Akceptační kritéria | Yes | Testable and measurable acceptance criteria |
-| Poznámky | Yes | Source PR link, formatting note, caveats |
+| Goal | Yes | Brief summary understandable for non-technical audience |
+| Original Assignment | Yes | Verbatim original assignment text, unchanged |
+| Technical Context from PR | Yes | Summary of relevant technical findings from PR |
+| Implementation Requirements | Yes | Checklist of concrete implementation requirements |
+| Acceptance Criteria | Yes | Testable and measurable acceptance criteria |
+| Notes | Yes | Source PR link, formatting note, caveats |
 | Confidence notes | If applicable | Assumptions, missing attachments, ambiguous comments |
 
 ## Output format (markdown)
 
 ```markdown
-## Cíl
-<Stručné, srozumitelné shrnutí cíle pro netechnické publikum>
+## Goal
+<Brief, clear summary of the goal for non-technical audience>
 
-## Původní zadání (beze změn)
-<Přesně původní text zadání, bez úprav obsahu>
+## Original Assignment (unchanged)
+<Exact original assignment text, content unchanged>
 
-## Technický kontext z PR
-- <Shrnutí relevantních technických zjištění>
+## Technical Context from PR
+- <Summary of relevant technical findings>
 
-## Požadavky pro implementaci
-- [ ] <Konkrétní požadavek 1>
-- [ ] <Konkrétní požadavek 2>
+## Implementation Requirements
+- [ ] <Specific requirement 1>
+- [ ] <Specific requirement 2>
 
-## Akceptační kritéria
-- [ ] <Měřitelné kritérium 1>
-- [ ] <Měřitelné kritérium 2>
+## Acceptance Criteria
+- [ ] <Measurable criterion 1>
+- [ ] <Measurable criterion 2>
 
-## Poznámky
-- Zdroj: <HTTP odkaz na PR>
-- Výstup je naformátovaný pro JIRA issue, původní zadání zůstalo obsahově beze změn.
+## Notes
+- Source: <HTTP link to PR>
+- Output is formatted for JIRA issue, original assignment content remains unchanged.
 ```
 
 ## Output Humanization

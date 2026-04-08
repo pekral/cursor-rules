@@ -20,6 +20,6 @@
 
 ## Inclusion in Output
 
-- Summarize attachment findings in the "Technický kontext z PR" section
-- If an attachment reveals additional requirements, add them to "Požadavky pro implementaci"
-- If an attachment cannot be retrieved, add a warning note in "Poznámky"
+- Summarize attachment findings in the "Technical Context from PR" section
+- If an attachment reveals additional requirements, add them to "Implementation Requirements"
+- If an attachment cannot be retrieved, add a warning note in "Notes"

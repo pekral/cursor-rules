@@ -32,25 +32,24 @@ class UserServiceTest extends TestCase
 ## After (PEST)
 
 ```php
+beforeEach(function () {
+    $this->repo = Mockery::mock(UserRepository::class);
+    $this->service = new UserService($this->repo);
+});
+
 // Error cases first, then happy paths
 it('throws when user is not found', function () {
-    $repo = Mockery::mock(UserRepository::class);
-    $repo->shouldReceive('find')->with(999)->andReturnNull();
+    $this->repo->shouldReceive('find')->with(999)->andReturnNull();
 
-    $service = new UserService($repo);
-
-    expect(fn () => $service->getUser(999))
+    expect(fn () => $this->service->getUser(999))
         ->toThrow(UserNotFoundException::class);
 });
 
 it('returns the user', function () {
     $user = new User(id: 1, name: 'Alice');
-    $repo = Mockery::mock(UserRepository::class);
-    $repo->shouldReceive('find')->with(1)->andReturn($user);
+    $this->repo->shouldReceive('find')->with(1)->andReturn($user);
 
-    $service = new UserService($repo);
-
-    expect($service->getUser(1))->toBe($user);
+    expect($this->service->getUser(1))->toBe($user);
 });
 ```
 
@@ -60,3 +59,4 @@ it('returns the user', function () {
 - Error case placed first
 - Arrange-act-assert pattern preserved
 - No `covers()` method generated
+- Shared setup (mock + service) extracted into `beforeEach` to follow DRY principles

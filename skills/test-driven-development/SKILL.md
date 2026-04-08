@@ -20,21 +20,28 @@ NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
 
 Write code before the test? Delete it. Start over. No exceptions.
 
+**Scripts:** Use the pre-built scripts in `@skills/test-driven-development/scripts/` for test execution. Do not reinvent these commands -- run the scripts directly.
+
+| Script | Purpose |
+|---|---|
+| `scripts/run-test.sh` | Run a single test file or filter by name |
+| `scripts/run-coverage.sh` | Run tests with code coverage report |
+
+**References:**
+- `references/test-writing-rules.md` -- rules for writing tests: one behavior per test, mocking guidelines, prohibited patterns
+- `references/red-flags-and-anti-patterns.md` -- common rationalizations, red flags, testing anti-patterns
+- `references/verification-checklist.md` -- checklist to complete before marking work done
+- `references/tdd-applicability.md` -- when to use TDD, exceptions, bug-fix workflow
+
+**Examples:** See `examples/` for expected output format:
+- `examples/red-green-refactor-cycle.md` -- full TDD cycle for a new feature
+- `examples/bug-fix-workflow.md` -- TDD-driven bug fix with summary report
+
 **Steps:**
 
 ## 1. RED - Write Failing Test
 
-Write one minimal test showing expected behavior.
-
-- One behavior per test.
-- Clear, descriptive name that describes the behavior.
-- Real code paths — mock only external services (HTTP clients) or to simulate exceptions. Do not use constructor mocking! **Prefer partial mocks** (`Mockery::mock(Service::class)->makePartial()`) so real methods run and only needed methods are overridden.
-- Arrange-act-assert pattern, error cases first.
-- In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
-- In Livewire component tests, prefer `set()` for form state updates instead of `fill()` to avoid one round-trip per field and keep the suite fast.
-- Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases instead.
-- Use data providers when they simplify writing and readability.
-- Never generate the `covers()` method.
+Write one minimal test showing expected behavior per `references/test-writing-rules.md`.
 
 ```php
 it('rejects empty email on registration', function (): void {
@@ -52,10 +59,10 @@ it('rejects empty email on registration', function (): void {
 
 **Mandatory. Never skip.**
 
-Run the test and confirm:
+Run `scripts/run-test.sh --filter "test name"` and confirm:
 - Test fails (not errors from syntax or missing imports).
 - Failure message matches expected behavior (feature missing, not typos).
-- If test passes immediately — you are testing existing behavior. Fix the test.
+- If test passes immediately -- you are testing existing behavior. Fix the test.
 
 ## 3. GREEN - Minimal Code
 
@@ -69,11 +76,11 @@ Write the simplest code to make the test pass.
 
 **Mandatory.**
 
-Run the test and confirm:
+Run `scripts/run-test.sh --filter "test name"` and confirm:
 - The new test passes.
 - All other tests still pass.
 - No errors or warnings in output.
-- If the test fails — fix the code, not the test.
+- If the test fails -- fix the code, not the test.
 
 ## 5. REFACTOR - Clean Up
 
@@ -81,67 +88,32 @@ After green only:
 - Remove duplication.
 - Improve names.
 - Extract helpers or private methods.
-- Keep tests green throughout — do not add new behavior during refactoring.
+- Keep tests green throughout -- do not add new behavior during refactoring.
 
 ## 6. Repeat
 
 Next failing test for the next behavior. Continue the cycle.
 
-**When to use TDD:**
-- New features
-- Bug fixes (write a test reproducing the bug first)
-- Behavior changes
-- Refactoring (ensure tests exist before changing code)
+When to use TDD and exceptions: see `references/tdd-applicability.md`.
 
-**Exceptions (confirm with user first):**
-- Throwaway prototypes
-- Generated code
-- Configuration files
+For bug fixes, follow the bug-fix workflow in `references/tdd-applicability.md` and see `examples/bug-fix-workflow.md` for a concrete example.
 
-**Bug-Fix Workflow:**
-1. Write a failing test that reproduces the bug.
-2. Verify the test fails for the expected reason.
-3. Fix the bug with minimal code.
-4. Verify the test passes.
-5. Refactor if needed.
+If any red flags or rationalizations arise, consult `references/red-flags-and-anti-patterns.md`.
 
-Never fix bugs without a failing test first.
+**Output contract:** For each TDD cycle completed, the output must include:
 
-**Common rationalizations to reject:**
+| Field | Required | Description |
+|---|---|---|
+| Test name | Yes | Descriptive name of the test |
+| RED result | Yes | Confirmation test failed and failure reason |
+| GREEN result | Yes | Confirmation test passes after implementation |
+| Implementation summary | Yes | What production code was written or changed |
+| Refactoring notes | If applicable | What was cleaned up after green |
+| Coverage | Yes | 100% for changed code confirmed |
+| Confidence notes | If applicable | Caveats or assumptions (e.g., partial mock limitations, skipped edge case) |
+| All tests pass | Yes | Confirmation full suite is green |
 
-| Excuse | Reality |
-|--------|---------|
-| "Too simple to test" | Simple code breaks. The test takes seconds. |
-| "I'll test after" | Tests passing immediately prove nothing. |
-| "Need to explore first" | Fine. Throw away exploration, start with TDD. |
-| "Test is hard to write" | Hard to test means hard to use. Simplify the design. |
-| "TDD will slow me down" | TDD is faster than debugging in production. |
-| "Already manually tested" | Ad-hoc testing is not systematic. No record, cannot re-run. |
-
-**Red flags — stop and start over:**
-- Production code written before a failing test.
-- Test passes immediately without implementation.
-- Cannot explain why the test failed.
-- Rationalizing "just this once".
-
-**Testing anti-patterns to avoid:**
-- Testing mock behavior instead of real behavior.
-- Adding test-only methods to production classes — use test utilities instead.
-- Mocking without understanding the dependency chain — understand side effects first, mock minimally.
-- Incomplete mocks — mirror real API response structure completely.
-- Over-complex mock setup (more than 50% of the test) — consider integration tests.
-
-**Verification checklist before marking work complete:**
-- [ ] Every new function or method has a test.
-- [ ] Watched each test fail before implementing.
-- [ ] Each test failed for the expected reason (feature missing, not typo).
-- [ ] Wrote minimal code to pass each test.
-- [ ] All tests pass.
-- [ ] Tests use real code (mocks only for external services or exception simulation).
-- [ ] Edge cases and error paths are covered.
-- [ ] 100% code coverage for changes.
-- [ ] Remove generated coverage files after verification.
-
-**After completing the tasks**
-- Check that the tests are written according to the test-writing guidelines and ensure 100% coverage; fix dry; use data providers to simplify the tests
+**After completing the tasks:**
+- Run `references/verification-checklist.md` to verify all items are satisfied.
+- Check that the tests are written according to the test-writing guidelines and ensure 100% coverage; fix dry; use data providers to simplify the tests.
 - If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!

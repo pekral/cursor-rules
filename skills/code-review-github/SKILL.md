@@ -16,34 +16,67 @@ metadata:
 - Explicitly detect and report **DRY violations** (duplicated logic, duplicated validation rules, repeated branching/condition blocks, and copy-pasted code paths) in every CR result.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 
-**Steps:**
-- **Multiple PRs per issue:** If the issue has more than one open pull request, perform a separate code review for each open PR sequentially. Review each PR independently on its own branch, post findings to the corresponding PR, and produce a per-PR summary. After all PRs are reviewed, provide a consolidated overview listing each PR with its result (clean / has findings).
-- **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
-- Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
-- Before writing findings, collect prior review comments/reports from the PR timeline and related issue discussion. Build a dedup list by problem signature (file/scope + root cause + risk) and skip findings already reported unless severity/impact changed.
-- **Plan Alignment Analysis:** Compare the implementation against the original issue description, planning documents, or step description. Identify deviations from the planned approach, architecture, or requirements. Assess whether deviations are justified improvements or problematic departures. Verify that all planned functionality has been implemented — list any missing or only partially met items.
-- **Simplification analysis:** Evaluate whether the solution can be written more simply without altering the new logic, leveraging rules and conventions already defined in `rules/**/*.mdc`. Flag unnecessary complexity as a finding.
-- **Regression analysis:** For every changed file, check whether the modifications could break existing functionality that is NOT part of the ticket scope. Trace callers and dependents of changed methods/classes. If a change alters shared logic (helpers, services, traits, base classes, interfaces), verify that all consumers still behave correctly. Flag any regression risk as a finding — even if the new code is correct in isolation, breaking unrelated features is **Critical**.
-- Always apply @skills/code-review/SKILL.md and @skills/security-review/SKILL.md. If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed code), also apply @skills/mysql-problem-solver/SKILL.md for those parts; otherwise do not use the SQL skill. Find the issue by code or URL on GitHub.
-- **Race condition review (when shared state is modified):** If the changes contain any of the following signals — read-modify-write sequences, shared counters/balances/stock/quotas, `firstOrCreate`/`updateOrCreate`, retried or re-dispatched jobs that mutate shared records, cache write-back patterns, or bulk read-then-write operations — apply @skills/race-condition-review/SKILL.md. If none of these signals are present, skip this step.
-- **I/O bottleneck review (when changes touch file, storage, or external I/O):** If the changes include any of the following signals — synchronous file reads/writes on large or unbounded files, blocking HTTP calls without timeouts, storage operations executed in the request lifecycle, large file responses not streamed, or export/import operations loading all records into memory — flag each occurrence and recommend the appropriate async/streaming pattern. If none of these signals are present, skip this step.
-- Apply @rules/architecture-patterns.mdc
-- Find the Git branch and switch to it.
-- If possible, find links to the assignment and analyze it so you can do a quality CR.
-- List findings using exactly three severity levels: **Critical**, **Moderate**, **Minor**.
-- If there are any findings, add comments to the PR about where you found these errors. If that is not possible, create a new comment on the PR with the list of findings. If you do not find any issues, post a short comment stating that **no findings were identified**. Every text in English.
-- I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. The PR comment must contain **only findings** grouped by severity (Critical → Moderate → Minor), each with file/line (or file) and a short, actionable recommendation. Do not include any summary, “what was checked”, or praise.
-- Use readable Markdown with clear section separators and include short code suggestions for simple fixes when helpful.
-- Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
-- If needed, use browser-based testing via available browser MCP tools
-- If all **Critical** and **Moderate** findings from the current CR cycle are resolved, run @skills/test-like-human/SKILL.md before closing the review flow (when the changes are testable). The test-like-human skill must post its unified test report as a comment to the related issue in the issue tracker.
+**Scripts:** Use the pre-built scripts in `@skills/code-review-github/scripts/` to gather data. Do not reinvent these queries — run the scripts directly.
 
-**Communication protocol:**
+| Script | Purpose |
+|---|---|
+| `scripts/pr-detail.sh <PR>` | Full PR context: body, reviews, comments, CI checks |
+| `scripts/pr-diff.sh <PR>` | Full diff for the PR |
+| `scripts/pr-comments.sh <PR>` | All PR comments and inline review threads for dedup |
+| `scripts/post-review-comment.sh <PR> <FILE>` | Post a review comment to the PR |
+| `scripts/issue-detail.sh <ISSUE>` | Issue body and comments for plan alignment |
+
+**References:**
+- `references/review-severity-levels.md` — definition of Critical, Moderate, Minor severity levels
+- `references/plan-alignment-analysis.md` — how to compare implementation against the plan/issue
+- `references/regression-analysis.md` — procedure for tracing callers and detecting regressions
+- `references/dedup-policy.md` — deduplication of findings from prior review cycles
+- `references/communication-protocol.md` — output format rules, language, escalation
+- `references/specialized-review-triggers.md` — when to invoke race-condition, I/O, database, and other sub-skills
+
+**Examples:** See `examples/` for expected output format:
+- `examples/report-findings.md` — PR with findings grouped by severity
+- `examples/report-clean.md` — PR with no findings
+- `examples/report-conflict-skip.md` — PR skipped due to merge conflicts
+- `examples/report-multi-pr.md` — multiple PRs reviewed for one issue
+
+**Steps:**
+1. **Multiple PRs per issue:** If the issue has more than one open pull request, perform a separate code review for each open PR sequentially. Review each PR independently on its own branch, post findings to the corresponding PR, and produce a per-PR summary. After all PRs are reviewed, provide a consolidated overview listing each PR with its result (clean / has findings). See `examples/report-multi-pr.md`.
+2. **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts. See `examples/report-conflict-skip.md`.
+3. Switch locally to the branch in PR and perform code review over changes locally on the filesystem. Use `scripts/pr-detail.sh <PR>` and `scripts/pr-diff.sh <PR>` to gather context.
+4. Before writing findings, collect prior review comments/reports using `scripts/pr-comments.sh <PR>` and apply `references/dedup-policy.md` to skip already-reported findings.
+5. **Plan Alignment Analysis:** Compare the implementation against the original issue description, planning documents, or step description per `references/plan-alignment-analysis.md`. Use `scripts/issue-detail.sh <ISSUE>` to load issue context.
+6. **Simplification analysis:** Evaluate whether the solution can be written more simply without altering the new logic, leveraging rules and conventions already defined in `rules/**/*.mdc`. Flag unnecessary complexity as a finding.
+7. **Regression analysis:** For every changed file, apply `references/regression-analysis.md`. Trace callers and dependents of changed methods/classes. If a change alters shared logic, verify that all consumers still behave correctly. Flag any regression risk as a finding.
+8. Apply specialized sub-skills per `references/specialized-review-triggers.md`: always apply `@skills/code-review/SKILL.md` and `@skills/security-review/SKILL.md`. Conditionally apply database, race-condition, and I/O reviews based on the triggers defined in that reference.
+9. Apply @rules/architecture-patterns.mdc
+10. List findings using exactly three severity levels per `references/review-severity-levels.md`: **Critical**, **Moderate**, **Minor**.
+11. Post findings to the PR per `references/communication-protocol.md`. Use `scripts/post-review-comment.sh <PR> <FILE>` to post the comment. If no issues are found, post a short comment stating that **no findings were identified**. See `examples/report-findings.md` and `examples/report-clean.md`.
+12. Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
+13. If needed, use browser-based testing via available browser MCP tools.
+14. If all **Critical** and **Moderate** findings from the current CR cycle are resolved, run @skills/test-like-human/SKILL.md before closing the review flow (when the changes are testable). The test-like-human skill must post its unified test report as a comment to the related issue in the issue tracker.
+
+**Communication protocol:** See `references/communication-protocol.md` for full rules. Key points:
 - Do not include praise/positive feedback; output must contain only findings.
 - If you find significant deviations from the plan or requirements, explicitly flag them and ask for confirmation.
 - If you identify issues with the original plan or requirements themselves, recommend updates.
 - For implementation problems, provide clear guidance on fixes needed with code examples.
 
-**After completing the tasks**
+**After completing the tasks:**
 - Keep @skills/test-like-human/SKILL.md as a required final step only after **Critical** and **Moderate** findings are resolved and the changes are testable. The test-like-human skill must post its unified test report as a comment to the related issue in the issue tracker.
 - Based on the discussion in the assignment, is the proposed solution to the problems safe and effective? Analyze the assignment and all discussions related to this task and write me your conclusion!
+
+**Output contract:** For each reviewed PR, produce a structured report containing:
+
+| Field | Required | Description |
+|---|---|---|
+| PR number and title | Yes | Identifies the PR |
+| Review result | Yes | `clean` or `has findings` |
+| Conflict status | Yes | None / present (if present, review is skipped) |
+| Findings by severity | If has findings | Grouped as Critical, Moderate, Minor per `references/review-severity-levels.md` |
+| File/line references | Per finding | Location of each finding in the codebase |
+| Actionable recommendation | Per finding | Short, specific fix guidance |
+| Plan alignment | Yes | Deviations from the issue/plan, or "fully aligned" |
+| Testing recommendations | If tests pass | Brief recommendations with direct in-app URLs |
+| Confidence notes | If applicable | Caveats or assumptions (e.g., untestable paths, ambiguous requirements) |
+| Conclusion | Yes | Assessment of whether the proposed solution is safe and effective |

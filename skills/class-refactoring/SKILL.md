@@ -12,46 +12,54 @@ metadata:
 - Apply @rules/architecture-patterns.mdc
 - Apply @rules/testing-conventions.mdc
 
+**Scripts:** Use the pre-built scripts in `@skills/class-refactoring/scripts/` to gather data. Do not reinvent these queries — run the scripts directly.
+
+| Script | Purpose |
+|---|---|
+| `scripts/changed-classes.sh [base]` | List PHP classes modified in current branch vs base branch |
+| `scripts/check-coverage.sh [filter]` | Run PHPUnit with coverage report, optional test filter |
+
+**References:**
+- `references/refactoring-checklist.md` — pre-refactoring steps, core principles (SRP, DRY), and prohibitions
+- `references/coding-standards.md` — PHP clean code rules, PHPDoc, method design
+- `references/type-safety-rules.md` — Spatie DTOs, `?array` prohibition, array key safety
+- `references/laravel-conventions.md` — Laravel helpers, Eloquent, Livewire delegation, job dispatch
+- `references/testing-requirements.md` — coverage verification, test quality, post-refactoring testing
+
+**Examples:** See `examples/` for expected output format:
+- `examples/report-refactoring-complete.md` — clean refactoring with full coverage
+- `examples/report-coverage-gap.md` — refactoring where coverage gaps were found and resolved
+
 **Steps:**
-- Analyze the class and complete the TODO list tasks.
-- Verify code coverage after refactoring.
-- For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.
-- Preserve functionality — change how, not what.
-- Focus on recently modified code unless instructed otherwise.
-- No increase in public API surface without strong justification
-- Clean, modern, optimized code.
-- Stateless PHP classes.
-- Collections over `foreach` where appropriate.
-- PHPDoc for PHPStan analysis. PHPDoc content: describe business logic and general purpose; avoid listing method calls or implementation steps.
-- Complex logic commented
-- No magic numbers
-- No deep nesting
-- Prefer small, focused functions.
-- English comments only.
-- Spatie DTOs (Spatie Laravel Data) instead of arrays (except Job constructors). Use PHP attributes for property mapping — never override `from()` solely to rename keys. Apply `#[MapInputName(SnakeCaseMapper::class)]` at class level for snake_case-to-camelCase input mapping, or `#[MapName(SnakeCaseMapper::class)]` when the DTO is also serialized to output. Custom named static constructors (e.g. `fromModel()`, `fromRequest()`) are allowed for domain-specific data transformation.
-- **`?array` is forbidden:** Any use of `?array` as a type hint must be replaced with a typed collection, DTO, or explicit `array<Type>|null`. Vague nullable arrays hide structure and break static analysis.
-- **PHP array key type safety:** When refactoring associative arrays with dynamic keys, apply safe key strategies: use stable prefixed keys (`'user:' . $id`, `'postal:' . $postalCode`, `'ext:' . $externalReference`); prefer a dedicated collection or value object when the key is domain-significant; prefer `list<T>` when the structure is a list, not a map; prefer explicit validation or normalization before using external values as array keys; where relevant, prefer `array<non-decimal-int-string, T>` over misleading `array<string, T>`.
-- Laravel helpers over native PHP when appropriate.
-- When changing Eloquent models, migrations, or factories, do not duplicate column defaults that already exist in the database schema; see `@rules/laravel/architecture.mdc` (Schema defaults, Migrations).
-- When changing Laravel tests that queue jobs, dispatch only via `JobClass::dispatch(...)` per `@rules/laravel/architecture.mdc` Testing.
-- DRY principle — eliminate duplicates.
-- Remove obvious comments; keep PHPStan-relevant docs.
-- Single Responsibility Principle.
-- Extract private methods if body exceeds ~30 lines.
-- No single-use variables.
-- Extract intention-revealing private methods
-- **Livewire components (only in Livewire projects):** Delegate all business logic to Action classes following the mandatory flow: `Livewire Component -> Action -> ModelService -> Repository/ModelManager`.
-- Separate orchestration layer from business logic
-- Split by responsibility
-- Centralize business rules
-- Business logic duplication is not allowed.
-- Method signatures must remain expressive and minimal.
-- Match test variable names to actual use cases.
-- New tests must cover relevant code.
-- Remove coverage files after verification.
+1. Run `scripts/changed-classes.sh` to identify modified PHP classes in the current branch.
+2. Analyze the class and complete the TODO list tasks per `references/refactoring-checklist.md`.
+3. Apply coding standards per `references/coding-standards.md`:
+   - Clean, modern, optimized code. Stateless PHP classes. Collections over `foreach` where appropriate.
+   - PHPDoc for PHPStan analysis. No magic numbers. No deep nesting. Prefer small, focused functions.
+   - Extract private methods if body exceeds ~30 lines. No single-use variables.
+4. Enforce type safety per `references/type-safety-rules.md`:
+   - Spatie DTOs instead of arrays (except Job constructors). `?array` is forbidden.
+   - Apply safe key strategies for associative arrays with dynamic keys.
+5. Follow Laravel conventions per `references/laravel-conventions.md`:
+   - Laravel helpers over native PHP. Livewire components delegate to Action classes.
+   - Do not duplicate column defaults from database schema. Dispatch jobs via `JobClass::dispatch(...)`.
+6. Verify and enforce test coverage per `references/testing-requirements.md`:
+   - Run `scripts/check-coverage.sh` to verify coverage after refactoring.
+   - Add any missing tests to ensure 100% coverage. Remove coverage files after verification.
+7. If according to @skills/test-like-human/SKILL.md the changes can be tested, do it.
 
-  **Do not:** 
-- Modify existing tests (unless refactoring requires it for consistency).
+**Output contract:** For each refactored class, produce a structured report containing:
 
-**After completing the tasks**
-- If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!
+| Field | Required | Description |
+|---|---|---|
+| Class name | Yes | Fully qualified class name |
+| Decision | Yes | Refactoring complete / blocked |
+| Refactoring direction | Yes | The single highest-impact direction selected |
+| Coverage before | Yes | Coverage percentage before changes |
+| Coverage after | Yes | Coverage percentage after changes (must be 100%) |
+| Public API changed | Yes | Yes / No |
+| Tests added | Yes | Count of new tests |
+| Tests modified | Yes | Count of modified tests |
+| Changes applied | Yes | Bullet list of refactoring actions taken |
+| Coverage gaps found | If applicable | Table of gaps and how they were resolved |
+| Confidence notes | If applicable | Caveats or assumptions (e.g., existing test modified, edge case) |

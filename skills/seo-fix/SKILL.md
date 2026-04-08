@@ -9,51 +9,56 @@ metadata:
 **Constraint:**
 - Apply @rules/base-constraints.mdc
 - All messages formatted as markdown for output.
-- Adapt to the project’s framework and structure; locate where robots, sitemap, and head meta are implemented in the codebase.
+- Adapt to the project's framework and structure; locate where robots, sitemap, and head meta are implemented in the codebase.
 
-**Where SEO usually lives (locate in the current project):**
-- **robots.txt** — Endpoint or static file serving GET `/robots.txt`. Response: `Content-Type: text/plain; charset=UTF-8`, header `X-Robots-Tag: noindex`. Content: see Steps.
-- **sitemap.xml** — Endpoint or static file serving GET `/sitemap.xml`. Response: `Content-Type: application/xml; charset=UTF-8`, header `X-Robots-Tag: noindex`. Content: see Steps.
-- **Public (indexed) pages** — Head/template with meta robots index,follow; canonical URL; link to sitemap; OG tags; title and description. Often a shared “guest” or “public” layout.
-- **Private (auth/app) pages** — Head/template with meta robots noindex,nofollow. No sitemap link. Often a shared “app” or “auth” layout.
-- **Tests** — Feature or E2E tests for robots response, sitemap response, and head meta (e.g. sitemap link, robots meta). Keep them green after changes.
+**Scripts:** Use the pre-built scripts in `@skills/seo-fix/scripts/` to verify SEO configuration. Do not reinvent these checks — run the scripts directly.
+
+| Script | Purpose |
+|---|---|
+| `scripts/check-robots.sh <BASE_URL>` | Fetch robots.txt and validate headers, directives, and sitemap reference |
+| `scripts/check-sitemap.sh <BASE_URL>` | Fetch sitemap.xml and validate headers, XML structure, and entry count |
+| `scripts/check-meta.sh <PAGE_URL>` | Fetch a page and extract robots meta, canonical, title, description, OG tags |
+
+**References:**
+- `references/robots-txt-rules.md` — response headers, body format, disallow policy, anti-patterns
+- `references/sitemap-xml-rules.md` — response headers, XML structure, required fields, priority guidance
+- `references/meta-layout-rules.md` — public vs private page meta tags, layout requirements, where SEO lives
+- `references/checklists.md` — new public page checklist, new private area checklist, post-change checklist
+
+**Examples:** See `examples/` for expected output format:
+- `examples/report-new-public-page.md` — adding a new indexed page
+- `examples/report-new-private-area.md` — adding a new private/noindex area
+- `examples/report-robots-update.md` — updating robots.txt disallow rules
 
 **Steps:**
 
-**robots.txt**
-- Response headers: `Content-Type: text/plain; charset=UTF-8`, `X-Robots-Tag: noindex`.
-- Body: `User-agent: *`, then `Allow: /`, then one or more `Disallow: /path` lines only for private areas (dashboard, settings, auth, admin, API that must not be indexed). One line `Sitemap: <absolute URL of sitemap>`.
-- Do not add `Disallow` for public pages; keep `Allow: /` and list only exceptions.
-- When adding a **new private area**: add corresponding `Disallow: /path` and add or update a test that the response contains that line.
+1. Locate where robots.txt, sitemap.xml, and head meta are implemented in the current project per `references/meta-layout-rules.md`.
+2. Determine the type of SEO change (new public page, new private area, robots update, sitemap update, meta fix).
+3. Apply the rules from the corresponding reference file:
+   - **robots.txt** changes: follow `references/robots-txt-rules.md`
+   - **sitemap.xml** changes: follow `references/sitemap-xml-rules.md`
+   - **Meta and layout** changes: follow `references/meta-layout-rules.md`
+4. After making changes, verify using the appropriate script:
+   - `scripts/check-robots.sh` for robots.txt changes
+   - `scripts/check-sitemap.sh` for sitemap changes
+   - `scripts/check-meta.sh` for meta/layout changes
+5. Complete the applicable checklist from `references/checklists.md`.
+6. All new or modified production code must follow @skills/class-refactoring/SKILL.md.
+7. If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
+8. Run existing tests that hit robots, sitemap, or assert head meta. Fix any failing assertions.
 
-**sitemap.xml**
-- Response headers: `Content-Type: application/xml; charset=UTF-8`, `X-Robots-Tag: noindex`.
-- XML: root `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"`. For multi‑locale: add `xmlns:xhtml="http://www.w3.org/1999/xhtml"` and per URL `<xhtml:link rel="alternate" hreflang="..." href="...">` for each locale and `hreflang="x-default"`.
-- Per URL: `<loc>` (absolute URL), `<lastmod>` (YYYY-MM-DD), `<changefreq>` (e.g. weekly, monthly, yearly), `<priority>` (0.0–1.0). Static pages and dynamic entries (e.g. blog, products) come from app config, CMS, or backend; ensure each has lastmod (e.g. file mtime or updated_at), priority, and changefreq.
-- When adding a **new public page**: register it in the place the app uses to build the sitemap (config, DB, CMS); ensure the page uses the public head (canonical, title, description, index,follow); add or update a test that the sitemap body contains the new URL in `<loc>`.
-- Priority guidance: homepage often `1.0`; main sections about `0.8`–`0.9`; blog/articles about `0.8`–`0.9`; legal/low‑priority about `0.3`. changefreq: often updated `weekly`, else `monthly`, legal `yearly`.
+**Output contract:** For each SEO change, produce a structured report containing:
 
-**Meta and layout**
-- **Public pages:** Head must include: `<meta name="robots" content="index, follow" ...>`, canonical URL, `<link rel="sitemap" ... href="<sitemap URL>">`, OG tags (og:title, og:description, og:url, og:type, og:image). Title and meta description must exist (from i18n, CMS, or config per route/page).
-- **Private (auth/app) pages:** Head must include: `<meta name="robots" content="noindex, nofollow">`. No sitemap link.
-- New public route/page: use the public layout and ensure title and meta description are defined for that page.
-
-**After SEO changes**
-- All new or modified production code must follow @skills/class-refactoring/SKILL.md.
-- If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
-- Run existing tests that hit robots, sitemap, or assert head meta. Fix any failing assertions.
-
-**Checklist — new public page**
-- Page/route added; uses public (guest) layout and head with index,follow, canonical, sitemap link, title, description.
-- Entry added to sitemap source (config, CMS, or backend that generates sitemap).
-- Test added or updated so sitemap response contains the new URL in `<loc>`.
-- No new `Disallow` for this path in robots.
-
-**Checklist — new private area**
-- New `Disallow: /path` in robots (file or endpoint that serves robots.txt).
-- Test added or updated so robots response contains that `Disallow`.
-- Area uses private (app/auth) layout with noindex,nofollow.
-- Area not included in sitemap.
+| Field | Required | Description |
+|---|---|---|
+| Change type | Yes | What was changed (new public page, new private area, robots update, etc.) |
+| Route / path | Yes | The route or path affected |
+| Layout | Yes | Public (guest) or Private (app/auth) |
+| Status | Yes | Complete / incomplete / blocked |
+| Checklist | Yes | All items from the applicable checklist with pass/fail |
+| Files changed | Yes | List of files modified or created |
+| Verification result | If scripts were run | Output summary from check scripts |
+| Confidence notes | If applicable | Caveats or assumptions (e.g., could not verify live, framework-specific quirks) |
 
 **Related**
 - For GEO (generative engines), AI-search citation strategy, keyword research, and JSON-LD/content patterns beyond robots/sitemap wiring, use @skills/seo-geo/SKILL.md.

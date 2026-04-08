@@ -52,15 +52,35 @@ The skill should proceed with whatever is available and not block on perfect inp
 
 ---
 
+**Scripts:** Use the pre-built scripts in `@skills/laravel-telescope/scripts/` to gather data. Do not reinvent these queries — run the scripts directly.
+
+| Script | Purpose |
+|---|---|
+| `scripts/fetch-entry.sh <UUID>` | Fetch a single Telescope entry by UUID |
+| `scripts/fetch-family.sh <FAMILY_HASH>` | Fetch all entries sharing a family hash, with tags |
+| `scripts/fetch-recent-requests.sh <FROM> <TO>` | Fetch recent request entries within a time window |
+
+**References:**
+- `references/url-parsing-rules.md` — how to parse Telescope URLs and extract identifiers, entry types, and filters
+- `references/db-query-patterns.md` — SQL patterns and safety rules for querying Telescope tables
+- `references/correlation-criteria.md` — how to match UI records with DB records, confidence levels
+- `references/bottleneck-analysis.md` — what to look for when analyzing performance issues from Telescope data
+- `references/optimization-rules.md` — rules for proposing optimizations with required impact/risk structure, behavior constraints
+
+**Examples:** See `examples/` for expected output format:
+- `examples/report-full-analysis.md` — complete analysis with UI + DB correlation
+- `examples/report-limited-access.md` — analysis when DB access is unavailable
+- `examples/report-n-plus-one.md` — focused N+1 query detection report
+
+---
+
 ## Required workflow
 
 Follow these steps in order.
 
 ### 1. Parse the Telescope target from URL
 
-- Extract environment, host, path, query params, and request identifier from the provided URL.
-- Identify whether the URL points to requests, exceptions, queries, jobs, cache, dumps, or logs.
-- Capture all filters (time window, status code, tag, batch, family hash, etc.) because they affect record matching.
+Extract environment, host, path, query params, and request identifier per `references/url-parsing-rules.md`.
 
 ### 2. Read the same request in Telescope UI data
 
@@ -72,143 +92,39 @@ Follow these steps in order.
 
 Prefer DB-backed verification over UI-only conclusions.
 
-Use Telescope tables and relationships, typically:
+Use `scripts/fetch-entry.sh <UUID>` to retrieve the entry. For related entries, use `scripts/fetch-family.sh <FAMILY_HASH>`. For time-based searches, use `scripts/fetch-recent-requests.sh <FROM> <TO>`.
 
-- `telescope_entries`
-- `telescope_entries_tags`
-- `telescope_monitoring` (if used)
-
-Suggested SQL patterns (adapt per storage):
-
-```sql
-SELECT uuid, type, family_hash, content, created_at
-FROM telescope_entries
-WHERE uuid = :uuid
-LIMIT 1;
-```
-
-```sql
-SELECT te.uuid, te.type, te.created_at, tet.tag
-FROM telescope_entries te
-LEFT JOIN telescope_entries_tags tet ON tet.entry_uuid = te.uuid
-WHERE te.family_hash = :family_hash
-ORDER BY te.created_at DESC
-LIMIT 200;
-```
-
-```sql
-SELECT uuid, type, content, created_at
-FROM telescope_entries
-WHERE type = 'request'
-  AND created_at BETWEEN :from AND :to
-ORDER BY created_at DESC
-LIMIT 100;
-```
-
-Notes:
-
-- Use bound parameters; never concatenate raw user input.
-- Avoid broad unbounded scans on large Telescope tables.
-- If JSON fields are large, select only required columns.
+For query safety rules and additional SQL patterns, see `references/db-query-patterns.md`.
 
 ### 4. Correlate UI and DB records
 
-Confirm that the DB row is the same request shown in UI by matching:
-
-- `uuid`
-- timestamp proximity
-- method + URI
-- status code
-- tags / family hash
-- related child entries (query, cache, job, exception)
-
-If correlation is ambiguous, explicitly state what is missing.
+Confirm that the DB row is the same request shown in UI per `references/correlation-criteria.md`. If correlation is ambiguous, explicitly state what is missing.
 
 ### 5. Analyze bottlenecks from evidence
 
-Evaluate observed data and highlight concrete problems, for example:
-
-- N+1 query behavior
-- slow SQL with missing or poor index usage
-- repeated cache misses / no cache strategy
-- excessive synchronous work in request cycle
-- heavy serialization or payload size issues
-- noisy logging causing overhead
-- repeated failing jobs/events chained to the same request
+Evaluate observed data per `references/bottleneck-analysis.md`. Highlight concrete problems with supporting evidence from Telescope data.
 
 ### 6. Propose optimizations with impact and risk
 
-For every recommendation include:
-
-- what to change
-- why it helps
-- expected impact (latency, DB load, memory, throughput)
-- implementation risk or side effects
-- verification plan (how to measure after change)
-
-Keep suggestions scoped to observed telemetry, not hypothetical architecture rewrites.
+For every recommendation, follow the structure defined in `references/optimization-rules.md`. Keep suggestions scoped to observed telemetry, not hypothetical architecture rewrites.
 
 ---
 
-## Output format
+## Output contract
 
-Use this structure:
+For each analyzed request, produce a structured report containing:
 
-```md
-## Laravel Telescope Analysis Report
-
-### Input
-- Telescope URL: ...
-- Scope / filters: ...
-
-### Matched request (UI)
-- UUID: ...
-- Method + URI: ...
-- Status: ...
-- Duration / memory: ...
-- Timestamp: ...
-
-### Matched request (DB)
-- Table path used: ...
-- Key match criteria: ...
-- Query summary: ...
-- Confidence of match: High | Medium | Low
-
-### Findings
-1. ...
-2. ...
-
-### Recommended optimizations
-1. Change: ...
-   - Why: ...
-   - Expected impact: ...
-   - Risk: ...
-   - Verification: ...
-
-### SQL / index notes (if relevant)
-- ...
-
-### Limitations
-- ...
-```
-
----
-
-## Behavior rules
-
-The skill must:
-
-- prefer evidence from Telescope data over assumptions
-- match UI request with DB request whenever possible
-- clearly separate confirmed findings from hypotheses
-- avoid recommending changes without measurable validation
-- keep output concise and implementation-oriented
-
-The skill must not:
-
-- invent UUIDs, timings, or DB rows
-- claim DB correlation without explicit match criteria
-- suggest destructive DB operations without justification
+| Field | Required | Description |
+|---|---|---|
+| Telescope URL | Yes | The analyzed URL or entry identifier |
+| Scope / filters | Yes | Active filters affecting the analysis |
+| Matched request (UI) | Yes | UUID, method + URI, status, duration/memory, timestamp |
+| Matched request (DB) | If DB available | Table path, match criteria, query summary, confidence |
+| Findings | Yes | Numbered list of concrete issues with evidence |
+| Recommended optimizations | Yes | Each with: what, why, impact, risk, verification |
+| SQL / index notes | If relevant | Index recommendations or query observations |
+| Limitations | Yes | What was unavailable or uncertain |
+| Confidence notes | If applicable | Caveats or assumptions affecting the analysis |
 
 ---
 

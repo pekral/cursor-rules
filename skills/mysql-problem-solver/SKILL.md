@@ -63,6 +63,32 @@ The skill should not block on perfect input. It should inspect whatever is avail
 
 ---
 
+**Scripts:** Use the pre-built scripts in `@skills/mysql-problem-solver/scripts/` to gather data. Do not reinvent these queries — run the scripts directly.
+
+| Script | Purpose |
+|---|---|
+| `scripts/discover-db-credentials.sh` | Find DB credentials from .env, docker-compose, and config files |
+| `scripts/show-table-info.sh <table>` | Show table structure, columns, and indexes |
+| `scripts/run-explain.sh "<query>" [format]` | Run EXPLAIN on a query (format: traditional or json) |
+
+---
+
+**References:**
+- `references/investigation-workflow.md` — the 8-step investigation workflow from query identification to final report
+- `references/common-mysql-problems.md` — checklist of common MySQL performance issues to detect
+- `references/index-advice-rules.md` — rules for realistic, safe index recommendations
+- `references/laravel-guidance.md` — Laravel-specific inspection points and common pitfalls
+- `references/terminal-connection.md` — how to discover credentials and connect to MySQL
+
+---
+
+**Examples:** See `examples/` for expected output format:
+- `examples/report-full-analysis.md` — complete analysis with DB access and EXPLAIN
+- `examples/report-no-db-access.md` — static analysis without database access
+- `examples/report-laravel-n-plus-one.md` — Laravel N+1 detection and fix
+
+---
+
 ## Core goals
 
 The skill must try to achieve these goals in order:
@@ -80,192 +106,15 @@ The skill must try to achieve these goals in order:
 
 ---
 
-## Required investigation workflow
+## Steps
 
-Follow this workflow in order. Do not jump straight to adding indexes without inspection.
-
-### 1. Identify the actual query
-
-First determine exactly what query is being executed.
-
-Look for:
-
-- raw SQL strings
-- Eloquent chains
-- query builder chains
-- relationship loading
-- subqueries
-- scopes
-- dynamic filters
-- `orderBy`, `groupBy`, `distinct`, `having`, `limit`, and pagination patterns
-
-If the input is Laravel code, reconstruct the effective SQL as faithfully as possible.
-
-### 2. Inspect table structure
-
-If terminal or DB access is available, inspect the relevant tables before proposing changes.
-
-Prefer commands such as:
-
-```bash
-SHOW CREATE TABLE table_name;
-DESCRIBE table_name;
-SHOW INDEX FROM table_name;
-```
-
-If the codebase contains migrations, read them too, because the schema in code may reveal intent or upcoming changes.
-
-### 3. Use EXPLAIN through terminal tools
-
-If MySQL access is available, run `EXPLAIN` on the real query. Use terminal tools whenever possible.
-
-Examples:
-
-```bash
-mysql -e "EXPLAIN SELECT ..."
-mysql -e "EXPLAIN FORMAT=TRADITIONAL SELECT ..."
-mysql -e "EXPLAIN FORMAT=JSON SELECT ..."
-```
-
-If the environment supports it and the query is a `SELECT`, prefer richer output when useful.
-
-The skill should inspect at least these parts of `EXPLAIN` output:
-
-- table
-- type
-- possible_keys
-- key
-- key_len
-- rows
-- filtered
-- Extra
-
-Treat these as diagnostic signals, not absolute truth.
-
-### 4. Evaluate index usage
-
-Check whether the query actually benefits from existing indexes.
-
-Review especially:
-
-- filter columns in `WHERE`
-- join keys
-- columns used in `ORDER BY`
-- columns used in `GROUP BY`
-- composite filter patterns
-- covering index opportunities
-- leftmost prefix behavior in composite indexes
-
-The skill must distinguish between:
-
-- no index exists
-- index exists but is not chosen
-- index exists but only partially helps
-- query shape prevents efficient index usage
-
-### 5. Detect common MySQL problems
-
-The skill should actively look for these issues:
-
-- full table scans on large tables
-- joins without effective indexes
-- filtering on low-selectivity columns without a better composite index
-- functions on indexed columns that make indexes unusable
-- leading wildcard searches like `LIKE '%term%'`
-- sorting without supporting indexes
-- offset pagination on large datasets
-- `OR` conditions that degrade index usage
-- `SELECT *` on wide tables when fewer columns are needed
-- redundant or overlapping indexes
-- missing foreign key side indexes
-- N+1 patterns caused by application code
-- unbounded scans caused by missing limits or weak predicates
-
-### 6. Propose safe optimizations
-
-Only after inspection should the skill propose improvements.
-
-Possible outputs include:
-
-- SQL rewrite
-- query builder rewrite
-- eager loading change
-- pagination strategy change
-- index addition
-- composite index replacement
-- redundant index removal
-- splitting one query into two smaller ones
-- precomputation or denormalization suggestions when justified
-
-Every recommendation should include a reason.
-
-### 7. Prefer realistic index advice
-
-When suggesting indexes, follow these rules:
-
-- do not propose indexes blindly
-- avoid duplicate or near-duplicate indexes without justification
-- prefer composite indexes that match real filter and sort patterns
-- mention leftmost prefix implications
-- warn about insert/update overhead
-- mention when a proposed index helps reads but hurts writes
-- avoid recommending every filtered column as a standalone index
-
-### 8. Produce a final report
-
-End with a practical report that includes:
-
-- analyzed query or code path
-- relevant tables
-- existing indexes found
-- `EXPLAIN` summary if executed
-- detected issues
-- recommended actions
-- optional migration snippet if a new index is justified
-- confidence level and limitations
-
----
-
-## Output format
-
-Use this response structure:
-
-```md
-## MySQL Analysis Report
-
-### Query under review
-...
-
-### Tables inspected
-...
-
-### Existing indexes
-...
-
-### EXPLAIN summary
-...
-
-### Problems found
-- ...
-
-### Recommended optimizations
-1. ...
-2. ...
-
-### Suggested SQL or code rewrite
-...
-
-### Suggested index changes
-...
-
-### Risks and trade-offs
-...
-
-### Confidence / limitations
-...
-```
-
-If terminal access or DB credentials are unavailable, explicitly say that `EXPLAIN` and live schema verification could not be performed.
+1. Discover DB credentials using `scripts/discover-db-credentials.sh` if terminal access is available.
+2. Follow the investigation workflow in `references/investigation-workflow.md` step by step.
+3. Check for common problems per `references/common-mysql-problems.md`.
+4. Apply index advice rules per `references/index-advice-rules.md` when suggesting changes.
+5. If the input is Laravel code, also apply `references/laravel-guidance.md`.
+6. Use `scripts/show-table-info.sh` and `scripts/run-explain.sh` for live inspection when DB access is available.
+7. Produce the final report following the output contract below.
 
 ---
 
@@ -287,69 +136,24 @@ The skill must behave according to these rules:
 
 ---
 
-## Terminal guidance
+## Output contract
 
-When terminal access is available, the skill should try to discover how to connect safely to MySQL by checking:
+For each analyzed query or code path, produce a structured report containing:
 
-- `.env`
-- `config/database.php`
-- docker compose files
-- local dev scripts
-- CI or docs mentioning DB access
+| Field | Required | Description |
+|---|---|---|
+| Query under review | Yes | The SQL query or code path being analyzed |
+| Tables inspected | Yes | List of tables reviewed with row counts if known |
+| Existing indexes | Yes | Indexes found on relevant tables |
+| EXPLAIN summary | If DB access available | Key columns from EXPLAIN output |
+| Problems found | Yes | List of detected issues |
+| Recommended optimizations | Yes | Numbered list with reasons |
+| Suggested SQL or code rewrite | If applicable | Improved query or code |
+| Suggested index changes | If applicable | DDL or migration snippet |
+| Risks and trade-offs | Yes | Write overhead, caveats |
+| Confidence / limitations | Yes | High/medium/low with explanation of what was or was not verified |
 
-Possible command patterns:
-
-```bash
-cat .env | grep DB_
-php artisan env
-php artisan tinker
-mysql --version
-mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" -e "SHOW TABLES;"
-mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" -e "SHOW CREATE TABLE users\G"
-mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" -e "EXPLAIN SELECT ..."
-```
-
-If credentials are unavailable or access fails, continue with static analysis and state that runtime verification could not be completed.
-
----
-
-## Laravel-specific guidance
-
-When the input is Laravel code, also inspect:
-
-- eager loading opportunities via `with()`
-- `whereHas()` and nested relationship filters
-- `withCount()` usage
-- `chunk()` vs `cursor()` vs pagination
-- scopes that hide query complexity
-- repeated query patterns in loops
-- casts or accessors that trigger hidden queries
-- whether a repository or service builds inefficient dynamic filters
-
-If useful, the skill may provide both:
-
-- a rewritten SQL query
-- an improved Eloquent or query builder version
-
----
-
-## Example prompts
-
-```text
-@skills/mysql-problem-solver analyze this query and check whether indexes are used effectively
-```
-
-```text
-@skills/mysql-problem-solver inspect OrderRepository and use EXPLAIN if terminal access is available
-```
-
-```text
-@skills/mysql-problem-solver review this slow MySQL query, inspect table structure, and propose safe index changes
-```
-
-```text
-@skills/mysql-problem-solver analyze the Laravel query in this service, reconstruct the SQL, inspect indexes, and optimize it
-```
+If terminal access or DB credentials are unavailable, explicitly say that `EXPLAIN` and live schema verification could not be performed.
 
 ---
 

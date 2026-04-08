@@ -28,54 +28,59 @@ metadata:
   - `Create/use Action in app/Actions/<Domain>/<ActionName>.php and wire entry point to delegate.`
   - `Respect project.mdc Action architecture rules.`
 
-**Mandatory Action pattern requirements:**
-- **All business logic is allowed only in classes that follow the action pattern!**
-- Mandatory flow: `Controller/Job/Command/Listener/Livewire Component -> Action -> ModelService -> Repository (read) / ModelManager (write)`.
-- New Action must be placed under `app/Actions/**` in a domain-specific subfolder.
-- Action class must be `final readonly`.
-- Action must expose exactly one public business entry point: `__invoke(...)` with explicit return type.
-- Action must stay clean and simple: minimal orchestration surface, no duplicated branches, no dead paths.
-- Action should be as optimized as possible for readability and runtime (avoid redundant mapping, calls, or temporary structures).
-- No direct Eloquent queries and no `DB::` calls inside the Action.
-- Action orchestrates only: data validator invocation, mapping, and delegation; heavy shared logic belongs to Services.
-- **Single-use Service/Facade method rule (Action pattern):** If the Action calls a Service or Facade method that is used only once in the entire codebase, move the business logic from that Service/Facade method directly into the Action and remove the original Service/Facade method.
-- **BaseModelService pattern:** When delegating to Services, ensure model-oriented services extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()` (see `vendor/pekral/arch-app-services/examples/Services/User/UserModelService.php`). Services that do not primarily serve a single model must be refactored into Action pattern classes instead.
-- **Actions must not contain inline validation logic**: do not throw `ValidationException` directly or call `Validator::make()` inside Actions. Extract all validation into a dedicated Data Validator class under `app/DataValidators/{Domain}/`.
-- Data Validators are `final readonly` classes with constructor DI and a single `validate()` method that throws `ValidationException` on failure.
-- Actions call the Data Validator before proceeding with business orchestration.
-- Entry point method must become thin and only delegate to Action using direct invocation syntax `$action($params)`.
-- **Livewire components** are entry points: component action methods (e.g. `save()`, `submit()`, `delete()`) must delegate to Action classes. The component class lives in `app/Livewire/` with a separate Blade view in `resources/views/livewire/`. Single-file (Volt) components are forbidden.
-- **Invokeable call convention:** Always use `$action($params)` to call Actions — never use `$action->__invoke($params)`. PHP natively routes the call to `__invoke()`, making the explicit form redundant.
-- Add or update PHPDoc where needed so PHPStan can infer intent/types without ambiguity (especially DTO shapes, iterable generics, and non-obvious contracts).
+**Scripts:** Use the pre-built scripts in `@skills/refactor-entry-point-to-action/scripts/` for recurring operations. Do not reinvent these commands -- run the scripts directly.
+
+| Script | Purpose |
+|---|---|
+| `scripts/run-quality-checks.sh` | Run lint, static analysis, and code style checks on changed PHP files |
+| `scripts/run-tests.sh` | Run targeted or full test suite |
+| `scripts/run-migrations.sh` | Run pending database migrations |
+
+**References:**
+- `references/action-pattern-rules.md` -- Action class constraints, single-use rule, BaseModelService pattern, invocation convention, PHPDoc requirements
+- `references/data-validator-rules.md` -- Data Validator placement, class constraints, prohibited patterns in Actions
+- `references/entry-point-conventions.md` -- what counts as an entry point, thin entry point rule, Livewire rules, backward compatibility
+- `references/definition-of-done.md` -- completion criteria checklist, post-refactor verification steps
+
+**Examples:** See `examples/` for expected output format:
+- `examples/report-successful-refactor.md` -- clean refactor with no review findings
+- `examples/report-refactor-with-review-findings.md` -- refactor that required fixes after internal review
 
 **Steps:**
 1. Analyze current implementation of the target entry point method and identify orchestration steps.
-2. Create a dedicated Action (one use case = one Action) in the correct domain folder under `app/Actions/**`.
-3. Move orchestration from controller method into Action `__invoke(...)`.
+2. Create a dedicated Action (one use case = one Action) in the correct domain folder under `app/Actions/**` per `references/action-pattern-rules.md`.
+3. Move orchestration from entry point method into Action `__invoke(...)`.
 4. Keep reads in Repository and writes in ModelManager; if missing, introduce or reuse proper layer classes.
-5. Update controller method to dependency-inject and call the Action using direct invocation syntax `$action($params)` (never `$action->__invoke($params)`).
-6. Keep account/multitenancy scope intact in all delegated calls.
-7. Ensure method signatures and returned response format stay backward compatible.
-8. Add or update PHPDoc to satisfy static analysis quality for touched PHP code.
-9. Run an internal architecture-first code review of the generated changes (no third-party reporting in this iteration).
-10. If the review finds critical or medium issues, fix them immediately and repeat the review until no such findings remain.
-11. If PHP files changed, run required project checks/fixers and resolve all issues.
-12. If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
-13. Add or update tests to fully cover touched logic and preserve behavior.
+5. Extract any validation logic into a Data Validator per `references/data-validator-rules.md`.
+6. Update entry point method to dependency-inject and call the Action per `references/entry-point-conventions.md`.
+7. Keep account/multitenancy scope intact in all delegated calls.
+8. Ensure method signatures and returned response format stay backward compatible.
+9. Add or update PHPDoc to satisfy static analysis quality for touched PHP code.
+10. Run an internal architecture-first code review of the generated changes (no third-party reporting in this iteration).
+11. If the review finds critical or medium issues, fix them immediately and repeat the review until no such findings remain.
+12. If PHP files changed, run `scripts/run-quality-checks.sh` and resolve all issues.
+13. If new database migrations were created during the changes, run `scripts/run-migrations.sh` before running tests or creating a PR.
+14. Add or update tests to fully cover touched logic and preserve behavior. Run `scripts/run-tests.sh` to verify.
 
 **Do not:**
-- Do not place validation logic (throwing `ValidationException`, calling `Validator::make()`) directly in Action classes — use Data Validators.
+- Do not place validation logic (throwing `ValidationException`, calling `Validator::make()`) directly in Action classes -- use Data Validators.
 - Do not keep business branching/orchestration in the controller method.
 - Do not place Action classes outside `app/Actions/**`.
 - Do not create multiple public business methods in an Action.
 - Do not bypass Repository/ModelManager boundaries.
 - Do not change unrelated behavior while refactoring.
 
-**Definition of done:**
-- Target entry point method is thin and delegates to a dedicated Action.
-- Action respects all project Action-pattern constraints.
-- Internal architecture-focused review was executed and all critical/medium findings were fixed before completion.
-- Action implementation is clean, simple, and optimized without changing behavior.
-- Required PHPDoc for PHPStan is present on touched PHP code where needed.
-- Tests cover the refactored flow (including failure/edge paths where applicable).
-- Required project quality checks pass for changed files.
+**Output contract:** For each refactored entry point, produce a structured report containing:
+
+| Field | Required | Description |
+|---|---|---|
+| Entry point | Yes | Class and method that was refactored |
+| Action created | Yes | Full path of the new or updated Action class |
+| Data Validator | If applicable | Full path of the Data Validator class |
+| Decision | Yes | `refactor complete` or `refactor blocked` |
+| Review findings | Yes | Count of critical/medium findings and whether they were fixed |
+| Quality checks | Yes | All passed / issues found |
+| Changes summary | Yes | Brief list of what was moved, created, or inlined |
+| Tests | Yes | List of test files created or updated |
+| Confidence notes | If applicable | Caveats or assumptions (e.g., untestable path, scope limitation) |
+| Next action | Yes | What should happen next |

@@ -19,103 +19,41 @@ metadata:
 - Do not implement any code — this skill only creates issues.
 - Each created issue must be assigned to the current user.
 
+**Scripts:** Use the pre-built scripts in `@skills/create-issues-from-text/scripts/` to interact with the issue tracker. Do not reinvent these commands — run the scripts directly.
+
+| Script | Purpose |
+|---|---|
+| `scripts/get-current-user.sh` | Get the currently authenticated user login |
+| `scripts/create-issue.sh <title> <body> [labels...]` | Create a single issue and assign it to the current user |
+| `scripts/comment-on-issue.sh <issue> <body>` | Post a comment on an existing issue |
+
+**References:**
+- `references/issue-structure-template.md` — full issue body template with section guidelines
+- `references/step-decomposition-guidelines.md` — rules for splitting assignments into steps, granularity checklist, ordering rules
+- `references/title-generation-rules.md` — title pattern, examples, and anti-patterns
+- `references/post-creation-checklist.md` — required and conditional steps after issue creation
+
+**Examples:** See `examples/` for expected output formats:
+- `examples/proposed-breakdown.md` — proposed breakdown presented before confirmation
+- `examples/issue-single-step.md` — a single created issue with all sections filled
+- `examples/breakdown-summary.md` — final summary table after all issues are created
+
 **Steps:**
-- Read and fully understand the provided assignment text.
-- Analyze the assignment and break it down into logical, sequential implementation steps. Each step should represent a single deliverable unit of work (one feature, one integration, one migration, etc.).
-- For each step, prepare a complete issue draft structured as described in the **Issue Structure** section below.
-- Before creating issues, present the proposed breakdown (step titles and brief summaries) to the user for confirmation. Wait for approval before proceeding.
-- After confirmation, create all issues in the configured issue tracker using installed CLI tools (`gh`, `acli`, or equivalent).
-- If the assignment references an existing issue or PR, link each created issue back to the source.
-- After all issues are created, return a numbered list of created issues with direct URLs.
+1. Read and fully understand the provided assignment text.
+2. Analyze the assignment and break it down into logical, sequential implementation steps per `references/step-decomposition-guidelines.md`. Each step should represent a single deliverable unit of work (one feature, one integration, one migration, etc.).
+3. For each step, prepare a complete issue draft structured per `references/issue-structure-template.md`. Generate titles per `references/title-generation-rules.md`.
+4. Before creating issues, present the proposed breakdown (step titles and brief summaries) to the user for confirmation. Wait for approval before proceeding.
+5. After confirmation, run `scripts/get-current-user.sh` to identify the assignee, then create all issues using `scripts/create-issue.sh`.
+6. If the assignment references an existing issue or PR, link each created issue back to the source.
+7. After all issues are created, complete all steps in `references/post-creation-checklist.md` — including the summary table and optional comment on the source issue using `scripts/comment-on-issue.sh`.
 
-------------------------------------------------------------------------
+**Output contract:** After execution, produce a structured report containing:
 
-## Issue Structure
-
-Each issue must follow this template:
-
-```markdown
-## Goal
-
-<Clear, concise summary of what this step achieves — written for product managers
-and non-technical stakeholders. Focus on the business value and user impact.>
-
-## Original Assignment (context)
-
-<Reference to the original assignment or a relevant excerpt that explains why
-this step exists. Keep it brief — link to the parent issue when possible.>
-
-## Technical Solution
-
-<Detailed technical approach for developers and AI agents:>
-- Architecture decisions and patterns to follow
-- Key files, classes, or modules to create/modify
-- Integration points and dependencies on other steps
-- Edge cases and constraints to consider
-
-## Acceptance Criteria
-
-- [ ] <Specific, measurable criterion 1>
-- [ ] <Specific, measurable criterion 2>
-- [ ] <...>
-
-## Testing Scenarios
-
-<Concrete test cases a QA tester can execute:>
-
-### Happy Path
-- <Scenario description and expected result>
-
-### Edge Cases
-- <Scenario description and expected result>
-
-### Regression
-- <What existing functionality must remain unaffected>
-
-## Dependencies
-
-- <List any steps/issues that must be completed before this one>
-- <Or state "None" if independent>
-
-## Notes
-
-- Source: <HTTP link to the original assignment or parent issue>
-- This issue was created by the `create-issues-from-text` skill.
-```
-
-------------------------------------------------------------------------
-
-## Step Decomposition Guidelines
-
-When splitting the assignment into steps:
-
-- Each step must be independently deliverable and testable.
-- Order steps by dependency — earlier steps should not depend on later ones.
-- Group related changes together (e.g., migration + model + factory = one step).
-- Separate infrastructure/setup steps from business logic steps.
-- Separate frontend and backend work when they can be developed in parallel.
-- Keep each step small enough to be reviewed in a single PR.
-- If a step is too large, split it further.
-
-------------------------------------------------------------------------
-
-## Title Generation
-
-Issue titles must follow the pattern:
-
-`[Step N/Total] <Concise action-oriented title>`
-
-Examples:
-- `[Step 1/5] Create database migration for user preferences`
-- `[Step 2/5] Implement UserPreference model and repository`
-- `[Step 3/5] Add API endpoints for preference management`
-
-------------------------------------------------------------------------
-
-## After Creating Issues
-
-After all issues are created:
-
-1. Return a summary table with: step number, issue title, issue URL, and dependencies.
-2. If the original assignment came from an existing issue, post a comment on that issue with the breakdown summary and links to all created issues.
-3. Ensure all issues are assigned to the current user.
+| Field | Required | Description |
+|---|---|---|
+| Issues created | Yes | Count of issues created |
+| Summary table | Yes | Step number, title, URL, and dependencies for each issue |
+| Assignee | Yes | GitHub login of the user all issues are assigned to |
+| Source link | If applicable | Link to the original issue or PR that triggered the breakdown |
+| Comment posted | If applicable | Confirmation that a summary comment was posted on the source issue |
+| Confidence notes | If applicable | Caveats or assumptions (e.g., ambiguous requirements, inferred dependencies) |

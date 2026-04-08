@@ -10,23 +10,41 @@ metadata:
 - Apply @rules/base-constraints.mdc
 - Apply @rules/testing-conventions.mdc
 
-**Steps:**
-- For tests that do not use PEST syntax, I want you to rewrite them in PEST syntax.
-- Never generate the covers() method!
-- Follow the rules for writing tests.
-- Create deterministic every time!
-- Arrange-act-assert pattern, error cases first
-- Before writing tests, always analyze the abstractions that will be used in the tests and always use helper methods if it simplifies the code.
-- If there are any "shared" helper functions such as `bindSparkpostMailerNever($this->app);`, I want all these functions to be defined in the Pest.php file.
-- If the PEST test requires calling a method that is in an abstract class, use the notation `test()->methodName()`.
-- In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
-- Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases instead.
-- Correct DRY, use data providers, and try to write tests as simply as possible.
-- After creating or modifying tests, check that they are not flaky.
-- Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them.
-- Tests must have 100% coverage.
-- After writing the tests, verify that they are functional and follow the rules.
-- Check that the tests are written according to the test-writing guidelines and ensure 100% coverage; fix dry; use data providers to simplify the tests
+**References:**
+- `references/pest-syntax-rules.md` — PEST syntax conventions, arrange-act-assert pattern, mocking, shared helpers
+- `references/dry-and-data-providers.md` — DRY principles, data provider usage and refactoring
+- `references/coverage-and-quality.md` — 100% coverage requirement, flakiness checks, post-completion verification
 
-**After completing the tasks**
-- If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!
+**Examples:** See `examples/` for expected rewrite patterns:
+- `examples/rewrite-before-after.md` — PHPUnit to PEST conversion
+- `examples/data-provider-usage.md` — collapsing repetitive tests into data providers
+- `examples/shared-helpers.md` — extracting shared helpers into Pest.php
+
+**Steps:**
+1. Analyze the existing test file and the code under test. Identify abstractions, shared setup, and helper methods that can simplify the rewrite.
+2. Rewrite all tests into PEST syntax per `references/pest-syntax-rules.md`:
+   - Use arrange-act-assert pattern with error cases first.
+   - Use `test()->methodName()` for abstract class methods.
+   - Move shared helper functions to `Pest.php`.
+   - Never generate the `covers()` method.
+   - Avoid reflection; use mocks (including partial mocks) instead.
+   - Tests must not contain conditions (`if`, `switch`); split into separate test cases.
+3. Apply DRY principles per `references/dry-and-data-providers.md`:
+   - Use data providers to simplify repetitive test cases.
+   - Analyze all similar tests and refactor where possible.
+4. Verify quality per `references/coverage-and-quality.md`:
+   - Ensure 100% coverage of the code under test.
+   - Confirm tests are not flaky and all pass.
+   - Validate tests follow project test-writing guidelines.
+5. If according to `@skills/test-like-human/SKILL.md` the changes can be tested, run those tests.
+
+**Output contract:** After completing the rewrite, produce a structured report:
+
+| Field | Required | Description |
+|---|---|---|
+| Files rewritten | Yes | List of test files converted to PEST syntax |
+| Helpers extracted | If any | Shared functions moved to `Pest.php` |
+| Data providers added | If any | Test cases collapsed into data providers |
+| Coverage status | Yes | Confirmed 100% or gaps identified |
+| Tests passing | Yes | All green / failures listed |
+| Confidence notes | If applicable | Caveats (e.g., partial mock trade-offs, untestable paths) |

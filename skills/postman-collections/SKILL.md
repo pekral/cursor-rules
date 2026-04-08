@@ -17,37 +17,54 @@ metadata:
 - The AI modifies existing API endpoint path, method, headers, query params, body schema, or response examples.
 - The user asks to prepare or update Postman collections for current API changes.
 
+**Scripts:** Use the pre-built scripts in `@skills/postman-collections/scripts/` to gather data. Do not reinvent these queries — run the scripts directly.
+
+| Script | Purpose |
+|---|---|
+| `scripts/find-postman-files.sh` | Locate existing Postman collection and environment files in the repo |
+| `scripts/detect-changed-endpoints.sh [base]` | Detect changed routes, controllers, and schemas from branch diff |
+| `scripts/validate-collection.sh <file>` | Validate collection JSON format, structure, and check for hard-coded secrets |
+
+**References:**
+- `references/endpoint-detection.md` — sources for detecting changed endpoints, building the change list
+- `references/collection-structure.md` — file locations, folder organization, variables, environment files, JSON format
+- `references/request-completeness.md` — required fields per endpoint, security rules, test assertion handling
+- `references/quality-checklist.md` — full pre-finalization checklist for completeness, security, structure, validity
+
+**Examples:** See `examples/` for expected output format:
+- `examples/report-collection-updated.md` — existing collection updated with added/changed/removed endpoints
+- `examples/report-new-collection.md` — new collection created from scratch
+- `examples/report-validation-failed.md` — blocked by validation errors
+
 **Steps:**
-- Detect changed endpoints from current branch diff and route/schema sources (Laravel routes, OpenAPI, API docs, controller + request classes).
-- Build a change list grouped by resource (for example Users, Orders, Auth).
-- Locate existing Postman assets in the repository (`postman/`, `docs/postman/`, `*.postman_collection.json`, `*.postman_environment.json`).
-- If a collection exists, update it in place; if it does not exist, create a new collection in the project convention.
-- For each changed endpoint, ensure:
-  - method and path are correct,
-  - path/query variables are explicit,
-  - auth type is configured (Bearer/API key/etc.) via variables,
-  - required headers are included,
-  - request body example matches current validation/schema,
-  - at least one realistic response example is present.
-- Keep endpoint naming stable and human-readable (`[Resource] Action` style), avoid duplicates.
-- Organize folders by domain/module, not by HTTP method.
-- Add collection-level variables and environment placeholders:
-  - `baseUrl`
-  - `token` (or equivalent auth variable)
-  - any required tenant/workspace/account identifiers
-- If tests already exist inside collection requests, update assertions only where endpoint behavior changed.
-- Validate generated JSON format (no trailing commas, valid Postman v2.1 schema shape).
-- Verify collection importability and runnability using available tooling (CLI or local import check).
-- Summarize what was added/changed/removed in the collection and list any TODOs for missing backend behavior.
+1. Run `scripts/find-postman-files.sh` to locate existing Postman assets in the repository.
+2. Run `scripts/detect-changed-endpoints.sh` to detect changed endpoints from the current branch diff.
+3. Build a change list grouped by resource (e.g., Users, Orders, Auth) per `references/endpoint-detection.md`.
+4. If a collection exists, update it in place; if none exists, create a new collection following the project convention per `references/collection-structure.md`.
+5. For each changed endpoint, ensure request completeness per `references/request-completeness.md`:
+   - method and path are correct,
+   - path/query variables are explicit,
+   - auth type is configured (Bearer/API key/etc.) via variables,
+   - required headers are included,
+   - request body example matches current validation/schema,
+   - at least one realistic response example is present.
+6. Keep endpoint naming stable and human-readable (`[Resource] Action` style), organize folders by domain/module per `references/collection-structure.md`.
+7. Add collection-level variables and environment placeholders (`baseUrl`, `token`, tenant identifiers) per `references/collection-structure.md`.
+8. If tests already exist inside collection requests, update assertions only where endpoint behavior changed.
+9. Run `scripts/validate-collection.sh <file>` to validate JSON format and check for hard-coded secrets.
+10. Run through `references/quality-checklist.md` before finalizing.
+11. Summarize what was added/changed/removed and list any TODOs for missing backend behavior.
 
-**Quality checklist:**
-- No stale endpoints remain for removed routes.
-- No duplicated requests for the same method + path unless intentionally versioned.
-- All protected routes use variables for credentials.
-- Request examples reflect actual DTO/FormRequest validation rules.
-- Collection works with a clean environment file containing placeholders only.
+**Output contract:** For each collection sync, produce a structured report containing:
 
-**Output expectations:**
-- Updated or newly created Postman collection file(s).
-- Updated environment file(s) if needed.
-- Short changelog of endpoints synchronized with code changes.
+| Field | Required | Description |
+|---|---|---|
+| Collection file | Yes | Path to the collection file (new or updated) |
+| Environment file | Yes | Path to the environment file (new, updated, or unchanged) |
+| Endpoints synced | Yes | Count of added, updated, and removed endpoints |
+| Changes | Yes | List of added, updated, and removed endpoints with method and path |
+| Environment variables added | If applicable | New variables introduced by endpoint changes |
+| Quality checklist | Yes | Pass/fail status of each checklist item |
+| Validation errors | If blocked | JSON errors, hard-coded secrets, stale endpoints |
+| TODOs | If applicable | Missing backend behavior or undocumented responses |
+| Confidence notes | If applicable | Caveats or assumptions (e.g., assumed response shape, undocumented route) |

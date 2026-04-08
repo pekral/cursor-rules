@@ -15,33 +15,42 @@ metadata:
 - The summary must be understandable by both developers and product managers.
 - Do not include code snippets unless they are essential to explain a breaking change.
 
+**Scripts:** Use the pre-built scripts in `@skills/pr-summary/scripts/` to gather data. Do not reinvent these queries — run the scripts directly.
+
+| Script | Purpose |
+|---|---|
+| `scripts/branch-commits.sh [base]` | List all commits since branch diverged from base |
+| `scripts/branch-diff.sh [base]` | Full diff of branch against base |
+| `scripts/pr-context.sh` | Load PR description and linked issues for the current branch |
+
+**References:**
+- `references/summary-guidelines.md` — tone, audience, content rules, and formatting requirements
+- `references/change-categorization.md` — standard categories and categorization rules
+- `references/context-gathering.md` — branch detection, commit analysis, PR/issue context, handling large PRs
+
+**Examples:** See `examples/` for expected output format:
+- `examples/summary-feature-branch.md` — feature branch with new functionality
+- `examples/summary-bugfix-branch.md` — bugfix with a minor breaking change
+- `examples/summary-refactoring-branch.md` — internal refactoring with no user-facing change
+
 **Steps:**
-1. Identify the current branch and its base branch (usually `master` or `main`).
-2. Load all commits in the current branch since it diverged from the base branch (`git log base..HEAD`).
-3. For each commit, read the commit message and the diff to understand what changed and why.
-4. If a PR already exists for this branch, load the PR description and linked issue(s) for additional context.
-5. Group the changes into logical categories (e.g. new features, bug fixes, refactoring, configuration, tests).
-6. Write a markdown summary following the output format below.
+1. Run `scripts/branch-commits.sh` to load all commits in the current branch since it diverged from the base branch.
+2. Run `scripts/branch-diff.sh` to load the full diff for analysis.
+3. Run `scripts/pr-context.sh` to load the PR description and linked issue(s) for additional context.
+4. For each commit, read the commit message and the diff to understand what changed and why.
+5. Group the changes into logical categories per `references/change-categorization.md`.
+6. Write a markdown summary following the output contract below, applying rules from `references/summary-guidelines.md`.
 
-**Output format:**
+**Output contract:** The summary must contain the following sections:
 
-```markdown
-## Summary of changes — [branch name]
-
-### What changed
-A concise paragraph (3-5 sentences) explaining the overall purpose of the changes and their business impact.
-
-### Changes by category
-
-#### [Category name]
-- Description of change (file or area affected)
-
-### Breaking changes
-List any breaking changes that require action from other team members (API changes, migration steps, configuration updates). If there are none, state "No breaking changes."
-
-### Testing notes
-Brief notes on what was tested or what should be verified before deployment.
-```
+| Field | Required | Description |
+|---|---|---|
+| Branch name | Yes | Identifies the branch in the heading |
+| What changed | Yes | Concise paragraph (3-5 sentences) explaining purpose and business impact |
+| Changes by category | Yes | Grouped list of changes with affected files or areas |
+| Breaking changes | Yes | List of breaking changes, or "No breaking changes." |
+| Testing notes | Yes | What was tested or should be verified before deployment |
+| Confidence notes | If applicable | Caveats or assumptions (e.g., incomplete context, unclear commit messages) |
 
 **After completing the tasks**
 - Post the summary as a comment to the related PR or issue if available.

@@ -6,54 +6,89 @@ metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
-**Constraint:**
+# SEO & GEO
+
+## Purpose
+
+Perform SEO audits, GEO (Generative Engine Optimization) analysis, and content strategy so that AI search systems **cite** your content and traditional search engines rank it well.
+
+GEO optimizes for AI citation — the primary success signal in generative search — while combining traditional SEO (crawl, index, snippets) with clear answers, structured facts, and authoritative content.
+
+---
+
+## Constraint
+
 - Apply @rules/base-constraints.mdc
 - All messages formatted as markdown for output.
-- Do not rely on bundled scripts or external example files; use project code, public URLs, and available tools (e.g. WebSearch, HTTP fetch) only.
+- Do not rely on bundled scripts or external example files beyond those in this skill; use project code, public URLs, and available tools (e.g. WebSearch, HTTP fetch) only.
 - For **implementing** `robots.txt`, `sitemap.xml`, route-level meta, canonical, and OG tags in a Laravel/PHP codebase, follow @skills/seo-fix/SKILL.md. Use this skill for **strategy, audits, GEO content patterns, and schema design** that complements that implementation work.
 
-**Steps:**
+---
 
-**Understand GEO**
-- **GEO (Generative Engine Optimization)** — optimizing so AI search systems **cite** your content; citation is the primary success signal, not classic blue-link rank alone.
-- Combine traditional SEO (crawl, index, snippets) with GEO (clear answers, citations, structured facts).
+## Scripts
 
-**Audit (technical, no custom scripts)**
-- Obtain the target URL(s). Check HTML for `<title>`, `<meta name="description">`, Open Graph tags, and `application/ld+json` (e.g. via HTTP fetch or local template output).
-- Fetch `/robots.txt` and verify important user-agents are not blocked for public content: e.g. `Googlebot`, `Bingbot`, `Perplexity-User`, `ChatGPT-User`, `GPTBot`, `ClaudeBot` / `anthropic-ai`, as required by product policy.
-- Fetch `/sitemap.xml` (or app sitemap route) and confirm important public URLs appear under `<loc>`.
-- Note page speed and mobile usability from project context or public signals when relevant.
+Use the pre-built scripts in `@skills/seo-geo/scripts/` to gather data. Do not reinvent these queries — run the scripts directly.
 
-**Keyword and competitor research**
-- Use WebSearch for difficulty, volume hints, and competitor pages (e.g. `site:competitor.com keyword`).
-- Capture long-tail variants and locale-specific ambiguity (same acronym, different industries).
+| Script | Purpose |
+|---|---|
+| `scripts/check-robots.sh <url>` | Fetch robots.txt and check AI bot access policy |
+| `scripts/check-sitemap.sh <url>` | Fetch sitemap.xml, count URLs, check robots.txt reference |
+| `scripts/check-meta-tags.sh <url>` | Extract title, meta description, OG tags, JSON-LD, canonical |
 
-**GEO content methods (Princeton-style checklist)**
-- Prioritize: **authoritative citations**, **concrete statistics**, **attributed quotations**, confident expert tone, plain-language explanations, domain terminology where appropriate, varied vocabulary, strong readability (fluency). **Avoid keyword stuffing** (hurts visibility).
-- **Strong pair:** fluency + statistics.
-- Prefer **answer-first** layout: direct answer before detail; clear `H1` > `H2` > `H3`; lists and tables for comparisons; short paragraphs.
+---
 
-**Structured data**
-- Recommend JSON-LD types that match the page: `WebPage` / `Article`, `FAQPage`, `Product`, `Organization`, `SoftwareApplication`, etc.
-- For FAQ-style GEO lift, suggest `FAQPage` with questions and answers that include citations or numbers where truthful.
-- Validate with Google Rich Results Test and Schema.org validator (share URLs; do not assume GUI automation).
+## References
 
-**Traditional on-page SEO**
-- Title: primary keyword, brand, secondary keyword where natural.
-- Meta description ~150–160 characters, compelling, aligned with query intent.
-- Align OG and Twitter Card tags with title/description and a 1200×630 image when available.
-- Checklist: primary keyword in `H1`; descriptive image `alt`; internal links; external links with `rel="noopener noreferrer"` when appropriate; public pages indexable; reasonable load time.
+- `references/audit-checklist.md` — technical audit criteria for meta tags, robots.txt, sitemap, and page signals
+- `references/geo-content-methods.md` — Princeton-style GEO checklist: citations, statistics, quotations, layout
+- `references/structured-data-guidelines.md` — JSON-LD types, FAQ schema for GEO lift, validation methods
+- `references/on-page-seo-checklist.md` — traditional on-page SEO: title, meta, OG, content structure, canonical
+- `references/platform-notes.md` — platform-specific notes for ChatGPT, Perplexity, Google, Bing/Copilot, Claude
 
-**Platform-oriented notes (high level)**
-- **ChatGPT / OpenAI:** brand and freshness matter; backlinks and clear structure support citation.
-- **Perplexity:** allow Perplexity-related crawling per `robots.txt` policy; FAQ schema and semantically tight copy help; PDFs may be cited where applicable.
-- **Google (incl. AI Overviews):** E-E-A-T, structured data, topical clusters and internal links, citations where appropriate.
-- **Bing / Copilot:** Bing index coverage; fast pages; clear entity definitions.
-- **Claude (via search partners):** factual density and clear structure aid extraction.
+---
 
-**Deliverable**
-- Produce a concise markdown report: current status (meta, schema, robots, sitemap, AI bot access), prioritized recommendations, GEO tactics applied or proposed, and validation links/tests to run in the project.
+## Examples
 
-**After completing the tasks**
+See `examples/` for expected output format:
+- `examples/report-full-audit.md` — complete SEO/GEO audit with status table, recommendations, and validation links
+- `examples/report-geo-recommendations.md` — GEO-focused content recommendations with before/after changes
+
+---
+
+## Steps
+
+1. **Obtain target URL(s)** and understand the scope (full site audit, single page, content strategy).
+2. **Run audit scripts** to gather technical data:
+   - `scripts/check-meta-tags.sh <url>` for HTML meta, OG, JSON-LD, canonical
+   - `scripts/check-robots.sh <base-url>` for robots.txt and AI bot access
+   - `scripts/check-sitemap.sh <base-url>` for sitemap coverage
+3. **Evaluate technical SEO** per `references/audit-checklist.md` and `references/on-page-seo-checklist.md`.
+4. **Perform keyword and competitor research** — use WebSearch for difficulty, volume hints, and competitor pages (e.g. `site:competitor.com keyword`). Capture long-tail variants and locale-specific ambiguity.
+5. **Assess GEO readiness** per `references/geo-content-methods.md` — check for authoritative citations, statistics, quotations, answer-first layout, and content fluency.
+6. **Evaluate structured data** per `references/structured-data-guidelines.md` — recommend JSON-LD types matching the page, suggest FAQ schema for GEO lift where applicable.
+7. **Review platform-specific requirements** per `references/platform-notes.md` — ensure bot access, content signals, and schema align with target platforms.
+8. **Produce the deliverable report** following the Output contract below.
+
+---
+
+## Output Contract
+
+For each audited URL or site, produce a structured report containing:
+
+| Field | Required | Description |
+|---|---|---|
+| Current status table | Yes | Meta tags, JSON-LD, robots.txt, sitemap, AI bot access status |
+| Prioritized recommendations | Yes | Ordered list of changes, highest impact first |
+| GEO tactics | Yes | Applied or proposed GEO content methods with specifics |
+| Structured data recommendations | If applicable | JSON-LD types to add or fix |
+| Platform-specific notes | If applicable | Relevant platform optimization notes |
+| Validation links/tests | Yes | URLs for Rich Results Test, Schema.org validator, or commands to verify |
+| Confidence notes | If applicable | Caveats, assumptions, or items requiring stakeholder input |
+| Next action | Yes | What should happen next (implementation handoff, re-audit, etc.) |
+
+---
+
+## After Completing the Tasks
+
 - If code changes to robots, sitemap, or layouts are required, hand off implementation steps to @skills/seo-fix/SKILL.md and keep tests green.
 - Summarize what was audited, what to change first, and what to validate after deploy.

@@ -17,6 +17,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - **Cancel CR if PR has conflicts!** If the PR has merge conflicts with the base branch, do not perform the code review; cancel and report that the CR was skipped due to conflicts.
 - Before writing findings, collect previous CR reports from the related PR/issue discussion and build a dedup list by problem signature (file/scope + risk + root cause). Do not repeat already reported findings unless severity or impact changed.
 - **Plan Alignment Analysis:** Compare the implementation against the original issue description, planning documents, or step description. Identify deviations from the planned approach, architecture, or requirements. Assess whether deviations are justified improvements or problematic departures. Verify that all planned functionality has been implemented — list any missing or only partially met items.
+- **Simplification analysis:** Evaluate whether the solution can be written more simply without altering the new logic, leveraging rules and conventions already defined in `rules/**/*.mdc`. Flag unnecessary complexity as a finding.
 - **Regression analysis:** For every changed file, check whether the modifications could break existing functionality that is NOT part of the ticket scope. Trace callers and dependents of changed methods/classes. If a change alters shared logic (helpers, services, traits, base classes, interfaces), verify that all consumers still behave correctly. Flag any regression risk as a finding — even if the new code is correct in isolation, breaking unrelated features is **Critical**.
 - **Security review (every CR):** Always apply @skills/security-review/SKILL.md for the current changes.
 - All changes must comply with `rules/**/*.mdc`.
@@ -113,4 +114,4 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Findings are recommendations; final decisions remain with the human reviewer.
 
 **After completing the tasks**
-- If all **Critical** and **Moderate** findings from the current CR cycle are resolved, then (and only then) run @skills/test-like-human/SKILL.md when the changes can be tested.
+- If all **Critical** and **Moderate** findings from the current CR cycle are resolved, then (and only then) run @skills/test-like-human/SKILL.md when the changes can be tested. The test-like-human skill must post its unified test report as a comment to the related issue in the issue tracker.

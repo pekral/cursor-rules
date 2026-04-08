@@ -33,6 +33,7 @@ metadata:
 - Switch locally to the branch in PR and perform code review over changes locally on the filesystem.
 - Before writing findings, collect prior review comments/reports from the PR timeline and JIRA discussion. Build a dedup list by problem signature (file/scope + root cause + risk) and skip findings already reported unless severity/impact changed.
 - **Plan Alignment Analysis:** Compare the implementation against the original issue description, planning documents, or step description. Identify deviations from the planned approach, architecture, or requirements. Assess whether deviations are justified improvements or problematic departures. Verify that all planned functionality has been implemented — list any missing or only partially met items.
+- **Simplification analysis:** Evaluate whether the solution can be written more simply without altering the new logic, leveraging rules and conventions already defined in `rules/**/*.mdc`. Flag unnecessary complexity as a finding.
 - **Regression analysis:** For every changed file, check whether the modifications could break existing functionality that is NOT part of the ticket scope. Trace callers and dependents of changed methods/classes. If a change alters shared logic (helpers, services, traits, base classes, interfaces), verify that all consumers still behave correctly. Flag any regression risk as a finding — even if the new code is correct in isolation, breaking unrelated features is **Critical**.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - Always apply @skills/code-review/SKILL.md and @skills/security-review/SKILL.md. If the changes include any database-related modifications (migrations, schema changes, repositories, raw SQL, query builder, or Eloquent/queries in changed code), also apply @skills/mysql-problem-solver/SKILL.md for those parts; otherwise do not use the SQL skill.
@@ -50,7 +51,7 @@ metadata:
 - I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. The PR comment must contain **only findings** grouped by severity (Critical → Moderate → Minor), each with file/line (or file) and a short, actionable recommendation. Do not include any summary, “what was checked”, or praise.
 - Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
 - If needed, use browser-based testing via available browser MCP tools
-- If all **Critical** and **Moderate** findings from the current CR cycle are resolved, run @skills/test-like-human/SKILL.md before closing the review flow (when the changes are testable).
+- If all **Critical** and **Moderate** findings from the current CR cycle are resolved, run @skills/test-like-human/SKILL.md before closing the review flow (when the changes are testable). The test-like-human skill must post its unified test report as a comment to the related issue in the issue tracker.
 
 **Communication protocol:**
 - Do not include praise/positive feedback; output must contain only findings.
@@ -59,5 +60,5 @@ metadata:
 - For implementation problems, provide clear guidance on fixes needed with code examples.
 
 **After completing the tasks**
-- Keep @skills/test-like-human/SKILL.md as a required final step only after **Critical** and **Moderate** findings are resolved and the changes are testable.
+- Keep @skills/test-like-human/SKILL.md as a required final step only after **Critical** and **Moderate** findings are resolved and the changes are testable. The test-like-human skill must post its unified test report as a comment to the related issue in the issue tracker.
 - Based on the discussion in the assignment, is the proposed solution to the problems safe and effective? Analyze the assignment and all discussions related to this task and write me your conclusion!

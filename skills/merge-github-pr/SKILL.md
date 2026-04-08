@@ -9,7 +9,7 @@ metadata:
 **Constraint:**
 - Apply @rules/base-constraints.mdc
 - Apply @rules/github-operations.mdc
-- Never send PRs that have conflicts
+- Never merge PRs that have conflicts
 
 **Steps:**
 - For each candidate PR, load all review comments and requested changes from code review (including unresolved/outdated discussion threads) and create a checklist of required fixes.

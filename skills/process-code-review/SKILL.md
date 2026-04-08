@@ -21,6 +21,7 @@ metadata:
 - Build a checklist from all review findings and map each item to a concrete code or test change.
 - Ensure the checklist explicitly contains all reported **DRY violations** and tracks their resolution before triggering the next CR cycle.
 - Apply the requested changes and keep scope limited to review feedback. All new or modified production code must follow @skills/class-refactoring/SKILL.md.
+- **Simplification analysis:** Evaluate whether the solution can be written more simply without altering the new logic, leveraging rules and conventions already defined in `rules/**/*.mdc`. Flag unnecessary complexity as a finding.
 - Re-check current changes with @skills/code-review/SKILL.md and @skills/security-review/SKILL.md.  
 - If review feedback requires additional tests, use @skills/create-missing-tests-in-pr/SKILL.md and ensure current changes are fully covered.
 - If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
@@ -29,7 +30,7 @@ metadata:
   - GitHub issue flow: run @skills/code-review-github/SKILL.md
   - JIRA issue flow: run @skills/code-review-jira/SKILL.md
 - Fix all Critical and Moderate findings from that review and repeat the same review skill until no Critical or Moderate findings remain.
-- After the CR loop is clean (no **Critical** or **Moderate** findings), run @skills/test-like-human/SKILL.md when the change can be tested.
+- After the CR loop is clean (no **Critical** or **Moderate** findings), run @skills/test-like-human/SKILL.md when the change can be tested. The test-like-human skill must post its unified test report as a comment to the related issue in the issue tracker.
 - Commit all changes and push the branch. If no pull request exists for the current branch, create one according to @rules/git/pr.mdc rules — link it to the original issue and follow the PR description format (title in English, body in the language of the assignment). Do not create a new PR before the CR cycle is clean.
 - Update the review result comment in the pull request:
 - mark resolved points as checked items when possible, or

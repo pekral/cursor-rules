@@ -17,3 +17,4 @@ metadata:
 - If at least one code review item is not resolved, DO NOT merge the PR. Instead, report unresolved items and stop processing that PR.
 - Only when all code review checklist items are resolved and CI is green, continue with merge preparation.
 - Go through all PRs that have successfully completed the attached CI actions and systematically merge the changes into the main branch.
+- If the CI fails on GitHub (GitHub Actions), check to see if the GitHub Actions quota has been exceeded; if so, ignore the CI actions and merge the PR

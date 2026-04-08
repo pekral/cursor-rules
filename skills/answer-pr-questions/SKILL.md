@@ -49,7 +49,7 @@ metadata:
 
 | Field | Required | Description |
 |---|---|---|
-| Section heading | Yes | "Nezodpovezene otazky a sjednocene odpovedi" |
+| Section heading | Yes | "Unanswered Questions and Unified Answers" |
 | Question number and formulation | Per question | Short clear formulation of the unanswered question |
 | Unified answer | Per question | Concise non-technical answer (2-4 sentences) |
 | Missing information note | If applicable | What is unknown and who should provide it |
@@ -60,21 +60,21 @@ metadata:
 - Use this structure so answers can be copied easily:
 
 ```markdown
-## Nezodpovezene otazky a sjednocene odpovedi
+## Unanswered Questions and Unified Answers
 
-### 1) <Kratka formulace otazky>
-**Sjednocena odpoved:** <Kratka finalni odpoved pro PM/klienta>
+### 1) <Short question formulation>
+**Unified answer:** <Short final answer for PM/client>
 
-### 2) <Kratka formulace otazky>
-**Sjednocena odpoved:** <Kratka finalni odpoved pro PM/klienta>
+### 2) <Short question formulation>
+**Unified answer:** <Short final answer for PM/client>
 ```
 
 - If there are no unanswered relevant questions, return:
 
 ```markdown
-## Nezodpovezene otazky a sjednocene odpovedi
+## Unanswered Questions and Unified Answers
 
-V aktualnim issue a souvisejicim PR nejsou zadne nezodpovezene otazky.
+There are no unanswered questions in the current issue and related PR.
 ```
 
 ## Output Humanization

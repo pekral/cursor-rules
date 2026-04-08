@@ -1,12 +1,12 @@
 # Example: Report With Unanswered Questions
 
-## Nezodpovezene otazky a sjednocene odpovedi
+## Unanswered Questions and Unified Answers
 
-### 1) Bude zmena ovlivnovat existujici uzivatele?
-**Sjednocena odpoved:** Ano, zmena se projevi vsem uzivatelum po nasazeni. Stavajici data zustanou beze zmeny, ale nove chovani se aktivuje automaticky.
+### 1) Will the change affect existing users?
+**Unified answer:** Yes, the change will apply to all users after deployment. Existing data will remain unchanged, but the new behavior will activate automatically.
 
-### 2) Kdy je planovane nasazeni teto zmeny?
-**Sjednocena odpoved:** Termin nasazeni zatim nebyl stanoven. Je potreba, aby projektovy manazer potvrdil datum po schvaleni PR.
+### 2) When is the deployment of this change planned?
+**Unified answer:** The deployment date has not been set yet. The project manager needs to confirm the date after PR approval.
 
-### 3) Je potreba aktualizovat dokumentaci pro klienta?
-**Sjednocena odpoved:** Z dostupnych informaci neni jasne, zda klientska dokumentace pokryva tuto funkcionalitu. Je potreba, aby PM overil aktualni stav dokumentace a rozhodl o nutnosti aktualizace.
+### 3) Is it necessary to update client documentation?
+**Unified answer:** Based on available information, it is unclear whether the client documentation covers this functionality. The PM should verify the current state of the documentation and decide on the need for an update.

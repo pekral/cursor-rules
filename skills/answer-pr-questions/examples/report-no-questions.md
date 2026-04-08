@@ -1,5 +1,5 @@
 # Example: No Unanswered Questions
 
-## Nezodpovezene otazky a sjednocene odpovedi
+## Unanswered Questions and Unified Answers
 
-V aktualnim issue a souvisejicim PR nejsou zadne nezodpovezene otazky.
+There are no unanswered questions in the current issue and related PR.

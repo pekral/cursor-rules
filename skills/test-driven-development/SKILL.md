@@ -143,4 +143,5 @@ Never fix bugs without a failing test first.
 - [ ] Remove generated coverage files after verification.
 
 **After completing the tasks**
+- Check that the tests are written according to the test-writing guidelines and ensure 100% coverage; fix dry; use data providers to simplify the tests
 - If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!

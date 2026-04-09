@@ -1,9 +1,11 @@
 ---
 name: analyze-problem
-description: This skill should be used when analyzing a problem, debugging unexpected behavior, identifying root causes, or breaking down complex issues before proposing or implementing solutions.
+description: Use when this skill should be used when analyzing a problem,
+  debugging unexpected behavior, identifying root causes, or breaking down
+  complex issues before proposing or implementing solutions.
 license: MIT
 metadata:
-  author: "Petr Král (pekral.cz)"
+  author: Petr Král (pekral.cz)
 ---
 
 # Analyze Problem

@@ -1,6 +1,6 @@
 ---
 name: merge-github-pr
-description: "Use when merging PRs that are ready for deployment, one by one. Evaluates CI status, review feedback, and conflicts before rebase-merging."
+description: "Use when merging PRs that are ready for deployment, one by one."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
@@ -22,37 +22,15 @@ metadata:
 | `scripts/review-threads.sh <PR>` | Inline code review comments (threads) |
 | `scripts/merge-pr.sh <PR>` | Rebase-merge the PR and delete the branch |
 
-**References:**
-- `references/merge-criteria.md` — definition of resolved feedback, approval validation, dependent PRs
-- `references/ci-failure-policy.md` — quota vs real failure, blocking rules, allowed exceptions
-- `references/review-thread-resolution.md` — extracting checklist, verifying fixes, detecting unresolved threads
-- `references/merge-decision-matrix.md` — pre-merge checklist and script execution order
-
-**Examples:** See `examples/` for expected output format:
-- `examples/report-merge-ready.md` — clean merge decision
-- `examples/report-blocked-by-review.md` — blocked by unresolved review
-- `examples/report-blocked-by-conflict.md` — blocked by merge conflict
+**References:** See `@skills/merge-github-pr/references/merge-decision-matrix.md` for the decision matrix and script execution order.
 
 **Steps:**
 1. Run `scripts/list-candidates.sh` to identify all open PRs and their readiness.
 2. For each candidate PR where CI passed and there are no conflicts:
    a. Run `scripts/pr-detail.sh <PR>` to load full context.
    b. Run `scripts/pr-reviews.sh <PR>` and `scripts/review-threads.sh <PR>` to load all review comments and requested changes (including unresolved/outdated discussion threads).
-   c. Create a checklist of required fixes from code review per `references/review-thread-resolution.md`.
-   d. Verify that every checklist item is fully resolved in the current PR diff per `references/merge-criteria.md`.
+   c. Create a checklist of required fixes from code review.
+   d. Verify that every checklist item is fully resolved in the current PR diff.
    e. If at least one item is not resolved, DO NOT merge. Report unresolved items and stop processing that PR.
 3. Only when all checklist items are resolved and CI is green, run `scripts/merge-pr.sh <PR>` to rebase-merge.
-4. If CI fails on GitHub Actions, evaluate per `references/ci-failure-policy.md` whether the failure is quota-related and may be bypassed.
-
-**Output contract:** For each evaluated PR, produce a structured report containing:
-
-| Field | Required | Description |
-|---|---|---|
-| PR number and title | Yes | Identifies the PR |
-| Decision | Yes | `merge` or `do not merge` |
-| CI status | Yes | All passed / failed / quota exceeded |
-| Conflicts | Yes | None / present |
-| Review status | Yes | Approved / changes requested / no reviews |
-| Unresolved threads | Yes | Count and list |
-| Blocking reasons | If blocked | Why the PR cannot be merged |
-| Next action | Yes | What should happen next |
+4. If CI fails on GitHub Actions, check whether the Actions quota has been exceeded; if so, the CI gate may be bypassed per the decision matrix.

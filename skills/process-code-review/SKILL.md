@@ -9,6 +9,8 @@ metadata:
 **Constraint:**
 - Apply @rules/base-constraints.mdc
 - Apply @rules/github-operations.mdc
+- Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
+- All CR output (findings, recommendations, comments) must be written in English.
 - Never push direct changes to the main branch.
 - If the pull request has merge conflicts with the base branch, stop and report that the code review processing is blocked.
 - Apply @rules/jira-operations.mdc

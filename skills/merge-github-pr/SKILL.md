@@ -55,5 +55,4 @@ metadata:
 | Review status | Yes | Approved / changes requested / no reviews |
 | Unresolved threads | Yes | Count and list |
 | Blocking reasons | If blocked | Why the PR cannot be merged |
-| Confidence notes | If applicable | Caveats or assumptions (e.g., stale approval, quota bypass) |
 | Next action | Yes | What should happen next |

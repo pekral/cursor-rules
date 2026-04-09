@@ -28,7 +28,7 @@ metadata:
 - **Race condition review (when shared state is modified):** If the changes contain any of the following signals — read-modify-write sequences, shared counters/balances/stock/quotas, `firstOrCreate`/`updateOrCreate`, retried or re-dispatched jobs that mutate shared records, cache write-back patterns, or bulk read-then-write operations — apply @skills/race-condition-review/SKILL.md. If none of these signals are present, skip this step.
 - **I/O bottleneck review (when changes touch file, storage, or external I/O):** If the changes include any of the following signals — synchronous file reads/writes on large or unbounded files, blocking HTTP calls without timeouts, storage operations executed in the request lifecycle, large file responses not streamed, or export/import operations loading all records into memory — flag each occurrence and recommend the appropriate async/streaming pattern. If none of these signals are present, skip this step.
 - Apply @rules/architecture-patterns.mdc
-- Find the Git branch and switch to it.
+- Find the Git branch, switch to it, and pull the latest changes (`git pull`) to ensure the code is up to date before reviewing.
 - If possible, find links to the assignment and analyze it so you can do a quality CR.
 - List findings using exactly three severity levels: **Critical**, **Moderate**, **Minor**.
 - Use numbered lists for findings — do not use bullet points.

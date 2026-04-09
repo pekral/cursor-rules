@@ -75,8 +75,8 @@ h4. Testing recommendations
 - Apply @rules/testing-conventions.mdc
 - If there are any automatic fixers in the project that are called through another layer, such as Phing or composer scripts, run them and ensure automatic error correction (find and load local configs for tools if exists). If there are any CI (or local) checkers, run them (never run all tests for the entire codebase, only for the current changes). Fix any errors, run the fixers again, and keep fixing until all errors are fixed. Never try to format PHP code outside of these fixers yourself.
 - Before creating a PR, run @skills/code-review-jira/SKILL.md for the current changes and treat it as mandatory CR for JIRA flow.
-- Fix all Critical and Moderate findings from that CR directly in code/tests, then run @skills/code-review-jira/SKILL.md again.
-- Repeat the CR + fix cycle until there are no Critical or Moderate findings left.
+- Fix all Critical, Moderate, and Minor findings from that CR directly in code/tests, then run @skills/code-review-jira/SKILL.md again.
+- Repeat the CR + fix cycle until there are no Critical, Moderate, or Minor findings left.
 - Only after the CR cycle is clean, automatically push the branch and create a GitHub pull request according to the pr.mdc rules. This step is mandatory; do not wait for additional confirmation.
 - If there is no link to the issue tracker, add a link to the issue tracker entry to the CR summary and, if possible, link it directly according to the issue tracker recommendations. Be sure to include an HTTP link.
 - I want you to post a comment on the core revision on GitHub, but I want you to post only critical or medium-severity issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue as ready for review.

@@ -10,6 +10,7 @@ metadata:
 - Apply @rules/base-constraints.mdc
 - Apply @rules/review-only.mdc
 - Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
+- All CR output (findings, recommendations, comments) must be written in English.
 - Be realistic and precise.
 - Never reveal secret values; only report secret categories and exposure risk.
 

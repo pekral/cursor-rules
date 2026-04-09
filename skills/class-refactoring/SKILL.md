@@ -28,6 +28,7 @@ metadata:
 - No deep nesting
 - Prefer small, focused functions.
 - English comments only.
+- **Endpoint I/O typing:** Controller actions must accept a FormRequest (or typed DTO) and return a typed response (Resource, DTO, or response class). Never pass raw `$request->all()` arrays or return ad-hoc associative arrays — the contract must be explicit.
 - Spatie DTOs (Spatie Laravel Data) instead of arrays (except Job constructors). Use PHP attributes for property mapping — never override `from()` solely to rename keys. Apply `#[MapInputName(SnakeCaseMapper::class)]` at class level for snake_case-to-camelCase input mapping, or `#[MapName(SnakeCaseMapper::class)]` when the DTO is also serialized to output. Custom named static constructors (e.g. `fromModel()`, `fromRequest()`) are allowed for domain-specific data transformation.
 - **`?array` is forbidden:** Any use of `?array` as a type hint must be replaced with a typed collection, DTO, or explicit `array<Type>|null`. Vague nullable arrays hide structure and break static analysis.
 - **PHP array key type safety:** When refactoring associative arrays with dynamic keys, apply safe key strategies: use stable prefixed keys (`'user:' . $id`, `'postal:' . $postalCode`, `'ext:' . $externalReference`); prefer a dedicated collection or value object when the key is domain-significant; prefer `list<T>` when the structure is a list, not a map; prefer explicit validation or normalization before using external values as array keys; where relevant, prefer `array<non-decimal-int-string, T>` over misleading `array<string, T>`.
@@ -45,6 +46,11 @@ metadata:
 - Split by responsibility
 - Centralize business rules
 - Business logic duplication is not allowed.
+- **Service single-responsibility:** A service must not mix business logic with cross-cutting concerns (validation, email/notification dispatch, logging, metrics). Extract cross-cutting work into middleware, events/listeners, or dedicated classes.
+- **Middleware for cross-cutting concerns:** Logging, authentication, metrics, retry logic, and rate limiting belong in middleware (HTTP middleware, job middleware, or pipeline stages) — never copy-pasted into individual handlers or services.
+- **Façade simplicity:** Expose a simple, intention-revealing API to callers. Hide implementation complexity (retry strategies, idempotence guards, provider selection, circuit breakers) inside the service.
+- **Request traceability:** Keep the request path through the system linear and easy to follow. Avoid implicit side effects (hidden event listeners that silently mutate state, magic method calls, model boot events with non-obvious service calls). Each side effect should be explicitly dispatched or documented at the call site.
+- **No unnecessary interfaces:** Do not create an interface for a repository or service that has only one implementation and no realistic second implementation. Single-implementation interfaces add indirection without value.
 - Method signatures must remain expressive and minimal.
 - Match test variable names to actual use cases.
 - New tests must cover relevant code.

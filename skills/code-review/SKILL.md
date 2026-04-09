@@ -58,10 +58,16 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Short transactions; batch writes in one transaction where appropriate.
 - Use `SHOW ENGINE INNODB STATUS` to diagnose lock waits when investigating issues.
 - Controllers: slim; delegate to Services; accept FormRequest only; never `validate()` in controller.
+- **Endpoint I/O typing (**Moderate**):** Controller actions must accept a FormRequest (or typed DTO) and return a typed response (Resource, DTO, or response class). Passing raw `$request->all()` arrays or returning ad-hoc associative arrays is **Moderate** — flag and recommend a typed DTO or API Resource so the contract is explicit.
 - Services: hold business logic; return DTOs or models.
+- **Service single-responsibility (**Moderate**):** A service class must not mix business logic with cross-cutting concerns (validation, email/notification dispatch, logging, metrics). If a service method contains more than one of these, flag as **Moderate** and recommend extracting cross-cutting work into middleware, events/listeners, or dedicated classes.
 - **DTO attribute syntax (**Moderate**):** If a Spatie Laravel Data DTO overrides `from()` solely to rename input keys, or uses manual array mapping instead of `#[MapInputName(SnakeCaseMapper::class)]` / `#[MapName(SnakeCaseMapper::class)]` attributes, flag as **Moderate** and suggest the declarative attribute approach. Custom named static constructors (e.g. `fromModel()`, `fromRequest()`, `fromArray()`) that perform domain-specific data transformation beyond simple key renaming are a valid pattern and must not be flagged.
 - Repositories: read-only. ModelManagers: write-only.
+- **Repository interface overkill (**Minor**):** Do not require an interface for a repository (or any service) that has only one implementation and no realistic second implementation on the horizon. Flag unnecessary single-implementation interfaces as **Minor** — they add indirection without value.
 - Jobs, Events, Commands: slim; delegate to Services.
+- **Middleware for cross-cutting concerns (**Moderate**):** Logging, authentication, metrics, retry logic, and rate limiting must not be copy-pasted into individual handlers or services. These belong in middleware (HTTP middleware, job middleware, or pipeline stages). If the same cross-cutting logic appears in multiple handlers, flag as **Moderate** (DRY violation) and recommend extraction into middleware or a decorator.
+- **Façade simplicity (**Minor**):** The calling code should interact with a simple, intention-revealing API. Implementation complexity (retry strategies, idempotence guards, provider selection, circuit breakers) must be encapsulated inside the service — not leaked to the caller. Flag leaked complexity as **Minor**.
+- **Request traceability (**Moderate**):** The path of a request through the system must be linear and easy to follow. Flag implicit side effects that break traceability — hidden event listeners that silently mutate state, magic method calls, or service calls triggered by model boot events that are not obvious from the calling code. Each side effect should be explicitly dispatched or documented at the call site.
 - New controller actions must have corresponding Request classes.
 - Race conditions
 - Cache stampede risks

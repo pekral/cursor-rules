@@ -100,7 +100,9 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 **Deliver:** Output **only findings** (bugs/issues/risks) with a brief suggested fix. No summary, no “what was checked”, no praise.
 - Use exactly three severity levels for every finding: **Critical**, **Moderate**, **Minor**.
 - Group output by severity (Critical → Moderate → Minor).
+- Do not use numbered lists for findings — use bullet points only.
 - Each finding must include: **location** (file + line, or at least file), **impact/risk**, and a **concrete fix recommendation** (include a short snippet for simple fixes).
+- **Code coverage for changed files must be 100%.** If coverage is below 100% for any changed file, report it as a **Critical** finding.
 - If there are no findings, simply state that no issues were found.
 
 **Communication protocol:**

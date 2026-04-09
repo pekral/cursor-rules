@@ -45,6 +45,8 @@ metadata:
 - I want you to fix the bug from JIRA (you have either the ID or a link to JIRA). Use the preferred JIRA tool (see @rules/jira-operations.mdc) to retrieve all the information you need about the bug (including comments and attachments). If you have other resources available that you could use to understand the problem, load them and analyze them.
 - If possible, find links to the assignment and analyze it so that you understand it and can do a quality CR. Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker. If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
 - List findings using exactly three severity levels: **Critical**, **Moderate**, **Minor**.
+- Do not use numbered lists for findings — use bullet points only.
+- **Code coverage for changed files must be 100%.** If coverage is below 100% for any changed file, report it as a **Critical** finding.
 - If there are any findings, add comments to the PR about where you found these errors. If that is not possible, create a new comment on the PR with the list of findings. If you do not find any issues, post a short comment stating that **no findings were identified**. Every text in English.
 - I don't want to enter technical data into the JIRA issue tracker after code review, but I want to edit the text so that project managers and testers can understand it.
 - For simple fixes, include a minimal example using JIRA `{code}` blocks only when it improves clarity.

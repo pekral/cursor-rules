@@ -31,7 +31,7 @@ metadata:
 - Find the Git branch and switch to it.
 - If possible, find links to the assignment and analyze it so you can do a quality CR.
 - List findings using exactly three severity levels: **Critical**, **Moderate**, **Minor**.
-- Do not use numbered lists for findings — use bullet points only.
+- Use numbered lists for findings — do not use bullet points.
 - **Code coverage for changed files must be 100%.** If coverage is below 100% for any changed file, report it as a **Critical** finding.
 - If there are any findings, add comments to the PR about where you found these errors. If that is not possible, create a new comment on the PR with the list of findings. If you do not find any issues, post a short comment stating that **no findings were identified**. Every text in English.
 - I want you to use the console cli tool to insert the CR result into the GitHub PR as a new comment. The PR comment must contain **only findings** grouped by severity (Critical → Moderate → Minor), each with file/line (or file) and a short, actionable recommendation. Do not include any summary, “what was checked”, or praise.

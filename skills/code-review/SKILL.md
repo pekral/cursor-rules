@@ -97,13 +97,13 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - For new or changed behavior, suggest concrete test scenarios where coverage is missing or unclear (e.g. "Unit: method X with null/empty input"; "Integration: POST without auth must return 401"). This supports testing readiness alongside coverage metrics.
 - Laravel: prefer `Http::fake()` over Mockery.
 
-**Deliver:** Output **only findings** (bugs/issues/risks) with a brief suggested fix. No summary, no “what was checked”, no praise.
+**Deliver:** Output **only findings** (bugs/issues/risks) with a brief suggested fix. No “what was checked”, no praise.
 - Use exactly three severity levels for every finding: **Critical**, **Moderate**, **Minor**.
 - Group output by severity (Critical → Moderate → Minor).
 - Use numbered lists for findings — do not use bullet points.
 - Each finding must include: **location** (file + line, or at least file), **impact/risk**, and a **concrete fix recommendation** (include a short snippet for simple fixes).
 - **Code coverage for changed files must be 100%.** If coverage is below 100% for any changed file, report it as a **Critical** finding.
-- If there are no findings, simply state that no issues were found.
+- End the output with a **Summary** line showing the total count of findings per severity, e.g.: `**Summary: 3 Critical, 2 Moderate, 1 Minor**`. If there are no findings, state that no issues were found.
 
 **Communication protocol:**
 - Do not include positive feedback or “well done” passages; output must contain only findings.

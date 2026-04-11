@@ -32,6 +32,47 @@ metadata:
 - Check encryption in transit and at rest for sensitive data.
 - Check CSP, CORS, CSRF, rate limiting, session/cookie flags (`HttpOnly`, `Secure`, `SameSite`), and security headers.
 - Check outbound request controls (allowlists, URL validation, timeouts).
+- Perform explicit SSRF review for all user-influenced outbound requests:
+  - Identify all outbound-request sinks, including:
+    - HTTP clients (`Http::`, Guzzle, cURL, Symfony HTTP client, `file_get_contents`, `fopen`, `readfile`)
+    - image/PDF/document fetchers
+    - webhook dispatchers
+    - URL preview, import, crawler, scraper, feed-reader, oEmbed, avatar fetch, and screenshot features
+    - integrations that fetch remote files or call third-party APIs using user-controlled URLs, hosts, domains, paths, redirects, or protocols
+  - Trace whether any part of the destination is user-controlled:
+    - full URL
+    - hostname / domain
+    - scheme / protocol
+    - port
+    - path / query
+    - redirect target
+  - Flag as High or Critical when user input can influence server-side requests to arbitrary destinations without strict allowlisting.
+  - Verify SSRF protections:
+    - strict allowlist of approved domains or exact base URLs where business requirements permit
+    - deny private, loopback, link-local, multicast, and reserved IP ranges for user-driven destinations
+    - deny access to cloud metadata endpoints and equivalent internal metadata services
+    - restrict dangerous schemes/protocols (`file://`, `gopher://`, `ftp://`, `dict://`, `php://`, `ldap://`), unless explicitly required and safely sandboxed
+    - validate the final resolved IP after DNS resolution, not only the original hostname
+    - re-validate after redirects; do not trust redirect chains
+    - enforce sane timeout, size, and response limits to reduce blind SSRF and abuse impact
+    - prefer egress firewall / network policy restrictions so the application cannot reach internal-only services by default
+  - Check for SSRF filter bypass opportunities:
+    - redirects to internal targets
+    - DNS rebinding / hostname-to-private-IP resolution
+    - alternate IP encodings (decimal, octal, hex, IPv6, IPv4-mapped IPv6)
+    - userinfo tricks, mixed-case schemes, embedded credentials
+    - parser inconsistencies between validation and request libraries
+  - For Laravel/PHP, specifically inspect:
+    - `Http::get/post/send`, Guzzle client calls, cURL wrappers
+    - file and image retrieval helpers using remote URLs
+    - webhook test/send endpoints
+    - import/sync jobs, queues, and background workers fetching remote content
+  - If SSRF risk exists, report:
+    - exact entry point of user control
+    - exact outbound sink
+    - reachable internal trust boundary (localhost, RFC1918, cloud metadata, internal admin panels, service mesh, Redis, Elasticsearch, etc.)
+    - whether the issue is direct SSRF or blind SSRF
+    - concrete remediation with code-level and network-level controls
 - Check logging and monitoring of security-relevant events without leaking sensitive data.
 - Check OWASP coverage:
   - **A01 Broken Access Control**

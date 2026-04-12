@@ -14,6 +14,7 @@ metadata:
 - If you are not on the main git branch in the project, switch to it.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - Pull request creation is mandatory for every resolved JIRA issue. After checks pass, automatically push the branch and create a GitHub PR, then link it back to the JIRA issue. Do not finish without a PR URL.
+- **Safe error messages:** All user-facing error and validation messages must be written so they do not reveal internal implementation details, database structure, file paths, or technology specifics that could help an attacker deduce an exploit vector. Messages should be helpful for the user but not informative for an attacker.
 
 **Universal JIRA Comment Formatting**
 - Use this structure for every JIRA comment type (status update, testing recommendation, CR summary, implementation summary):

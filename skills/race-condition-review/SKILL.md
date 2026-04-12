@@ -12,6 +12,7 @@ metadata:
 - Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
 - All CR output (findings, recommendations, comments) must be written in English.
 - Be realistic and precise — only flag genuine concurrency risks, not hypothetical ones.
+- **Safe error messages:** If error or exception messages in the reviewed code reveal internal state, lock details, or transaction structure that could help an attacker, flag as **Moderate** and recommend generic user-facing messages.
 
 **When to apply this skill:**
 Apply this skill when the changed code contains any of the following signals:

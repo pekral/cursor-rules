@@ -24,6 +24,7 @@ metadata:
 - Ensure the checklist explicitly contains all reported **DRY violations** and tracks their resolution before triggering the next CR cycle.
 - Apply the requested changes and keep scope limited to review feedback. All new or modified production code must follow @skills/class-refactoring/SKILL.md.
 - **Simplification analysis:** Evaluate whether the solution can be written more simply without altering the new logic, leveraging rules and conventions already defined in `rules/**/*.mdc`. Flag unnecessary complexity as a finding.
+- **Safe error messages:** When resolving review feedback, ensure that all user-facing error and validation messages do not reveal internal implementation details, database structure, file paths, or technology specifics that could help an attacker deduce an exploit vector. Messages should be helpful for the user but not informative for an attacker.
 - Re-check current changes with @skills/code-review/SKILL.md and @skills/security-review/SKILL.md.  
 - If review feedback requires additional tests, use @skills/create-missing-tests-in-pr/SKILL.md and ensure current changes are fully covered.
 - If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.

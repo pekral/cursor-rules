@@ -12,6 +12,7 @@ metadata:
 - Before resolving a task, always switch to the main branch, download the latest changes, and make sure you have the latest code in the main branch.
 - If you are not on the main git branch in the project, switch to it.
 - Pull request creation is mandatory for every resolved GitHub issue selected by this skill. Do not finish without a GitHub PR URL linked to the selected GitHub issue.
+- **Safe error messages:** All user-facing error and validation messages must be written so they do not reveal internal implementation details, database structure, file paths, or technology specifics that could help an attacker deduce an exploit vector. Messages should be helpful for the user but not informative for an attacker.
 
 **Steps:**
 - Load all open issues from the GitHub repository using GitHub CLI (`gh`).

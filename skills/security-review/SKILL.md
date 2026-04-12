@@ -26,6 +26,7 @@ metadata:
 - Check mobile-specific vulnerabilities (WebView, insecure storage).
 - Check that all user input is validated and sanitized before processing.
 - Check that error handling does not reveal sensitive information (stack traces, internal paths, DB details).
+- **Safe error messages:** User-facing error and validation messages must not reveal internal implementation details, database structure, file paths, stack traces, or specific technology versions that could help an attacker craft an exploit. Messages should be informative for the user but generic enough to prevent information leakage. Translate or rewrite messages so they do not give an attacker clues to deduce an exploit vector (e.g. via form validation errors). Flag overly detailed error messages as **High**.
 - Check for hardcoded secrets (credentials, API keys, tokens) in source code or configuration.
 - Check that all DB queries use parameterized APIs or ORM (no string concatenation with user input).
 - Check least privilege for database and service accounts.

@@ -78,6 +78,7 @@ description: Senior PHP code reviewer. Use when reviewing pull requests, examini
 - Timezone handling
 - N+1 queries
 - Unhandled or swallowed exceptions in critical paths; overly broad catch blocks; silent failures; poor logging.
+- **Safe error messages (**Moderate**):** User-facing error and validation messages must not reveal internal implementation details, database structure, file paths, stack traces, or specific technology versions that could help an attacker craft an exploit. Messages should be informative for the user but generic enough to prevent information leakage. Flag overly detailed error messages as **Moderate**.
 - Defensive code: timeouts, invalid input, empty responses, failed API calls. Suggest safer error paths and guard clauses.
 - N+1: relationships used in loops must be eager-loaded (`with()`, `load()`); no DB or model calls inside loops that could be batched.
 - Avoid nested loops over large data; prefer chunk/cursor and set-based or batched work; cache repeated lookups (e.g. config, reference data).

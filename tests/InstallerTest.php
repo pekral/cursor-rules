@@ -1139,6 +1139,19 @@ test('resolve-random skills use clear CR-before-PR phrasing', function (): void 
     }
 });
 
+test('eloquent query scopes rule is present in code review and refactoring skills', function (): void {
+    $packageDir = dirname(__DIR__);
+    $expectedFiles = [
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/class-refactoring/SKILL.md',
+    ];
+
+    foreach ($expectedFiles as $expectedFile) {
+        $content = (string) file_get_contents($expectedFile);
+        expect($content)->toContain('Eloquent query scopes');
+    }
+});
+
 test('install with prune on non-existent target directory does nothing', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/skills/some-skill/SKILL.md', 'content');

@@ -34,6 +34,7 @@ metadata:
 - **PHP array key type safety:** When refactoring associative arrays with dynamic keys, apply safe key strategies: use stable prefixed keys (`'user:' . $id`, `'postal:' . $postalCode`, `'ext:' . $externalReference`); prefer a dedicated collection or value object when the key is domain-significant; prefer `list<T>` when the structure is a list, not a map; prefer explicit validation or normalization before using external values as array keys; where relevant, prefer `array<non-decimal-int-string, T>` over misleading `array<string, T>`.
 - Laravel helpers over native PHP when appropriate.
 - When changing Eloquent models, migrations, or factories, do not duplicate column defaults that already exist in the database schema; see `@rules/laravel/architecture.mdc` (Schema defaults, Migrations).
+- **Eloquent query scopes (only in Laravel projects):** Always use defined model scopes instead of inline `->where()` calls when a matching scope exists on the model. If a reusable query condition appears in the changed code and no scope exists yet, extract it into a query scope on the model. See `@rules/laravel/architecture.mdc`.
 - When changing Laravel tests that queue jobs, dispatch only via `JobClass::dispatch(...)` per `@rules/laravel/architecture.mdc` Testing.
 - DRY principle — eliminate duplicates.
 - Remove obvious comments; keep PHPStan-relevant docs.

@@ -54,3 +54,9 @@ globs: ["vendor/pekral/arch-app-services/**", "app/Actions/**", "app/DataValidat
 - **DTO attribute syntax enforcement**: if a DTO class overrides `from()` solely to rename keys or uses manual array mapping instead of `#[MapInputName]` / `#[MapName]` attributes, flag it as **Moderate** and recommend the attribute-based approach. Custom named static constructors (e.g. `fromModel()`, `fromRequest()`) that perform domain-specific transformation beyond key renaming are valid and must not be flagged.
 - **Legacy carve-out**: do not block a CR solely to rewrite untouched surrounding code; still require Actions for **new** behavior and for **refactored** paths you touch.
 - **Exceptions** (no Action required): trivial pass-through, pure DTO mapping with no domain rules, config-only changes, or frontend-only diffs with no new PHP orchestration.
+
+## Custom Helpers
+- Small utility functions that don't belong to any specific class (cache key generators, input validators, formatters) must be implemented as **global helper functions** in `app/helpers.php` (autoloaded via `composer.json` `files` key).
+- Follow the [Laravel News helpers pattern](https://laravel-news.com/creating-helpers): plain functions, no wrapper classes, snake_case names.
+- Do **not** create `final class` wrappers with a single static method for simple utility logic — use a helper function instead.
+- Helper functions are globally available — no `use` imports needed.

@@ -109,7 +109,9 @@ final class Installer
             )
             : [0, 0];
 
-        echo sprintf('Cursor rules installed (%d files, %d pruned).%s', $rulesCopied + $skillsCopied, $rulesPruned + $skillsPruned, PHP_EOL);
+        $claudeMdCopied = self::installClaudeMd($root, $force, $editor);
+
+        echo sprintf('Cursor rules installed (%d files, %d pruned).%s', $rulesCopied + $skillsCopied + $claudeMdCopied, $rulesPruned + $skillsPruned, PHP_EOL);
 
         return 0;
     }
@@ -342,6 +344,27 @@ final class Installer
         if (!copy($src, $dst)) {
             throw InstallerFailure::fileCopyFailed($src, $dst);
         }
+    }
+
+    private static function installClaudeMd(string $root, bool $force, string $editor): int
+    {
+        if (!InstallerPath::isClaudeMdEditor($editor)) {
+            return 0;
+        }
+
+        $source = InstallerPath::resolveClaudeMdSource();
+
+        if ($source === null) {
+            return 0;
+        }
+
+        $target = InstallerPath::resolveClaudeMdTarget($root);
+
+        if (file_exists($target) && !$force) {
+            return 0;
+        }
+
+        return self::installFile($source, $target, false) ? 1 : 0;
     }
 
     private static function canSymlink(): bool

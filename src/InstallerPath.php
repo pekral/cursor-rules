@@ -68,6 +68,29 @@ final class InstallerPath
         // @codeCoverageIgnoreEnd
     }
 
+    public static function resolveClaudeMdSource(): ?string
+    {
+        $source = self::getPackageDirectory() . '/claude.md';
+
+        return is_file($source) ? $source : null;
+    }
+
+    /**
+     * Target path for CLAUDE.md in the project root.
+     */
+    public static function resolveClaudeMdTarget(string $root): string
+    {
+        return $root . '/CLAUDE.md';
+    }
+
+    /**
+     * Whether CLAUDE.md should be installed for the given editor.
+     */
+    public static function isClaudeMdEditor(string $editor): bool
+    {
+        return $editor === self::EDITOR_CLAUDE || $editor === self::EDITOR_ALL;
+    }
+
     public static function resolveTargetDirectory(string $root): string
     {
         return $root . '/.cursor/rules';

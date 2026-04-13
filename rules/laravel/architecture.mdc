@@ -126,6 +126,12 @@ $intercomServiceMock = Mockery::mock(IntercomService::class)->makePartial();
     app()->instance(IntercomService::class, $intercomServiceMock);
 ```
 
+### No external connections in tests
+- Tests must **never** communicate with third-party services or external endpoints.
+- All HTTP requests must be mocked. `Http::preventStrayRequests()` is called globally in `TestCase::setUp()` to prevent accidental real HTTP requests.
+- Database connection tests (PDO) must use `sqlite::memory:` or local file-based SQLite instead of connecting to real MySQL/PostgreSQL/SQL Server hosts. For testing failure paths, use SQLite with an inaccessible path.
+- DNS lookups (`gethostbyname`, `dns_get_record`) should be avoided in tests. If an action performs DNS resolution, mock the action or use the `fakeTestDatabaseConnectionAction()` helper.
+- When testing an action that makes external calls, bind a fake implementation via the container rather than making real calls.
 
 ## Helpers
 - Use Laravel helpers instead of `use` section classes. Examples: use `auth()->id()` instead of `Auth::id()` and adding `Auth` in the `use` section. Other examples: use `redirect()->route()` instead of `Redirect::route()`, or `str()->slug()` instead of `Str::slug()`.

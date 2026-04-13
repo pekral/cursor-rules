@@ -16,3 +16,10 @@ alwaysApply: false
 - **Prefer partial mocks** over full mocks whenever possible. Partial mocks keep real method implementations and only override the methods you need to control, making tests more realistic and less brittle. Use `Mockery::mock(Service::class)->makePartial()` or `$this->partialMock(Service::class)` in Laravel.
 - After generating or modifying tests, verify that all new tests comply with the testing rules in `@rules/php/standards.mdc`.
 - If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
+
+### No external connections in tests
+- Tests must **never** communicate with third-party services or external endpoints.
+- All HTTP requests must be mocked. `Http::preventStrayRequests()` is called globally in `TestCase::setUp()` to prevent accidental real HTTP requests.
+- Database connection tests (PDO) must use `sqlite::memory:` or local file-based SQLite instead of connecting to real MySQL/PostgreSQL/SQL Server hosts. For testing failure paths, use SQLite with an inaccessible path.
+- DNS lookups (`gethostbyname`, `dns_get_record`) should be avoided in tests. If an action performs DNS resolution, mock the action or use the `fakeTestDatabaseConnectionAction()` helper.
+- When testing an action that makes external calls, bind a fake implementation via the container rather than making real calls.

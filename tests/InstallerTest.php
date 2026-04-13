@@ -1110,6 +1110,35 @@ test('dry review rule is referenced by all code review flow skills', function ()
     }
 });
 
+test('resolve skills require code review cycle before PR creation', function (): void {
+    $packageDir = dirname(__DIR__);
+    $resolveSkills = [
+        $packageDir . '/skills/resolve-github-issue/SKILL.md',
+        $packageDir . '/skills/resolve-jira-issue/SKILL.md',
+        $packageDir . '/skills/resolve-bugsnag-issue/SKILL.md',
+    ];
+
+    foreach ($resolveSkills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->not->toContain('After checks pass, automatically push');
+        expect($content)->toContain('code review cycle is clean');
+    }
+});
+
+test('resolve-random skills use clear CR-before-PR phrasing', function (): void {
+    $packageDir = dirname(__DIR__);
+    $randomSkills = [
+        $packageDir . '/skills/resolve-random-github-issue/SKILL.md',
+        $packageDir . '/skills/resolve-random-jira-issue/SKILL.md',
+    ];
+
+    foreach ($randomSkills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('Before creating the PR');
+        expect($content)->not->toContain('Before pushing changes to PR');
+    }
+});
+
 test('install with prune on non-existent target directory does nothing', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/skills/some-skill/SKILL.md', 'content');

@@ -20,7 +20,7 @@ metadata:
   List only those issues that are to be resolved by AI (they are tagged). Look for tasks labeled "Resolve_by_AI." If you are supposed to search in other places as well, find those other places too. Only not resolved issues should be listed!
 - Randomly select one and try to resolve it. Use the skill @skills/resolve-jira-issue/SKILL.md.
 - Completion is valid only when the delegated flow creates a GitHub PR and links it in the selected JIRA issue.
-- Before pushing changes to PR, run @skills/code-review-jira/SKILL.md for the current changes and treat it as mandatory CR.
+- Before creating the PR, run @skills/code-review-jira/SKILL.md for the current changes and treat it as mandatory CR.
 - Fix all Critical, Moderate, and Minor findings from that CR directly in code/tests, then run @skills/code-review-jira/SKILL.md again.
 - Repeat the CR + fix cycle until there are no Critical, Moderate, or Minor findings left.
 

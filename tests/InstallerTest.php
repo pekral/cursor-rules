@@ -1402,7 +1402,7 @@ test('install does not overwrite existing CLAUDE.md without force flag', functio
     }
 });
 
-test('install overwrites existing CLAUDE.md with force flag', function (): void {
+test('install never overwrites existing CLAUDE.md even with force flag', function (): void {
     $root = installerCreateProjectRoot();
     $claudeMd = $root . '/CLAUDE.md';
     file_put_contents($claudeMd, 'my custom CLAUDE.md');
@@ -1415,8 +1415,7 @@ test('install overwrites existing CLAUDE.md with force flag', function (): void 
         Installer::run(['cursor-rules', 'install', '--editor=claude', '--force']);
         ob_end_clean();
 
-        expect(file_get_contents($claudeMd))->toContain('Behavioral guidelines');
-        expect(file_get_contents($claudeMd))->not->toBe('my custom CLAUDE.md');
+        expect(file_get_contents($claudeMd))->toBe('my custom CLAUDE.md');
     } finally {
         if ($originalCwd !== '') {
             chdir($originalCwd);

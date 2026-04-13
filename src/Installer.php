@@ -109,7 +109,7 @@ final class Installer
             )
             : [0, 0];
 
-        $claudeMdCopied = self::installClaudeMd($root, $force, $editor);
+        $claudeMdCopied = self::installClaudeMd($root, $editor);
 
         echo sprintf('Cursor rules installed (%d files, %d pruned).%s', $rulesCopied + $skillsCopied + $claudeMdCopied, $rulesPruned + $skillsPruned, PHP_EOL);
 
@@ -346,7 +346,7 @@ final class Installer
         }
     }
 
-    private static function installClaudeMd(string $root, bool $force, string $editor): int
+    private static function installClaudeMd(string $root, string $editor): int
     {
         if (!InstallerPath::isClaudeMdEditor($editor)) {
             return 0;
@@ -360,7 +360,7 @@ final class Installer
 
         $target = InstallerPath::resolveClaudeMdTarget($root);
 
-        if (file_exists($target) && !$force) {
+        if (file_exists($target)) {
             return 0;
         }
 

@@ -70,6 +70,7 @@ metadata:
 - Do not create multiple public business methods in an Action.
 - Do not bypass Repository/ModelManager boundaries.
 - Do not change unrelated behavior while refactoring.
+- Do not create `final class` wrappers with a single static method for simple utility logic — use a global helper function in `app/helpers.php` instead (see Custom Helpers in `@rules/laravel/architecture.mdc`).
 
 **Definition of done:**
 - Target entry point method is thin and delegates to a dedicated Action.

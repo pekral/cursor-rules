@@ -131,6 +131,12 @@ $intercomServiceMock = Mockery::mock(IntercomService::class)->makePartial();
 - Use Laravel helpers instead of `use` section classes. Examples: use `auth()->id()` instead of `Auth::id()` and adding `Auth` in the `use` section. Other examples: use `redirect()->route()` instead of `Redirect::route()`, or `str()->slug()` instead of `Str::slug()`.
 - Replace all foreach with collect() helper.
 
+## Custom Helpers
+- Small utility functions that don't belong to any specific class (cache key generators, input validators, formatters) must be implemented as **global helper functions** in `app/helpers.php` (autoloaded via `composer.json` `files` key).
+- Follow the [Laravel News helpers pattern](https://laravel-news.com/creating-helpers): plain functions, no wrapper classes, snake_case names.
+- Do **not** create `final class` wrappers with a single static method for simple utility logic — use a helper function instead.
+- Helper functions are globally available — no `use` imports needed.
+
 ## Best practices
 - Follow Laravel best practices and conventions
 - Use object-oriented programming with a focus on SOLID principles

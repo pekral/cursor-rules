@@ -1291,8 +1291,9 @@ test('resolveClaudeMdSource returns path to claude.md in package', function (): 
     $source = InstallerPath::resolveClaudeMdSource();
 
     expect($source)->not->toBeNull();
+    expect($source)->toBeString();
     expect($source)->toEndWith('/claude.md');
-    expect(is_file($source))->toBeTrue();
+    expect(is_file((string) $source))->toBeTrue();
 });
 
 test('resolveClaudeMdTarget returns CLAUDE.md path in project root', function (): void {

@@ -1,0 +1,27 @@
+---
+description: Constraints for read-only review skills (code review, security review, etc.)
+alwaysApply: false
+globs: []
+---
+
+## Review-Only Constraints
+
+- Never modify code. Output analysis only.
+- Format all output as Markdown.
+
+## Context Awareness
+- Before reviewing, understand the expected outcome from the issue and PR discussion.
+- Load existing review comments and reports when available.
+- Do not repeat already reported findings.
+
+## Code Context
+- Ensure the review is based on the latest available state of:
+    - main branch
+    - the PR branch
+- Compare changes against main to understand impact.
+
+## Scope
+- Focus only on relevant changes in the PR unless broader context is required.
+
+## Safety
+- If context is incomplete, state assumptions instead of guessing.

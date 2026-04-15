@@ -1,0 +1,46 @@
+---
+description: Shared testing conventions for skills that generate or modify tests
+alwaysApply: false
+globs: []
+---
+
+## Testing Rules
+
+- Follow test conventions from:
+    - @rules/php/standards.mdc
+    - @rules/laravel/architecture.mdc (for Laravel projects)
+
+- Never use `describe()`; use top-level `it()` / `test()` only.
+- Test classes should be `final`.
+- Prefer local variables; avoid shared mutable state.
+
+## Data Handling
+- For Laravel:
+    - Use `Model::factory()` for persisted data.
+    - Do not duplicate database defaults unless explicitly required by the test.
+- Avoid mocking data that can be created via factories.
+
+## Mocking
+- Mock only:
+    - external services
+    - exception scenarios
+- Prefer partial mocks over full mocks.
+- Remove unnecessary or redundant mocks.
+
+## Jobs
+- Dispatch jobs using `JobClass::dispatch(...)` only.
+
+## External Calls
+- Tests must not call external services.
+- Mock all HTTP requests.
+- Use local or in-memory database connections for tests.
+- Avoid DNS lookups in tests.
+
+## Consistency
+- Ensure new or modified tests follow existing project conventions.
+
+## Scope
+- Focus tests on behavior, not implementation details.
+
+## Quality
+- Prefer simple, readable tests over complex setups.

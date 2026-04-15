@@ -29,9 +29,22 @@ globs:
   - validate input or delegate validation
   - call an Action
   - return a response or update UI state
+
 - Do not place business logic in controllers, jobs, commands, listeners, or Livewire components.
 - Legacy untouched code is a carve-out, but all new or materially changed flows must follow this architecture.
 - Multitenancy remains mandatory in every layer: all reads and writes must stay account-scoped.
+- **Invokeable call convention:** When calling Action classes, always use direct invocation `$action($params)` — never `$action->__invoke($params)`.
+- **Action pattern (only when `vendor/pekral/arch-app-services` exists):** Apply @skills/refactor-entry-point-to-action/SKILL.md rules when the class is a controller, job, command, listener, or **Livewire component** that contains orchestration logic. If a new or changed entry point contains orchestration logic without an Action class, flag it as **Critical**.
+- **Single-use Service/Facade method rule (Action pattern):** If an Action calls a Service or Facade method that is used only once in the entire codebase, move the business logic from that Service/Facade method directly into the Action and remove the original Service/Facade method.
+- **Invokeable controller rule:** Any controller method that is not a standard CRUD method (`index`, `create`, `store`, `show`, `edit`, `update`, `destroy`) must be extracted into a dedicated single-action invokeable controller with only `__invoke()`. Resource controllers must only contain CRUD methods.
+- **BaseModelService pattern (only when `vendor/pekral/arch-app-services` exists):** All services that primarily work with a specific Eloquent Model must extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()` (see `vendor/pekral/arch-app-services/examples/Services/User/UserModelService.php`). Services that do not primarily serve a single model must be refactored into Action pattern classes.
+- **Data Validator extraction (only when `vendor/pekral/arch-app-services` exists):** If an Action class contains inline validation logic (throwing `ValidationException` directly or calling `Validator::make()`), extract it into a dedicated Data Validator class under `app/DataValidators/{Domain}/`.
+- **Livewire components (only in Livewire projects):** Livewire components are entry points — they must not contain business logic. Split every component into a PHP class (`app/Livewire/`) and a Blade view (`resources/views/livewire/`). Never use single-file (Volt) components. Delegate all business logic to Action classes.
+- **Validation rules as traits:** Extract reusable validation rules into traits in `App\Concerns`. Use these traits in FormRequest classes instead of duplicating rule arrays.
+- **Custom Rule classes reuse:** Before adding inline validation logic to a FormRequest, scan `app/Rules/` for existing custom Rule classes that already implement the required validation. Use existing custom rules instead of duplicating logic. During code review, flag any FormRequest that duplicates logic already covered by an existing custom Rule class.
+- **Laravel AI SDK:** When implementing AI features in a Laravel project, always use the [Laravel AI SDK](https://laravel.com/docs/13.x/ai-sdk). Never call AI provider APIs directly when the Laravel AI SDK covers the use case.
+- **Custom Helpers:** Small utility functions that don't belong to any specific class (cache key generators, input validators, formatters) must be implemented as **global helper functions** in `app/helpers.php` (autoloaded via `composer.json` `files` key). Follow the [Laravel News helpers pattern](https://laravel-news.com/creating-helpers): plain functions, no wrapper classes, snake_case names. Do **not** create `final class` wrappers with a single static method for simple utility logic — use a helper function instead.
+
 
 ## Actions
 - Store all Actions under `app/Actions/{Domain}`.

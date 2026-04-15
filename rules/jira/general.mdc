@@ -1,0 +1,21 @@
+---
+description: JIRA CLI (acli) usage and fallback rules
+alwaysApply: false
+globs: []
+---
+
+## JIRA Rules
+
+- Never change JIRA issue status. Status transitions are handled by humans only.
+
+## Tooling
+- Use `acli` as the primary tool for all JIRA operations (read, comment, attachments).
+- If `acli` is unavailable, use a JIRA MCP server.
+- If no JIRA tool is available, stop and report that JIRA access is not available.
+
+## Comments Format
+- Always use JIRA Wiki Markup.
+- Do not use Markdown syntax:
+    - no fenced code blocks
+    - no `#` headings
+    - no markdown tables

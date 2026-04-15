@@ -60,3 +60,8 @@ globs: ["*"]
 
 ## Cleanup
 - Remove any temporary `.md` files created during PR preparation.
+
+## Tooling
+- Use GitHub CLI (`gh`) as the primary tool for all operations.
+- If `gh` is unavailable, use a GitHub MCP server.
+- If no GitHub tool is available, stop and report that GitHub access is not available.

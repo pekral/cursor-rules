@@ -1,8 +1,6 @@
 ---
 name: analyze-problem
-description: Use when this skill should be used when analyzing a problem,
-  debugging unexpected behavior, identifying root causes, or breaking down
-  complex issues before proposing or implementing solutions.
+description: Structured problem analysis for debugging, root cause identification, and breaking down complex issues before proposing solutions
 license: MIT
 metadata:
   author: Petr Král (pekral.cz)
@@ -11,151 +9,163 @@ metadata:
 # Analyze Problem
 
 ## Purpose
+Perform structured problem analysis before proposing or implementing any changes.
 
-Perform structured problem analysis before any implementation.
-
-This skill enforces deep reasoning, prevents premature solutions, and ensures that the root cause is correctly identified.
+Focus on:
+- verified facts
+- multiple hypotheses
+- root cause identification
+- validation strategy
 
 ---
 
-## Constraint
-
+## Constraints
 - Apply @rules/base-constraints.mdc
-- Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
-- NEVER CHANGE THE CODE! Generate the output only.
-- All messages formatted as markdown for output.
+- Never modify code
+- Output Markdown only
+- Use one language only
+- Do not jump directly to solutions
+- Do not assume a single cause
+- Be explicit about uncertainty
 
 ---
 
-## Workflow
+## Execution
 
-Follow these steps strictly. Do not skip any.
+- Analyze the problem and all available context.
+- If relevant, load issue, comments, and attachments using available CLI or MCP tools.
+- Prefer issue-tracker-specific tools over generic browsing.
+- Separate facts from assumptions.
+- Generate multiple plausible hypotheses.
+- Identify the most probable root cause.
+- Define how to validate it.
+- Suggest minimal, low-risk next steps.
+
+---
+
+## Analysis Structure
 
 ### 1. Problem Summary
-- Restate the problem clearly and precisely
-- Avoid copying blindly — interpret the problem
+- Clearly restate the problem in your own words
+- Interpret, do not copy
 
 ### 2. Known Facts
-- List only verified information
+- Only verified information
 - No assumptions
 
 ### 3. Assumptions
-- List what is inferred but not confirmed
-- Clearly separate from facts
+- Inferred but not confirmed
 
 ### 4. Missing Information
-- Identify what is unknown but necessary
-- Ask for clarification if critical
+- Unknowns that affect confidence or validation
 
 ### 5. Hypotheses
-Generate multiple plausible explanations:
-- At least 2–3 hypotheses
-- Group by type if useful (code, infra, config, data)
+- At least 2 plausible explanations
+- Prefer competing explanations
+- Group when useful:
+    - code
+    - configuration
+    - infrastructure
+    - data
+    - external dependencies
 
 ### 6. Hypothesis Evaluation
 For each hypothesis:
-- Why it could be true
-- Why it might be false
-- Estimated likelihood (high / medium / low)
+- why it could be true
+- why it might be false
+- likelihood: high / medium / low
 
-### 7. Root Cause
-- Identify the most probable cause
-- Explain why it is more likely than others
-- If uncertain, explicitly state uncertainty
+### 7. Most Probable Root Cause
+- Select the most likely explanation
+- Explain why it is stronger than others
+- Explicitly state uncertainty if present
 
 ### 8. Validation Plan
-Define how to confirm the root cause:
-- logs to check
+Define how to confirm or reject the root cause:
+- logs to inspect
 - commands to run
-- code to inspect
+- code paths to check
 - experiments to perform
 
 ### 9. Next Steps
-- Suggest next actions (not full implementation)
-- Keep it actionable and minimal
+- Minimal, actionable steps
+- Do not provide full implementation
 
----
-
-## Steps
-
-- Analyze the assignment and go through all the attached resources (download their contents via CLI or MCP). There are specific console CLI tools available for issue trackers, so use them. Never use a web browser! If you cannot load the issue, find out the available tools in the system and choose the most suitable tool to download the information.
-- Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
-- Find the attachments for the assignment and analyze them. Again, use the available MCP servers or CLI tools for the specific issue tracker.
-- Analyze the error as accurately as possible and produce output following the Workflow above.
-- Write how to effectively and simply solve the problem without side effects and disruption to the application's operation.
-- Produce one technical output and another for explaining to people who are not programmers, but perhaps product managers.
-
----
-
-## Rules
-
-- Do NOT jump directly to solutions
-- Do NOT assume a single cause without alternatives
-- Do NOT ignore uncertainty
-- ALWAYS show reasoning
-- ALWAYS provide multiple hypotheses
+### 10. Stakeholder Explanation
+- Explain the issue in simple terms
+- Focus on impact, cause, and next step
 
 ---
 
 ## Output Format
 
-```
-## Problem Summary
+```markdown
+## Technical Analysis
 
+### Problem Summary
 ...
 
-## Known Facts
+### Known Facts
+- ...
 
-* ...
+### Assumptions
+- ...
 
-## Assumptions
+### Missing Information
+- ...
 
-* ...
-
-## Missing Information
-
-* ...
-
-## Hypotheses
-
+### Hypotheses
 1. ...
 2. ...
 
-## Hypothesis Evaluation
+### Hypothesis Evaluation
 
-### Hypothesis 1
+#### Hypothesis 1
+- Why true:
+- Why false:
+- Likelihood:
 
-* Why true:
-* Why false:
-* Likelihood:
+#### Hypothesis 2
+- Why true:
+- Why false:
+- Likelihood:
 
-### Hypothesis 2
-
+### Most Probable Root Cause
 ...
 
-## Most Probable Root Cause
+### Validation Plan
+- ...
 
+### Next Steps
+- ...
+
+## Stakeholder Explanation
 ...
 
-## Validation Plan
-
-* ...
-
-## Next Steps
-
-* ...
 ```
 
 ---
 
-## Additional Resources
+## Principles
 
-See:
+- Focus on root cause, not symptoms
+- Prefer evidence over assumptions
+- Avoid confirmation bias
+- Keep analysis structured and concise
+- Prefer simple explanations over complex ones
+
+---
+
+## References
+
 - references/debugging-strategies.md
 - references/hypothesis-generation.md
 - references/root-cause-analysis.md
 
-See examples:
+---
+
+## Examples
+
 - examples/analysis-good.md
 - examples/analysis-missing-context.md
 - examples/analysis-multiple-hypotheses.md

@@ -13,6 +13,7 @@ globs: []
 - Never use `describe()`; use top-level `it()` / `test()` only.
 - Test classes should be `final`.
 - Prefer local variables; avoid shared mutable state.
+- In Laravel Pest projects, define `uses(Tests\TestCase::class)` in `tests/Pest.php` instead of repeating it in every test file.
 
 ## Data Handling
 - For Laravel:

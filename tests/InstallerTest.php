@@ -1100,19 +1100,11 @@ test('dry review rule is referenced by process-code-review skill', function (): 
     expect($content)->toContain('DRY violations');
 });
 
-test('resolve skills require code review before PR creation', function (): void {
+test('unified resolve-issue skill requires code review before PR creation', function (): void {
     $packageDir = dirname(__DIR__);
-    $resolveSkills = [
-        $packageDir . '/skills/resolve-github-issue/SKILL.md',
-        $packageDir . '/skills/resolve-jira-issue/SKILL.md',
-        $packageDir . '/skills/resolve-bugsnag-issue/SKILL.md',
-    ];
-
-    foreach ($resolveSkills as $skillFile) {
-        $content = (string) file_get_contents($skillFile);
-        expect($content)->not->toContain('After checks pass, automatically push');
-        expect($content)->toContain('Code review and security review findings are resolved');
-    }
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+    expect($content)->toContain('Code review and security review findings are resolved');
+    expect($content)->not->toContain('After checks pass, automatically push');
 });
 
 test('resolve-random skills are not shipped in source skills directory', function (): void {

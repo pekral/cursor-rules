@@ -111,9 +111,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | Skill | Description |
 |---|---|
 | `analyze-problem` | Analyze problems from issue trackers, including attachments, technical context, and human-readable outputs. |
-| `resolve-bugsnag-issue` | End-to-end Bugsnag issue resolution with fixes, review loops, coverage checks, and PR creation. |
-| `resolve-github-issue` | End-to-end GitHub issue resolution with fixes, review loops, coverage checks, and PR creation. |
-| `resolve-jira-issue` | End-to-end JIRA issue resolution with fixes, review loops, coverage checks, and PR creation. |
+| `resolve-issue` | Unified issue resolution for GitHub, JIRA, and Bugsnag. Detects the tracker from the provided link, implements fixes, runs review loops, and creates a PR. |
 | `resolve-random-jira-issue` | Pick and resolve a random JIRA issue with the full quality workflow. |
 | `answer-pr-questions` | Find unanswered current issue/PR questions and generate short PM/client-friendly unified answers. |
 | `merge-github-pr` | Merge one GitHub PR that is ready for deployment. |

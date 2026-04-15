@@ -42,6 +42,8 @@ metadata:
 - All new or modified production code must follow @skills/class-refactoring/SKILL.md.
 - If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
 - Run existing tests that hit robots, sitemap, or assert head meta. Fix any failing assertions.
+- Run @skills/code-review/SKILL.md for the current changes.
+- Run @skills/process-code-review/SKILL.md to resolve any findings from the code review.
 
 **Checklist — new public page**
 - Page/route added; uses public (guest) layout and head with index,follow, canonical, sitemap link, title, description.

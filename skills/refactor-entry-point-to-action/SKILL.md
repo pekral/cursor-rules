@@ -72,6 +72,10 @@ metadata:
 - Do not change unrelated behavior while refactoring.
 - Do not create `final class` wrappers with a single static method for simple utility logic — use a global helper function in `app/helpers.php` instead (see Custom Helpers in `@rules/laravel/architecture.mdc`).
 
+**After completing the tasks**
+- Run @skills/code-review/SKILL.md for the current changes.
+- Run @skills/process-code-review/SKILL.md to resolve any findings from the code review.
+
 **Definition of done:**
 - Target entry point method is thin and delegates to a dedicated Action.
 - Action respects all project Action-pattern constraints.

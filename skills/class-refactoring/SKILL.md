@@ -62,4 +62,6 @@ metadata:
 - Modify existing tests (unless refactoring requires it for consistency).
 
 **After completing the tasks**
+- Run @skills/code-review/SKILL.md for the current changes.
+- Run @skills/process-code-review/SKILL.md to resolve any findings from the code review.
 - If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!

@@ -1,6 +1,6 @@
 ---
 name: resolve-jira-issue
-description: "Use when resolving JIRA issues. Fixes bugs, refactors code, performs code and security reviews, ensures 100% test coverage, runs CI checks, and creates pull requests. Links PRs to JIRA issues and updates issue status."
+description: "Use when resolving JIRA issues. Fixes bugs, refactors code, performs code and security reviews, ensures 100% test coverage, runs CI checks, and creates pull requests. Links PRs to JIRA issues."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
@@ -82,7 +82,7 @@ h4. Testing recommendations
 - Only after the CR cycle is clean, automatically push the branch and create a GitHub pull request according to the pr.mdc rules. This step is mandatory; do not wait for additional confirmation.
 - If there is no link to the issue tracker, add a link to the issue tracker entry to the CR summary and, if possible, link it directly according to the issue tracker recommendations. Be sure to include an HTTP link.
 - I want you to post a comment on the core revision on GitHub, but I want you to post only critical or medium-severity issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue as ready for review.
-- After completing all tasks for GitHub, link the created PR in the JIRA issue, change the status of the JIRA issue to ready for review.
+- After completing all tasks for GitHub, link the created PR in the JIRA issue.
 - Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.
 - Write missing tests for current changes and ensure 100% coverage, fix dry and try to simplify the code base so that it is easy to read for humans, but also as simple as possible. These changes will be in a separate commit.
 - I want you to post a comment into the pull request on GitHub regarding the core review, but I want you to only post critical or moderately serious issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue with the label ready for review.

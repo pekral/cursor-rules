@@ -1,6 +1,6 @@
 ---
 name: resolve-random-jira-issue
-description: "Use when resolving random JIRA issues. Fixes bugs, refactors code, performs code and security reviews, ensures 100% test coverage, runs CI checks, and creates pull requests. Links PRs to JIRA issues and updates issue status."
+description: "Use when resolving random JIRA issues. Fixes bugs, refactors code, performs code and security reviews, ensures 100% test coverage, runs CI checks, and creates pull requests. Links PRs to JIRA issues."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"

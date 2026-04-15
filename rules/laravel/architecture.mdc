@@ -20,6 +20,7 @@ globs: ["*"]
 - Store reusable validation rules as traits in the `App\Concerns` namespace (e.g. `PasswordValidationRules`).
 - Each trait should provide focused, well-typed methods that return validation rule arrays with proper PHPDoc generics.
 - Use these traits in FormRequest classes and anywhere validation rules are needed to ensure DRY and consistent validation across the application.
+- **Custom Rule classes:** Use Laravel custom Rule classes (`App\Rules\*`) for complex, reusable validation logic that goes beyond simple rule strings. Before writing new inline validation logic in a FormRequest, check whether a matching custom Rule class already exists in the project (`app/Rules/`). If one exists and covers the required logic, use it instead of duplicating the validation inline. When creating new FormRequests or modifying existing ones, always scan `app/Rules/` for applicable custom rules.
 
 ## DTOs (Spatie Laravel Data)
 - Use Spatie Laravel Data DTOs (`Spatie\LaravelData\Data`) for all typed data exchange between layers; never pass raw `array<mixed>`.

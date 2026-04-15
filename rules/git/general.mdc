@@ -65,3 +65,6 @@ globs: ["*"]
 - Use GitHub CLI (`gh`) as the primary tool for all operations.
 - If `gh` is unavailable, use a GitHub MCP server.
 - If no GitHub tool is available, stop and report that GitHub access is not available.
+
+## Merging
+- Use rebase and merge strategy

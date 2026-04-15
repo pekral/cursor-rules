@@ -13,6 +13,7 @@ metadata:
 - Apply @rules/testing-conventions.mdc
 
 **Steps:**
+- Before implementing the main change, scan the affected files for pre-existing bugs (broken logic, incorrect behavior, type errors, deprecated patterns). Fix all identified pre-existing bugs in a separate commit before the main implementation commit.
 - Analyze the class and complete the TODO list tasks.
 - Verify code coverage after refactoring.
 - For all changes in the current branch, analyze code coverage and ensure that all changes are covered by tests. Add any missing tests to ensure 100% coverage.

@@ -55,6 +55,7 @@ h4. Testing recommendations
 ```
 
 **Steps:**
+- Before implementing the main change, scan the affected files for pre-existing bugs (broken logic, incorrect behavior, type errors, deprecated patterns). Fix all identified pre-existing bugs in a separate commit before the main implementation commit.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - I want you to fix the bug from JIRA (you have either the ID or a link to JIRA).
   Use the preferred JIRA tool (see @rules/jira-operations.mdc) to retrieve all issue details (including comments and attachments).

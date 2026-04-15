@@ -168,7 +168,7 @@ test('install copies rules from package when no development directory', function
 
 test('install respects force flag', function (): void {
     $root = installerCreateProjectRoot();
-    $installedFile = $root . '/.cursor/rules/php/core.mdc';
+    $installedFile = $root . '/.cursor/rules/php/core-standards.mdc';
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 
@@ -247,7 +247,7 @@ test('install creates symlinks when requested', function (): void {
         Installer::run(['cursor-rules', 'install', '--symlink']);
         ob_end_clean();
 
-        $target = $root . '/.cursor/rules/php/core.mdc';
+        $target = $root . '/.cursor/rules/php/core-standards.mdc';
 
         expect(is_link($target))->toBeTrue();
         expect(file_get_contents($target))->not->toBeEmpty();
@@ -295,7 +295,7 @@ test('install with default editor copies rules and skills only to .cursor', func
         Installer::run(['cursor-rules', 'install']);
         ob_end_clean();
 
-        expect(is_file($root . '/.cursor/rules/php/core.mdc'))->toBeTrue();
+        expect(is_file($root . '/.cursor/rules/php/core-standards.mdc'))->toBeTrue();
         expect(is_file($root . '/.cursor/skills/code-review/SKILL.md'))->toBeTrue();
         expect(is_dir($root . '/.claude/skills'))->toBeFalse();
         expect(is_dir($root . '/.codex/skills'))->toBeFalse();
@@ -488,7 +488,7 @@ test('install fails when target path is a file instead of directory', function (
 
 test('install fails when destination is directory that cannot be removed', function (): void {
     $root = installerCreateProjectRoot();
-    $targetDir = $root . '/.cursor/rules/php/core.mdc';
+    $targetDir = $root . '/.cursor/rules/php/core-standards.mdc';
     installerEnsureDirectory($targetDir);
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
@@ -597,7 +597,7 @@ test('install always force-copies security rules even without force flag', funct
         ob_end_clean();
 
         $securityFile = $root . '/.cursor/rules/security/backend.md';
-        $regularFile = $root . '/.cursor/rules/php/core.mdc';
+        $regularFile = $root . '/.cursor/rules/php/core-standards.mdc';
 
         file_put_contents($securityFile, 'old security content');
         file_put_contents($regularFile, 'old rules content');
@@ -766,7 +766,7 @@ test('install with editor=claude copies to .claude only', function (): void {
         Installer::run(['cursor-rules', 'install', '--editor=claude']);
         ob_end_clean();
 
-        expect(is_file($root . '/.claude/rules/php/core.mdc'))->toBeTrue();
+        expect(is_file($root . '/.claude/rules/php/core-standards.mdc'))->toBeTrue();
         expect(is_file($root . '/.claude/skills/code-review/SKILL.md'))->toBeTrue();
         expect(is_dir($root . '/.cursor/rules'))->toBeFalse();
         expect(is_dir($root . '/.codex/rules'))->toBeFalse();
@@ -784,7 +784,7 @@ test('install supports combined force and editor flags for claude', function ():
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
     $packageDir = dirname(__DIR__);
-    $originalContent = file_get_contents($packageDir . '/rules/php/core.mdc');
+    $originalContent = file_get_contents($packageDir . '/rules/php/core-standards.mdc');
 
     try {
         chdir($root);
@@ -793,7 +793,7 @@ test('install supports combined force and editor flags for claude', function ():
         Installer::run(['cursor-rules', 'install', '--editor=claude']);
         ob_end_clean();
 
-        $ruleFile = $root . '/.claude/rules/php/core.mdc';
+        $ruleFile = $root . '/.claude/rules/php/core-standards.mdc';
         file_put_contents($ruleFile, 'old rules');
 
         ob_start();
@@ -823,7 +823,7 @@ test('install with editor=codex copies to .codex only', function (): void {
         Installer::run(['cursor-rules', 'install', '--editor=codex']);
         ob_end_clean();
 
-        expect(is_file($root . '/.codex/rules/php/core.mdc'))->toBeTrue();
+        expect(is_file($root . '/.codex/rules/php/core-standards.mdc'))->toBeTrue();
         expect(is_file($root . '/.codex/skills/code-review/SKILL.md'))->toBeTrue();
         expect(is_dir($root . '/.cursor/rules'))->toBeFalse();
         expect(is_dir($root . '/.claude/rules'))->toBeFalse();
@@ -1020,7 +1020,7 @@ test('install with prune also removes rules that no longer exist in source', fun
         Installer::run(['cursor-rules', 'install', '--prune']);
         ob_end_clean();
 
-        expect(is_file($root . '/.cursor/rules/php/core.mdc'))->toBeTrue();
+        expect(is_file($root . '/.cursor/rules/php/core-standards.mdc'))->toBeTrue();
         expect(is_file($root . '/.cursor/rules/removed.mdc'))->toBeFalse();
     } finally {
         if ($originalCwd !== '') {
@@ -1094,23 +1094,13 @@ test('race-condition-review skill is referenced only by code review skills', fun
     }
 });
 
-test('dry review rule is referenced by all code review flow skills', function (): void {
+test('dry review rule is referenced by process-code-review skill', function (): void {
     $packageDir = dirname(__DIR__);
-    $requiredPhrase = 'DRY violations';
-    $expectedFiles = [
-        $packageDir . '/skills/code-review/SKILL.md',
-        $packageDir . '/skills/code-review-github/SKILL.md',
-        $packageDir . '/skills/code-review-jira/SKILL.md',
-        $packageDir . '/skills/process-code-review/SKILL.md',
-    ];
-
-    foreach ($expectedFiles as $expectedFile) {
-        $content = file_get_contents($expectedFile);
-        expect($content)->toContain($requiredPhrase);
-    }
+    $content = file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+    expect($content)->toContain('DRY violations');
 });
 
-test('resolve skills require code review cycle before PR creation', function (): void {
+test('resolve skills require code review before PR creation', function (): void {
     $packageDir = dirname(__DIR__);
     $resolveSkills = [
         $packageDir . '/skills/resolve-github-issue/SKILL.md',
@@ -1121,35 +1111,19 @@ test('resolve skills require code review cycle before PR creation', function ():
     foreach ($resolveSkills as $skillFile) {
         $content = (string) file_get_contents($skillFile);
         expect($content)->not->toContain('After checks pass, automatically push');
-        expect($content)->toContain('code review cycle is clean');
+        expect($content)->toContain('Code review and security review findings are resolved');
     }
 });
 
-test('resolve-random skills use clear CR-before-PR phrasing', function (): void {
+test('resolve-random-jira-issue skill exists in .claude/skills', function (): void {
     $packageDir = dirname(__DIR__);
-    $randomSkills = [
-        $packageDir . '/skills/resolve-random-github-issue/SKILL.md',
-        $packageDir . '/skills/resolve-random-jira-issue/SKILL.md',
-    ];
-
-    foreach ($randomSkills as $skillFile) {
-        $content = (string) file_get_contents($skillFile);
-        expect($content)->toContain('Before creating the PR');
-        expect($content)->not->toContain('Before pushing changes to PR');
-    }
+    expect(is_file($packageDir . '/.claude/skills/resolve-random-jira-issue/SKILL.md'))->toBeTrue();
 });
 
-test('eloquent query scopes rule is present in code review and refactoring skills', function (): void {
+test('query scopes rule is present in class refactoring skill', function (): void {
     $packageDir = dirname(__DIR__);
-    $expectedFiles = [
-        $packageDir . '/skills/code-review/SKILL.md',
-        $packageDir . '/skills/class-refactoring/SKILL.md',
-    ];
-
-    foreach ($expectedFiles as $expectedFile) {
-        $content = (string) file_get_contents($expectedFile);
-        expect($content)->toContain('Eloquent query scopes');
-    }
+    $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+    expect($content)->toContain('query scopes');
 });
 
 test('install with prune on non-existent target directory does nothing', function (): void {

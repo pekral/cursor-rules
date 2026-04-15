@@ -19,6 +19,7 @@ metadata:
 - **Tests** — Feature or E2E tests for robots response, sitemap response, and head meta (e.g. sitemap link, robots meta). Keep them green after changes.
 
 **Steps:**
+- Before implementing the main change, scan the affected files for pre-existing bugs (broken logic, incorrect behavior, type errors, deprecated patterns). Fix all identified pre-existing bugs in a separate commit before the main implementation commit.
 
 **robots.txt**
 - Response headers: `Content-Type: text/plain; charset=UTF-8`, `X-Robots-Tag: noindex`.

@@ -49,6 +49,7 @@ metadata:
 - Add or update PHPDoc where needed so PHPStan can infer intent/types without ambiguity (especially DTO shapes, iterable generics, and non-obvious contracts).
 
 **Steps:**
+0. Before implementing the main change, scan the affected files for pre-existing bugs (broken logic, incorrect behavior, type errors, deprecated patterns). Fix all identified pre-existing bugs in a separate commit before the main implementation commit.
 1. Analyze current implementation of the target entry point method and identify orchestration steps.
 2. Create a dedicated Action (one use case = one Action) in the correct domain folder under `app/Actions/**`.
 3. Move orchestration from controller method into Action `__invoke(...)`.

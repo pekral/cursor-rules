@@ -16,6 +16,7 @@ metadata:
 - Apply @rules/jira-operations.mdc
 
 **Steps:**
+- Before applying review fixes, scan the affected files for pre-existing bugs (broken logic, incorrect behavior, type errors, deprecated patterns). Fix all identified pre-existing bugs in a separate commit before the main review-fix commit.
 - Identify the task from the provided issue code or URL.
 - Find all open pull requests for that task. If there are multiple open PRs, process each one sequentially — apply the full review-feedback resolution cycle to each PR independently before moving to the next.
 - In each pull request, locate code review output and all review comments (including review threads and general comments).

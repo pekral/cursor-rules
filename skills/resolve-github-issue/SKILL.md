@@ -15,6 +15,7 @@ metadata:
 - **Safe error messages:** All user-facing error and validation messages must be written so they do not reveal internal implementation details, database structure, file paths, or technology specifics that could help an attacker deduce an exploit vector. Messages should be helpful for the user but not informative for an attacker.
 
 **Steps:**
+- Before implementing the main change, scan the affected files for pre-existing bugs (broken logic, incorrect behavior, type errors, deprecated patterns). Fix all identified pre-existing bugs in a separate commit before the main implementation commit.
 - Analyze all comments in the issue and create a list of tasks from the assignment and comments so that you can resolve all issues, if they have not already been resolved.
 - I want you to fix the bug from Github (you either got an ID or a link to Github). Use the available GitHub tools to get all the necessary information about the bug so you can fix it.
 - Classify the task type before writing any code:

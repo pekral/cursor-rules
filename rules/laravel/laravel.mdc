@@ -1,0 +1,103 @@
+---
+description: Core Laravel architecture and coding conventions
+alwaysApply: true
+globs:
+  - app/**/*.php
+  - bootstrap/**/*.php
+  - routes/**/*.php
+  - database/migrations/**/*.php
+  - resources/views/**/*.blade.php
+---
+
+## Architecture
+- Keep business logic out of controllers, middleware, Blade views, and Eloquent models.
+- Use Actions for orchestration-heavy use cases.
+- Treat controllers, jobs, events, listeners, and commands as entry points.
+- Entry points must stay slim: validate input, delegate work, return a response.
+
+## Layer Responsibilities
+- Controllers: accept validated input, authorize access, delegate work.
+- Actions: orchestrate use cases and business flows.
+- Services: focused stateless domain/application services.
+- Repositories: read-only data access.
+- ModelManagers: write-only persistence.
+- Data Builders: transform DTOs only, never query the database.
+
+## Validation
+- Use FormRequest classes for controller validation.
+- Store reusable validation rules as traits in `App\\Concerns`.
+- Use custom Rule classes in `App\\Rules` for complex reusable validation.
+- Before adding inline validation logic, check whether a reusable rule already exists.
+
+## DTOs
+- Prefer typed DTOs over raw arrays across layer boundaries.
+- Use Spatie Laravel Data when the project already uses it.
+- Prefer attribute-based mapping over overriding `from()` only for key renaming.
+- DTOs should be simple, explicit, and immutable where practical.
+
+## Controllers
+- Use method injection.
+- Never call `validate()` directly in controllers.
+- Never execute database queries directly in controllers.
+- Keep resource controllers CRUD-only:
+    - `index`
+    - `create`
+    - `store`
+    - `show`
+    - `edit`
+    - `update`
+    - `destroy`
+- For non-CRUD endpoints, prefer single-action invokable controllers.
+- Call invokable classes using `$action($payload)`, never `$action->__invoke($payload)`.
+
+## Database and Eloquent
+- Prefer Eloquent over Query Builder or raw SQL unless there is a measured reason not to.
+- Keep business logic out of models.
+- Define relationships, scopes, casts, and accessors in models.
+- Use eager loading to avoid N+1 queries.
+- Do not query inside loops.
+- Use `withCount()` for counts where appropriate.
+- Use chunking for large datasets.
+- Prefer the smallest fitting column types.
+- Use snake_case for table and column names.
+
+## Migrations
+- Write `up()` methods only if that is the project convention.
+- Prefer database-level defaults as the source of truth.
+- When adding columns, update `$fillable` only if the project still relies on `$fillable`.
+- Never chain multiple migration-generating commands in one shell line because of timestamp collisions.
+
+## Blade and Views
+- Analyze the existing UI before creating or changing views.
+- Keep layout, colors, spacing, and typography consistent with the application.
+- Blade views are for presentation only.
+- Never execute queries in Blade templates.
+
+## Testing
+- Prefer `Http::fake()` over mocking HTTP integrations manually.
+- Never allow real external HTTP calls in tests.
+- Use factories for Eloquent persistence in tests.
+- Add or update tests for every meaningful behavior change.
+- Use `Artisan::call(CommandClass::class)` for console command execution in tests.
+
+## Queue and Jobs
+- Queue long-running or external-dependent work.
+- Jobs should be idempotent.
+- Avoid heavy logic in job constructors.
+- Define retries, timeout, and backoff explicitly or via config.
+- When reviewing jobs, verify whether queue behavior is configured in the job class or centrally in config.
+
+## Middleware
+- Use middleware only for cross-cutting concerns.
+- Keep middleware focused on one concern.
+- Do not place business logic in middleware.
+- Middleware order must be intentional.
+
+## General Laravel Practices
+- Prefer Laravel conventions and built-in features first.
+- Prefer dependency injection over manual resolution.
+- Prefer named routes and `route()` for URL generation.
+- Follow the Laravel 11/12 application structure when the project uses it:
+    - middleware, exceptions, routes in `bootstrap/app.php`
+    - providers in `bootstrap/providers.php`
+    - console configuration in `routes/console.php`

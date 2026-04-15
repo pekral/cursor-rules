@@ -70,7 +70,7 @@ final class InstallerPath
 
     public static function resolveClaudeMdSource(): ?string
     {
-        $source = self::getPackageDirectory() . '/claude.md';
+        $source = self::getPackageDirectory() . '/CLAUDE.md';
 
         return is_file($source) ? $source : null;
     }

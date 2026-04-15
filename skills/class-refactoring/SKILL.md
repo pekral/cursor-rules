@@ -38,6 +38,7 @@ metadata:
 - When changing Eloquent models, migrations, or factories, do not duplicate column defaults that already exist in the database schema; see `@rules/laravel/architecture.mdc` (Schema defaults, Migrations).
 - **Eloquent query scopes (only in Laravel projects):** Always use defined model scopes instead of inline `->where()` calls when a matching scope exists on the model. If a reusable query condition appears in the changed code and no scope exists yet, extract it into a query scope on the model. See `@rules/laravel/architecture.mdc`.
 - When changing Laravel tests that queue jobs, dispatch only via `JobClass::dispatch(...)` per `@rules/laravel/architecture.mdc` Testing.
+- **Custom Rule classes reuse:** Before adding validation logic to a FormRequest, scan `app/Rules/` for existing custom Rule classes that cover the required validation. Use existing rules instead of inline duplication.
 - DRY principle — eliminate duplicates.
 - Remove obvious comments; keep PHPStan-relevant docs.
 - Single Responsibility Principle.

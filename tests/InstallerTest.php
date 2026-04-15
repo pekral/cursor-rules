@@ -1115,9 +1115,10 @@ test('resolve skills require code review before PR creation', function (): void 
     }
 });
 
-test('resolve-random-jira-issue skill exists in .claude/skills', function (): void {
+test('resolve-random skills are not shipped in source skills directory', function (): void {
     $packageDir = dirname(__DIR__);
-    expect(is_file($packageDir . '/.claude/skills/resolve-random-jira-issue/SKILL.md'))->toBeTrue();
+    expect(is_dir($packageDir . '/skills/resolve-random-github-issue'))->toBeFalse();
+    expect(is_dir($packageDir . '/skills/resolve-random-jira-issue'))->toBeFalse();
 });
 
 test('query scopes rule is present in class refactoring skill', function (): void {

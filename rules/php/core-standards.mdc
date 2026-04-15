@@ -1,0 +1,110 @@
+---
+description: Project context, AI behavior, and unified coding standards for PHP/Laravel projects
+alwaysApply: true
+globs: ["*"]
+---
+
+## Project Context
+- The project tech stack is defined in `composer.json`.
+- Use the PHP version and major package versions defined in `composer.json` as the source of truth.
+- Prefer existing project conventions over introducing new patterns.
+
+## AI Behavior
+- Do not apologize.
+- Do not invent changes, files, implementations, or results.
+- Preserve existing code and do not remove unrelated logic.
+- Verify visible context before proposing changes.
+- Do not speculate when the answer can be derived from the repository context.
+- Do not ask the user to verify something that is already visible in the provided code or files.
+- Do not suggest file changes when no actual modification is needed.
+- Fix obvious grammatical issues in user-facing text you modify.
+
+## Naming
+- Use clear, descriptive names that reveal purpose.
+- Prefer descriptive method and variable names over comments.
+- Classes: PascalCase.
+- Methods and variables: camelCase.
+- Routes: kebab-case URLs and dot notation route names.
+- Config keys: snake_case.
+- Controllers: plural noun + `Controller`.
+- Jobs: action-oriented names.
+- Events: past-tense or domain-event names.
+- Enums: descriptive case names.
+
+## Structure
+- Keep one clear responsibility per class and per method.
+- Avoid god classes and mixed responsibilities.
+- Prefer composition over inheritance unless inheritance is clearly justified.
+- Expose clear interfaces and keep implementation details internal.
+- Extract deeply nested conditionals into well-named methods where it improves readability.
+- Prefer small, simple classes or functions unless state is genuinely needed.
+- Prefer typed DTOs over raw arrays across important boundaries.
+- Use `readonly` for immutable data where practical.
+- Use PHP attributes when they provide a cleaner and more idiomatic solution than manual wiring.
+
+## Code Style
+- Follow active PHP-FIG standards used by the project.
+- Never reformat unrelated existing code.
+- Keep formatting readable and consistent with surrounding code.
+- Add blank lines between distinct logical blocks, but avoid unnecessary vertical noise.
+- Avoid cramped formatting and avoid excessive empty lines.
+
+## PHP Practices
+- Always declare explicit return types.
+- Use the PHP version supported by `composer.json`.
+- Prefer modern PHP syntax when supported by the project.
+- Use `match` where it improves clarity.
+- Use named arguments when they improve readability and reduce ambiguity.
+- Document iterable value types with generics where applicable.
+- Use array shapes for fixed structured arrays when DTOs are not appropriate.
+- Avoid magic numbers; extract meaningful constants when the value has domain meaning.
+- Prefer specific exceptions over generic ones.
+- Catch specific exceptions only when recovery or translation is meaningful.
+- Never suppress errors with `@`.
+
+## Design Principles
+- Follow SOLID pragmatically, not dogmatically.
+- Keep I/O at the edges where practical.
+- Prefer deterministic behavior based on explicit inputs.
+- Extract repeated logic into reusable abstractions only when repetition is real and meaningful.
+- Keep related code together and maintain a logical folder structure.
+- Leave touched code cleaner than you found it.
+
+## Documentation
+- Prefer self-documenting code over explanatory comments.
+- Document APIs, complex business rules, non-obvious side effects, and important constraints.
+- PHPDoc should describe intent and domain meaning, not restate the method name or implementation steps.
+- Keep PHPDoc high-level and useful for maintainers.
+
+## Testing
+- Add or update tests for every meaningful behavior change.
+- Prefer deterministic tests.
+- Use the arrange-act-assert structure when it improves readability.
+- Use clear, human-readable test names.
+- Do not use `describe()` in Pest tests.
+- Prefer top-level `it()` or `test()` blocks only.
+- Prefer data providers through test arguments rather than PHPDoc annotations.
+- Avoid reflection in tests unless there is no reasonable alternative.
+- Split complex conditional test setups into separate test cases instead of branching inside a test.
+- Never generate `covers()` methods unless the repository explicitly requires them.
+- Mock only external services or exception paths that are otherwise hard to reach.
+- Prefer partial mocks over full mocks when mocking is necessary.
+- Follow existing project testing conventions unless introducing a new pattern is clearly justified.
+
+## Bug Fix Workflow
+- Write or update a failing test before fixing a bug when practical.
+- Refactor only after behavior is covered.
+- Run the most relevant tests for changed code first.
+
+## Fluent API Design
+- Prefer readable, intention-revealing APIs over vague helper utilities.
+- Use factory methods like `of()` or `from()` when they match existing project style.
+- Prefer explicit domain language over generic utility method naming.
+- Avoid god utility classes with many unrelated static helpers.
+
+## Globals
+- Do not use global variables.
+- Do not introduce `global` state in application or test code unless the platform truly requires it.
+
+## Async Review Note
+- When reviewing asynchronous jobs, first verify whether retry, timeout, and backoff behavior is defined in the job itself or centrally in configuration.

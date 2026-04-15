@@ -1296,12 +1296,12 @@ test('InstallerPruner handles unwritable parent directory when removing empty di
     }
 });
 
-test('resolveClaudeMdSource returns path to claude.md in package', function (): void {
+test('resolveClaudeMdSource returns path to CLAUDE.md in package', function (): void {
     $source = InstallerPath::resolveClaudeMdSource();
 
     expect($source)->not->toBeNull();
     expect($source)->toBeString();
-    expect($source)->toEndWith('/claude.md');
+    expect($source)->toEndWith('/CLAUDE.md');
     expect(is_file((string) $source))->toBeTrue();
 });
 
@@ -1435,9 +1435,9 @@ test('install never overwrites existing CLAUDE.md even with force flag', functio
     }
 });
 
-test('claude.md source file exists in package', function (): void {
+test('CLAUDE.md source file exists in package', function (): void {
     $packageDir = dirname(__DIR__);
-    $claudeMd = $packageDir . '/claude.md';
+    $claudeMd = $packageDir . '/CLAUDE.md';
 
     expect(is_file($claudeMd))->toBeTrue();
     expect(file_get_contents($claudeMd))->toContain('Behavioral guidelines');

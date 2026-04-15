@@ -4,7 +4,7 @@
 
 # Cursor Rules for PHP and Laravel
 
-**Cursor rules for PHP and Laravel** — a complete set of `.mdc` rule files and Cursor Agent skills for the Cursor editor. One package for PHP and Laravel cursor rules: coding standards, testing, and conventions. The installer discovers the project root (via `composer.json` lookup from the current directory), mirrors the `rules/` directory into `.cursor/rules` and the `skills/` directory into `.cursor/skills`, and copies or symlinks every file into the target project. Use cursor rules for PHP and Laravel to keep every edit aligned with enforced standards, plus comprehensive Agent skills for issue resolution, bug fixing, code review, security analysis, refactoring, testing, and package review.
+**Cursor rules for PHP and Laravel** — a complete set of `.mdc` rule files and Agent skills for Cursor, Claude Code, and Codex. One package for PHP and Laravel cursor rules: coding standards, testing, and conventions. The installer discovers the project root (via `composer.json` lookup from the current directory), mirrors the `rules/` directory into the editor's rules path and the `skills/` directory into the editor's skills path, and copies or symlinks every file into the target project. Use cursor rules for PHP and Laravel to keep every edit aligned with enforced standards, plus comprehensive Agent skills for issue resolution, bug fixing, code review, security analysis, refactoring, testing, and package review.
 
 ## Why This Package
 
@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **30 comprehensive Agent skills** for automated workflows (v0.6.2)
+- **23 comprehensive Agent skills** for automated workflows (v0.7)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -31,7 +31,7 @@ By default the installer targets **Cursor** only (`.cursor/rules`, `.cursor/skil
 
 When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`.
 
-**Important:** By default, the installer only copies missing files and keeps existing content untouched. Use the `--force` flag to overwrite existing files: `vendor/bin/cursor-rules install --force`. This is particularly useful when you want to update rules to their latest versions or when you've made local changes that should be replaced. The file `.cursor/rules/project.mdc` is never overwritten once it exists in the target project, so you can safely customize it for your project.
+**Important:** By default, the installer only copies missing files and keeps existing content untouched. Use the `--force` flag to overwrite existing files: `vendor/bin/cursor-rules install --force`. This is particularly useful when you want to update rules to their latest versions or when you've made local changes that should be replaced. The file `.cursor/rules/project.mdc` and `CLAUDE.md` are never overwritten once they exist in the target project, so you can safely customize them.
 
 ### Automatic Installation via Composer Plugin
 
@@ -84,8 +84,9 @@ vendor/bin/cursor-rules install --symlink          # prefer symlinks (fallback t
 2. Resolve the rules source (local `rules/` or `vendor/pekral/cursor-rules/rules`).
 3. Install rules into the target directory(ies) for the chosen editor (see `--editor`).
 4. If present, resolve the skills source and install into the corresponding skill directory(ies).
-5. Optionally overwrite existing files with `--force`; use `--symlink` to prefer symlinks (fallback to copy on Windows).
-6. Surface explicit errors for missing directories, removal failures, and copy/symlink failures.
+5. For `--editor=claude` or `--editor=all`: copy `CLAUDE.md` to the project root (never overwrites existing).
+6. Optionally overwrite existing files with `--force`; use `--symlink` to prefer symlinks (fallback to copy on Windows).
+7. Surface explicit errors for missing directories, removal failures, and copy/symlink failures.
 
 ### CLI Switches
 
@@ -98,9 +99,9 @@ vendor/bin/cursor-rules install --symlink          # prefer symlinks (fallback t
 
 ---
 
-# 🎯 Skills Overview — **v0.6.2**
+# 🎯 Skills Overview — **v0.7**
 
-> Current release includes 31 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
+> Current release includes 23 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -110,13 +111,12 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 
 | Skill | Description |
 |---|---|
-| `analyze-problem` | Analyze problems from issue trackers, including attachments, technical context, and human-readable outputs. |
+| `analyze-problem` | Structured problem analysis for debugging, root cause identification, and breaking down complex issues. |
 | `resolve-issue` | Unified issue resolution for GitHub, JIRA, and Bugsnag. Detects the tracker from the provided link, implements fixes, runs review loops, and creates a PR. |
-| `resolve-random-jira-issue` | Pick and resolve a random JIRA issue with the full quality workflow. |
-| `answer-pr-questions` | Find unanswered current issue/PR questions and generate short PM/client-friendly unified answers. |
-| `merge-github-pr` | Merge one GitHub PR that is ready for deployment. |
+| `merge-github-pr` | Safely merge GitHub pull requests that are ready for deployment. |
 | `create-issue` | Create a tracker issue from provided task text while preserving original meaning and structure. |
-| `create-jira-issue-from-pr` | Draft a JIRA-ready issue from GitHub PR review context while preserving original assignment text. |
+| `create-issues-from-text` | Batch-create issues from provided text with automatic structure detection. |
+| `pr-summary` | Summarize current PR changes for development and product teams in a clear markdown report. |
 
 ## Code Review, Security & Architecture
 
@@ -126,9 +126,8 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `code-review-github` | Review GitHub pull requests with severity-based findings and review comments. |
 | `code-review-jira` | Review JIRA-linked changes with GitHub PR comments and structured findings. |
 | `process-code-review` | Process existing review feedback, resolve comments, and prepare next review cycle. |
-| `security-review` | OWASP-focused security review (injection, auth, exposure, misconfigurations). |
+| `security-review` | OWASP-focused security review (injection, auth, SSRF, exposure, misconfigurations). |
 | `class-refactoring` | Refactor PHP classes using SOLID and Laravel best practices with testability focus. |
-| `race-condition-review` | Review shared-state and concurrency paths for race conditions and atomicity gaps. |
 | `refactor-entry-point-to-action` | Refactor controller/job/command/listener entry-point logic into Action classes. |
 | `smartest-project-addition` | Propose one high-impact, low-risk project improvement. |
 | `understand-propose-implement-verify` | Enforce a strict 4-step loop: understand, propose, implement, verify. |
@@ -142,41 +141,36 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `rewrite-tests-pest` | Rewrite tests to PEST style while preserving behavior and conventions. |
 | `test-like-human` | Validate PR behavior from user perspective using scenario-driven testing. |
 | `test-driven-development` | Enforce strict red-green-refactor flow for bugfixes and features. |
-| `postman-collections` | Create or update Postman collections for changed API endpoints. |
 
-## Platform, Data & SEO
+## Platform & Data
 
 | Skill | Description |
 |---|---|
 | `composer-update` | Analyze composer updates, conflicts, and changelog impact. |
-| `package-review` | Review `composer.json` and package metadata/configuration quality. |
 | `mysql-problem-solver` | Diagnose and optimize MySQL queries, indexes, and execution plans. |
 | `laravel-telescope` | Analyze Laravel Telescope request data from URL, match entries in DB, and propose concrete optimizations. |
-| `seo-fix` | Implement and maintain Laravel SEO assets (robots/sitemap/meta/canonical). |
-| `seo-geo` | Improve SEO + GEO (AI search visibility and citation-readiness). |
 
 ---
 
 ## Rules Overview
 
-Cursor rules for PHP and Laravel included in this package:
+Rules included in this package:
 
-| File                   | Description                                                | Scope    |
-|------------------------|------------------------------------------------------------|----------|
-| `project.mdc`          | Base rules for actual project                              | Always   |
-| `php/core.mdc`         | Project tech stack and core context                        | Always   |
-| `php/standards.mdc`    | Unified coding standards for PHP/Laravel projects          | Always   |
-| `git/conventions.mdc`  | Git and commit conventions                                 | Always   |
-| `git/general.mdc`      | Git workflow — analyze branch/commits when outside main    | Always   |
-| `git/pr.mdc`           | Create pull request in Github                              | Always   |
-| `laravel/architecture.mdc` | Laravel architecture and conventions                   | Laravel  |
-| `laravel/arch-app-services.mdc` | BaseModelService/Data Validator conventions for `pekral/arch-app-services` projects | Laravel |
-| `laravel/filament.mdc` | Filament v4 specific rules                                 | Filament |
-| `laravel/livewire.mdc` | Livewire component rules and conventions                   | Livewire |
-| `sql/optimalize.mdc`   | SQL query optimization, index design, schema standards     | Always   |
-| `security/backend.md`  | Backend security rules and OWASP Top 10 checks             | Always   |
-| `security/frontend.md`  | Frontend security rules (XSS, CSRF, CSP)                  | Frontend |
-| `security/mobile.md`   | Mobile-specific security rules and WebView checks          | Mobile   |
+| File                          | Description                                                | Scope    |
+|-------------------------------|------------------------------------------------------------|----------|
+| `php/core-standards.mdc`      | Project context, AI behavior, and unified PHP/Laravel coding standards | Always   |
+| `git/general.mdc`             | Unified git workflow, commits, and pull request rules       | Always   |
+| `code-review/general.mdc`     | Code review conventions and output rules                   | Always   |
+| `code-testing/general.mdc`    | Testing conventions and quality standards                  | Always   |
+| `jira/general.mdc`            | JIRA CLI usage and formatting rules                        | JIRA     |
+| `laravel/architecture.mdc`    | Laravel architecture and conventions                       | Laravel  |
+| `laravel/laravel.mdc`         | Laravel-specific rules and patterns                        | Laravel  |
+| `laravel/filament.mdc`        | Filament v4 specific rules                                 | Filament |
+| `laravel/livewire.mdc`        | Livewire component rules and conventions                   | Livewire |
+| `sql/optimalize.mdc`          | SQL query optimization, index design, schema standards     | Always   |
+| `security/backend.md`         | Backend security rules and OWASP Top 10 checks             | Always   |
+| `security/frontend.md`        | Frontend security rules (XSS, CSRF, CSP)                  | Frontend |
+| `security/mobile.md`          | Mobile-specific security rules and WebView checks          | Mobile   |
 
 All `.mdc` and `.md` files are ready for automatic injection by Cursor so every PHP and Laravel edit stays aligned with the enforced standards.
 

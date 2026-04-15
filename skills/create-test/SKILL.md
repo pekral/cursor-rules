@@ -1,33 +1,63 @@
 ---
 name: create-test
-description: "Use when creating tests following project conventions and patterns. Ensures deterministic tests, 100% code coverage for changes, uses data providers where appropriate, and mocks only external services or exception scenarios."
+description: Use when create or update tests to ensure full coverage for current changes
 license: MIT
 metadata:
-  author: "Petr Král (pekral.cz)"
+  author: Petr Král (pekral.cz)
 ---
 
-**Constraint:**
-- Apply @rules/base-constraints.mdc
-- Apply @rules/testing-conventions.mdc
+# Create Test
 
-**Steps:**
-- Locate existing tests or create new ones following project conventions.
-- Never modify production code!
-- Create deterministic every time!
-- Use existing test patterns, helpers, and conventions.
-- Arrange-act-assert pattern, error cases first
-- Before writing tests, always analyze the abstractions that will be used in the tests and always use helper methods if it simplifies the code.
-- If the PEST test requires calling a method that is in an abstract class, use the notation `test()->methodName()`.
-- Never generate the covers() method!
-- In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
-- In Livewire component tests, prefer explicit `set()` calls for form state updates over `fill()`. `fill()` can trigger multiple Livewire round-trips (one per field) and significantly slow down tests.
-- Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases instead.
-- Use data providers when they simplify writing and readability.
-- Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them.
-- Make sure of 100% coverage required for changes. Add tests so that 100% coverage is achieved. Prioritize modifying existing test cases; if tests do not exist, add them according to the valid rules for writing tests.
-- Check that the tests are written according to the test-writing guidelines and ensure 100% coverage; fix dry; use data providers to simplify the tests
-- After creating or modifying tests, check that they are not flaky.
-- Remove generated coverage after work is done.
+## Purpose
+Create or update tests to cover current changes according to project conventions.
 
-**After completing the tasks**
-- If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!
+---
+
+## Constraints
+- Apply @rules/code-testing/general.mdc
+- Do not modify production code unless strictly required
+
+---
+
+## Execution
+
+### 1. Analyze Context
+- Locate existing tests
+- Identify missing coverage for changed code
+
+### 2. Create or Update Tests
+- Prefer updating existing tests
+- Create new tests only if necessary
+- Follow project conventions and helpers
+
+### 3. Ensure Coverage
+- Cover all changed code paths
+- Include:
+    - happy paths
+    - edge cases
+    - regression scenarios
+
+### 4. Validate
+- Run relevant tests
+- Ensure deterministic behavior
+- Remove flakiness
+
+---
+
+## Output
+
+- Created or updated test files
+- Coverage status for current changes
+
+---
+
+## Principles
+
+- Prefer updating existing tests over creating new ones
+- Keep tests simple and deterministic
+- Cover behavior, not implementation
+- Focus on changed code only
+- Follow project test conventions strictly
+- Prefer minimal tests for maximum coverage
+- Avoid duplication across test cases
+- Keep tests readable and maintainable

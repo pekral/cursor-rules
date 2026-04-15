@@ -7,8 +7,8 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/base-constraints.mdc
-- Apply @rules/github-operations.mdc
+- Apply @rules/php/core-standards.mdc
+- Apply @rules/git/general.mdc
 - Write the summary in singular first person (one developer made the changes).
 - The output must be formatted in markdown.
 - Focus on the "why" and business impact, not on implementation details.
@@ -45,3 +45,13 @@ Brief notes on what was tested or what should be verified before deployment.
 
 **After completing the tasks**
 - Post the summary as a comment to the related PR or issue if available.
+
+---
+
+## Principles
+- Focus on business impact, not technical detail
+- Explain the "why", not just the "what"
+- Group changes into meaningful categories
+- Avoid listing low-value or trivial changes
+- Be concise and easy to scan
+- Highlight risks and breaking changes first

@@ -11,9 +11,9 @@ metadata:
 ---
 
 **Constraint:**
--   Apply @rules/base-constraints.mdc
--   Apply @rules/github-operations.mdc
--   Apply @rules/testing-conventions.mdc
+-   Apply @rules/php/core-standards.mdc
+-   Apply @rules/git/general.mdc
+-   Apply @rules/code-testing/general.mdc
 -   If you are not on the main git branch in the project, switch to it.
 -   This task is based on the existing pull request review.
 -   First read your existing code review for the current pull request
@@ -78,3 +78,10 @@ Provide a brief markdown summary including:
     uncovered scenario.
 - Ask for create new commit with missing tests
 - If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!
+
+## Principles
+
+- Follow code review recommendations strictly
+- Do not duplicate existing tests
+- Prefer minimal changes for full coverage
+- Focus on changed code only

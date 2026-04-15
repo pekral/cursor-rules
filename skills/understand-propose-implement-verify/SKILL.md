@@ -1,34 +1,45 @@
 ---
 name: understand-propose-implement-verify
-description: "Use when the agent must follow a strict problem-solving loop: understand, propose, implement, verify."
+description: "Use when following a strict problem-solving loop: understand, propose, implement, verify."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
-**Constraint:**
-- Apply @rules/base-constraints.mdc
-- Always follow this order: understand -> propose -> implement -> verify.
-- Reuse existing project skills whenever they already solve a phase better than ad-hoc work.
+## Constraints
+- Apply `@rules/php/core-standards.mdc`
+- Always follow this order: understand → propose → implement → verify
+- Prefer existing project skills over custom solutions; do not duplicate logic already covered by a skill
 
-**Steps:**
-- **First: understand the problem**
-- Analyze assignment details, comments, context files, and any linked issue-tracker resources.
-- Classify the request (bug, feature, refactor, review, docs, infra).
-- Build a short task checklist with assumptions and constraints.
-- **Then: propose solution**
-- Propose the smallest safe solution that satisfies the request.
-- Explain expected impact, trade-offs, risks, and why this approach is preferred.
-- Select and invoke relevant existing skills for the task (e.g. `resolve-github-issue`, `create-test`, `code-review`, `security-review`, `process-code-review`).
-- **Then: implement**
-- Execute the proposed solution end-to-end.
-- Keep changes focused, deterministic, and aligned with existing project conventions.
-- Add or update tests for all changed behavior.
-- **Finally: verify correctness**
-- Run required fixers/checkers/tests for changed scope.
-- Confirm output quality, regressions, and requirement coverage.
-- Report final status with what changed, what was tested, and any remaining risks.
+## Use when
+- Solving a task that requires structured thinking and controlled execution
+- Coordinating multiple steps or skills
 
-**After completing the tasks**
-- Ensure every response and change can be traced back to this four-step loop.
-- Ensure existing skills were reused where applicable instead of duplicating logic.
+## Execution
+
+### 1. Understand
+- Analyze the problem, context, and related resources
+- Classify the task (bug, feature, refactor, review, etc.)
+- Define a short checklist of goals, constraints, and assumptions
+
+### 2. Propose
+- Suggest the smallest safe solution
+- Explain why this approach is preferred (impact, risk, trade-offs)
+- Select relevant existing skills to execute the plan
+
+### 3. Implement
+- Execute the solution using selected skills where applicable
+- Keep changes focused and aligned with project conventions
+- Add or update tests for changed behavior
+
+### 4. Verify
+- Validate the result against requirements
+- Run relevant checks/tests for the affected scope
+- Ensure no regressions or unintended side effects
+- Summarize what was changed, tested, and any remaining risks
+
+## Done when
+- The task is fully addressed
+- The solution follows the defined loop
+- Existing skills were reused where applicable
+- Results are validated and clearly summarized

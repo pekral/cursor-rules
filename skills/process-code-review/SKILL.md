@@ -7,45 +7,105 @@ metadata:
 ---
 
 **Constraint:**
-- Apply @rules/base-constraints.mdc
-- Apply @rules/github-operations.mdc
-- Never combine multiple languages in your answer, e.g., one part in English and the other in Czech.
-- All CR output (findings, recommendations, comments) must be written in English.
-- Never push direct changes to the main branch.
-- If the pull request has merge conflicts with the base branch, stop and report that the code review processing is blocked.
-- Apply @rules/jira-operations.mdc
+- Apply @rules/php/core-standards.mdc
+- Apply @rules/git/general.mdc
+- Apply @rules/jira/general.mdc
+- Never combine multiple languages in your answer
+- All CR output must be written in English
+- Never push direct changes to the main branch
+- If the pull request has merge conflicts with the base branch, stop and report it
+- Do not introduce new logic unrelated to review feedback
 
-**Steps:**
-- Before applying review fixes, scan the affected files for pre-existing bugs (broken logic, incorrect behavior, type errors, deprecated patterns). Fix all identified pre-existing bugs in a separate commit before the main review-fix commit.
-- Identify the task from the provided issue code or URL.
-- Find all open pull requests for that task. If there are multiple open PRs, process each one sequentially — apply the full review-feedback resolution cycle to each PR independently before moving to the next.
-- In each pull request, locate code review output and all review comments (including review threads and general comments).
-- If there is only a generic `CR` comment, treat it as `code review` feedback.
-- Build a checklist from all review findings and map each item to a concrete code or test change.
-- Ensure the checklist explicitly contains all reported **DRY violations** and tracks their resolution before triggering the next CR cycle.
-- Apply the requested changes and keep scope limited to review feedback. All new or modified production code must follow @skills/class-refactoring/SKILL.md.
-- **Simplification analysis:** Evaluate whether the solution can be written more simply without altering the new logic, leveraging rules and conventions already defined in `rules/**/*.mdc`. Flag unnecessary complexity as a finding.
-- **Safe error messages:** When resolving review feedback, ensure that all user-facing error and validation messages do not reveal internal implementation details, database structure, file paths, or technology specifics that could help an attacker deduce an exploit vector. Messages should be helpful for the user but not informative for an attacker.
-- Re-check current changes with @skills/code-review/SKILL.md and @skills/security-review/SKILL.md.  
-- If review feedback requires additional tests, use @skills/create-missing-tests-in-pr/SKILL.md and ensure current changes are fully covered.
-- If new database migrations were created during the changes, run them (`php artisan migrate`) before running tests or creating a PR.
-- Run only checks/tests needed for the changed files and fix all errors before continuing.
-- Run the issue-tracker-specific code review skill before PR creation:
-  - GitHub issue flow: run @skills/code-review-github/SKILL.md
-  - JIRA issue flow: run @skills/code-review-jira/SKILL.md
-- Fix all Critical and Moderate findings from that review and repeat the same review skill until no Critical or Moderate findings remain.
-- After the CR loop is clean (no **Critical** or **Moderate** findings), run @skills/test-like-human/SKILL.md when the change can be tested. The test-like-human skill must post its unified test report as a comment to the related issue in the issue tracker.
-- Commit all changes and push the branch. If no pull request exists for the current branch, create one according to @rules/git/general.mdc rules — link it to the original issue and follow the PR description format (title in English, body in the language of the assignment). Do not create a new PR before the CR cycle is clean.
-- Update the review result comment in the pull request:
-- mark resolved points as checked items when possible, or
-- format resolved points as underlined text when checkbox updates are not possible.
-- If you cannot update the original comment, add a new PR comment with the same resolved-point status.
-- After all points are addressed, trigger the next review interaction by issue tracker:
-- GitHub: run @skills/code-review-github/SKILL.md
-- JIRA: run @skills/code-review-jira/SKILL.md
-- Share a concise completion report with PR link, resolved items, and any remaining blockers.
+---
 
-**After completing the tasks**
-- Confirm all review points are resolved or explicitly marked as blocked with reasons.
-- Ensure the PR contains clear evidence that each review remark was handled.
-- Summarize what changed, what was tested, and what requires follow-up.
+## Steps
+
+- Identify the task from the provided issue code or URL
+- Find all open pull requests for the task
+  - If multiple PRs exist, process each independently
+
+### For each PR:
+
+- Load all review comments (including threads and general comments)
+- Build a checklist from all review findings
+- Map each finding to a concrete code or test change
+
+---
+
+### Pre-fix phase
+
+- Scan affected files for pre-existing bugs
+- Fix them in a **separate commit** before applying review fixes
+
+---
+
+### Apply fixes
+
+- Apply only requested review changes
+- Keep scope strictly limited to review feedback
+- Ensure DRY violations are included and resolved
+- All production code changes must follow:
+  - @skills/class-refactoring/SKILL.md
+
+---
+
+### Testing
+
+- If tests are required or missing:
+  - Run @skills/create-missing-tests-in-pr/SKILL.md
+- Ensure current changes have 100% coverage
+- Run only relevant tests for changed files
+- If migrations were added, run `php artisan migrate`
+
+---
+
+### Review loop
+
+- Run the appropriate review skill:
+  - GitHub: @skills/code-review-github/SKILL.md
+  - JIRA: @skills/code-review-jira/SKILL.md
+
+- Fix findings and repeat until:
+  - No **Critical** or **Moderate** issues remain
+
+---
+
+### Finalization
+
+- Run @skills/test-like-human/SKILL.md if changes are testable
+- Commit and push changes
+- If PR does not exist, create it according to @rules/git/general.mdc
+  - Title in English
+  - Body in assignment language
+
+---
+
+### PR update
+
+- Update review comments:
+  - Mark resolved items (checkbox or inline)
+- If original comment cannot be edited, add a new one
+
+---
+
+### Completion
+
+- Trigger final review:
+  - GitHub: @skills/code-review-github/SKILL.md
+  - JIRA: @skills/code-review-jira/SKILL.md
+
+- Share a concise completion report:
+  - PR link
+  - resolved items
+  - remaining blockers (if any)
+
+---
+
+## Principles
+
+- Resolve review feedback, do not expand scope
+- Prefer minimal changes over unnecessary refactoring
+- Do not introduce new bugs while fixing existing ones
+- Keep changes traceable to review comments
+- Ensure every review comment is explicitly addressed
+- Avoid unnecessary commits or noise

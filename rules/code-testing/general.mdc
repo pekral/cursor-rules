@@ -7,7 +7,7 @@ globs: []
 ## Testing Rules
 
 - Follow test conventions from:
-    - @rules/php/standards.mdc
+    - @rules/php/core-standards.mdc
     - @rules/laravel/architecture.mdc (for Laravel projects)
 
 - Never use `describe()`; use top-level `it()` / `test()` only.

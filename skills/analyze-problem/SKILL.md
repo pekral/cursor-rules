@@ -1,6 +1,7 @@
 ---
 name: analyze-problem
-description: Structured problem analysis for debugging, root cause identification, and breaking down complex issues before proposing solutions
+description: Use when structured problem analysis for debugging, root cause
+  identification, and breaking down complex issues before proposing solutions
 license: MIT
 metadata:
   author: Petr Král (pekral.cz)
@@ -20,7 +21,7 @@ Focus on:
 ---
 
 ## Constraints
-- Apply @rules/base-constraints.mdc
+- Apply @rules/php/core-standards.mdc
 - Never modify code
 - Output Markdown only
 - Use one language only

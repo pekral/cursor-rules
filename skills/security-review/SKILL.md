@@ -1,38 +1,38 @@
 ---
 name: security-review
-description: "Use when performing comprehensive security review for Laravel/PHP projects. Covers OWASP Top 10, SSRF, auth flaws, data exposure, and incident-response hardening."
+description: "Use when performing a focused security review for Laravel/PHP projects. Prioritize real exploitability, business logic flaws, and high-risk vulnerabilities."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
 ## Constraints
-- Apply @rules/base-constraints.mdc
-- Apply @rules/review-only.mdc
-- All output must be in English
-- Be precise and realistic
-- Never reveal secret values
+- Apply `@rules/php/core-standards.mdc`
+- Apply `@rules/code-review/general.mdc`
+- Output must be in English
+- Focus on realistic, exploitable issues
+- Never reveal secrets
 
 ## Scope
-Perform a comprehensive security review with focus on:
+Perform a focused security review with emphasis on:
 - real exploitability
 - business logic flaws
 - missing authorization
-- dangerous data flows
+- unsafe data flows
 
-Do not rely on generic best practices alone — prioritize findings based on real risk.
+Avoid generic best-practice noise.
 
 ---
 
-## Core Security Checks
+## Core Checks
 
 ### Input & Injection
-- SQL, command, LDAP injection
-- XSS (stored, reflected, DOM-based)
-- unsafe deserialization / parser abuse
+- SQL / command injection
+- XSS (stored, reflected, DOM)
+- unsafe deserialization
 
-### Authentication & Authorization
-- missing authorization checks (IDOR / BOLA)
+### Authentication & Access Control
+- missing authorization (IDOR / BOLA)
 - privilege escalation
 - broken access control
 
@@ -40,105 +40,47 @@ Do not rely on generic best practices alone — prioritize findings based on rea
 - sensitive data leaks (API, logs, errors)
 - unsafe error messages (stack traces, paths, DB details)
 
-### API Security
-- missing auth / auth bypass
-- weak CORS
-- missing rate limiting
-- missing integrity checks
+### External Interaction (APIs & SSRF)
+- outbound requests with user-controlled input
+- missing domain allowlists
+- access to internal/private IPs
+- dangerous protocols (`file://`, `gopher://`, etc.)
+- missing validation after redirects
+- missing rate limiting or abuse protection
 
-### External Requests (SSRF)
-- identify all outbound request sinks:
-  - HTTP clients, cURL, file functions
-  - webhooks, imports, crawlers, previews
+### File Handling
+- unsafe uploads (extension, MIME, signature)
+- path traversal
+- execution risk (files in webroot)
 
-- detect user-controlled input:
-  - URL, host, scheme, port, redirects
+### Dependencies & Configuration
+- vulnerable packages (`composer.lock`, `composer audit`)
+- unsafe configuration (uploads, execution, credentials)
 
-- verify protections:
-  - allowlist of domains
-  - block private/internal IP ranges
-  - deny dangerous protocols (`file://`, `gopher://`, etc.)
-  - validate resolved IP (DNS rebinding protection)
-  - re-validate after redirects
-  - enforce timeouts and limits
-
-- report:
-  - entry point
-  - sink
-  - reachable internal targets
-  - SSRF type (direct / blind)
-
-### File Uploads
-- allowlist extensions
-- MIME + signature validation
-- random filenames
-- storage outside webroot
-- path traversal protection
-
-### Secrets
-- no hardcoded credentials
-- `.env` not committed
-- `.env.example` safe
-- check git history for leaks
-- recommend rotation if exposed
-
-### Cryptography
-- encryption in transit and at rest
-- safe key handling
-
-### Logging & Monitoring
-- log security-critical events
-- avoid leaking sensitive data in logs
+### Queues & Background Jobs
+- retry abuse
+- non-idempotent operations
+- unsafe external calls
 
 ---
 
-## Laravel/PHP Specific Audit
-
-### Dependencies
-- analyze `composer.lock`
-- check `composer audit`
-- flag vulnerable packages
-- highlight critical cases (e.g. known vulnerable libs)
-
-### Malware / Webshell Detection
-- scan upload/storage paths for executable PHP
-- detect suspicious patterns:
-  - `eval`, `base64_decode`, `exec`, etc.
-- check `.htaccess` anomalies
-
-### Configuration
-- verify PHP execution blocked in upload/storage
-- check file upload handling
-- check credential exposure risk
-
-### Queue & Background Jobs
-- check idempotency
-- check retry abuse risk
-- check unsafe external calls
-
----
-
-## Modern Threat Coverage (2023–2026)
-
-- ATO resistance (credential stuffing / spraying)
-- password reset / OTP hardening
-- API resource exhaustion (rate limits, quotas)
-- fail-secure behavior
-- SSRF bypass techniques
-- supply chain risks (SCA, lockfile changes)
-- exploitability-based prioritization (CVSS, EPSS, KEV)
+## Prioritization
+- Focus on issues that are:
+  - exploitable in real scenarios
+  - impactful (data access, privilege escalation, RCE)
+- Deprioritize theoretical or low-impact findings
 
 ---
 
 ## Report
 
-### Severity Levels
+### Severity
 - Critical
 - High
 - Medium
 - Low
 
-### For each finding include:
+### Each finding must include
 - severity
 - category (OWASP)
 - location (file + line)
@@ -164,3 +106,5 @@ Do not rely on generic best practices alone — prioritize findings based on rea
 
 ### Action Items
 1. [ ] ...
+
+```

@@ -1,32 +1,41 @@
 ---
 name: smartest-project-addition
-description: "Use when you want one radically useful, high-impact project addition proposal."
+description: "Use when you want exactly one high-impact, concrete proposal for the next project addition."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
-**Constraint:**
-- Apply @rules/base-constraints.mdc
-- Focus on exactly one proposal with the highest impact.
-- Do not return multiple alternatives in the final recommendation.
-- Do not implement code unless explicitly requested.
+## Constraints
+- Apply `@rules/php/core-standards.mdc`
+- Recommend exactly one addition
+- Do not include alternative proposals in the final answer
+- Do not implement code unless explicitly requested
 
-**Steps:**
-- Analyze the current repository context (architecture, tests, DX, reliability, performance, security, delivery speed).
-- Use this core ideation prompt internally:
-- "What is the single smartest and most radically innovative and accretive and useful and compelling addition you could make to the project at this point?"
-- Use this technical variant when code-level direction is needed:
-- "What is the single smartest and most radically innovative and accretive and useful and compelling technical code change/addition you could make to the project at this point?"
-- Evaluate candidate ideas by impact, implementation complexity, risk, and reversibility.
-- Select exactly one proposal with the best impact/complexity/risk ratio.
-- Prepare output with:
-- concise proposal statement,
-- expected business and technical benefits,
-- key risks and mitigations,
-- minimal implementation plan (smallest safe iteration),
-- test strategy and rollout/rollback notes.
+## Use when
+- You want the single most valuable next addition to the project
+- You want a concrete recommendation, not a list of ideas
 
-**After completing the tasks**
-- Ensure the recommendation is concrete, measurable, and actionable.
-- Ensure the final answer contains only one top proposal.
+## Required approach
+- Inspect the current repository and identify the strongest leverage point across architecture, DX, reliability, performance, security, or delivery speed
+- Evaluate candidate ideas by:
+    - impact
+    - implementation complexity
+    - risk
+    - reversibility
+- Select exactly one proposal with the best overall leverage
+
+## Output
+Provide:
+- a concise proposal statement
+- why this is the best next addition now
+- expected business and technical benefits
+- key risks and mitigations
+- smallest safe implementation plan
+- test/validation strategy
+- rollout and rollback notes
+
+## Done when
+- The recommendation is concrete, measurable, and actionable
+- The final answer contains exactly one proposal
+- The proposal is justified by impact relative to complexity and risk

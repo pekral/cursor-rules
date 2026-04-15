@@ -1,32 +1,44 @@
 ---
 name: rewrite-tests-pest
-description: "Use when rewriting existing tests to PEST syntax. Follows project conventions, ensures DRY principles, uses data providers, maintains 100% coverage, and verifies test functionality."
+description: "Use when rewriting existing tests to Pest syntax. Preserve behavior, follow project testing conventions, reduce duplication where helpful, and verify rewritten tests are deterministic and passing."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
-**Constraint:**
-- Apply @rules/base-constraints.mdc
-- Apply @rules/testing-conventions.mdc
+## Constraints
+- Apply `@rules/php/core-standards.mdc`
+- Apply `@rules/code-testing/general.mdc`
+- Do not generate `covers()`
 
-**Steps:**
-- For tests that do not use PEST syntax, I want you to rewrite them in PEST syntax.
-- Never generate the covers() method!
-- Follow the rules for writing tests.
-- Create deterministic every time!
-- Arrange-act-assert pattern, error cases first
-- Before writing tests, always analyze the abstractions that will be used in the tests and always use helper methods if it simplifies the code.
-- If there are any "shared" helper functions such as `bindSparkpostMailerNever($this->app);`, I want all these functions to be defined in the Pest.php file.
-- If the PEST test requires calling a method that is in an abstract class, use the notation `test()->methodName()`.
-- In tests, avoid reflection; use mocks instead (even partial ones, if they are effective and easy to read).
-- Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases instead.
-- Correct DRY, use data providers, and try to write tests as simply as possible.
-- After creating or modifying tests, check that they are not flaky.
-- Analyze the created tests and all tests that are similar and can be simplified using data providers, then modify them.
-- Tests must have 100% coverage.
-- After writing the tests, verify that they are functional and follow the rules.
-- Check that the tests are written according to the test-writing guidelines and ensure 100% coverage; fix dry; use data providers to simplify the tests
+## Use when
+- Existing tests are written in PHPUnit-style syntax and should be rewritten to Pest
+- You want to modernize tests without changing their intended behavior
 
-**After completing the tasks**
-- If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!
+## Required approach
+- Preserve test intent and coverage of the rewritten behavior
+- Keep tests deterministic and non-flaky
+- Prefer simple, readable Pest syntax
+- Use helper methods or datasets when they clearly reduce duplication
+- Avoid reflection; prefer mocks or partial mocks when readable and effective
+- Avoid branching in tests; prefer separate test cases or datasets instead
+
+## Execution
+1. Identify existing tests that should be rewritten to Pest syntax.
+2. Analyze repeated setup and assertions before rewriting.
+3. Rewrite tests to Pest syntax without changing covered behavior.
+4. Use datasets/data providers where they simplify similar test cases.
+5. Move broadly shared lightweight test helpers to `Pest.php` when it improves clarity and reuse.
+6. If a Pest test needs to call a helper method defined on the test case for abstract-class scenarios, use `test()->methodName()`.
+7. Keep tests structured and easy to read, preferably with clear arrange / act / assert flow.
+8. Separate success and failure scenarios into distinct test cases where practical.
+9. Run the rewritten tests and confirm they pass consistently.
+10. Simplify nearby similar tests only when the cleanup is small, safe, and clearly improves maintainability.
+
+## Done when
+- Target tests are rewritten to Pest syntax
+- Rewritten tests preserve original intent and behavior
+- Tests are deterministic and pass reliably
+- Duplication is reduced where it meaningfully improves readability
+- Shared lightweight helpers are extracted appropriately
+- The rewritten tests follow project testing conventions

@@ -43,5 +43,8 @@ globs: []
 ## Scope
 - Focus tests on behavior, not implementation details.
 
+## Execution
+- Run tests in parallel whenever possible (e.g. `php artisan test --parallel` or `pest --parallel`).
+
 ## Quality
 - Prefer simple, readable tests over complex setups.

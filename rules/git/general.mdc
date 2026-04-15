@@ -1,7 +1,62 @@
 ---
-description: Git workflow — analyze branch/commits when working outside main
+description: Unified Git workflow, commits and pull request rules
 alwaysApply: true
 globs: ["*"]
 ---
 
-- If you are working outside the main branch, always analyze the commit in the current branch before solving tasks so that you understand the logic and changes for the current branch.
+## Branch Context
+- If working outside `main`, always analyze commits in the current branch before making changes to understand context.
+
+## Git Rules
+- Never push directly to `main` branch. NEVER.
+- Use small, focused commits (one logical change per commit).
+- Use meaningful branch names.
+
+## Commit Messages
+- Language: English
+- Format: `type(scope): short description`
+- Keep messages concise and specific.
+- Use lowercase for `type` and `scope`.
+- Do not end with a period.
+- Never include signatures or attribution (e.g. "Made with Cursor").
+
+### Allowed Types
+- feat: New feature
+- fix: Bug fix
+- docs: Documentation changes
+- style: Formatting or style-only changes
+- refactor: Code changes without behavior change
+- test: Adding or updating tests
+- chore: Maintenance tasks
+
+## Issue Linking
+- If a GitHub issue is provided, always link it in commits so it can be closed after merge (e.g. `Closes #123`).
+
+## Pull Requests
+- PR title must be in English.
+- PR description must be written in the same language as the assignment.
+- Format PR messages as Markdown.
+
+### PR Content Requirements
+- Include links to all sources used during analysis.
+- Prefer adding these as a comment on the related GitHub issue.
+
+### Testing
+- Suggest how to test the changes (UI, API, etc.).
+- Verify that tests exist:
+    - If yes → update or extend them if needed.
+    - If no → explicitly state: `no`.
+
+## PR Lifecycle
+- When merging a PR:
+    - Merge into `main`
+    - Close the PR
+    - Delete the branch
+    - Switch locally to `main`
+    - Pull latest changes
+
+- If already deployed:
+    - Only switch to `main` and pull latest changes
+
+## Cleanup
+- Remove any temporary `.md` files created during PR preparation.

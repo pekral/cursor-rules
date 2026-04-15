@@ -37,7 +37,7 @@ metadata:
 - Before creating a PR, run @skills/code-review-github/SKILL.md for the current changes and treat it as mandatory CR.
 - Fix all Critical, Moderate, and Minor findings from that CR directly in code/tests, then run @skills/code-review-github/SKILL.md again.
 - Repeat the CR + fix cycle until there are no Critical, Moderate, or Minor findings left.
-- Only after the CR cycle is clean, automatically push the branch and create a GitHub pull request according to the pr.mdc rules. This step is mandatory; do not wait for additional confirmation.
+- Only after the CR cycle is clean, automatically push the branch and create a GitHub pull request according to the @rules/git/general.mdc rules. This step is mandatory; do not wait for additional confirmation.
 - If there is no link to the issue tracker, add a link to the issue tracker entry to the CR summary and, if possible, link it directly according to the issue tracker recommendations. Be sure to include an HTTP link.
 - I want you to post a comment into the pull request on GitHub regarding the core review, but I want you to only post critical or moderately serious issues, ideally including the lines of code that are affected. If there are none, don't post anything! If possible, mark the issue with the label ready for review.
 - Run the tests and let me know if the current changes meet the requirements. If so, add a new comment to the issue with brief testing recommendations and include direct in-app links (full URLs) for each recommendation so testers can click through immediately. If the requirements are not met or you have found critical errors, just list them for me.

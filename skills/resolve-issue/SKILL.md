@@ -77,7 +77,10 @@ If the source cannot be determined, ask the user.
 
 ### JIRA-specific follow-up
 - Link the created PR back to the JIRA issue
-- Add a concise JIRA comment with implementation summary and testing recommendations using JIRA formatting rules
+- Add a JIRA comment (using JIRA formatting rules) that is understandable by non-technical testers and product managers, containing:
+  - **What changed:** a brief, plain-language summary of the fix or feature
+  - **How to test:** step-by-step instructions a tester can follow to verify the change works correctly
+  - **Risk areas and edge cases:** specific scenarios the tester should focus on to catch potential regressions or unexpected behavior
 
 ## Done when
 - The issue is fully addressed

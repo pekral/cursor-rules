@@ -30,6 +30,7 @@ Avoid generic best-practice noise.
 - SQL / command injection
 - XSS (stored, reflected, DOM)
 - unsafe deserialization
+- scattered or inline validation logic (validation not encapsulated in Data Validator classes or FormRequests increases risk of bypassed or inconsistent input checks)
 
 ### Authentication & Access Control
 - missing authorization (IDOR / BOLA)

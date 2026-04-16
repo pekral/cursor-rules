@@ -24,10 +24,12 @@ globs:
 - Data Builders: transform DTOs only, never query the database.
 
 ## Validation
-- Use FormRequest classes for controller validation.
+- Use FormRequest classes for controller input validation.
 - Store reusable validation rules as traits in `App\\Concerns`.
 - Use custom Rule classes in `App\\Rules` for complex reusable validation.
 - Before adding inline validation logic, check whether a reusable rule already exists.
+- All non-FormRequest validation logic must be encapsulated in dedicated Data Validator classes under `app/DataValidators/{Domain}/`. Never inline `Validator::make()` or throw `ValidationException` directly in Actions, controllers, jobs, commands, listeners, or Livewire components.
+- When `pekral/arch-app-services` is installed, Data Validators must use the `DataValidator` trait and call `$this->validate()` — see `@rules/laravel/architecture.mdc` for details.
 
 ## DTOs
 - Prefer typed DTOs over raw arrays across layer boundaries.

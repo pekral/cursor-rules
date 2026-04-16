@@ -107,13 +107,16 @@ globs:
 - Place DTOs under `app/Dto/{Domain}` and use a `Data` suffix.
 
 ## Data Validators
-- Validation logic inside Actions must be encapsulated in dedicated Data Validator classes.
+- All data validation logic must be encapsulated in dedicated Data Validator classes — never inline in Actions, controllers, jobs, commands, listeners, or Livewire components.
 - Actions must not throw `ValidationException` directly.
 - Actions must not call `Validator::make()` inline.
+- Controllers must not call `Validator::make()` inline — use FormRequest or delegate to a Data Validator via an Action.
 - Data Validators are responsible for validating input data and throwing `ValidationException` when needed.
 - Store Data Validators under `app/DataValidators/{Domain}`.
 - Use the `DataValidator` suffix.
-- Data Validators should be `final readonly` with constructor injection and a single public method such as `validate()`.
+- Data Validators should be `final readonly` with constructor injection and a single public method `validate()`.
+- **When `pekral/arch-app-services` is installed:** Data Validator classes must use the `Pekral\Arch\DataValidation\DataValidator` trait, which provides the `$this->validate($data, $rules, $messages)` method. Do not call `Validator::make()` directly — always use `$this->validate()` from the trait.
+- **When `pekral/arch-app-services` is installed:** Data Validator classes may implement the `Pekral\Arch\DataValidation\ValidationRules` interface to expose validation rules via a static `rules()` method for reuse.
 - Reusable validation traits in `App\Concerns` may be used inside Data Validators.
 - Actions must call Data Validators before business orchestration.
 
@@ -167,12 +170,15 @@ globs:
   - new orchestration that bypasses Actions
   - inline `Validator::make()` inside Actions
   - `ValidationException` thrown directly inside Actions
+  - validation logic not encapsulated in a dedicated Data Validator class (e.g. inline validation in controllers, jobs, commands, listeners, or Livewire components outside of FormRequest)
+  - Data Validator class calling `Validator::make()` directly when `pekral/arch-app-services` is installed (must use `DataValidator` trait and `$this->validate()`)
   - services tied to one model that do not extend `BaseModelService`
   - non-CRUD methods inside resource controllers
 - Mark as moderate:
   - calling Actions via `->__invoke()` instead of `$action(...)`
   - DTOs overriding `from()` only for key renaming instead of using mapping attributes
   - plain service classes used where an Action is the better fit
+  - Data Validator class not implementing `ValidationRules` interface when rules could be reused
 
 ## Exceptions
 - No Action is required for:

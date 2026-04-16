@@ -41,7 +41,7 @@ globs:
 - **Data Validator extraction (only when `vendor/pekral/arch-app-services` exists):** If an Action class contains inline validation logic (throwing `ValidationException` directly or calling `Validator::make()`), extract it into a dedicated Data Validator class. Default location is `app/DataValidators/{Domain}/`, but follow the project's existing convention if different.
 - **Livewire components (only in Livewire projects):** Livewire components are entry points — they must not contain business logic. Split every component into a PHP class (`app/Livewire/`) and a Blade view (`resources/views/livewire/`). Never use single-file (Volt) components. Delegate all business logic to Action classes.
 - **Validation rules as traits:** Extract reusable validation rules into traits in `App\Concerns`. Use these traits in FormRequest classes instead of duplicating rule arrays.
-- **Custom Rule classes reuse:** Before adding inline validation logic to a FormRequest, scan `app/Rules/` for existing custom Rule classes that already implement the required validation. Use existing custom rules instead of duplicating logic. During code review, flag any FormRequest that duplicates logic already covered by an existing custom Rule class.
+- **Custom Rule classes reuse:** Before adding validation logic, scan `app/Rules/` for existing custom Rule classes that already implement the required validation. If a matching Rule exists, use it. If no matching Rule exists and the validation logic is non-trivial or reusable, create a new custom Rule class in `app/Rules/` and use it. During code review, flag any FormRequest or Data Validator that duplicates logic already covered by an existing custom Rule class or that contains non-trivial inline validation that should be a custom Rule.
 - **Laravel AI SDK:** When implementing AI features in a Laravel project, always use the [Laravel AI SDK](https://laravel.com/docs/13.x/ai-sdk). Never call AI provider APIs directly when the Laravel AI SDK covers the use case.
 - **Custom Helpers:** Small utility functions that don't belong to any specific class (cache key generators, input validators, formatters) must be implemented as **global helper functions** in `app/helpers.php` (autoloaded via `composer.json` `files` key). Follow the [Laravel News helpers pattern](https://laravel-news.com/creating-helpers): plain functions, no wrapper classes, snake_case names. Do **not** create `final class` wrappers with a single static method for simple utility logic — use a helper function instead.
 
@@ -179,6 +179,7 @@ globs:
   - DTOs overriding `from()` only for key renaming instead of using mapping attributes
   - plain service classes used where an Action is the better fit
   - Data Validator class not implementing `ValidationRules` interface when rules could be reused
+  - non-trivial or reusable validation logic written inline instead of as a custom Rule class in `app/Rules/`
 
 ## Exceptions
 - No Action is required for:

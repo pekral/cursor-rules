@@ -26,8 +26,8 @@ globs:
 ## Validation
 - Use FormRequest classes for controller input validation.
 - Store reusable validation rules as traits in `App\\Concerns`.
-- Use custom Rule classes in `App\\Rules` for complex reusable validation.
-- Before adding inline validation logic, check whether a reusable rule already exists.
+- Use custom Rule classes in `App\\Rules` for complex or reusable validation.
+- Before adding validation logic, check `app/Rules/` for an existing custom Rule. If none exists and the logic is non-trivial or reusable, create a new custom Rule class and use it.
 - All non-FormRequest validation logic must be encapsulated in dedicated Data Validator classes (default location `app/DataValidators/{Domain}/`, but follow the project's existing convention). Never inline `Validator::make()` or throw `ValidationException` directly in Actions, controllers, jobs, commands, listeners, or Livewire components.
 - When `pekral/arch-app-services` is installed, Data Validators must use the `DataValidator` trait and call `$this->validate()` — see `@rules/laravel/architecture.mdc` for details.
 

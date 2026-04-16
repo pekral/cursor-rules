@@ -43,11 +43,25 @@ Run a full code review for GitHub pull requests and publish findings directly to
 
 ### 4. Post Results
 
-- Post findings as a PR comment using CLI tools
-- Format:
-    - Critical → Moderate → Minor
-    - include file + line
-    - include actionable fix
+#### Thread detection
+- Before posting, search for an existing code review comment on the PR:
+  - Use `gh api` to list PR comments and find one matching the CR format (e.g. contains "Summary:" with severity counts)
+  - Store its `comment_id` if found
+
+#### Posting strategy
+- **If an existing CR comment is found (follow-up review):**
+    - Post a **summary-only** top-level PR comment (e.g. status update, summary line)
+    - Post **detailed findings** as a reply to the original CR comment using:
+      `gh api repos/{owner}/{repo}/issues/comments/{comment_id}/replies -f body="..."` or by quoting the original comment
+    - If the API reply endpoint is unavailable, post details as a new comment referencing the original (e.g. "> Replying to code review from {date}")
+
+- **If no existing CR comment is found (first review):**
+    - Post findings as a single PR comment using CLI tools
+
+#### Format
+- Critical → Moderate → Minor
+- Include file + line
+- Include actionable fix
 
 - If no findings:
     - post: "No findings identified"

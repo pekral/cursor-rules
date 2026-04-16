@@ -61,6 +61,7 @@ globs: ["*"]
 - Prefer specific exceptions over generic ones.
 - Catch specific exceptions only when recovery or translation is meaningful.
 - Never suppress errors with `@`.
+- When fixing an unused variable (e.g. PHPCS `UnusedVariable`): delete the variable if it is not required. If the variable is required (e.g. assigned from a function call with side effects), suppress the warning with `assert($variable !== null)` or similar `assert()` instead of removing the assignment.
 
 ## Design Principles
 - Follow SOLID pragmatically, not dogmatically.

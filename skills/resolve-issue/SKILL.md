@@ -66,7 +66,8 @@ If the source cannot be determined, ask the user.
 ## Code quality and review
 - Run `@skills/code-review/SKILL.md`
 - Run `@skills/security-review/SKILL.md`
-- Fix all critical and moderate findings before proceeding
+- Fix all critical and moderate findings by `@skills/process-code-review/SKILL.md` before proceeding
+- Run `@skills/test-like-human/SKILL.md`
 
 ## Pull request
 - Create a branch and commit changes following `@rules/git/general.mdc`

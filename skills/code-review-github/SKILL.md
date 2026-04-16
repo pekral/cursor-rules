@@ -51,9 +51,8 @@ Run a full code review for GitHub pull requests and publish findings directly to
 #### Posting strategy
 - **If an existing CR comment is found (follow-up review):**
     - Post a **summary-only** top-level PR comment (e.g. status update, summary line)
-    - Post **detailed findings** as a reply to the original CR comment using:
-      `gh api repos/{owner}/{repo}/issues/comments/{comment_id}/replies -f body="..."` or by quoting the original comment
-    - If the API reply endpoint is unavailable, post details as a new comment referencing the original (e.g. "> Replying to code review from {date}")
+    - Post **detailed findings** as a new PR comment that references the original CR comment (quote its first line or link to it)
+    - GitHub does not support native replies to issue comments — use quoting (e.g. "> Replying to code review from {date}") to create a visual thread
 
 - **If no existing CR comment is found (first review):**
     - Post findings as a single PR comment using CLI tools

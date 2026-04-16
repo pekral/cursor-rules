@@ -85,9 +85,8 @@ metadata:
 - Find the original code review comment on the PR:
   - Use `gh api` to list PR comments and identify the CR comment (e.g. contains "Summary:" with severity counts)
 - **If the original CR comment is found:**
-  - Post resolved items and status updates as a reply to the original CR comment thread
-    (use `gh api repos/{owner}/{repo}/issues/comments/{comment_id}/replies -f body="..."` or quote the original)
-  - If reply endpoint is unavailable, post a new comment referencing the original (e.g. "> Replying to code review from {date}")
+  - Post resolved items and status updates as a new PR comment that references the original CR comment
+  - GitHub does not support native replies to issue comments — use quoting (e.g. "> Replying to code review from {date}") to create a visual thread
 - **If original comment cannot be found or edited:**
   - Add a new top-level PR comment with resolved-point status
 - Mark resolved items (checkbox or inline) in all cases

@@ -36,7 +36,7 @@ Example input:
 - Action class must be `final readonly`.
 - Action must expose exactly one public business method: `__invoke(...)` with an explicit return type.
 - Action must orchestrate only: validation, mapping, and delegation.
-- Do not place inline validation inside the Action. Use a dedicated Data Validator under `app/DataValidators/<Domain>/`.
+- Do not place inline validation inside the Action. Use a dedicated Data Validator (default location `app/DataValidators/<Domain>/`, but follow the project's existing convention).
 - Do not use direct Eloquent queries or `DB::` calls inside the Action.
 - Keep reads in repositories and writes in model managers/services according to project architecture.
 - Add or update PHPDoc where needed for PHPStan clarity.

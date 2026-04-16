@@ -38,6 +38,7 @@ Perform structured code review focused on:
 - Business logic correctness
 - Missing or incorrect behavior
 - Type safety and error handling
+- Data validation encapsulation — verify that all validation logic is in dedicated Data Validator classes or FormRequests, not inline in Actions, controllers, jobs, commands, listeners, or Livewire components (see `@rules/laravel/architecture.mdc` Data Validators section)
 
 ### Specialized Reviews (when relevant)
 

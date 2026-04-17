@@ -23,6 +23,7 @@ metadata:
 - Identify the task from the provided issue code or URL
 - Find all open pull requests for the task
   - If multiple PRs exist, process each independently
+- Before processing a PR, switch to the PR branch and pull latest changes
 
 ### For each PR:
 

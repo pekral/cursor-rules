@@ -27,6 +27,7 @@ Run a full code review for GitHub pull requests and publish findings directly to
 ### 1. Load Context
 - Load PR, linked issue, and comments using CLI or MCP tools
 - If multiple PRs exist for one issue, review each independently
+- Before reviewing a PR, switch to the PR branch and pull latest changes
 
 ### 2. Pre-checks
 - If PR has merge conflicts → cancel review

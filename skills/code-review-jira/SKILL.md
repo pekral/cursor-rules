@@ -31,6 +31,7 @@ Perform code review for JIRA issues by analyzing related pull requests and publi
 ### 1. Load Context
 - Load JIRA issue, comments, and attachments
 - Identify all open PRs linked to the issue
+- Before reviewing a PR, switch to the PR branch and pull latest changes
 
 ### 2. Pre-checks
 - If PR has conflicts → skip review for that PR

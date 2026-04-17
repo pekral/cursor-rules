@@ -103,6 +103,18 @@ Before reviewing code, load and analyze the full issue context:
 
 1. ...
 
+## Refactoring Proposals
+
+If any reviewed code violates project rules (`@rules/php/core-standards.mdc`, `@rules/laravel/architecture.mdc`) or has clear structural issues that are **out of scope** for the current PR, propose a new issue for each refactoring opportunity:
+
+1. **Title:** short, actionable issue title  
+   **Scope:** affected file(s) or area  
+   **Reason:** which rule or principle is violated and why it matters  
+   **Suggested approach:** brief description of the expected refactoring
+
+Only propose refactoring that is justified by defined rules or architecture — not stylistic preferences.
+If no refactoring opportunities are found, omit this section.
+
 **Summary: X Critical, Y Moderate, Z Minor**
 ```
 ---

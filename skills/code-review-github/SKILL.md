@@ -90,5 +90,10 @@ Before reviewing code, load and analyze the full linked issue:
     - Moderate
     - Minor
 
+- If reviewed code violates project rules or architecture but is **out of scope** for the current PR, add a **Refactoring Proposals** section with issue drafts:
+    - Title, scope, violated rule/principle, and suggested approach per proposal
+    - Only propose refactoring justified by defined rules — not stylistic preferences
+    - Omit this section if no opportunities are found
+
 - End with summary:
 **Summary: X Critical, Y Moderate, Z Minor**

@@ -71,6 +71,12 @@ metadata:
 
 ---
 
+### Pre-push quality gates
+
+- Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`)
+- Run available fixers on all changed files and fix any violations
+- Run available checkers/analyzers on all changed files and resolve all reported errors
+
 ### Finalization
 
 - Run @skills/test-like-human/SKILL.md if changes are testable

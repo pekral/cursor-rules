@@ -56,9 +56,11 @@ globs: []
 - Ensure 100% code coverage for all changed or added code paths.
 - If coverage tooling exists in the project, use it to verify coverage after test changes.
 
-## Code Style
-- Run project fixers (e.g. `php-cs-fixer`, `pint`) in dry-run mode on changed test files to verify code style compliance.
-- Fix any code style violations before finalizing test changes.
+## Code Style and Quality Gates
+- Discover available fixers and checkers: prefer Phing targets (`build.xml`/`phing.xml`) over Composer scripts (`composer.json`).
+- Run available fixers on changed test files and fix any violations.
+- Run available checkers/analyzers on changed test files and resolve all reported errors.
+- Complete all quality gates before finalizing test changes.
 
 ## Test Review
 - After completing test changes, run a quick code review focused on test quality against these rules.

@@ -61,7 +61,21 @@ If the source cannot be determined, ask the user.
 9. Ensure no sensitive data is exposed in error/validation messages.
 10. Run tests for affected areas and confirm correctness.
 11. Add or update tests to cover the new or fixed behavior.
-12. Run project fixers and resolve issues for changed files.
+12. Verify 100% code coverage for all changed or added code paths — if coverage tooling exists, run it and confirm the result before proceeding.
+
+## Pre-push quality gates
+
+Before committing and pushing changes, run project fixers and checkers on changed files. Discover available tooling using this priority:
+
+1. **Phing** — check for `build.xml` or `phing.xml` in the project root. If present, list available targets (`phing -l`) and use relevant fixer/checker targets.
+2. **Composer scripts** — if Phing is not available, inspect `composer.json` `scripts` section for fixer and checker commands (e.g. `fix`, `check`, `build`, `pint-fix`, `phpcs-fix`, `rector-fix`, `pint-check`, `phpcs-check`, `rector-check`, `test:coverage`).
+
+Run in this order:
+1. **Fixers** — run all available fixers on changed files (e.g. code style, rector, normalize). Fix any issues they report.
+2. **Checkers** — run all available checkers/analyzers on changed files (e.g. code style check, static analysis, audit). Resolve all reported errors before proceeding.
+3. **Coverage** — if a coverage command exists, run it and confirm 100% coverage for changed code paths.
+
+If both fixers and checkers fail or are not found, stop and inform the user.
 
 ## Pull request
 - Create a branch and commit changes following `@rules/git/general.mdc`
@@ -102,7 +116,8 @@ Post the final report (code review result, security review result, and test-like
 ## Done when
 - The issue is fully addressed
 - Behavior is correct and stable
-- Tests cover affected logic and pass
+- Tests cover affected logic with 100% coverage and pass
+- Pre-push fixers and checkers ran clean on all changed files
 - No sensitive data is exposed
 - Code review loop passed with no Critical or Moderate findings
 - Security review completed

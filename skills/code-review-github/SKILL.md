@@ -29,6 +29,18 @@ Run a full code review for GitHub pull requests and publish findings directly to
 - If multiple PRs exist for one issue, review each independently
 - Before reviewing a PR, switch to the PR branch and pull latest changes
 
+#### Issue Context Analysis
+Before reviewing code, load and analyze the full linked issue:
+
+1. Fetch the complete GitHub issue — description, all comments, and any referenced attachments or links.
+2. Extract from the issue:
+   - **Requirements and acceptance criteria** — what the code must do
+   - **Expected behavior** — how the feature or fix should work
+   - **Edge cases and constraints** — mentioned by the reporter or in comments
+   - **Test data** — any sample inputs, payloads, or scenarios provided in the issue
+3. Use this context to evaluate whether the implementation fully satisfies the issue — not just whether the code is technically correct.
+4. If the issue contains test data or test scenarios, verify they are covered by existing or new tests. Flag missing test coverage as a finding.
+
 ### 2. Pre-checks
 - If PR has merge conflicts → cancel review
 

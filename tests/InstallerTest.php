@@ -1103,7 +1103,8 @@ test('dry review rule is referenced by process-code-review skill', function (): 
 test('unified resolve-issue skill requires code review before PR creation', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
-    expect($content)->toContain('Code review and security review findings are resolved');
+    expect($content)->toContain('Code review loop passed with no Critical or Moderate findings');
+    expect($content)->toContain('Security review completed');
     expect($content)->not->toContain('After checks pass, automatically push');
 });
 

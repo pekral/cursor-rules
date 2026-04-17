@@ -50,7 +50,7 @@ Example input:
 6. Preserve repository/service/manager boundaries and multitenancy/account scope.
 7. Update the entry point to delegate via `$action(...)` and keep its public contract unchanged.
 8. Add or update tests for the refactored flow and important failure paths.
-9. Run required checks/fixers for changed PHP files and resolve issues.
+9. Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`). Run fixers first, then checkers/analyzers on all changed files. Resolve all reported issues.
 10. Run `@skills/code-review/SKILL.md` for the current changes.
 11. Run `@skills/process-code-review/SKILL.md` and fix critical or medium findings before finishing.
 
@@ -68,5 +68,5 @@ Example input:
 - Validation is delegated to a dedicated Data Validator when applicable.
 - Behavior, signatures, and response format remain unchanged.
 - Tests cover the refactored flow and important edge/failure paths.
-- Required checks pass for changed files.
+- Fixers and checkers ran clean on all changed files.
 - Internal architecture-focused review was completed and important findings were fixed.

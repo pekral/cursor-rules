@@ -69,8 +69,10 @@ Never fix a bug without first writing or updating a test that reproduces it.
 
 ## Post-cycle validation
 1. Verify 100% code coverage for all changed or added code paths — if coverage tooling exists, run it.
-2. Run project fixers in dry-run mode on changed test files and fix any violations.
-3. Run a quick code review of all tests written during the TDD cycle against `@rules/code-testing/general.mdc` and fix any findings.
+2. Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`).
+3. Run available fixers on changed files and fix any violations.
+4. Run available checkers/analyzers on changed files and resolve all reported errors.
+5. Run a quick code review of all tests written during the TDD cycle against `@rules/code-testing/general.mdc` and fix any findings.
 
 ## Done when
 - Every implemented behavior is backed by a test
@@ -79,6 +81,6 @@ Never fix a bug without first writing or updating a test that reproduces it.
 - Changed behavior, edge cases, and failure paths are covered
 - Relevant tests pass
 - 100% code coverage is verified for all changes
-- Code style is verified via fixer dry-run
+- Code style and quality checks pass (fixers and checkers ran clean)
 - Test review passed with no findings
 - Refactoring did not introduce new behavior

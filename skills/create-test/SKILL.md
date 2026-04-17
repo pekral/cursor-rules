@@ -46,9 +46,10 @@ Create or update tests to cover current changes according to project conventions
 - Ensure 100% code coverage for all changed or added code paths
 - If coverage tooling exists, run it and verify the result
 
-### 6. Code Style
-- Run project fixers in dry-run mode on changed test files
-- Fix any code style violations
+### 6. Code Style and Quality Gates
+- Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`)
+- Run available fixers on changed test files and fix any violations
+- Run available checkers/analyzers on changed test files and resolve all reported errors
 
 ### 7. Test Review
 - Run a quick code review of the created/updated tests against `@rules/code-testing/general.mdc`

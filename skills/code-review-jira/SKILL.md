@@ -60,34 +60,45 @@ Before reviewing code, load and analyze the full JIRA issue:
 
 ### 4. Publish Results
 
-#### GitHub
-- Post findings as PR comment
+#### GitHub (technical findings only)
+- Post all technical findings as PR comment
 - Format:
   - Critical → Moderate → Minor
   - file + line
   - actionable fix
+- This is the only place where technical details appear
 
-#### JIRA
-- Post simplified summary:
-  - short status (clean / has issues)
-  - key risks
-  - testing recommendations (with links)
+#### JIRA (non-technical summary only)
+- Never post file paths, line numbers, code snippets, or technical severity levels to JIRA
+- Post a plain-language summary:
+  - overall status (clean / has issues)
+  - key risks described in business terms
+  - testing recommendations with step-by-step instructions
+  - link to the GitHub PR for full technical details
 
 ---
 
 ## Output Rules
 
-### GitHub
-- Findings only
-- No praise
-- No explanations of what was checked
+### GitHub (technical report — only here)
+- All technical findings go exclusively to GitHub PR comments
+- Include: file paths, line numbers, code references, severity levels, concrete fixes
+- Findings only — no praise, no explanations of what was checked
 - Use severity levels:
   - Critical
   - Moderate
   - Minor
-
 - End with:
   **Summary: X Critical, Y Moderate, Z Minor**
+
+### JIRA (non-technical summary — only here)
+- Never include file paths, line numbers, code snippets, or technical severity levels
+- Write in plain language understandable by non-developers
+- Include:
+  - overall status (clean / has issues)
+  - key risks described in business terms
+  - testing recommendations with step-by-step instructions
+  - link to the GitHub PR for technical details
 
 ---
 

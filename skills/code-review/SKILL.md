@@ -28,6 +28,7 @@ Perform structured code review focused on:
 
 ## Execution
 
+- Before starting, ensure you are on the branch that contains the changes to review. If not, switch to it.
 - Identify changes vs main branch.
 - Understand context (issue, PR description, comments).
 - Deduplicate previous findings.

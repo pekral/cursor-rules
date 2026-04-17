@@ -70,10 +70,12 @@ Provide a brief markdown summary including:
 
 **After completing the tasks**
 
+-   Run project fixers in dry-run mode on all changed test files and fix any violations.
+-   Run a quick code review of all added or updated tests against `@rules/code-testing/general.mdc` and fix any findings.
 -   Summarize what testing recommendations from the code review were
     verified.
 -   List added or modified test files.
--   Confirm whether current changes now meet the required test coverage.
+-   Confirm whether current changes now meet the required test coverage (must be 100%).
 -   If something is still missing, clearly describe the blocker or
     uncovered scenario.
 - Ask for create new commit with missing tests
@@ -84,4 +86,6 @@ Provide a brief markdown summary including:
 - Follow code review recommendations strictly
 - Do not duplicate existing tests
 - Prefer minimal changes for full coverage
+- Use data providers where they improve readability and reduce duplication
+- Every test change must be verified to pass before moving on
 - Focus on changed code only

@@ -35,10 +35,19 @@ metadata:
 9. Run the rewritten tests and confirm they pass consistently.
 10. Simplify nearby similar tests only when the cleanup is small, safe, and clearly improves maintainability.
 
+## Post-rewrite validation
+1. Run all rewritten tests and confirm they pass.
+2. Verify 100% code coverage for all rewritten test paths — if coverage tooling exists, run it.
+3. Run project fixers in dry-run mode on changed test files and fix any violations.
+4. Run a quick code review of rewritten tests against `@rules/code-testing/general.mdc` and fix any findings.
+
 ## Done when
 - Target tests are rewritten to Pest syntax
 - Rewritten tests preserve original intent and behavior
 - Tests are deterministic and pass reliably
+- 100% code coverage is verified for rewritten code paths
+- Code style is verified via fixer dry-run
+- Test review passed with no findings
 - Duplication is reduced where it meaningfully improves readability
 - Shared lightweight helpers are extracted appropriately
 - The rewritten tests follow project testing conventions

@@ -67,10 +67,18 @@ Never fix a bug without first writing or updating a test that reproduces it.
 - Fix obvious blocking issues only when necessary for safe implementation
 - Keep unrelated cleanup out of scope unless it is trivial and low risk
 
+## Post-cycle validation
+1. Verify 100% code coverage for all changed or added code paths — if coverage tooling exists, run it.
+2. Run project fixers in dry-run mode on changed test files and fix any violations.
+3. Run a quick code review of all tests written during the TDD cycle against `@rules/code-testing/general.mdc` and fix any findings.
+
 ## Done when
 - Every implemented behavior is backed by a test
 - Each new test was observed failing before implementation
 - Production code was added only to satisfy failing tests
 - Changed behavior, edge cases, and failure paths are covered
 - Relevant tests pass
+- 100% code coverage is verified for all changes
+- Code style is verified via fixer dry-run
+- Test review passed with no findings
 - Refactoring did not introduce new behavior

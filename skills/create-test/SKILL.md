@@ -38,16 +38,29 @@ Create or update tests to cover current changes according to project conventions
     - regression scenarios
 
 ### 4. Validate
-- Run relevant tests
+- Run relevant tests after each change and confirm they pass
 - Ensure deterministic behavior
 - Remove flakiness
+
+### 5. Verify Coverage
+- Ensure 100% code coverage for all changed or added code paths
+- If coverage tooling exists, run it and verify the result
+
+### 6. Code Style
+- Run project fixers in dry-run mode on changed test files
+- Fix any code style violations
+
+### 7. Test Review
+- Run a quick code review of the created/updated tests against `@rules/code-testing/general.mdc`
+- Fix any findings before finalizing
 
 ---
 
 ## Output
 
 - Created or updated test files
-- Coverage status for current changes
+- Coverage status for current changes (must be 100%)
+- Test review result
 
 ---
 
@@ -59,5 +72,5 @@ Create or update tests to cover current changes according to project conventions
 - Focus on changed code only
 - Follow project test conventions strictly
 - Prefer minimal tests for maximum coverage
-- Avoid duplication across test cases
+- Use data providers where they improve readability and reduce duplication
 - Keep tests readable and maintainable

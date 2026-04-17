@@ -48,3 +48,17 @@ globs: []
 
 ## Quality
 - Prefer simple, readable tests over complex setups.
+- Use data providers (datasets) where they improve readability and reduce duplication across similar test cases.
+- Tests must not contain conditions (e.g., `if`, `switch`); split conditional logic into separate test cases or data providers instead.
+
+## Coverage
+- Every test change must be verified to be functional — run affected tests after each modification.
+- Ensure 100% code coverage for all changed or added code paths.
+- If coverage tooling exists in the project, use it to verify coverage after test changes.
+
+## Code Style
+- Run project fixers (e.g. `php-cs-fixer`, `pint`) in dry-run mode on changed test files to verify code style compliance.
+- Fix any code style violations before finalizing test changes.
+
+## Test Review
+- After completing test changes, run a quick code review focused on test quality against these rules.

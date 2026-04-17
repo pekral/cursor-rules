@@ -63,12 +63,6 @@ If the source cannot be determined, ask the user.
 11. Add or update tests to cover the new or fixed behavior.
 12. Run project fixers and resolve issues for changed files.
 
-## Code quality and review
-- Run `@skills/code-review/SKILL.md`
-- Run `@skills/security-review/SKILL.md`
-- Fix all critical and moderate findings by `@skills/process-code-review/SKILL.md` before proceeding
-- Run `@skills/test-like-human/SKILL.md`
-
 ## Pull request
 - Create a branch and commit changes following `@rules/git/general.mdc`
 - Create a pull request with:
@@ -76,18 +70,43 @@ If the source cannot be determined, ask the user.
   - reference to the original issue
   - testing instructions
 
-### JIRA-specific follow-up
-- Link the created PR back to the JIRA issue
-- Add a JIRA comment (using JIRA formatting rules) that is understandable by non-technical testers and product managers, containing:
+## Code quality and review loop
+
+After the pull request is created, run the following review loop:
+
+1. Run `@skills/code-review/SKILL.md`
+2. If **Critical** or **Moderate** findings exist:
+   - Run `@skills/process-code-review/SKILL.md` to fix them
+   - Repeat from step 1
+3. Iterate until no **Critical** or **Moderate** findings remain
+
+After the review loop passes clean:
+
+4. Run `@skills/security-review/SKILL.md`
+5. Run `@skills/test-like-human/SKILL.md`
+
+## Final report
+
+Post the final report (code review result, security review result, and test-like-human result) back to the issue tracker where the assignment originated:
+
+- **GitHub:** post as a comment on the original issue
+- **JIRA:** post as a JIRA comment (using JIRA formatting rules) understandable by non-technical testers and product managers, containing:
   - **What changed:** a brief, plain-language summary of the fix or feature
   - **How to test:** step-by-step instructions a tester can follow to verify the change works correctly
   - **Risk areas and edge cases:** specific scenarios the tester should focus on to catch potential regressions or unexpected behavior
+- **Bugsnag:** post as a comment on the linked GitHub issue (if available)
+
+### JIRA-specific follow-up
+- Link the created PR back to the JIRA issue
 
 ## Done when
 - The issue is fully addressed
 - Behavior is correct and stable
 - Tests cover affected logic and pass
 - No sensitive data is exposed
-- Code review and security review findings are resolved
+- Code review loop passed with no Critical or Moderate findings
+- Security review completed
+- Test-like-human completed
+- Final report posted to the issue tracker
 - A clean pull request is created
 - For JIRA issues: PR is linked back and a summary comment is posted

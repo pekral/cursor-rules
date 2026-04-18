@@ -18,7 +18,7 @@ Perform structured code review focused on:
 ## Constraints
 - Apply @rules/php/core-standards.mdc
 - Apply @rules/code-review/general.mdc
-- Apply @rules/laravel/architecture.mdc
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Output findings only (no praise)
 - Never modify code
 - All output must be in English

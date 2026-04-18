@@ -19,6 +19,7 @@ Perform code review for JIRA issues by analyzing related pull requests and publi
 ## Constraints
 - Apply @rules/jira/general.mdc
 - Apply @rules/git/general.mdc
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Never modify code
 - GitHub output must be in English
 - JIRA output must be understandable for non-developers

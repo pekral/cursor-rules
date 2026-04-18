@@ -22,7 +22,7 @@ Focus on:
 
 ## Constraints
 - Apply @rules/php/core-standards.mdc
-- Apply @rules/laravel/architecture.mdc
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Apply @rules/code-testing/general.mdc
 - Never change behavior
 - Keep public API stable unless explicitly required

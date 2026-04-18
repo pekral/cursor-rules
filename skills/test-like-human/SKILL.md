@@ -10,6 +10,7 @@ metadata:
 - Apply `@rules/php/core-standards.mdc`
 - Apply `@rules/git/general.mdc`
 - Apply `@rules/jira/general.mdc`
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Output must be human-readable (no technical logs or internal details)
 - Focus on user-visible behavior, not implementation
 

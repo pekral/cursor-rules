@@ -15,6 +15,7 @@ Create or update tests to cover current changes according to project conventions
 
 ## Constraints
 - Apply @rules/code-testing/general.mdc
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Do not modify production code unless strictly required
 
 ---

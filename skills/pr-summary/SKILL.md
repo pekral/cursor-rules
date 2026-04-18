@@ -9,6 +9,7 @@ metadata:
 **Constraint:**
 - Apply @rules/php/core-standards.mdc
 - Apply @rules/git/general.mdc
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Write the summary in singular first person (one developer made the changes).
 - The output must be formatted in markdown.
 - Focus on the "why" and business impact, not on implementation details.

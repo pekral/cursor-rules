@@ -16,6 +16,7 @@ Run a full code review for GitHub pull requests and publish findings directly to
 
 ## Constraints
 - Apply @rules/git/general.mdc
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - All output posted to GitHub must be in English
 - Never modify code
 - Output findings only (no praise)

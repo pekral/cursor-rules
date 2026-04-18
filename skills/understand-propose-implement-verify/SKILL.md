@@ -8,6 +8,7 @@ metadata:
 
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Always follow this order: understand → propose → implement → verify
 - Prefer existing project skills over custom solutions; do not duplicate logic already covered by a skill
 

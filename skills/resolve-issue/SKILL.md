@@ -9,6 +9,7 @@ metadata:
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
 - Apply `@rules/git/general.mdc`
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Follow project architecture and testing rules
 - Do not expose sensitive/internal details in user-facing messages
 - Preserve existing behavior unless explicitly required otherwise

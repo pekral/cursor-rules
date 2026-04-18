@@ -8,7 +8,7 @@ metadata:
 
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`.
-- Read and follow `@rules/laravel/architecture.mdc` before making changes.
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Preserve behavior, signatures, response contracts, and tenant/account scope.
 - Do not report review output to any third-party service.
 - After changes, run an internal architecture-first review and fix important findings immediately.

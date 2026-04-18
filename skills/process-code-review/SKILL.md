@@ -10,6 +10,7 @@ metadata:
 - Apply @rules/php/core-standards.mdc
 - Apply @rules/git/general.mdc
 - Apply @rules/jira/general.mdc
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Never combine multiple languages in your answer
 - All CR output must be written in English
 - Never push direct changes to the main branch

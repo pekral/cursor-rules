@@ -6,6 +6,11 @@ metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
+## Constraints
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
+
+---
+
 ## Purpose
 
 Use this skill when you need to investigate a specific Laravel Telescope request, read its runtime data, find the same request directly in the Telescope database tables, and propose actionable optimizations.

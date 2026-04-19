@@ -78,14 +78,17 @@ globs:
 - Keep services stateless.
 - Do not mix unrelated multi-domain orchestration into one service.
 - If logic does not primarily serve a single model, prefer an Action instead.
+- Services must not execute direct Eloquent queries or `DB::` calls — delegate reads to Repositories and writes to ModelManagers.
 
 ## Repositories and ModelManagers
+- All database read operations (Eloquent queries, `DB::` calls, query builder) must be encapsulated in Repository classes — never inline in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components.
 - Repositories are read-only:
   - querying
   - filtering
   - pagination
   - retrieval
 - Repositories must not perform writes or side effects.
+- All database write operations must be encapsulated in ModelManager classes — never inline persistence in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components.
 - ModelManagers are write-only:
   - create
   - update
@@ -175,6 +178,7 @@ globs:
   - validation logic not encapsulated in a dedicated Data Validator class (e.g. inline validation in controllers, jobs, commands, listeners, or Livewire components outside of FormRequest)
   - inline imperative validation in Actions, Services, Facades, Jobs, Commands, or Listeners — guard clauses that check input and throw exceptions (e.g. `if (!in_array(...)) throw new InvalidArgumentException(...)`) must be extracted into a Data Validator
   - Data Validator class calling `Validator::make()` directly when `pekral/arch-app-services` is installed (must use `DataValidator` trait and `$this->validate()`)
+  - inline database queries (Eloquent or `DB::`) in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components — reads must go through Repositories, writes through ModelManagers
   - services tied to one model that do not extend `BaseModelService`
   - non-CRUD methods inside resource controllers
 - Mark as moderate:

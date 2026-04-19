@@ -53,6 +53,8 @@ globs:
 - Call invokable classes using `$action($payload)`, never `$action->__invoke($payload)`.
 
 ## Database and Eloquent
+- All database read operations must be encapsulated in Repository classes — never inline Eloquent queries or `DB::` calls for data retrieval in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components. Delegate reads to a Repository.
+- All database write operations must be encapsulated in ModelManager classes (when using `pekral/arch-app-services`) — never perform inline persistence in Actions, Services, controllers, jobs, commands, listeners, or Livewire components.
 - Prefer Eloquent over Query Builder or raw SQL unless there is a measured reason not to.
 - Keep business logic out of models.
 - Define relationships, scopes, casts, and accessors in models.

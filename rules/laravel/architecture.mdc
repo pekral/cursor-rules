@@ -4,6 +4,7 @@ alwaysApply: false
 globs:
   - vendor/pekral/arch-app-services/**
   - app/Actions/**
+  - app/DataBuilders/**
   - app/DataValidators/**
   - app/ModelManagers/**
   - app/Repositories/**
@@ -109,6 +110,16 @@ globs:
 - DTO classes should be `final readonly` with promoted constructor properties where practical.
 - Place DTOs under `app/Dto/{Domain}` and use a `Data` suffix.
 
+## Data Builders
+- Data Builders are dedicated classes for mapping, hydrating, and normalizing input into DTOs.
+- Data Builders are **not** Action pattern classes — they do not use `__invoke()` and may expose multiple public methods.
+- Each public method should accept input (array, request data, model, external API response, etc.) and return a typed DTO.
+- Data Builders must never query the database or perform side effects.
+- Store Data Builders under `app/DataBuilders/{Domain}/` and use the `DataBuilder` suffix.
+- Data Builders should be `final readonly` with constructor injection where practical.
+- Use Data Builders when DTO construction involves non-trivial mapping, hydration, or normalization that does not belong in the DTO itself.
+- Actions may call Data Builders for complex DTO transformations instead of performing inline mapping.
+
 ## Data Validators
 - All data validation logic must be encapsulated in dedicated Data Validator classes — never inline in Actions, controllers, jobs, commands, listeners, or Livewire components.
 - Actions must not throw `ValidationException` directly.
@@ -185,6 +196,7 @@ globs:
   - calling Actions via `->__invoke()` instead of `$action(...)`
   - DTOs overriding `from()` only for key renaming instead of using mapping attributes
   - plain service classes used where an Action is the better fit
+  - Data Builder class using Action pattern (`__invoke()`) instead of named public methods
   - Data Validator class not implementing `ValidationRules` interface when rules could be reused
   - non-trivial or reusable validation logic written inline instead of as a custom Rule class in `app/Rules/`
 

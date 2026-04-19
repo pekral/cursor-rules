@@ -21,7 +21,7 @@ globs:
 - Services: focused stateless domain/application services.
 - Repositories: read-only data access.
 - ModelManagers: write-only persistence.
-- Data Builders: transform DTOs only, never query the database.
+- Data Builders: multi-method classes that map, hydrate, or normalize input into DTOs. Not Action pattern — no `__invoke()`. Never query the database.
 
 ## Validation
 - Use FormRequest classes for controller input validation.

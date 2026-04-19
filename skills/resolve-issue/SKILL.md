@@ -49,20 +49,27 @@ If the source cannot be determined, ask the user.
 3. Define exact requirements and expected behavior.
 4. Classify the task (bug or feature).
 
+### Problem analysis
+
+5. Run `@skills/analyze-problem/SKILL.md` using the issue description, comments, and any available context as input.
+6. Review the analysis output and split the identified items into two groups:
+   - **In scope** — items that directly match the issue requirements. These will be implemented.
+   - **Out of scope** — items that are valid findings but fall outside the current issue. These will be added to the PR summary as a TODO list for future tasks.
+
 ### If bug
-5. Reproduce the issue if possible.
-6. Write or update a test capturing the failure.
-7. Confirm the failure before applying the fix.
+7. Reproduce the issue if possible.
+8. Write or update a test capturing the failure.
+9. Confirm the failure before applying the fix.
 
 ### If feature
-5. Design a minimal implementation aligned with project architecture.
+7. Design a minimal implementation aligned with project architecture.
 
 ### Continue
-8. Implement the solution.
-9. Ensure no sensitive data is exposed in error/validation messages.
-10. Run tests for affected areas and confirm correctness.
-11. Add or update tests to cover the new or fixed behavior.
-12. Verify 100% code coverage for all changed or added code paths — if coverage tooling exists, run it and confirm the result before proceeding.
+10. Implement the solution for all **in-scope** items identified in step 6.
+11. Ensure no sensitive data is exposed in error/validation messages.
+12. Run tests for affected areas and confirm correctness.
+13. Add or update tests to cover the new or fixed behavior.
+14. Verify 100% code coverage for all changed or added code paths — if coverage tooling exists, run it and confirm the result before proceeding.
 
 ## Pre-push quality gates
 
@@ -84,6 +91,7 @@ If both fixers and checkers fail or are not found, stop and inform the user.
   - clear description of the change
   - reference to the original issue
   - testing instructions
+  - **TODO list** — if any **out-of-scope** items were identified in step 6, include them in the PR summary under a `## TODO` section as a checklist of potential follow-up tasks
 
 ## Code quality and review loop
 

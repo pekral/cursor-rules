@@ -38,7 +38,7 @@ globs:
 - **Single-use Service/Facade method rule (Action pattern):** If an Action calls a Service or Facade method that is used only once in the entire codebase, move the business logic from that Service/Facade method directly into the Action and remove the original Service/Facade method.
 - **Invokeable controller rule:** Any controller method that is not a standard CRUD method (`index`, `create`, `store`, `show`, `edit`, `update`, `destroy`) must be extracted into a dedicated single-action invokeable controller with only `__invoke()`. Resource controllers must only contain CRUD methods.
 - **BaseModelService pattern (only when `vendor/pekral/arch-app-services` exists):** All services that primarily work with a specific Eloquent Model must extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()` (see `vendor/pekral/arch-app-services/examples/Services/User/UserModelService.php`). Services that do not primarily serve a single model must be refactored into Action pattern classes.
-- **Data Validator extraction (only when `vendor/pekral/arch-app-services` exists):** If an Action class contains inline validation logic (throwing `ValidationException` directly or calling `Validator::make()`), extract it into a dedicated Data Validator class. Default location is `app/DataValidators/{Domain}/`, but follow the project's existing convention if different.
+- **Data Validator extraction (only when `vendor/pekral/arch-app-services` exists):** If an Action class contains inline validation logic (throwing `ValidationException` directly, calling `Validator::make()`, or imperative guard clauses that check input and throw exceptions like `InvalidArgumentException`), extract it into a dedicated Data Validator class. Default location is `app/DataValidators/{Domain}/`, but follow the project's existing convention if different.
 - **Livewire components (only in Livewire projects):** Livewire components are entry points — they must not contain business logic. Split every component into a PHP class (`app/Livewire/`) and a Blade view (`resources/views/livewire/`). Never use single-file (Volt) components. Delegate all business logic to Action classes.
 - **Validation rules as traits:** Extract reusable validation rules into traits in `App\Concerns`. Use these traits in FormRequest classes instead of duplicating rule arrays.
 - **Custom Rule classes reuse:** Before adding validation logic, scan `app/Rules/` for existing custom Rule classes that already implement the required validation. If a matching Rule exists, use it. If no matching Rule exists and the validation logic is non-trivial or reusable, create a new custom Rule class in `app/Rules/` and use it. During code review, flag any FormRequest or Data Validator that duplicates logic already covered by an existing custom Rule class or that contains non-trivial inline validation that should be a custom Rule.
@@ -110,7 +110,9 @@ globs:
 - All data validation logic must be encapsulated in dedicated Data Validator classes — never inline in Actions, controllers, jobs, commands, listeners, or Livewire components.
 - Actions must not throw `ValidationException` directly.
 - Actions must not call `Validator::make()` inline.
+- Actions must not contain inline imperative validation — guard clauses that check input and throw exceptions (`InvalidArgumentException`, `RuntimeException`, `DomainException`, `\LogicException`, or any other exception used to reject invalid input) must be extracted into a Data Validator.
 - Controllers must not call `Validator::make()` inline — use FormRequest or delegate to a Data Validator via an Action.
+- Services, Facades, Jobs, Commands, and Listeners must not contain inline imperative validation (guard clauses with `in_array`, `is_null`, type/range checks followed by `throw`) — extract into a Data Validator.
 - Data Validators are responsible for validating input data and throwing `ValidationException` when needed.
 - Store Data Validators under `app/DataValidators/{Domain}` by default, but follow the project's existing namespace convention if different.
 - Use the `DataValidator` suffix.
@@ -171,6 +173,7 @@ globs:
   - inline `Validator::make()` inside Actions
   - `ValidationException` thrown directly inside Actions
   - validation logic not encapsulated in a dedicated Data Validator class (e.g. inline validation in controllers, jobs, commands, listeners, or Livewire components outside of FormRequest)
+  - inline imperative validation in Actions, Services, Facades, Jobs, Commands, or Listeners — guard clauses that check input and throw exceptions (e.g. `if (!in_array(...)) throw new InvalidArgumentException(...)`) must be extracted into a Data Validator
   - Data Validator class calling `Validator::make()` directly when `pekral/arch-app-services` is installed (must use `DataValidator` trait and `$this->validate()`)
   - services tied to one model that do not extend `BaseModelService`
   - non-CRUD methods inside resource controllers

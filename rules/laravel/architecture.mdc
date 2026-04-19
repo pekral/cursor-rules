@@ -39,10 +39,10 @@ globs:
 - **Single-use Service/Facade method rule (Action pattern):** If an Action calls a Service or Facade method that is used only once in the entire codebase, move the business logic from that Service/Facade method directly into the Action and remove the original Service/Facade method.
 - **Invokeable controller rule:** Any controller method that is not a standard CRUD method (`index`, `create`, `store`, `show`, `edit`, `update`, `destroy`) must be extracted into a dedicated single-action invokeable controller with only `__invoke()`. Resource controllers must only contain CRUD methods.
 - **BaseModelService pattern (only when `vendor/pekral/arch-app-services` exists):** All services that primarily work with a specific Eloquent Model must extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()` (see `vendor/pekral/arch-app-services/examples/Services/User/UserModelService.php`). Services that do not primarily serve a single model must be refactored into Action pattern classes.
-- **Data Validator extraction (only when `vendor/pekral/arch-app-services` exists):** If an Action class contains inline validation logic (throwing `ValidationException` directly, calling `Validator::make()`, or imperative guard clauses that check input and throw exceptions like `InvalidArgumentException`), extract it into a dedicated Data Validator class. Default location is `app/DataValidators/{Domain}/`, but follow the project's existing convention if different.
+- **Data Validator extraction (only when `vendor/pekral/arch-app-services` exists):** If an Action class contains inline validation logic (throwing `ValidationException` directly, calling `Validator::make()`, or imperative guard clauses that check input and throw exceptions like `InvalidArgumentException`), extract it into a dedicated Data Validator class. Data Validators must use validation rules defined as reusable traits in `app/Concerns/`. Default location is `app/DataValidators/{Domain}/`, but follow the project's existing convention if different.
 - **Livewire components (only in Livewire projects):** Livewire components are entry points — they must not contain business logic. Split every component into a PHP class (`app/Livewire/`) and a Blade view (`resources/views/livewire/`). Never use single-file (Volt) components. Delegate all business logic to Action classes.
-- **Validation rules as traits:** Extract reusable validation rules into traits in `App\Concerns`. Use these traits in FormRequest classes instead of duplicating rule arrays.
-- **Custom Rule classes reuse:** Before adding validation logic, scan `app/Rules/` for existing custom Rule classes that already implement the required validation. If a matching Rule exists, use it. If no matching Rule exists and the validation logic is non-trivial or reusable, create a new custom Rule class in `app/Rules/` and use it. During code review, flag any FormRequest or Data Validator that duplicates logic already covered by an existing custom Rule class or that contains non-trivial inline validation that should be a custom Rule.
+- **Validation rules as traits:** Store all validation rules as reusable traits in `app/Concerns/` (e.g. `GitHubIssueNumbersValidationRules`, `JiraIssueKeysValidationRules`). Use these traits in FormRequest classes and Data Validator classes — never duplicate rule arrays.
+- **Custom Rule classes reuse:** Before adding validation logic, scan `app/Rules/` for existing custom Rule classes that already implement the required validation. If a matching Rule exists, use it. If no matching Rule exists and the validation logic is non-trivial or reusable, create a new custom Rule class in `app/Rules/` and use it. During code review, flag any FormRequest that duplicates logic already covered by an existing custom Rule class or that contains non-trivial inline validation that should be a custom Rule.
 - **Laravel AI SDK:** When implementing AI features in a Laravel project, always use the [Laravel AI SDK](https://laravel.com/docs/13.x/ai-sdk). Never call AI provider APIs directly when the Laravel AI SDK covers the use case.
 - **Custom Helpers:** Small utility functions that don't belong to any specific class (cache key generators, input validators, formatters) must be implemented as **global helper functions** in `app/helpers.php` (autoloaded via `composer.json` `files` key). Follow the [Laravel News helpers pattern](https://laravel-news.com/creating-helpers): plain functions, no wrapper classes, snake_case names. Do **not** create `final class` wrappers with a single static method for simple utility logic — use a helper function instead.
 
@@ -57,7 +57,7 @@ globs:
 
 ### Action Rules
 - Actions are orchestration-only:
-  - validation via Data Validators
+  - validation via Data Validators (using validation traits from `app/Concerns/`)
   - DTO/data transformation
   - delegation to services, repositories, and model managers
 - Do not:
@@ -120,8 +120,14 @@ globs:
 - Use Data Builders when DTO construction involves non-trivial mapping, hydration, or normalization that does not belong in the DTO itself.
 - Actions may call Data Builders for complex DTO transformations instead of performing inline mapping.
 
+## Validation Rules (Traits)
+- Store all validation rules as reusable traits in `app/Concerns/` following the existing naming convention (e.g. `GitHubIssueNumbersValidationRules`, `JiraIssueKeysValidationRules`). Keep this approach consistent across the entire application.
+- Use these validation traits in FormRequest classes and Data Validator classes — never duplicate rule arrays.
+- Use custom Rule classes in `app/Rules/` for complex or reusable validation logic that goes beyond simple rule arrays.
+
 ## Data Validators
 - All data validation logic must be encapsulated in dedicated Data Validator classes — never inline in Actions, controllers, jobs, commands, listeners, or Livewire components.
+- Data Validators must use validation rules defined as reusable traits in `app/Concerns/` — never define rule arrays inline in the Data Validator.
 - Actions must not throw `ValidationException` directly.
 - Actions must not call `Validator::make()` inline.
 - Actions must not contain inline imperative validation — guard clauses that check input and throw exceptions (`InvalidArgumentException`, `RuntimeException`, `DomainException`, `\LogicException`, or any other exception used to reject invalid input) must be extracted into a Data Validator.
@@ -132,8 +138,6 @@ globs:
 - Use the `DataValidator` suffix.
 - Data Validators should be `final readonly` with constructor injection and a single public method `validate()`.
 - **When `pekral/arch-app-services` is installed:** Data Validator classes must use the `Pekral\Arch\DataValidation\DataValidator` trait, which provides the `$this->validate($data, $rules, $messages)` method. Do not call `Validator::make()` directly — always use `$this->validate()` from the trait.
-- **When `pekral/arch-app-services` is installed:** Data Validator classes may implement the `Pekral\Arch\DataValidation\ValidationRules` interface to expose validation rules via a static `rules()` method for reuse.
-- Reusable validation traits in `App\Concerns` may be used inside Data Validators.
 - Actions must call Data Validators before business orchestration.
 
 ## Controllers and Other Entry Points
@@ -166,6 +170,7 @@ globs:
 - Livewire components are entry points and must delegate orchestration to Actions.
 - Mandatory flow:
   - `Livewire Component -> Action -> ModelService -> Repository / ModelManager`
+- Livewire does not support constructor injection. Use the `boot()` lifecycle hook to inject service dependencies.
 - Do not place business logic in Livewire components.
 - Do not execute direct Eloquent queries or `DB::` calls in Livewire components.
 - Keep component methods slim: validate input, delegate work, update UI state.
@@ -189,6 +194,7 @@ globs:
   - validation logic not encapsulated in a dedicated Data Validator class (e.g. inline validation in controllers, jobs, commands, listeners, or Livewire components outside of FormRequest)
   - inline imperative validation in Actions, Services, Facades, Jobs, Commands, or Listeners — guard clauses that check input and throw exceptions (e.g. `if (!in_array(...)) throw new InvalidArgumentException(...)`) must be extracted into a Data Validator
   - Data Validator class calling `Validator::make()` directly when `pekral/arch-app-services` is installed (must use `DataValidator` trait and `$this->validate()`)
+  - Data Validator defining validation rules inline instead of using reusable traits from `app/Concerns/`
   - inline database queries (Eloquent or `DB::`) in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components — reads must go through Repositories, writes through ModelManagers
   - services tied to one model that do not extend `BaseModelService`
   - non-CRUD methods inside resource controllers
@@ -197,7 +203,6 @@ globs:
   - DTOs overriding `from()` only for key renaming instead of using mapping attributes
   - plain service classes used where an Action is the better fit
   - Data Builder class using Action pattern (`__invoke()`) instead of named public methods
-  - Data Validator class not implementing `ValidationRules` interface when rules could be reused
   - non-trivial or reusable validation logic written inline instead of as a custom Rule class in `app/Rules/`
 
 ## Exceptions

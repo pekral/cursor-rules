@@ -25,10 +25,11 @@ globs:
 
 ## Validation
 - Use FormRequest classes for controller input validation.
-- Store reusable validation rules as traits in `App\\Concerns`.
-- Use custom Rule classes in `App\\Rules` for complex or reusable validation.
+- Store all validation rules as reusable traits in `app/Concerns/` (e.g. `GitHubIssueNumbersValidationRules`, `JiraIssueKeysValidationRules`). Keep this approach consistent across the entire application.
+- All non-FormRequest validation logic must be encapsulated in dedicated Data Validator classes (default location `app/DataValidators/{Domain}/`, but follow the project's existing convention). Data Validators must use validation rules from traits in `app/Concerns/` — never define rule arrays inline.
+- Use custom Rule classes in `app/Rules/` for complex or reusable validation.
 - Before adding validation logic, check `app/Rules/` for an existing custom Rule. If none exists and the logic is non-trivial or reusable, create a new custom Rule class and use it.
-- All non-FormRequest validation logic must be encapsulated in dedicated Data Validator classes (default location `app/DataValidators/{Domain}/`, but follow the project's existing convention). Never inline `Validator::make()`, throw `ValidationException`, or use imperative guard clauses (e.g. `if (!in_array(...)) throw new InvalidArgumentException(...)`) directly in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components — extract into a Data Validator.
+- Never inline `Validator::make()`, throw `ValidationException`, or use imperative guard clauses (e.g. `if (!in_array(...)) throw new InvalidArgumentException(...)`) directly in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components — extract into a Data Validator using validation traits from `app/Concerns/`.
 - When `pekral/arch-app-services` is installed, Data Validators must use the `DataValidator` trait and call `$this->validate()` — see `@rules/laravel/architecture.mdc` for details.
 
 ## DTOs
@@ -96,6 +97,10 @@ globs:
 - Keep middleware focused on one concern.
 - Do not place business logic in middleware.
 - Middleware order must be intentional.
+
+## Dependency Injection
+- Always pass service dependencies via constructor, never as method parameters. This applies to Actions, Services, and all other classes.
+- Exception: Livewire components do not support constructor injection — use the `boot()` lifecycle hook instead.
 
 ## General Laravel Practices
 - Prefer Laravel conventions and built-in features first.

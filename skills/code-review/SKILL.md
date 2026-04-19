@@ -51,7 +51,7 @@ Before reviewing code, load and analyze the full issue context:
 - Business logic correctness
 - Missing or incorrect behavior
 - Type safety and error handling
-- Data validation encapsulation — verify that all validation logic is in dedicated Data Validator classes or FormRequests, not inline in Actions, controllers, jobs, commands, listeners, or Livewire components (see `@rules/laravel/architecture.mdc` Data Validators section)
+- Data validation encapsulation — verify that all validation logic is in dedicated Data Validator classes or FormRequests (using validation rules from reusable traits in `app/Concerns/`), not inline in Actions, controllers, jobs, commands, listeners, or Livewire components (see `@rules/laravel/architecture.mdc` Data Validators section)
 
 ### Specialized Reviews (when relevant)
 

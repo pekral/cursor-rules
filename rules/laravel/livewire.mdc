@@ -19,6 +19,11 @@ globs:
 - Delegate business logic to Actions or Services according to project architecture.
 - Do not execute direct Eloquent queries or `DB::` calls in components unless the repository already uses that pattern consistently.
 
+## Dependency Injection
+- Livewire does not support constructor injection — it creates components without DI.
+- Use the `boot()` lifecycle hook to inject service dependencies.
+- Never pass service dependencies as method parameters.
+
 ## Validation and UI
 - Use Livewire's built-in validation where appropriate.
 - Reuse validation traits from `App\\Concerns` when available.

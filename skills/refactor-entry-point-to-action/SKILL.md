@@ -36,7 +36,7 @@ Example input:
 - Action class must be `final readonly`.
 - Action must expose exactly one public business method: `__invoke(...)` with an explicit return type.
 - Action must orchestrate only: validation, mapping, and delegation.
-- Do not place inline validation inside the Action. Use a dedicated Data Validator (default location `app/DataValidators/<Domain>/`, but follow the project's existing convention).
+- Do not place inline validation inside the Action. Use a dedicated Data Validator (default location `app/DataValidators/<Domain>/`, but follow the project's existing convention). Data Validators must use validation rules from reusable traits in `app/Concerns/`.
 - Do not use direct Eloquent queries or `DB::` calls inside the Action.
 - Keep reads in repositories and writes in model managers/services according to project architecture.
 - Add or update PHPDoc where needed for PHPStan clarity.
@@ -46,7 +46,7 @@ Example input:
 2. Scan touched files for obvious pre-existing issues that would block or compromise the refactor. Fix only safe, relevant issues; keep unrelated cleanup out of scope.
 3. Create or reuse a dedicated Action in the correct domain folder.
 4. Move orchestration from the entry point into the Action `__invoke(...)`.
-5. Extract inline validation into a dedicated Data Validator if needed.
+5. Extract inline validation into a dedicated Data Validator (using validation traits from `app/Concerns/`) if needed.
 6. Preserve repository/service/manager boundaries and multitenancy/account scope.
 7. Update the entry point to delegate via `$action(...)` and keep its public contract unchanged.
 8. Add or update tests for the refactored flow and important failure paths.
@@ -65,7 +65,7 @@ Example input:
 ## Done when
 - The target entry point is thin and delegates to a dedicated Action.
 - The Action follows project Action-pattern rules.
-- Validation is delegated to a dedicated Data Validator when applicable.
+- Validation is delegated to a dedicated Data Validator (using validation traits from `app/Concerns/`) when applicable.
 - Behavior, signatures, and response format remain unchanged.
 - Tests cover the refactored flow and important edge/failure paths.
 - Fixers and checkers ran clean on all changed files.

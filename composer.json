@@ -36,7 +36,7 @@
   "require-dev": {
     "composer/composer": "^2.9.7",
     "ergebnis/composer-normalize": "^2.51.0",
-    "laravel/pint": "^1.29.0",
+    "laravel/pint": "^1.29.1",
     "pekral/phpcs-rules": "^0.4.8",
     "pekral/phpstan-rules": "^0.4.5",
     "pekral/rector-rules": "^0.4.8",

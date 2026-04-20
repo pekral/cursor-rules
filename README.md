@@ -19,12 +19,12 @@
 
 ```bash
 composer require pekral/cursor-rules --dev
-vendor/bin/cursor-rules install
+vendor/bin/cursor-rules install --editor=cursor
 ```
 
-By default the installer targets **Cursor** only (`.cursor/rules`, `.cursor/skills`). Use `--editor=` to choose the agent:
+The `--editor` flag is **required**. Use it to choose the target agent:
 
-- **cursor** (default): `.cursor/rules`, `.cursor/skills`
+- **cursor**: `.cursor/rules`, `.cursor/skills`
 - **claude**: `.claude/rules`, `.claude/skills`, and when `HOME`/`USERPROFILE` is set also `~/.claude/skills`
 - **codex**: `.codex/rules`, `.codex/skills`, and when `HOME`/`USERPROFILE` is set also `~/.codex/skills`
 - **all**: all of the above (Cursor, Claude, Codex in project + home)
@@ -69,13 +69,13 @@ Cursor will fetch and apply the rules from the repository. Note: this method pro
 ### Available Commands
 
 ```bash
-vendor/bin/cursor-rules help                        # print help
-vendor/bin/cursor-rules install                     # install for Cursor (default)
-vendor/bin/cursor-rules install --editor=claude     # install for Claude
-vendor/bin/cursor-rules install --editor=codex      # install for Codex
-vendor/bin/cursor-rules install --editor=all        # install for Cursor, Claude, and Codex
-vendor/bin/cursor-rules install --force             # overwrite existing files
-vendor/bin/cursor-rules install --symlink          # prefer symlinks (fallback to copy)
+vendor/bin/cursor-rules help                                  # print help
+vendor/bin/cursor-rules install --editor=cursor               # install for Cursor
+vendor/bin/cursor-rules install --editor=claude               # install for Claude
+vendor/bin/cursor-rules install --editor=codex                # install for Codex
+vendor/bin/cursor-rules install --editor=all                  # install for Cursor, Claude, and Codex
+vendor/bin/cursor-rules install --editor=cursor --force       # overwrite existing files
+vendor/bin/cursor-rules install --editor=cursor --symlink     # prefer symlinks (fallback to copy)
 ```
 
 ### Installer Flow
@@ -92,7 +92,7 @@ vendor/bin/cursor-rules install --symlink          # prefer symlinks (fallback t
 
 | Option            | Description                                                                 |
 |-------------------|-----------------------------------------------------------------------------|
-| `--editor=EDITOR` | Target editor: `cursor` (default), `claude`, `codex`, `all`.               |
+| `--editor=EDITOR` | Target editor (required): `cursor`, `claude`, `codex`, `all`.              |
 | `--force`         | Overwrite files that already exist in the target directory.                |
 | `--symlink`       | Create symlinks when the OS permits; automatically falls back to copy.     |
 | *(default)*       | Only copy missing files and keep existing content untouched.              |

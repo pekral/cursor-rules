@@ -83,38 +83,7 @@ Use Telescope tables and relationships, typically:
 - `telescope_entries_tags`
 - `telescope_monitoring` (if used)
 
-Suggested SQL patterns (adapt per storage):
-
-```sql
-SELECT uuid, type, family_hash, content, created_at
-FROM telescope_entries
-WHERE uuid = :uuid
-LIMIT 1;
-```
-
-```sql
-SELECT te.uuid, te.type, te.created_at, tet.tag
-FROM telescope_entries te
-LEFT JOIN telescope_entries_tags tet ON tet.entry_uuid = te.uuid
-WHERE te.family_hash = :family_hash
-ORDER BY te.created_at DESC
-LIMIT 200;
-```
-
-```sql
-SELECT uuid, type, content, created_at
-FROM telescope_entries
-WHERE type = 'request'
-  AND created_at BETWEEN :from AND :to
-ORDER BY created_at DESC
-LIMIT 100;
-```
-
-Notes:
-
-- Use bound parameters; never concatenate raw user input.
-- Avoid broad unbounded scans on large Telescope tables.
-- If JSON fields are large, select only required columns.
+For suggested SQL patterns, see `references/sql-patterns.md`.
 
 ### 4. Correlate UI and DB records
 
@@ -157,45 +126,7 @@ Keep suggestions scoped to observed telemetry, not hypothetical architecture rew
 
 ## Output format
 
-Use this structure:
-
-```md
-## Laravel Telescope Analysis Report
-
-### Input
-- Telescope URL: ...
-- Scope / filters: ...
-
-### Matched request (UI)
-- UUID: ...
-- Method + URI: ...
-- Status: ...
-- Duration / memory: ...
-- Timestamp: ...
-
-### Matched request (DB)
-- Table path used: ...
-- Key match criteria: ...
-- Query summary: ...
-- Confidence of match: High | Medium | Low
-
-### Findings
-1. ...
-2. ...
-
-### Recommended optimizations
-1. Change: ...
-   - Why: ...
-   - Expected impact: ...
-   - Risk: ...
-   - Verification: ...
-
-### SQL / index notes (if relevant)
-- ...
-
-### Limitations
-- ...
-```
+Use the template defined in `templates/analysis-report.md`.
 
 ---
 
@@ -217,19 +148,10 @@ The skill must not:
 
 ---
 
-## Example prompts
+## References
 
-```text
-@skills/laravel-telescope/SKILL.md Analyze this Telescope URL and find the same request in DB.
-```
-
-```text
-@skills/laravel-telescope/SKILL.md Compare Telescope request details with telescope_entries and propose optimizations.
-```
-
-```text
-@skills/laravel-telescope/SKILL.md Investigate this slow endpoint from Telescope and produce a practical optimization plan.
-```
+- references/sql-patterns.md
+- references/example-prompts.md
 
 ---
 

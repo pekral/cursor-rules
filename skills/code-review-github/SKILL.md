@@ -85,15 +85,10 @@ Before reviewing code, load and analyze the full linked issue:
 - Findings only
 - No praise
 - No “what was checked”
-- Use exactly three severity levels:
-    - Critical
-    - Moderate
-    - Minor
+- Use exactly three severity levels: Critical, Moderate, Minor
+- If reviewed code violates project rules or architecture but is **out of scope** for the current PR, add a **Refactoring Proposals** section with issue drafts (justified by defined rules only)
+- End with summary line
 
-- If reviewed code violates project rules or architecture but is **out of scope** for the current PR, add a **Refactoring Proposals** section with issue drafts:
-    - Title, scope, violated rule/principle, and suggested approach per proposal
-    - Only propose refactoring justified by defined rules — not stylistic preferences
-    - Omit this section if no opportunities are found
+## Output Format
 
-- End with summary:
-**Summary: X Critical, Y Moderate, Z Minor**
+Use the template defined in `templates/pr-comment-output.md`.

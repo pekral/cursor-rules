@@ -52,25 +52,7 @@ For each scenario, think:
 
 ## Report format
 
-```markdown
-## Scenario — Short Title
-
-What was tested  
-Short description of the user goal.
-
-Expected result  
-What a normal user would expect.
-
-Observed result  
-What actually happened.
-
-Status  
-Passed / Failed / Blocked / Unclear
-
-Comment  
-Human-readable note focused on user experience.
-
-```
+Use the template defined in `templates/test-report.md`.
 
 ## Deliver
 - Reference the pull request

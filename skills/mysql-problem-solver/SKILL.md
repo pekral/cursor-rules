@@ -102,40 +102,7 @@ If access fails, continue statically and say so.
 
 ## Output Format
 
-```md
-## MySQL Analysis Report
-
-### Query Under Review
-...
-
-### Tables Inspected
-...
-
-### Existing Indexes
-...
-
-### EXPLAIN Summary
-...
-
-### Problems Found
-- ...
-
-### Recommended Optimizations
-1. ...
-2. ...
-
-### Suggested Query or Code Rewrite
-...
-
-### Suggested Index Changes
-...
-
-### Risks and Trade-offs
-...
-
-### Confidence / Limitations
-...
-```
+Use the template defined in `templates/analysis-report.md`.
 ---
 
 ## Principles

@@ -20,15 +20,7 @@ metadata:
 
 ## Source detection
 
-Detect the issue tracker automatically from the input:
-
-| Input pattern | Source | Extra rules |
-|---|---|---|
-| GitHub URL or `#123` | GitHub | Use `gh` CLI |
-| JIRA URL or issue key (e.g. `PROJ-123`) | JIRA | Apply `@rules/jira/general.mdc`, use `acli` or JIRA MCP |
-| Bugsnag URL or ID | Bugsnag | Treat as runtime error, prefer TDD |
-
-If the source cannot be determined, ask the user.
+See `references/source-detection.md` for the detection table and rules.
 
 ## Required approach
 - Fully analyze the issue (description, comments, attachments)
@@ -73,17 +65,7 @@ If the source cannot be determined, ask the user.
 
 ## Pre-push quality gates
 
-Before committing and pushing changes, run project fixers and checkers on changed files. Discover available tooling using this priority:
-
-1. **Phing** — check for `build.xml` or `phing.xml` in the project root. If present, list available targets (`phing -l`) and use relevant fixer/checker targets.
-2. **Composer scripts** — if Phing is not available, inspect `composer.json` `scripts` section for fixer and checker commands (e.g. `fix`, `check`, `build`, `pint-fix`, `phpcs-fix`, `rector-fix`, `pint-check`, `phpcs-check`, `rector-check`, `test:coverage`).
-
-Run in this order:
-1. **Fixers** — run all available fixers on changed files (e.g. code style, rector, normalize). Fix any issues they report.
-2. **Checkers** — run all available checkers/analyzers on changed files (e.g. code style check, static analysis, audit). Resolve all reported errors before proceeding.
-3. **Coverage** — if a coverage command exists, run it and confirm 100% coverage for changed code paths.
-
-If both fixers and checkers fail or are not found, stop and inform the user.
+Follow the workflow defined in `references/quality-gates.md`.
 
 ## Pull request
 - Create a branch and commit changes following `@rules/git/general.mdc`
@@ -121,6 +103,11 @@ Post the final report (code review result, security review result, and test-like
 
 ### JIRA-specific follow-up
 - Link the created PR back to the JIRA issue
+
+## References
+
+- references/source-detection.md
+- references/quality-gates.md
 
 ## Done when
 - The issue is fully addressed

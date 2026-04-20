@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Pekral\CursorRules;
 
+use JsonException;
+
 final class InstallerPath
 {
 
@@ -171,6 +173,70 @@ final class InstallerPath
     public static function resolveAllSkillsTargetDirectories(string $root): array
     {
         return self::resolveSkillsTargetDirectories($root, self::EDITOR_ALL);
+    }
+
+    /**
+     * Reads the editor setting from composer.json extra.cursor-rules.editor.
+     */
+    public static function resolveEditorFromComposerJson(string $projectRoot): ?string
+    {
+        $data = self::readComposerJson($projectRoot);
+
+        if ($data === null) {
+            return null;
+        }
+
+        $extra = $data['extra'] ?? [];
+
+        if (!is_array($extra)) {
+            return null;
+        }
+
+        $config = $extra['cursor-rules'] ?? [];
+
+        if (!is_array($config)) {
+            return null;
+        }
+
+        $config = array_change_key_case($config, CASE_LOWER);
+        $editor = $config['editor'] ?? null;
+
+        if (!is_string($editor)) {
+            return null;
+        }
+
+        $editor = strtolower($editor);
+
+        return in_array($editor, self::getAllowedEditors(), true) ? $editor : null;
+    }
+
+    /**
+     * @return array<mixed>|null
+     */
+    private static function readComposerJson(string $projectRoot): ?array
+    {
+        $composerJsonPath = $projectRoot . '/composer.json';
+
+        if (!is_file($composerJsonPath)) {
+            return null;
+        }
+
+        $contents = file_get_contents($composerJsonPath);
+
+        // @codeCoverageIgnoreStart
+        if ($contents === false) {
+            return null;
+        }
+
+        // @codeCoverageIgnoreEnd
+
+        try {
+            $data = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return null;
+        }
+
+        return is_array($data) ? $data : null;
     }
 
     private static function resolveHomeDirectory(): string|false

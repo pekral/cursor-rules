@@ -64,7 +64,10 @@ final class Installer
             }
         }
 
-        return InstallerPath::EDITOR_CURSOR;
+        $root = InstallerPath::resolveProjectRoot();
+        $editorFromConfig = InstallerPath::resolveEditorFromComposerJson($root);
+
+        return $editorFromConfig ?? InstallerPath::EDITOR_CURSOR;
     }
 
     private static function showHelp(): int

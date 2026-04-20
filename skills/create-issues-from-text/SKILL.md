@@ -1,17 +1,6 @@
 ---
 name: create-issues-from-text
-description: Use when create-issues-from-text should be selected for a task
-  based on explicit user intent and clear context.
----
-
----
-
-# ✂️ Optimalizovaný `create-issues-from-text`
-
-```md
----
-name: create-issues-from-text
-description: Break down assignment into multiple structured issues
+description: Use when break down assignment into multiple structured issues
 license: MIT
 metadata:
   author: Petr Král (pekral.cz)
@@ -53,29 +42,4 @@ Split a complex assignment into multiple clear, structured issues.
 
 ## Issue Structure
 
-```markdown
-## Goal
-<Business value>
-
-## Context
-<Link or short reference>
-
-## Technical Solution
-- key decisions
-- files / modules
-- constraints
-
-## Acceptance Criteria
-- [ ] ...
-
-## Testing Scenarios
-### Happy Path
-### Edge Cases
-### Regression
-
-## Dependencies
-- ...
-
-## Notes
-- Source: <link>
-```
+Use the template defined in `templates/issue-structure.md`.

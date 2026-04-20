@@ -100,50 +100,7 @@ Define how to confirm or reject the root cause:
 
 ## Output Format
 
-```markdown
-## Technical Analysis
-
-### Problem Summary
-...
-
-### Known Facts
-- ...
-
-### Assumptions
-- ...
-
-### Missing Information
-- ...
-
-### Hypotheses
-1. ...
-2. ...
-
-### Hypothesis Evaluation
-
-#### Hypothesis 1
-- Why true:
-- Why false:
-- Likelihood:
-
-#### Hypothesis 2
-- Why true:
-- Why false:
-- Likelihood:
-
-### Most Probable Root Cause
-...
-
-### Validation Plan
-- ...
-
-### Next Steps
-- ...
-
-## Stakeholder Explanation
-...
-
-```
+Use the template defined in `templates/analysis-report.md`.
 
 ---
 
@@ -162,11 +119,6 @@ Define how to confirm or reject the root cause:
 - references/debugging-strategies.md
 - references/hypothesis-generation.md
 - references/root-cause-analysis.md
-
----
-
-## Examples
-
-- examples/analysis-good.md
-- examples/analysis-missing-context.md
-- examples/analysis-multiple-hypotheses.md
+- references/analysis-good.md
+- references/analysis-missing-context.md
+- references/analysis-multiple-hypotheses.md

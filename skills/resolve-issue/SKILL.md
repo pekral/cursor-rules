@@ -45,7 +45,7 @@ If the source cannot be determined, ask the user.
    - **GitHub:** the issue repository must match the current Git remote origin.
    - **JIRA:** the issue project key must match the configured JIRA project for this repository.
    - If the issue does not belong to the current project, refuse to process it and inform the user.
-2. Fetch and analyze the issue from the detected source.
+2. Fetch and analyze the issue from the detected source. For JIRA issues, use `acli` as the primary tool. If `acli` is unavailable, fall back to JIRA MCP server.
 3. Define exact requirements and expected behavior.
 4. Classify the task (bug or feature).
 

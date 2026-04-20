@@ -29,7 +29,7 @@ Perform code review for JIRA issues by analyzing related pull requests and publi
 ## Execution
 
 ### 1. Load Context
-- Load JIRA issue, comments, and attachments
+- Load JIRA issue, comments, and attachments using `acli`. If `acli` is unavailable, fall back to JIRA MCP server.
 - Identify all open PRs linked to the issue
 - Before reviewing a PR, switch to the PR branch and pull latest changes
 

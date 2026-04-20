@@ -64,23 +64,7 @@ For each updated package:
 
 ## Output Format
 
-```markdown
-## Conflicts
-
-No conflicts detected.
-
-## Changelogs
-
-### vendor/package (old → new)
-
-- Breaking: ...
-- New: ...
-- Fix: ...
-
-## Suggested Follow-up
-
-- ...
-```
+Use the template defined in `templates/update-report.md`.
 ---
 
 ## Principles

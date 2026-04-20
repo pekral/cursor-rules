@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **23 comprehensive Agent skills** for automated workflows (v0.7)
+- **23 comprehensive Agent skills** for automated workflows (v0.7.1)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -99,7 +99,7 @@ vendor/bin/cursor-rules install --symlink          # prefer symlinks (fallback t
 
 ---
 
-# 🎯 Skills Overview — **v0.7**
+# 🎯 Skills Overview — **v0.7.1**
 
 > Current release includes 23 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
 
@@ -112,7 +112,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | Skill | Description |
 |---|---|
 | `analyze-problem` | Structured problem analysis for debugging, root cause identification, and breaking down complex issues. |
-| `resolve-issue` | Unified issue resolution for GitHub, JIRA, and Bugsnag. Detects the tracker from the provided link, implements fixes, runs review loops, and creates a PR. |
+| `resolve-issue` | Unified issue resolution for GitHub, JIRA, and Bugsnag. Detects the tracker from the provided link, runs `analyze-problem` before implementation, validates with tests, and creates a PR. |
 | `merge-github-pr` | Safely merge GitHub pull requests that are ready for deployment. |
 | `create-issue` | Create a tracker issue from provided task text while preserving original meaning and structure. |
 | `create-issues-from-text` | Batch-create issues from provided text with automatic structure detection. |

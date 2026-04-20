@@ -1,0 +1,16 @@
+## Security Audit Report - <Project Name>
+
+### Critical
+- ...
+
+### High
+- ...
+
+### Medium
+- ...
+
+### Low
+- ...
+
+### Action Items
+1. [ ] ...

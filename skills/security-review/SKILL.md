@@ -93,22 +93,5 @@ Avoid generic best-practice noise.
 - recommended fix
 
 ### Output format
-```markdown
-## Security Audit Report - <Project Name>
 
-### Critical
-- ...
-
-### High
-- ...
-
-### Medium
-- ...
-
-### Low
-- ...
-
-### Action Items
-1. [ ] ...
-
-```
+Use the template defined in `templates/audit-report.md`.

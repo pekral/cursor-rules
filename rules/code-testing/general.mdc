@@ -22,9 +22,10 @@ globs: []
 - Avoid mocking data that can be created via factories.
 
 ## Mocking
+- Prefer storing real data in the database over mocking ModelManager or Repository classes.
 - Mock only:
-    - external services
-    - exception scenarios
+    - external services that cannot run in test environment
+    - exception scenarios that are hard to reach otherwise
 - Prefer partial mocks over full mocks.
 - Remove unnecessary or redundant mocks.
 

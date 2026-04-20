@@ -53,13 +53,13 @@ Before reviewing code, load and analyze the full issue context:
 - Type safety and error handling
 - Data validation encapsulation — verify that all validation logic is in dedicated Data Validator classes or FormRequests (using validation rules from reusable traits in `app/Concerns/`), not inline in Actions, controllers, jobs, commands, listeners, or Livewire components (see `@rules/laravel/architecture.mdc` Data Validators section)
 
-### Specialized Reviews (when relevant)
+### Specialized Reviews
 
 - Always run:
     - @skills/security-review/SKILL.md
+    - @skills/mysql-problem-solver/SKILL.md
 
 - Run conditionally:
-    - SQL changes → @skills/mysql-problem-solver/SKILL.md
     - Shared state / concurrency → @skills/race-condition-review/SKILL.md
     - I/O or external calls → I/O review
 
@@ -131,5 +131,4 @@ If no refactoring opportunities are found, omit this section.
 
 ## After Completion
 
-- If no **Critical** or **Moderate** findings remain:
-    - run @skills/test-like-human/SKILL.md
+- Always run @skills/test-like-human/SKILL.md

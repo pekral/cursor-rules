@@ -84,25 +84,13 @@ Before reviewing code, load and analyze the full JIRA issue:
 - All technical findings go exclusively to GitHub PR comments
 - Include: file paths, line numbers, code references, severity levels, concrete fixes
 - Findings only — no praise, no explanations of what was checked
-- Use severity levels:
-  - Critical
-  - Moderate
-  - Minor
-- If reviewed code violates project rules or architecture but is **out of scope** for the current PR, add a **Refactoring Proposals** section with issue drafts:
-  - Title, scope, violated rule/principle, and suggested approach per proposal
-  - Only propose refactoring justified by defined rules — not stylistic preferences
-  - Omit this section if no opportunities are found
-- End with:
-  **Summary: X Critical, Y Moderate, Z Minor**
+- Use severity levels: Critical, Moderate, Minor
+- Use the template defined in `templates/github-output.md`
 
 ### JIRA (non-technical summary — only here)
 - Never include file paths, line numbers, code snippets, or technical severity levels
 - Write in plain language understandable by non-developers
-- Include:
-  - overall status (clean / has issues)
-  - key risks described in business terms
-  - testing recommendations with step-by-step instructions
-  - link to the GitHub PR for technical details
+- Use the template defined in `templates/jira-output.md`
 
 ---
 

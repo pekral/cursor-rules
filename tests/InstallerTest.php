@@ -110,7 +110,7 @@ test('install ignores rules directory in project root and uses package source', 
     try {
         chdir($root);
         ob_start();
-        $exitCode = Installer::run(['cursor-rules', 'install']);
+        $exitCode = Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         expect($exitCode)->toBe(0);
@@ -137,7 +137,7 @@ test('install copies rules from package when no development directory', function
     try {
         chdir($root);
         ob_start();
-        $exitCode = Installer::run(['cursor-rules', 'install']);
+        $exitCode = Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         expect($exitCode)->toBe(0);
@@ -176,7 +176,7 @@ test('install respects force flag', function (): void {
         chdir($root);
 
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
         $originalContent = file_get_contents($installedFile);
         expect($originalContent)->toBeString();
@@ -184,12 +184,12 @@ test('install respects force flag', function (): void {
         file_put_contents($installedFile, 'modified content');
 
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
         expect(file_get_contents($installedFile))->toBe('modified content');
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--force']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--force']);
         ob_end_clean();
         expect(file_get_contents($installedFile))->toBe($originalContent);
     } finally {
@@ -213,12 +213,12 @@ test('install never overwrites existing project.mdc in target', function (): voi
         chdir($root);
 
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
         expect(file_get_contents($installedFile))->toBe('my project-specific content');
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--force']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--force']);
         ob_end_clean();
         expect(file_get_contents($installedFile))->toBe('my project-specific content');
     } finally {
@@ -244,7 +244,7 @@ test('install creates symlinks when requested', function (): void {
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--symlink']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--symlink']);
         ob_end_clean();
 
         $target = $root . '/.cursor/rules/php/core-standards.mdc';
@@ -268,7 +268,7 @@ test('install copies nested directories', function (): void {
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         $installedFile = $root . '/.cursor/rules/laravel/architecture.mdc';
@@ -284,7 +284,7 @@ test('install copies nested directories', function (): void {
     }
 });
 
-test('install with default editor copies rules and skills only to .cursor', function (): void {
+test('install with editor=cursor copies rules and skills only to .cursor', function (): void {
     $root = installerCreateProjectRoot();
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
@@ -292,7 +292,7 @@ test('install with default editor copies rules and skills only to .cursor', func
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         expect(is_file($root . '/.cursor/rules/php/core-standards.mdc'))->toBeTrue();
@@ -345,7 +345,7 @@ test('install appends output humanization directive to installed skill', functio
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         $installedSkill = $root . '/.cursor/skills/code-review/SKILL.md';
@@ -372,7 +372,7 @@ test('install does not duplicate output humanization directive in installed skil
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         $installedSkill = $root . '/.cursor/skills/code-review/SKILL.md';
@@ -473,7 +473,7 @@ test('install fails when target path is a file instead of directory', function (
     try {
         chdir($root);
         ob_start();
-        $exitCode = Installer::run(['cursor-rules', 'install']);
+        $exitCode = Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_get_clean();
 
         expect($exitCode)->toBe(1);
@@ -496,7 +496,7 @@ test('install fails when destination is directory that cannot be removed', funct
     try {
         chdir($root);
         ob_start();
-        $exitCode = Installer::run(['cursor-rules', 'install', '--force']);
+        $exitCode = Installer::run(['cursor-rules', 'install', '--editor=cursor', '--force']);
         ob_get_clean();
 
         expect($exitCode)->toBe(1);
@@ -541,7 +541,7 @@ test('install fails when rules subdirectory path is a file', function (): void {
     try {
         chdir($root);
         ob_start();
-        $exitCode = Installer::run(['cursor-rules', 'install']);
+        $exitCode = Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_get_clean();
 
         expect($exitCode)->toBe(1);
@@ -562,7 +562,7 @@ test('install copies security rules from rules/security directory', function ():
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         $securityDir = $root . '/.cursor/rules/security';
@@ -593,7 +593,7 @@ test('install always force-copies security rules even without force flag', funct
         chdir($root);
 
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         $securityFile = $root . '/.cursor/rules/security/backend.md';
@@ -603,7 +603,7 @@ test('install always force-copies security rules even without force flag', funct
         file_put_contents($regularFile, 'old rules content');
 
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         expect(file_get_contents($securityFile))->toBe($originalSecurityContent);
@@ -836,7 +836,7 @@ test('install with editor=codex copies to .codex only', function (): void {
     }
 });
 
-test('install from package root installs rules and skills into .cursor by default', function (): void {
+test('install from package root installs rules and skills into .cursor', function (): void {
     $packageRoot = dirname(__DIR__);
 
     if (!file_exists($packageRoot . '/composer.json') || !is_dir($packageRoot . '/rules')) {
@@ -851,7 +851,7 @@ test('install from package root installs rules and skills into .cursor by defaul
     try {
         chdir($packageRoot);
         ob_start();
-        $exitCode = Installer::run(['cursor-rules', 'install']);
+        $exitCode = Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         $output = (string) ob_get_clean();
 
         expect($exitCode)->toBe(0);
@@ -925,7 +925,7 @@ test('install fails when copy fails due to unwritable destination', function ():
         chdir($root);
         ob_start();
         set_error_handler(static fn (): bool => true);
-        $exitCode = Installer::run(['cursor-rules', 'install']);
+        $exitCode = Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         restore_error_handler();
         ob_get_clean();
 
@@ -959,13 +959,13 @@ test('install with prune removes files from target that no longer exist in sourc
         chdir($root);
 
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         installerWriteFile($root . '/.cursor/skills/orphaned-skill/SKILL.md', 'orphaned content');
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--prune']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--prune']);
         ob_end_clean();
 
         expect(is_file($root . '/.cursor/skills/code-review/SKILL.md'))->toBeTrue();
@@ -989,7 +989,7 @@ test('install without prune keeps orphaned files in target', function (): void {
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         expect(is_file($root . '/.cursor/skills/orphaned-skill/SKILL.md'))->toBeTrue();
@@ -1011,13 +1011,13 @@ test('install with prune also removes rules that no longer exist in source', fun
         chdir($root);
 
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         installerWriteFile($root . '/.cursor/rules/removed.mdc', 'removed rule');
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--prune']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--prune']);
         ob_end_clean();
 
         expect(is_file($root . '/.cursor/rules/php/core-standards.mdc'))->toBeTrue();
@@ -1040,13 +1040,13 @@ test('install with prune reports pruned file count in output', function (): void
         chdir($root);
 
         ob_start();
-        Installer::run(['cursor-rules', 'install']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
         ob_end_clean();
 
         installerWriteFile($root . '/.cursor/skills/drop-skill/SKILL.md', 'drop');
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--prune']);
+        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--prune']);
         $output = (string) ob_get_clean();
 
         expect($output)->toContain('1 pruned');
@@ -1129,7 +1129,7 @@ test('install with prune on non-existent target directory does nothing', functio
     try {
         chdir($root);
         ob_start();
-        $exitCode = Installer::run(['cursor-rules', 'install', '--prune']);
+        $exitCode = Installer::run(['cursor-rules', 'install', '--editor=cursor', '--prune']);
         ob_end_clean();
 
         expect($exitCode)->toBe(0);
@@ -1161,7 +1161,7 @@ test('install fails when existing file cannot be removed', function (): void {
         chdir($root);
         ob_start();
         set_error_handler(static fn (): bool => true);
-        $exitCode = Installer::run(['cursor-rules', 'install', '--force']);
+        $exitCode = Installer::run(['cursor-rules', 'install', '--editor=cursor', '--force']);
         restore_error_handler();
         ob_get_clean();
 
@@ -1530,33 +1530,10 @@ test('resolveEditorFromComposerJson is case-insensitive for editor key', functio
     }
 });
 
-test('install without --editor reads editor from composer.json', function (): void {
-    $root = installerCreateProjectRoot();
-    file_put_contents($root . '/composer.json', json_encode([
-        'extra' => [
-            'cursor-rules' => [
-                'editor' => 'claude',
-            ],
-        ],
-    ]));
-    $cwd = getcwd();
-    $originalCwd = $cwd !== false ? $cwd : '';
+test('install without --editor returns error', function (): void {
+    $exitCode = Installer::run(['cursor-rules', 'install']);
 
-    try {
-        chdir($root);
-        ob_start();
-        Installer::run(['cursor-rules', 'install']);
-        ob_end_clean();
-
-        expect(is_file($root . '/.claude/rules/php/core-standards.mdc'))->toBeTrue();
-        expect(is_dir($root . '/.cursor/rules'))->toBeFalse();
-    } finally {
-        if ($originalCwd !== '') {
-            chdir($originalCwd);
-        }
-
-        installerRemoveDirectory($root);
-    }
+    expect($exitCode)->toBe(1);
 });
 
 test('install with --editor flag overrides composer.json editor', function (): void {

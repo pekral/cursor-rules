@@ -37,7 +37,7 @@ final class Installer
             $editor = self::parseEditor($normalizedArgv);
 
             if ($editor === null) {
-                fwrite(STDERR, 'Invalid --editor value. Allowed: cursor, claude, codex, all.' . PHP_EOL);
+                fwrite(STDERR, 'Missing or invalid --editor value. Allowed: cursor, claude, codex, all.' . PHP_EOL);
 
                 return 1;
             }
@@ -64,21 +64,18 @@ final class Installer
             }
         }
 
-        $root = InstallerPath::resolveProjectRoot();
-        $editorFromConfig = InstallerPath::resolveEditorFromComposerJson($root);
-
-        return $editorFromConfig ?? InstallerPath::EDITOR_CURSOR;
+        return null;
     }
 
     private static function showHelp(): int
     {
         echo "Usage:\n";
-        echo "  vendor/bin/cursor-rules install [--force] [--symlink] [--prune] [--editor=EDITOR]\n\n";
+        echo "  vendor/bin/cursor-rules install --editor=EDITOR [--force] [--symlink] [--prune]\n\n";
         echo "Options:\n";
+        echo "  --editor=EDITOR Target editor (required): cursor, claude, codex, all.\n";
         echo "  --force         Overwrite existing files.\n";
         echo "  --symlink       Create symlinks instead of copying (falls back to copy on Windows).\n";
         echo "  --prune         Remove files in target that no longer exist in source.\n";
-        echo "  --editor=EDITOR Target editor: cursor (default), claude, codex, all.\n";
 
         return 0;
     }

@@ -82,6 +82,7 @@ globs:
 - Prefer `Http::fake()` over mocking HTTP integrations manually.
 - Never allow real external HTTP calls in tests.
 - Use factories for Eloquent persistence in tests.
+- Prefer storing real data in the database and using it in tests over mocking ModelManager or Repository classes. Only mock external services that cannot run in test environment.
 - Add or update tests for every meaningful behavior change.
 - Use `Artisan::call(CommandClass::class)` for console command execution in tests.
 
@@ -101,6 +102,13 @@ globs:
 ## Dependency Injection
 - Always pass service dependencies via constructor, never as method parameters. This applies to Actions, Services, and all other classes.
 - Exception: Livewire components do not support constructor injection — use the `boot()` lifecycle hook instead.
+
+## New Feature Implementation
+- Before implementing a new feature, check if an existing solution already covers the use case:
+  1. Check Spatie packages first (https://github.com/orgs/spatie/repositories)
+  2. Search for other well-maintained community packages
+  3. Only build a custom solution if no suitable package exists
+- When using an existing package, prefer the simplest and most efficient integration
 
 ## General Laravel Practices
 - Prefer Laravel conventions and built-in features first.

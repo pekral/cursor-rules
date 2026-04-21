@@ -63,7 +63,8 @@ Before reviewing code, load and analyze the full linked issue:
 
 #### Posting strategy
 - **If an existing CR comment is found (follow-up review):**
-    - Post a **summary-only** top-level PR comment (e.g. status update, summary line)
+    - Analyze all previous CR findings and classify each as: **Resolved**, **Deferred**, or **Still open**
+    - Include a **Previous CR Status** section at the top of the new review comment (before any new findings)
     - Post **detailed findings** as a new PR comment that references the original CR comment (quote its first line or link to it)
     - GitHub does not support native replies to issue comments — use quoting (e.g. "> Replying to code review from {date}") to create a visual thread
 

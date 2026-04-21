@@ -1,3 +1,13 @@
+## Previous CR Status
+
+> Include this section only in follow-up reviews when a previous CR exists for the same PR. Omit entirely for first reviews.
+
+| # | Finding | Status |
+|---|---------|--------|
+| 1 | Previous finding description | ✅ Resolved / ⏳ Deferred / ❌ Still open |
+
+---
+
 ## Critical
 
 1. [file:line] Description  

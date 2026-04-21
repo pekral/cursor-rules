@@ -32,6 +32,17 @@ Perform structured code review focused on:
 - Identify changes vs main branch.
 - Deduplicate previous findings.
 
+### Previous CR Analysis
+
+If a previous code review exists for the same PR:
+
+1. Load all previous CR findings from PR comments.
+2. Classify each previous finding into one of these statuses:
+   - **Resolved** — the finding was fixed in subsequent commits.
+   - **Deferred** — the finding was acknowledged but intentionally left for a future task.
+   - **Still open** — the finding was not addressed and remains valid.
+3. Include this classification as a **Previous CR Status** section in the output (before new findings).
+
 ### Issue Context Analysis
 
 Before reviewing code, load and analyze the full issue context:

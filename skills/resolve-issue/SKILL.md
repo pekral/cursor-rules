@@ -41,27 +41,37 @@ See `references/source-detection.md` for the detection table and rules.
 3. Define exact requirements and expected behavior.
 4. Classify the task (bug or feature).
 
+### Comment analysis
+
+5. Before analyzing the problem, fetch and read **all comments and replies** from the issue tracker (GitHub, JIRA, or Bugsnag):
+   - Group comments by conversation thread (e.g., review threads, reply chains).
+   - For each thread, determine:
+     - **Current requirements** — requests or conditions that are still valid and unfulfilled.
+     - **Resolved items** — requirements already addressed by merged PRs or subsequent comments.
+     - **Outdated items** — requests superseded by newer comments or decisions.
+   - Use only the **current requirements** (combined with the issue description) as input for the next step.
+
 ### Problem analysis
 
-5. Run `@skills/analyze-problem/SKILL.md` using the issue description, comments, and any available context as input.
-6. Review the analysis output and split the identified items into two groups:
+6. Run `@skills/analyze-problem/SKILL.md` using the issue description, current requirements from comment analysis, and any available context as input.
+7. Review the analysis output and split the identified items into two groups:
    - **In scope** — items that directly match the issue requirements. These will be implemented.
    - **Out of scope** — items that are valid findings but fall outside the current issue. These will be added to the PR summary as a TODO list for future tasks.
 
 ### If bug
-7. Reproduce the issue if possible.
-8. Write or update a test capturing the failure.
-9. Confirm the failure before applying the fix.
+8. Reproduce the issue if possible.
+9. Write or update a test capturing the failure.
+10. Confirm the failure before applying the fix.
 
 ### If feature
-7. Design a minimal implementation aligned with project architecture.
+8. Design a minimal implementation aligned with project architecture.
 
 ### Continue
-10. Implement the solution for all **in-scope** items identified in step 6.
-11. Ensure no sensitive data is exposed in error/validation messages.
-12. Run tests for affected areas and confirm correctness.
-13. Add or update tests to cover the new or fixed behavior.
-14. Verify 100% code coverage for all changed or added code paths — if coverage tooling exists, run it and confirm the result before proceeding.
+11. Implement the solution for all **in-scope** items identified in step 7.
+12. Ensure no sensitive data is exposed in error/validation messages.
+13. Run tests for affected areas and confirm correctness.
+14. Add or update tests to cover the new or fixed behavior.
+15. Verify 100% code coverage for all changed or added code paths — if coverage tooling exists, run it and confirm the result before proceeding.
 
 ## Pre-push quality gates
 
@@ -73,7 +83,7 @@ Follow the workflow defined in `references/quality-gates.md`.
   - clear description of the change
   - reference to the original issue
   - testing instructions
-  - **TODO list** — if any **out-of-scope** items were identified in step 6, include them in the PR summary under a `## TODO` section as a checklist of potential follow-up tasks
+  - **TODO list** — if any **out-of-scope** items were identified in step 7, include them in the PR summary under a `## TODO` section as a checklist of potential follow-up tasks
 
 ## Code quality and review loop
 

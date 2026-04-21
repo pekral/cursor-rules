@@ -61,6 +61,8 @@ Before reviewing code, load and analyze the full JIRA issue:
 ### 4. Publish Results
 
 #### GitHub (technical findings only)
+- If a previous CR exists for the same PR, analyze all previous findings and classify each as: **Resolved**, **Deferred**, or **Still open**
+- Include a **Previous CR Status** section at the top of the GitHub comment (before new findings)
 - Post all technical findings as PR comment
 - Format:
   - Critical → Moderate → Minor

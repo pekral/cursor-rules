@@ -64,6 +64,13 @@ Before reviewing code, load and analyze the full issue context:
 - Type safety and error handling
 - Data validation encapsulation — verify that all validation logic is in dedicated Data Validator classes or FormRequests (using validation rules from reusable traits in `app/Concerns/`), not inline in Actions, controllers, jobs, commands, listeners, or Livewire components (see `@rules/laravel/architecture.mdc` Data Validators section)
 
+### Named Arguments Review
+- Would positional arguments be ambiguous?
+- Are there boolean, null, array, or repeated scalar values?
+- Would a DTO or value object be a better design?
+- Is this a public API where parameter names must remain stable?
+- Are arguments still listed in the original method signature order?
+
 ### Specialized Reviews
 
 - Always run:

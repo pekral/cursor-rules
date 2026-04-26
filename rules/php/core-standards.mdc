@@ -63,6 +63,15 @@ globs: ["*"]
 - Never suppress errors with `@`.
 - When fixing an unused variable (e.g. PHPCS `UnusedVariable`): delete the variable if it is not required. If the variable is required (e.g. assigned from a function call with side effects), suppress the warning with `assert($variable !== null)` or similar `assert()` instead of removing the assignment.
 
+## Named Arguments
+- Many parameters is a code smell. It often means the method does too much or should accept a DTO/value object.
+- Named arguments help most with booleans, null, array values, and unclear strings. For example, `true`, `null`, `[]` without context say nothing.
+- They improve call-site readability without unnecessary variables. Instead of `$status = 'active'` just for a hint, use `status: 'active'`.
+- They should not replace good design. When a method has 8 parameters, named arguments do not fix the problem. They just make it bearable.
+- In public APIs, parameter names become part of the contract. Renaming a parameter in a public method can break consumers using named arguments.
+- Keep arguments in the original method signature order even when using named arguments.
+- See `rules/php/examples/named-arguments.md` for usage examples.
+
 ## Design Principles
 - Follow SOLID pragmatically, not dogmatically.
 - Keep I/O at the edges where practical.

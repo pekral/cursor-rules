@@ -916,8 +916,8 @@ test('install fails when copy fails due to unwritable destination', function ():
 
     $root = installerCreateProjectRoot();
     $targetDir = $root . '/.cursor/rules/php';
-    installerEnsureDirectory($targetDir);
-    chmod($targetDir, 0444);
+    installerEnsureDirectory($targetDir . '/examples');
+    chmod($targetDir, 0555);
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
 

@@ -99,6 +99,22 @@ metadata:
   - Add a new top-level PR comment with resolved-point status
 - Mark resolved items (checkbox or inline) in all cases
 
+#### Per-item justification (required)
+
+Every resolved review point in the PR comment **must** include a brief justification using this format:
+
+```
+- [x] {short finding title}
+  - **Why:** {what was wrong / what the reviewer asked for}
+  - **Reason:** {root cause or rule that was violated}
+  - **Solution:** {what was changed and why this is the best fit}
+```
+
+Rules:
+- Keep each line **one sentence max**.
+- Skip the section only if a point was rejected or deferred — in that case state the rejection reason instead.
+- Do not pad with filler, restate the obvious, or paraphrase the diff.
+
 ---
 
 ### Completion

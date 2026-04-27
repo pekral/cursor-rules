@@ -83,8 +83,11 @@ Before reviewing code, load and analyze the full issue context:
 
 ### Validation
 - Verify acceptance criteria
-- Check test coverage for changed files (must be 100%)
-- Identify missing test scenarios
+- **Coverage gate (mandatory):** every line, branch, and condition added or modified in the current PR diff must be covered by tests.
+  - Run the project coverage tool (e.g. `composer test:coverage` / `phpunit --coverage-*`) scoped to changed files.
+  - Map the coverage report to the diff and list any uncovered added/changed lines as **Critical** findings.
+  - If coverage tooling is unavailable or cannot be executed, raise that as a **Critical** finding instead of skipping the check.
+- Identify missing test scenarios beyond raw coverage (edge cases, error paths, regressions).
 
 ---
 

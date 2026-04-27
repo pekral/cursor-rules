@@ -79,6 +79,7 @@ globs: ["*"]
 - Extract repeated logic into reusable abstractions only when repetition is real and meaningful.
 - Keep related code together and maintain a logical folder structure.
 - Leave touched code cleaner than you found it.
+- Do not add speculative (YAGNI) parameters. Add a parameter to a method, function, action, or constructor only when at least one current caller actually needs it. Optional knobs, "in case" defaults, and parameters introduced solely for hypothetical future callers must be removed; add them later when a real use case appears.
 
 ## Documentation
 - Prefer self-documenting code over explanatory comments.

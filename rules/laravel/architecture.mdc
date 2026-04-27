@@ -89,6 +89,8 @@ globs:
   - pagination
   - retrieval
 - Repositories must not perform writes or side effects.
+- **Basic queries only:** Repositories may expose only generic, reusable queries (e.g. `find`, `findBy{Attribute}`, `all`, simple `where` lookups, pagination of a base scope). Use case–specific or feature-specific queries (combinations, multi-condition business filters, joins driven by a single feature) must not live in Repositories.
+- **Specialization belongs to Services and Actions:** When a feature needs a specialized result, compose it from basic Repository methods inside a Service (when scoped to one model) or an Action (when orchestrating across models or features). Services and Actions still must not write Eloquent or `DB::` queries themselves — they call Repository methods and shape the result.
 - All database write operations must be encapsulated in ModelManager classes — never inline persistence in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components.
 - ModelManagers are write-only:
   - create
@@ -199,6 +201,7 @@ globs:
   - services tied to one model that do not extend `BaseModelService`
   - non-CRUD methods inside resource controllers
 - Mark as moderate:
+  - feature-specific or use-case–specific query methods inside Repositories — Repositories must expose only basic, reusable queries; specialization belongs in Services or Actions composing those basic methods
   - calling Actions via `->__invoke()` instead of `$action(...)`
   - DTOs overriding `from()` only for key renaming instead of using mapping attributes
   - plain service classes used where an Action is the better fit

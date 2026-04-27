@@ -61,6 +61,7 @@ Focus on:
 - Do not place business logic in controllers or Livewire components.
 - Use existing query scopes instead of duplicating conditions.
 - Prefer DTOs over raw arrays when the project uses them.
+- Keep Repositories limited to basic, reusable queries. When refactoring uncovers a feature-specific query method on a Repository, move it to a Service (single-model) or an Action (cross-model / cross-feature) that composes basic Repository methods (see `@rules/laravel/architecture.mdc` Repositories and ModelManagers section).
 
 ---
 

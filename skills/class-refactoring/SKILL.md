@@ -48,6 +48,7 @@ Focus on:
 - Ensure single responsibility per class.
 - Separate orchestration from business logic.
 - Remove duplication (DRY).
+- Before modifying code, enumerate every place that modifies data before it is saved or passed downstream (DTO mapping, payload shaping, key renaming, default fallbacks, format normalization, business-driven derivation). Surface the list in the refactoring plan and consolidate duplicates into the canonical layer per `@rules/laravel/architecture.mdc` Data Modification (DRY) section (Data Builder, DTO named constructor, Data Validator, ModelManager, Repository).
 - Prefer small, focused methods.
 - Extract intention-revealing private methods when it improves clarity.
 - Avoid deep nesting and complex conditionals.

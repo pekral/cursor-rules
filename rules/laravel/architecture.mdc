@@ -112,6 +112,17 @@ globs:
 - DTO classes should be `final readonly` with promoted constructor properties where practical.
 - Place DTOs under `app/Dto/{Domain}` and use a `Data` suffix.
 
+## Data Modification (DRY)
+- Each data transformation has exactly one home, defined by the layer that produces the result:
+  - **Data Builders** — mapping, hydration, and normalization of incoming data into DTOs.
+  - **DTOs** — typed carriers; named constructors (`fromModel`, `fromRequest`, …) own model/request → DTO transformations.
+  - **Data Validators** — validation and rejection of invalid input.
+  - **ModelManagers** — persistence-side shaping (write payloads, bulk write transformations).
+  - **Repositories** — read-side shaping limited to basic query results; specialization via composition in Services/Actions.
+  - **Actions** — orchestration that composes the above, never inline transformation logic.
+- The same shaping rule (date format, default fallback, null handling, key renaming, business-driven derivation, etc.) must not be repeated across Actions, Services, controllers, jobs, listeners, Livewire components, or commands. If two or more entry points need the same transformation, extract it into the canonical layer above and reuse it.
+- When introducing or reviewing changes, enumerate every place that modifies data before it is saved or passed downstream and verify that no two places implement the same transformation.
+
 ## Data Builders
 - Data Builders are dedicated classes for mapping, hydrating, and normalizing input into DTOs.
 - Data Builders are **not** Action pattern classes — they do not use `__invoke()` and may expose multiple public methods.

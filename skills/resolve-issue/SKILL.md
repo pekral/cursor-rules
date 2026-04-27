@@ -58,6 +58,17 @@ See `references/source-detection.md` for the detection table and rules.
    - **In scope** — items that directly match the issue requirements. These will be implemented.
    - **Out of scope** — items that are valid findings but fall outside the current issue. These will be added to the PR summary as a TODO list for future tasks.
 
+### Phase planning (commit plan)
+
+Before writing any code, decide how the in-scope work will be split into commits within the PR.
+
+1. **Detect existing phases** in the issue description and the kept comments. Phase markers include explicit headings such as `Fáze 1` / `Phase 1`, numbered milestones, ordered acceptance-criteria blocks, or a step-by-step plan written by the reporter.
+2. **If phases exist:** treat each phase as exactly **one commit**. Keep the original phase order as commit order. Do not merge, reorder, or re-scope phases.
+3. **If no phases exist but the assignment is long or covers multiple distinct concerns:** propose a phased breakdown — each phase must be independently reviewable and yield a working state — then map **one phase per commit**.
+4. **If the assignment is small and atomic:** keep it as a single commit. Do not invent artificial phases.
+5. Record the planned phases as a numbered list (one line per commit, with the intended commit message in `type(scope): description` form per `@rules/git/general.mdc`) **before** starting implementation. This list is the commit plan for step 11.
+6. During implementation, commit at the end of each phase. Run pre-push fixers and tests on the changes belonging to that phase before moving on.
+
 ### If bug
 8. Reproduce the issue if possible.
 9. Write or update a test capturing the failure.

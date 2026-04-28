@@ -32,6 +32,22 @@ metadata:
 - Build a checklist from all review findings
 - Map each finding to a concrete code or test change
 
+#### Reproducer extraction (per finding)
+
+For every Critical and Moderate finding, extract the reproducer fields published by the CR skills (`@skills/code-review/SKILL.md`, `@skills/code-review-github/SKILL.md`, `@skills/code-review-jira/SKILL.md`, `@skills/security-review/SKILL.md`):
+
+- **Faulty Example** — the minimal snippet or input that reproduces the bug
+- **Expected Behavior** — the assertion target the test must verify
+- **Test Hint** — the layer (unit, integration, feature) and entry point
+
+Use these to write a failing test **before** applying the fix:
+
+1. Drop the Faulty Example into a new test case at the layer named in the Test Hint.
+2. Assert the Expected Behavior — the test must fail on the current code.
+3. Apply the fix from the finding; rerun the test until it passes.
+
+If a finding lacks one of these fields, request a CR rerun rather than guessing — the CR skills are responsible for providing them.
+
 ---
 
 ### Pre-fix phase

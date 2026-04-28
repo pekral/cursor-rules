@@ -87,6 +87,12 @@ Before reviewing code, load and analyze the full linked issue:
 - No praise
 - No “what was checked”
 - Use exactly three severity levels: Critical, Moderate, Minor
+- Each **Critical** and **Moderate** finding must include:
+    - **Faulty Example** — minimal code snippet or input payload reproducing the issue (redact secrets/PII)
+    - **Expected Behavior** — single assertable statement (return value, exception, persisted state, emitted event)
+    - **Test Hint** — one sentence pointing at the test layer (unit, integration, feature) and entry point
+- These three fields exist so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test directly from the PR comment.
+- Minor findings may omit these fields when no behavior change is implied.
 - If reviewed code violates project rules or architecture but is **out of scope** for the current PR, add a **Refactoring Proposals** section with issue drafts (justified by defined rules only)
 - End with summary line
 

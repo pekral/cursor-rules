@@ -92,6 +92,13 @@ Avoid generic best-practice noise.
 - exploit scenario
 - recommended fix
 
+### Reproducer fields (mandatory for Critical and High)
+- **Faulty Example** — minimal code snippet or attacker payload that reproduces the vulnerability (redact secrets, tokens, and PII)
+- **Expected Behavior** — single assertable security guarantee (rejection, authorization denial, escaped output, no side effect)
+- **Test Hint** — one sentence pointing at the test layer (unit, feature, HTTP) and entry point
+
+These fields exist so `@skills/process-code-review/SKILL.md` can turn each finding into a regression test without re-deriving the attack vector. Medium and Low findings may omit them when no behavior change is implied.
+
 ### Output format
 
 Use the template defined in `templates/audit-report.md`.

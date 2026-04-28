@@ -87,6 +87,12 @@ Before reviewing code, load and analyze the full JIRA issue:
 - Include: file paths, line numbers, code references, severity levels, concrete fixes
 - Findings only — no praise, no explanations of what was checked
 - Use severity levels: Critical, Moderate, Minor
+- Each **Critical** and **Moderate** finding must include:
+    - **Faulty Example** — minimal code snippet or input payload reproducing the issue (redact secrets/PII)
+    - **Expected Behavior** — single assertable statement (return value, exception, persisted state, emitted event)
+    - **Test Hint** — one sentence pointing at the test layer (unit, integration, feature) and entry point
+- These three fields exist so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test directly from the PR comment.
+- Minor findings may omit these fields when no behavior change is implied.
 - Use the template defined in `templates/github-output.md`
 
 ### JIRA (non-technical summary — only here)

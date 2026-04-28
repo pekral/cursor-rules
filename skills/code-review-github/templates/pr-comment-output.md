@@ -10,9 +10,15 @@
 
 ## Critical
 
-1. [file:line] Description  
-   Impact: ...  
+1. [file:line] Description
+   Impact: ...
    Fix: ...
+   Faulty Example:
+   ```php
+   // minimal code or input that reproduces the issue
+   ```
+   Expected Behavior: what the correct outcome (return value, exception, side effect) must be.
+   Test Hint: one-sentence outline of the test that would fail today and pass after the fix.
 
 ## Moderate
 
@@ -22,11 +28,17 @@
 
 1. ...
 
+> **Faulty Example, Expected Behavior, and Test Hint are mandatory for every Critical and Moderate finding** so `process-code-review` can turn each finding into a reproducer test.
+> - Faulty Example must be a minimal, runnable snippet (or sample input/payload) — never paste secrets or real PII; redact with placeholders.
+> - Expected Behavior must be a single assertable statement (return value, thrown exception, persisted state, emitted event).
+> - Test Hint must point at the layer the test belongs in (unit, integration, feature) and the entry point to call.
+> - Minor findings may omit these fields when no behavior change is implied (e.g. naming, dead code).
+
 ## Refactoring Proposals
 
-1. **Title:** short, actionable issue title  
-   **Scope:** affected file(s) or area  
-   **Reason:** which rule or principle is violated and why it matters  
+1. **Title:** short, actionable issue title
+   **Scope:** affected file(s) or area
+   **Reason:** which rule or principle is violated and why it matters
    **Suggested approach:** brief description of the expected refactoring
 
 Only propose refactoring justified by defined rules — not stylistic preferences.

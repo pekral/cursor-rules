@@ -106,6 +106,12 @@ Before reviewing code, load and analyze the full issue context:
     - location
     - risk/impact
     - concrete fix
+- Each **Critical** and **Moderate** finding must additionally include:
+    - **Faulty Example** — minimal code snippet or input payload that reproduces the issue (redact secrets/PII)
+    - **Expected Behavior** — single assertable statement (return value, exception, persisted state, emitted event)
+    - **Test Hint** — one sentence pointing at the test layer (unit, integration, feature) and entry point
+- These three fields exist so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test without re-deriving context.
+- Minor findings may omit these fields when no behavior change is implied (naming, dead code, etc.).
 
 ---
 

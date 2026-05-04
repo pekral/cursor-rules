@@ -51,7 +51,7 @@ Avoid generic best-practice noise.
 - dangerous protocols (`file://`, `gopher://`, etc.)
 - missing validation after redirects
 - missing rate limiting or abuse protection
-- third-party API contract — when the diff integrates with a third-party API or service, verify the implementation against the public API documentation: authentication and scope handling, signature/webhook verification, idempotency and retry semantics, error envelopes, and rate-limit handling. Flag any divergence from the issue assignment or missing in-scope use cases that the API exposes.
+- third-party API contract — when the diff integrates with a third-party API or service, verify the security-critical aspects of the implementation against the public API documentation: authentication and scope handling, signature/webhook verification, idempotency and retry semantics, error envelopes, and rate-limit handling. Functional alignment with the issue assignment is owned by `@skills/code-review/SKILL.md` — do not duplicate it here.
 
 ### File Handling
 - unsafe uploads (extension, MIME, signature)

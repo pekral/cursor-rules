@@ -53,6 +53,7 @@ Before reviewing code, load and analyze the full linked issue:
 - Run conditionally:
     - Database changes → @skills/mysql-problem-solver/SKILL.md
     - Shared state → @skills/race-condition-review/SKILL.md
+    - Third-party API or service changes → ensure the **Third-Party API & Service Analysis** step from `@skills/code-review/SKILL.md` is executed for the diff
 
 ### 4. Post Results
 

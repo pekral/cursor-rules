@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **23 comprehensive Agent skills** for automated workflows (v0.7.1)
+- **23 comprehensive Agent skills** for automated workflows (v0.8)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -99,7 +99,7 @@ vendor/bin/cursor-rules install --editor=cursor --symlink     # prefer symlinks 
 
 ---
 
-# 🎯 Skills Overview — **v0.7.1**
+# 🎯 Skills Overview — **v0.8**
 
 > Current release includes 23 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
 
@@ -162,6 +162,7 @@ Rules included in this package:
 | `git/general.mdc`             | Unified git workflow, commits, and pull request rules       | Always   |
 | `code-review/general.mdc`     | Code review conventions and output rules                   | Always   |
 | `code-testing/general.mdc`    | Testing conventions and quality standards                  | Always   |
+| `refactoring/general.mdc`     | Shared refactoring definition (legacy → modern, incremental migration) | Refactor |
 | `jira/general.mdc`            | JIRA CLI usage and formatting rules                        | JIRA     |
 | `laravel/architecture.mdc`    | Laravel architecture and conventions                       | Laravel  |
 | `laravel/laravel.mdc`         | Laravel-specific rules and patterns                        | Laravel  |

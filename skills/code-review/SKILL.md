@@ -18,6 +18,7 @@ Perform structured code review focused on:
 ## Constraints
 - Apply @rules/php/core-standards.mdc
 - Apply @rules/code-review/general.mdc
+- Apply @rules/refactoring/general.mdc — use the shared refactoring definition when assessing refactoring changes or when proposing refactoring; reject big-bang rewrites and prefer incremental migration.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Output findings only (no praise)
 - Never modify code
@@ -62,6 +63,7 @@ Before reviewing code, load and analyze the full issue context:
 - Business logic correctness
 - Missing or incorrect behavior
 - Type safety and error handling
+- Refactoring quality — when changes are refactoring in nature, validate them against `@rules/refactoring/general.mdc`: behavior must be preserved, migration must be incremental (no big-bang rewrites), and entry points / responsibilities / DRY / concurrency must follow the recommended process. In Laravel projects, combine with `@rules/laravel/architecture.mdc`.
 - Data validation encapsulation — verify that all validation logic is in dedicated Data Validator classes or FormRequests (using validation rules from reusable traits in `app/Concerns/`), not inline in Actions, controllers, jobs, commands, listeners, or Livewire components (see `@rules/laravel/architecture.mdc` Data Validators section)
 - Repository scope — verify Repositories expose only basic, reusable queries (`find`, `findBy{Attribute}`, `all`, simple `where` lookups, pagination of a base scope). Feature-specific or use-case–specific query methods in Repositories are a finding; specialization belongs in a Service (single-model) or Action (cross-model / cross-feature) composing basic Repository methods (see `@rules/laravel/architecture.mdc` Repositories and ModelManagers section)
 - Data Modification (DRY) — enumerate every place in the changes that modifies data before it is saved or passed downstream (DTO mapping, payload shaping, key renaming, default fallbacks, format normalization, business-driven derivation). Cross-check against existing entry points; if the same shaping appears in more than one Action / Service / controller / job / listener / Livewire component / command, flag it and require consolidation into the canonical layer (Data Builder, DTO named constructor, Data Validator, ModelManager, Repository — see `@rules/laravel/architecture.mdc` Data Modification (DRY) section). Output the list of modification places explicitly in the review so the duplication picture is visible.

@@ -1,0 +1,66 @@
+---
+description: Shared definition of refactoring (legacy → modern architecture). Applies to refactoring skills and code review whenever refactoring is in scope.
+alwaysApply: false
+globs: []
+---
+
+## What Refactoring Is
+- Refactoring is a **behavior-preserving change of code structure**.
+- The application keeps doing the same thing; only how it does it changes.
+- Goals: readability, structure, and readiness for further development.
+- Refactoring is **technical debt reduction**, not a feature.
+
+## Symptoms of Legacy Code
+- Large methods (e.g. controllers doing everything).
+- Mixed validation, business logic, and persistence in one place.
+- Code duplication.
+- Poor testability.
+- Hidden bugs and race conditions.
+
+## What Refactoring Brings
+- Faster delivery of new features.
+- Fewer bugs and regressions.
+- Better readability.
+- Easier onboarding.
+- The ability to scale both the application and the team.
+
+## Core Rule
+- **Never** do a big-bang rewrite.
+- **Always** migrate incrementally, one piece at a time.
+
+## Recommended Process
+1. **Stabilize** — add at least smoke tests, fix critical bugs first.
+2. **Identify entry points** — start at controllers, jobs, commands, listeners, Livewire components.
+3. **Introduce the Action pattern** — keep entry points thin; delegate orchestration to Actions.
+4. **Split responsibilities** — Action (orchestration), Service (business logic), Repository (read), ModelManager (write).
+5. **Modernize code**:
+    - raw arrays → DTOs (e.g. Spatie Laravel Data)
+    - static helpers → dependency injection
+    - fat models → service layer
+    - inline validation → Data Validators / FormRequests
+6. **Remove duplication** — apply DRY pragmatically, not dogmatically.
+7. **Address concurrency** — DB transactions, `lockForUpdate`, atomic operations instead of read-modify-write on shared state.
+
+## When to Refactor
+- Changes are slow and painful.
+- The code is unreadable.
+- The team is afraid to touch it.
+- The same bugs keep coming back.
+
+## When Not to Refactor
+- Just to make the code "look nice".
+- Without a business reason.
+
+## Reality Check
+- Refactoring does not deliver immediate business value.
+- Without it, however:
+    - delivery slows down,
+    - technical debt grows,
+    - error rate increases.
+- Refactoring is an investment in future delivery speed and system stability.
+
+## Code Review Application
+- Treat this definition as authoritative when reviewing or proposing refactoring.
+- Flag big-bang rewrites and mixed-responsibility entry points as findings.
+- Prefer incremental migration over wholesale rewrites in suggested fixes.
+- For Laravel projects, combine this rule with `@rules/laravel/architecture.mdc` (Action pattern, Repositories, ModelManagers, Data Validators, DTOs).

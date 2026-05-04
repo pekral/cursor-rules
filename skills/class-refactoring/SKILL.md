@@ -21,6 +21,7 @@ Focus on:
 ---
 
 ## Constraints
+- Apply @rules/refactoring/general.mdc — shared definition of refactoring, recommended incremental process, and "no big-bang rewrite" rule.
 - Apply @rules/php/core-standards.mdc
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Apply @rules/code-testing/general.mdc
@@ -32,6 +33,7 @@ Focus on:
 ## Execution
 
 - Analyze the class and identify the highest-impact refactoring.
+- Follow the incremental process from `@rules/refactoring/general.mdc` (stabilize → identify entry points → introduce Action pattern → split responsibilities → modernize → DRY → concurrency). Never propose a big-bang rewrite.
 - Fix any obvious pre-existing bugs before refactoring (separate commit).
 - Apply focused refactoring:
   - simplify structure

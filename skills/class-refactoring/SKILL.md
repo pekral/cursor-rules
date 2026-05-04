@@ -49,6 +49,7 @@ Focus on:
 
 - Ensure single responsibility per class.
 - Separate orchestration from business logic.
+- Replace per-row DB queries inside loops with batch operations per `@rules/sql/optimalize.mdc` "Batch over per-row operations" — ModelManager `batchUpdate` / `batchInsert`, `whereIn(...)->delete()`, or a single bulk read keyed in memory. Keep per-row work only when an explicit side-effect dependency between iterations cannot be batched.
 - Remove duplication (DRY).
 - Before modifying code, enumerate every place that modifies data before it is saved or passed downstream (DTO mapping, payload shaping, key renaming, default fallbacks, format normalization, business-driven derivation). Surface the list in the refactoring plan and consolidate duplicates into the canonical layer per `@rules/laravel/architecture.mdc` Data Modification (DRY) section (Data Builder, DTO named constructor, Data Validator, ModelManager, Repository).
 - Prefer small, focused methods.

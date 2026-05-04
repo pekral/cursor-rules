@@ -60,6 +60,7 @@ Look for:
 - poor sort/group plans
 - offset pagination on large datasets
 - N+1 behavior from application code
+- per-row queries inside loops — per-row `update()` / `create()` / `delete()` or single-row reads driven by a `foreach` (distinct from N+1 eager-loading: this is application code intentionally writing or reading row-by-row when a single batch query would suffice)
 - redundant or overlapping indexes
 
 ### 5. Propose Optimizations
@@ -68,6 +69,7 @@ Recommend only justified changes, such as:
 - Eloquent/query builder rewrite
 - eager loading change
 - pagination change
+- batching per-row loops into a single bulk operation — ModelManager batch methods (`batchUpdate`, `batchInsert`), `whereIn(...)->delete()` for deletes, or one bulk read keyed in memory for lookups (see `@rules/sql/optimalize.mdc` "Batch over per-row operations")
 - index addition or replacement
 - redundant index removal
 - splitting one query into smaller ones

@@ -40,6 +40,7 @@ Example input:
 - Do not place inline validation inside the Action. Use a dedicated Data Validator (default location `app/DataValidators/<Domain>/`, but follow the project's existing convention). Data Validators must use validation rules from reusable traits in `app/Concerns/`.
 - Do not use direct Eloquent queries or `DB::` calls inside the Action.
 - Keep reads in repositories and writes in model managers/services according to project architecture.
+- When the orchestration touches the database in a loop, prefer ModelManager batch methods (`batchUpdate`, `batchInsert`) and bulk delete/read patterns (`whereIn(...)->delete()`, `findBy{Attribute}In(...)` keyed in memory) over per-row queries (see `@rules/sql/optimalize.mdc` "Batch over per-row operations"). Per-row queries inside the Action are allowed only when iterations have an unavoidable side-effect dependency that must be justified in a code comment.
 - Add or update PHPDoc where needed for PHPStan clarity.
 
 ## Execution

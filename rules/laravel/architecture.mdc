@@ -198,6 +198,7 @@ globs:
 - Always enforce the Action pattern in code review for new or materially changed backend flows.
 - New jobs, controller actions, console commands, listeners, and Livewire methods must delegate orchestration to Actions.
 - If a new or changed flow bypasses the Action pattern, request changes.
+- Apply the shared refactoring definition from `@rules/refactoring/general.mdc` whenever the PR includes refactoring: behavior must be preserved, migration must be incremental, and entry points / responsibilities / DRY / concurrency must follow the recommended process.
 
 ### CR Severity Rules
 - Mark as critical:

@@ -7,6 +7,7 @@ metadata:
 ---
 
 ## Constraints
+- Apply `@rules/refactoring/general.mdc` — incremental migration only, never a big-bang rewrite.
 - Apply `@rules/php/core-standards.mdc`.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Preserve behavior, signatures, response contracts, and tenant/account scope.

@@ -69,8 +69,8 @@ Run this section only when the diff integrates with, modifies, or depends on a t
    - authentication, scopes, rate limits, idempotency keys, and retry semantics
    - pagination, filtering, sorting, webhook signatures, and timeouts
 4. Cross-check the implementation against the issue assignment — verify the chosen endpoints, parameters, and behaviors satisfy what the issue actually asked for. Flag any divergence (missing endpoint, wrong verb, ignored field, fabricated parameter) as a finding.
-5. Confirm coverage of every API use case that is in scope for the issue — documented filters, status branches, error states, and edge inputs the issue explicitly or implicitly requires. Missing in-scope use cases are findings; out-of-scope use cases belong in **Refactoring Proposals**.
-6. If the public reference cannot be located, accessed, or matched to the version in use, raise this as a finding instead of silently assuming the contract.
+5. Confirm coverage of every API use case that is in scope for the issue — documented filters, status branches, error states, and edge inputs the issue explicitly or implicitly requires. Missing in-scope use cases are findings. Do not propose adopting API features that current scope does not require (YAGNI per `@rules/php/core-standards.mdc`); only when the diff exposes an out-of-scope structural shortcoming in how the project consumes the API (e.g. missing webhook signature verification across other consumers) raise it under **Refactoring Proposals**.
+6. If the public reference cannot be located, accessed, or matched to the version in use, raise this as a **Moderate** finding instead of silently assuming the contract.
 
 ### Core Analysis
 - Regression risk (shared logic, dependencies)

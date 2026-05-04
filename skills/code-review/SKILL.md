@@ -57,12 +57,28 @@ Before reviewing code, load and analyze the full issue context:
 3. Use this context to evaluate whether the implementation fully satisfies the issue — not just whether the code is technically correct.
 4. If the issue contains test data or test scenarios, verify they are covered by existing or new tests. Flag missing test coverage as a finding.
 
+### Third-Party API & Service Analysis
+
+Run this section only when the diff integrates with, modifies, or depends on a third-party API or external service (HTTP clients, vendor SDK calls, webhooks, OAuth flows, payload schemas, queue/event consumers backed by external systems).
+
+1. Identify every affected API or service from the diff and list the concrete endpoints, SDK methods, webhook events, or message contracts that changed.
+2. Locate the official public reference for each one — vendor documentation, OpenAPI/Swagger spec, SDK reference, or webhook contract. Prefer URLs cited in the issue or PR; otherwise look up the vendor's current published documentation for the version in use.
+3. Compare the implementation against the public contract:
+   - endpoints, HTTP methods, and required vs optional parameters
+   - request and response schemas, status codes, and error envelopes
+   - authentication, scopes, rate limits, idempotency keys, and retry semantics
+   - pagination, filtering, sorting, webhook signatures, and timeouts
+4. Cross-check the implementation against the issue assignment — verify the chosen endpoints, parameters, and behaviors satisfy what the issue actually asked for. Flag any divergence (missing endpoint, wrong verb, ignored field, fabricated parameter) as a finding.
+5. Confirm coverage of every API use case that is in scope for the issue — documented filters, status branches, error states, and edge inputs the issue explicitly or implicitly requires. Missing in-scope use cases are findings; out-of-scope use cases belong in **Refactoring Proposals**.
+6. If the public reference cannot be located, accessed, or matched to the version in use, raise this as a finding instead of silently assuming the contract.
+
 ### Core Analysis
 - Regression risk (shared logic, dependencies)
 - Architecture and design quality
 - Business logic correctness
 - Missing or incorrect behavior
 - Type safety and error handling
+- Third-party API/service contract — when changes touch external APIs or services, verify the implementation matches the public API documentation, satisfies the issue assignment, and covers all relevant in-scope API use cases (see **Third-Party API & Service Analysis** section)
 - Refactoring quality — when changes are refactoring in nature, validate them against `@rules/refactoring/general.mdc`: behavior must be preserved, migration must be incremental (no big-bang rewrites), and entry points / responsibilities / DRY / concurrency must follow the recommended process. In Laravel projects, combine with `@rules/laravel/architecture.mdc`.
 - Data validation encapsulation — verify that all validation logic is in dedicated Data Validator classes or FormRequests (using validation rules from reusable traits in `app/Concerns/`), not inline in Actions, controllers, jobs, commands, listeners, or Livewire components (see `@rules/laravel/architecture.mdc` Data Validators section)
 - Repository scope — verify Repositories expose only basic, reusable queries (`find`, `findBy{Attribute}`, `all`, simple `where` lookups, pagination of a base scope). Feature-specific or use-case–specific query methods in Repositories are a finding; specialization belongs in a Service (single-model) or Action (cross-model / cross-feature) composing basic Repository methods (see `@rules/laravel/architecture.mdc` Repositories and ModelManagers section)

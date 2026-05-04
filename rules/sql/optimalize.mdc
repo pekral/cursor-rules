@@ -73,6 +73,46 @@ SELECT * FROM users WHERE EXISTS (SELECT 1 FROM orders WHERE orders.user_id = us
 ALTER TABLE orders ADD INDEX idx_user_status_created (user_id, status, created_at);
 ```
 
+## Batch over per-row operations
+- Solve database tasks and queries as a batch whenever possible. Per-row queries issued from inside a loop are a smell — flag during refactoring and code review.
+- **Bulk update:** prefer a ModelManager batch method (e.g. `batchUpdate($model, $rows, 'id')` backed by `Iksaku\Laravel\MassUpdate`) over looping per-row `Model::update()` / `$model->save()` calls.
+- **Bulk insert:** prefer a ModelManager batch method (e.g. `batchInsert($model, $rows)`) over looping per-row `Model::create()` calls.
+- **Bulk delete:** prefer a single `whereIn(...)->delete()` over per-row `Model::delete()` calls.
+- **Bulk read:** fetch the whole working set in one query (e.g. `findBy{Attribute}In(...)`) and key it in memory; never look rows up one by one inside a loop.
+- **Goal:** minimize DB round-trips and lock contention.
+- **Acceptable exception:** per-row work that genuinely cannot be batched because each iteration depends on a side effect of the previous one (e.g. each row triggers a downstream API call that mutates DB state the next row reads). The exception must be justified in a short code comment or in the PR description.
+
+```php
+// Bad — per-row update inside a loop
+foreach ($users as $user) {
+    $user->update(['status' => 'active']);
+}
+
+// Good — single batch update via ModelManager
+$this->userModelManager->batchUpdate(User::class, $rows, 'id');
+
+// Bad — per-row delete
+foreach ($staleIds as $id) {
+    Token::query()->whereKey($id)->delete();
+}
+
+// Good — single bulk delete
+Token::query()->whereIn('id', $staleIds)->delete();
+
+// Bad — per-row lookup inside a loop
+foreach ($externalIds as $externalId) {
+    $contact = $this->contactRepository->findByExternalId($externalId);
+    // ...
+}
+
+// Good — one bulk read keyed in memory
+$contacts = $this->contactRepository->findByExternalIdIn($externalIds)->keyBy('external_id');
+foreach ($externalIds as $externalId) {
+    $contact = $contacts->get($externalId);
+    // ...
+}
+```
+
 ## Transactions and Locking
 - Keep transactions short — no external calls or heavy logic inside.
 - Batch related writes in a single transaction.

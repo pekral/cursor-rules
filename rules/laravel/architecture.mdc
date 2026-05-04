@@ -98,6 +98,7 @@ globs:
   - delete
   - bulk persistence operations
 - ModelManagers must not contain read/query responsibilities.
+- **Batch-first writes:** ModelManagers should expose batch methods (`batchUpdate($model, $rows, 'id')`, `batchInsert($model, $rows)`) and use single-query bulk operations for delete (`whereIn(...)->delete()`). Actions and Services must call these batch methods instead of issuing per-row `update()` / `create()` / `delete()` from inside a loop (see `@rules/sql/optimalize.mdc` "Batch over per-row operations"). The same applies to reads: prefer one `findBy{Attribute}In(...)` keyed in memory over per-row Repository lookups inside a loop.
 - Never mix read and write responsibilities between Repositories and ModelManagers.
 
 ## DTOs
@@ -219,6 +220,7 @@ globs:
   - plain service classes used where an Action is the better fit
   - Data Builder class using Action pattern (`__invoke()`) instead of named public methods
   - non-trivial or reusable validation logic written inline instead of as a custom Rule class in `app/Rules/`
+  - per-row DB queries inside loops (per-row `update()`, `create()`, `delete()`, or single-row read inside a `foreach`) — must be replaced by ModelManager batch methods, `whereIn(...)->delete()`, or a single bulk read keyed in memory (see `@rules/sql/optimalize.mdc` "Batch over per-row operations"); allowed only when an explicit comment or PR description justifies an unavoidable per-row side-effect dependency
 
 ## Exceptions
 - No Action is required for:

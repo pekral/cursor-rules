@@ -30,6 +30,7 @@ See `references/source-detection.md` for the detection table and rules.
   - **Feature** — new behavior
 - Prefer minimal, safe, and readable changes
 - Keep scope limited unless related fixes are trivial and safe
+- When implementing DB work, prefer batch operations over per-row queries inside loops per `@rules/sql/optimalize.mdc` "Batch over per-row operations" — ModelManager `batchUpdate` / `batchInsert`, `whereIn(...)->delete()`, or a single bulk read keyed in memory. Per-row queries are allowed only when iterations have an unavoidable side-effect dependency that is justified in a code comment.
 
 ## Execution
 

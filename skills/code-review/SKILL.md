@@ -151,4 +151,4 @@ Use the template defined in `templates/review-output.md`.
 
 ## After Completion
 
-- Always run @skills/test-like-human/SKILL.md
+- Always run @skills/test-like-human/SKILL.md, regardless of code review findings.

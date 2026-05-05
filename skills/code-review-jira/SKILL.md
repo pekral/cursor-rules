@@ -115,5 +115,4 @@ Before reviewing code, load and analyze the full JIRA issue:
 
 ## After Completion
 
-- If no **Critical** or **Moderate** findings:
-  - run @skills/test-like-human/SKILL.md
+- Always run @skills/test-like-human/SKILL.md, regardless of code review findings.

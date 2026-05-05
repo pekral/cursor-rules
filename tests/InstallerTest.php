@@ -1129,8 +1129,8 @@ test('test-like-human always runs after code review skills regardless of finding
 
     foreach ($skillFiles as $skillFile) {
         $content = (string) file_get_contents($skillFile);
-        expect($content)->toContain('Always run @skills/test-like-human/SKILL.md');
-        expect($content)->not->toContain("If no **Critical** or **Moderate** findings:\n  - run @skills/test-like-human/SKILL.md");
+        expect($content)->not->toContain('If no **Critical** or **Moderate**');
+        expect($content)->toMatch('/##\s*After Completion[^#]*Always run @skills\/test-like-human\/SKILL\.md, regardless of code review findings\./s');
     }
 });
 

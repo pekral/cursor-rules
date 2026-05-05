@@ -1149,6 +1149,67 @@ test('test-like-human guard rejects gating regressions', function (): void {
     expect((bool) preg_match($guardRegex, $regressionDirectiveOutsideSection))->toBeFalse();
 });
 
+test('every code review skill references class-refactoring skill', function (): void {
+    $packageDir = dirname(__DIR__);
+    $needle = '@skills/class-refactoring/SKILL.md';
+    $reviewSkills = [
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+    ];
+
+    foreach ($reviewSkills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain($needle);
+    }
+});
+
+test('code review skills constrain refactoring lens to PR diff', function (): void {
+    $packageDir = dirname(__DIR__);
+    $reviewSkills = [
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+    ];
+
+    foreach ($reviewSkills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('Refactoring & Tech Debt (DRY)');
+        expect($content)->toContain('PR diff');
+    }
+});
+
+test('code review templates include refactoring tech debt section', function (): void {
+    $packageDir = dirname(__DIR__);
+    $templates = [
+        $packageDir . '/skills/code-review/templates/review-output.md',
+        $packageDir . '/skills/code-review-github/templates/pr-comment-output.md',
+        $packageDir . '/skills/code-review-jira/templates/github-output.md',
+    ];
+
+    foreach ($templates as $template) {
+        $content = (string) file_get_contents($template);
+        expect($content)->toContain('## Refactoring (DRY / Tech Debt Reduction)');
+        expect($content)->toContain('R Refactoring (DRY / Tech Debt Reduction)');
+    }
+});
+
+test('github code review skills describe inline review comment workflow', function (): void {
+    $packageDir = dirname(__DIR__);
+    $githubFacingSkills = [
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+    ];
+
+    foreach ($githubFacingSkills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('/pulls/{pr}/reviews');
+        expect($content)->toContain('comments[]');
+        expect($content)->toContain('event=COMMENT');
+        expect($content)->toContain('event=REQUEST_CHANGES');
+    }
+});
+
 test('install with prune on non-existent target directory does nothing', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/skills/some-skill/SKILL.md', 'content');

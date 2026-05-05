@@ -53,11 +53,22 @@ Before reviewing code, load and analyze the full JIRA issue:
 - For each PR:
   - run @skills/code-review/SKILL.md
   - run @skills/security-review/SKILL.md
+  - run @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes only on lines actually touched by the PR.
 
 - Run conditionally:
   - DB changes → @skills/mysql-problem-solver/SKILL.md
   - Shared state → @skills/race-condition-review/SKILL.md
   - Third-party API or service changes → ensure the **Third-Party API & Service Analysis** step from `@skills/code-review/SKILL.md` is executed for the diff
+
+#### Refactoring & Tech Debt (DRY) Analysis (PR diff only)
+
+1. Restrict the analysis to lines added or modified in the PR — never review untouched code.
+2. For each changed block, apply `@skills/class-refactoring/SKILL.md` and look for:
+   - duplicated logic that already exists elsewhere (DRY)
+   - data shaping repeated across Actions/Services/controllers/jobs/listeners/Livewire/commands
+   - oversized methods, deep nesting, mixed responsibilities introduced or amplified by the change
+3. Each finding must include the file path, the affected line range, and a concrete refactoring that *reduces* tech debt.
+4. In-scope refactorings go into the **Refactoring (DRY / Tech Debt Reduction)** section of the GitHub PR comment template. Out-of-scope structural problems still belong in **Refactoring Proposals**.
 
 ### 4. Publish Results
 
@@ -66,9 +77,11 @@ Before reviewing code, load and analyze the full JIRA issue:
 - Include a **Previous CR Status** section at the top of the GitHub comment (before new findings)
 - Post all technical findings as PR comment
 - Format:
-  - Critical → Moderate → Minor
+  - Critical → Moderate → Minor → Refactoring (DRY / Tech Debt Reduction)
   - file + line
   - actionable fix
+- For each finding that maps to a concrete line in the PR diff, attach an inline review comment via the GitHub review API (`gh api -X POST repos/{owner}/{repo}/pulls/{pr}/reviews` with a `comments[]` array of `{path, line, side, body}` entries). Submit one review with all inline comments so the PR shows a single reviewer pass instead of scattered ad-hoc comments. Use `event=COMMENT` for advisory passes; reserve `event=REQUEST_CHANGES` for blocking Critical findings.
+- The top-level PR comment still aggregates severity counts and lists items that cannot be anchored to a specific line (missing test coverage, cross-diff architectural concerns).
 - This is the only place where technical details appear
 
 #### JIRA (non-technical summary only)

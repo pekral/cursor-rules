@@ -49,11 +49,22 @@ Before reviewing code, load and analyze the full linked issue:
 - Always run:
     - @skills/code-review/SKILL.md
     - @skills/security-review/SKILL.md
+    - @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes that apply to lines actually touched by the PR. Do not propose changes outside the diff.
 
 - Run conditionally:
     - Database changes → @skills/mysql-problem-solver/SKILL.md
     - Shared state → @skills/race-condition-review/SKILL.md
     - Third-party API or service changes → ensure the **Third-Party API & Service Analysis** step from `@skills/code-review/SKILL.md` is executed for the diff
+
+#### Refactoring & Tech Debt (DRY) Analysis (PR diff only)
+
+1. Restrict the analysis to lines added or modified in the PR — never review untouched code.
+2. For each changed block, apply `@skills/class-refactoring/SKILL.md` and look for:
+   - duplicated logic that already exists elsewhere (DRY)
+   - data shaping repeated across Actions/Services/controllers/jobs/listeners/Livewire/commands
+   - oversized methods, deep nesting, mixed responsibilities introduced or amplified by the change
+3. Each finding must include the file path, the affected line range, and a concrete refactoring that *reduces* tech debt.
+4. In-scope refactorings go into the **Refactoring (DRY / Tech Debt Reduction)** section of the PR comment template. Out-of-scope structural problems still belong in **Refactoring Proposals**.
 
 ### 4. Post Results
 
@@ -72,10 +83,31 @@ Before reviewing code, load and analyze the full linked issue:
 - **If no existing CR comment is found (first review):**
     - Post findings as a single PR comment using CLI tools
 
+#### Inline review comments (per finding)
+
+Mirror how a human reviewer leaves comments in the GitHub UI before clicking *Request changes*:
+
+1. Group findings (Critical, Moderate, Minor, and Refactoring (DRY / Tech Debt Reduction)) by `file:line`.
+2. For each finding that maps to a concrete line in the PR diff, attach a GitHub **review comment** anchored to that line via the GitHub review API:
+   ```bash
+   gh api -X POST "repos/{owner}/{repo}/pulls/{pr}/reviews" \
+     -F event=COMMENT \
+     -F body="<top-level review summary>" \
+     -F "comments[][path]=src/Foo/Bar.php" \
+     -F "comments[][line]=42" \
+     -F "comments[][side]=RIGHT" \
+     -F "comments[][body]=<finding body — severity, impact, fix, faulty example, expected behavior, test hint>"
+   ```
+   Submit a single review with all inline comments attached so they appear as one reviewer pass, not many ad-hoc comments.
+3. Use `event=COMMENT` for advisory passes. Use `event=REQUEST_CHANGES` only when at least one **Critical** finding is present and blocking merge is appropriate.
+4. The top-level summary comment (from the strategy above) must include severity counts and a link to each inline thread.
+5. If a finding cannot be anchored to a specific changed line (e.g. missing test coverage, architectural concern across the diff), keep it in the top-level summary comment instead of the inline review.
+
 #### Format
-- Critical → Moderate → Minor
+- Critical → Moderate → Minor → Refactoring (DRY / Tech Debt Reduction)
 - Include file + line
 - Include actionable fix
+- Inline review comments target specific lines; the summary comment aggregates them and lists items that have no single anchor line.
 
 - If no findings:
     - post: "No findings identified"
@@ -88,6 +120,7 @@ Before reviewing code, load and analyze the full linked issue:
 - No praise
 - No “what was checked”
 - Use exactly three severity levels: Critical, Moderate, Minor
+- Add a **Refactoring (DRY / Tech Debt Reduction)** section after the Minor findings whenever the diff contains in-scope tech-debt-reducing changes (DRY duplication, oversized methods, mixed responsibilities). Each item must include `file:line` and a concrete refactoring step.
 - Each **Critical** and **Moderate** finding must include:
     - **Faulty Example** — minimal code snippet or input payload reproducing the issue (redact secrets/PII)
     - **Expected Behavior** — single assertable statement (return value, exception, persisted state, emitted event)

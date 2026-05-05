@@ -1120,18 +1120,33 @@ test('query scopes rule is present in class refactoring skill', function (): voi
     expect($content)->toContain('query scopes');
 });
 
-test('test-like-human always runs after code review skills regardless of findings', function (): void {
+test('code-review skill After Completion section runs test-like-human unconditionally', function (): void {
     $packageDir = dirname(__DIR__);
-    $skillFiles = [
-        $packageDir . '/skills/code-review/SKILL.md',
-        $packageDir . '/skills/code-review-jira/SKILL.md',
-    ];
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
 
-    foreach ($skillFiles as $skillFile) {
-        $content = (string) file_get_contents($skillFile);
-        expect($content)->not->toContain('If no **Critical** or **Moderate**');
-        expect($content)->toMatch('/##\s*After Completion[^#]*Always run @skills\/test-like-human\/SKILL\.md, regardless of code review findings\./s');
-    }
+    expect($content)->toMatch('/##\s*After Completion[^#]*Always run @skills\/test-like-human\/SKILL\.md, regardless of code review findings\./s');
+    expect($content)->not->toContain('If no **Critical** or **Moderate**');
+});
+
+test('code-review-jira skill After Completion section runs test-like-human unconditionally', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+
+    expect($content)->toMatch('/##\s*After Completion[^#]*Always run @skills\/test-like-human\/SKILL\.md, regardless of code review findings\./s');
+    expect($content)->not->toContain('If no **Critical** or **Moderate**');
+});
+
+test('test-like-human guard rejects gating regressions', function (): void {
+    $guardRegex = '/##\s*After Completion[^#]*Always run @skills\/test-like-human\/SKILL\.md, regardless of code review findings\./s';
+    $regressionWithGating = "## After Completion\n\n- If no **Critical** or **Moderate** findings:\n  - run @skills/test-like-human/SKILL.md\n";
+    $regressionWithoutRegardless = "## After Completion\n\n- Always run @skills/test-like-human/SKILL.md\n";
+    $regressionDirectiveOutsideSection = "## Other Section\n\n"
+        . "- Always run @skills/test-like-human/SKILL.md, regardless of code review findings.\n"
+        . "## After Completion\n\n- something else\n";
+
+    expect((bool) preg_match($guardRegex, $regressionWithGating))->toBeFalse();
+    expect((bool) preg_match($guardRegex, $regressionWithoutRegardless))->toBeFalse();
+    expect((bool) preg_match($guardRegex, $regressionDirectiveOutsideSection))->toBeFalse();
 });
 
 test('install with prune on non-existent target directory does nothing', function (): void {

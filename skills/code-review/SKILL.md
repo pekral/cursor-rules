@@ -97,10 +97,27 @@ Run this section only when the diff integrates with, modifies, or depends on a t
 - Always run:
     - @skills/security-review/SKILL.md
     - @skills/mysql-problem-solver/SKILL.md
+    - @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Use it to surface concrete tech-debt-reducing changes (DRY duplication, single-responsibility breaches, oversized methods) that apply to lines actually touched by the PR. Do not propose changes that fall outside the diff.
 
 - Run conditionally:
     - Shared state / concurrency → @skills/race-condition-review/SKILL.md
     - I/O or external calls → I/O review
+
+### Refactoring & Tech Debt (DRY) Analysis
+
+Run this section over the PR diff only — never over untouched code.
+
+1. List every block of changed lines (added or modified) per file.
+2. For each block, evaluate against `@skills/class-refactoring/SKILL.md`:
+   - duplicated logic that already exists elsewhere in the codebase (DRY)
+   - data-shaping repeated across Actions/Services/controllers/jobs/listeners/Livewire/commands
+   - oversized methods, deep nesting, mixed responsibilities introduced or amplified by the change
+   - per-row DB operations in loops (link to the **Core Analysis** rule above)
+3. Output the result in the **Refactoring (DRY / Tech Debt Reduction)** section of the review template:
+   - file:line of the offending change
+   - the duplicated/structural problem in one sentence
+   - a concrete refactoring that *reduces* tech debt (consolidate into Data Builder / DTO / Service / Action / Repository per `@rules/laravel/architecture.mdc`)
+4. Refactoring proposals here are improvements that fit inside the PR scope. Out-of-scope structural problems still belong in **Refactoring Proposals** (separate issue draft).
 
 ### Validation
 - Verify acceptance criteria

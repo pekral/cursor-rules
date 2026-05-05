@@ -28,6 +28,14 @@
 
 1. ...
 
+## Refactoring (DRY / Tech Debt Reduction)
+
+> Include only items that apply to lines actually touched by this PR (added or modified). Never review untouched code here. Each item must reduce technical debt — no stylistic preferences.
+
+1. [file:line] DRY duplication or structural problem in the changed code
+   Suggested refactoring: concrete consolidation step (Data Builder, DTO, Service, Action, Repository, etc.)
+   Why: which rule from `@rules/laravel/architecture.mdc` or `@skills/class-refactoring/SKILL.md` is satisfied by the change.
+
 > **Faulty Example, Expected Behavior, and Test Hint are mandatory for every Critical and Moderate finding.** They feed `process-code-review` so each fix can be backed by a reproducer test.
 > - Faulty Example must be a minimal, runnable snippet (or sample input/payload) — never paste secrets or real PII; redact with placeholders.
 > - Expected Behavior must be a single assertable statement (return value, thrown exception, persisted state, emitted event).
@@ -46,4 +54,4 @@ If any reviewed code violates project rules (`@rules/php/core-standards.mdc`, `@
 Only propose refactoring that is justified by defined rules or architecture — not stylistic preferences.
 If no refactoring opportunities are found, omit this section.
 
-**Summary: X Critical, Y Moderate, Z Minor**
+**Summary: X Critical, Y Moderate, Z Minor, R Refactoring (DRY / Tech Debt Reduction)**

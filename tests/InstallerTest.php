@@ -1120,6 +1120,20 @@ test('query scopes rule is present in class refactoring skill', function (): voi
     expect($content)->toContain('query scopes');
 });
 
+test('test-like-human always runs after code review skills regardless of findings', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skillFiles = [
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+    ];
+
+    foreach ($skillFiles as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('Always run @skills/test-like-human/SKILL.md');
+        expect($content)->not->toContain("If no **Critical** or **Moderate** findings:\n  - run @skills/test-like-human/SKILL.md");
+    }
+});
+
 test('install with prune on non-existent target directory does nothing', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/skills/some-skill/SKILL.md', 'content');

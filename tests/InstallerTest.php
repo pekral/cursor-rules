@@ -1175,7 +1175,7 @@ test('code review skills constrain refactoring lens to PR diff', function (): vo
     foreach ($reviewSkills as $skillFile) {
         $content = (string) file_get_contents($skillFile);
         expect($content)->toContain('Refactoring & Tech Debt (DRY)');
-        expect($content)->toContain('PR diff');
+        expect($content)->toContain('untouched code');
     }
 });
 

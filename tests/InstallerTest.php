@@ -1194,19 +1194,22 @@ test('code review templates include refactoring tech debt section', function ():
     }
 });
 
-test('github code review skills describe inline review comment workflow', function (): void {
+test('github code review skills do not describe inline review comment workflow', function (): void {
     $packageDir = dirname(__DIR__);
     $githubFacingSkills = [
         $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-github/templates/pr-comment-output.md',
         $packageDir . '/skills/code-review-jira/SKILL.md',
+        $packageDir . '/skills/code-review-jira/templates/github-output.md',
     ];
 
     foreach ($githubFacingSkills as $skillFile) {
         $content = (string) file_get_contents($skillFile);
-        expect($content)->toContain('/pulls/{pr}/reviews');
-        expect($content)->toContain('comments[]');
-        expect($content)->toContain('event=COMMENT');
-        expect($content)->toContain('event=REQUEST_CHANGES');
+        expect($content)->not->toContain('/pulls/{pr}/reviews');
+        expect($content)->not->toContain('comments[]');
+        expect($content)->not->toContain('event=COMMENT');
+        expect($content)->not->toContain('event=REQUEST_CHANGES');
+        expect($content)->not->toContain('inline review comment');
     }
 });
 

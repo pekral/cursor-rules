@@ -36,8 +36,6 @@
    Suggested refactoring: concrete consolidation step (Data Builder, DTO, Service, Action, Repository, etc.)
    Why: which rule from `@rules/laravel/architecture.mdc` or `@skills/class-refactoring/SKILL.md` is satisfied by the change.
 
-> Each item that maps to a concrete diff line should also be posted as an inline review comment anchored to `file:line`, mirroring how a human reviewer leaves comments before clicking *Request changes*.
-
 > **Faulty Example, Expected Behavior, and Test Hint are mandatory for every Critical and Moderate finding** so `process-code-review` can turn each finding into a reproducer test.
 > - Faulty Example must be a minimal, runnable snippet (or sample input/payload) — never paste secrets or real PII; redact with placeholders.
 > - Expected Behavior must be a single assertable statement (return value, thrown exception, persisted state, emitted event).

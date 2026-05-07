@@ -83,31 +83,11 @@ Before reviewing code, load and analyze the full linked issue:
 - **If no existing CR comment is found (first review):**
     - Post findings as a single PR comment using CLI tools
 
-#### Inline review comments (per finding)
-
-Mirror how a human reviewer leaves comments in the GitHub UI before clicking *Request changes*:
-
-1. Group findings (Critical, Moderate, Minor, and Refactoring (DRY / Tech Debt Reduction)) by `file:line`.
-2. For each finding that maps to a concrete line in the PR diff, attach a GitHub **review comment** anchored to that line via the GitHub review API:
-   ```bash
-   gh api -X POST "repos/{owner}/{repo}/pulls/{pr}/reviews" \
-     -F event=COMMENT \
-     -F body="<top-level review summary>" \
-     -F "comments[][path]=src/Foo/Bar.php" \
-     -F "comments[][line]=42" \
-     -F "comments[][side]=RIGHT" \
-     -F "comments[][body]=<finding body — severity, impact, fix, faulty example, expected behavior, test hint>"
-   ```
-   Submit a single review with all inline comments attached so they appear as one reviewer pass, not many ad-hoc comments.
-3. Use `event=COMMENT` for advisory passes. Use `event=REQUEST_CHANGES` only when at least one **Critical** finding is present and blocking merge is appropriate.
-4. The top-level summary comment (from the strategy above) must include severity counts and a link to each inline thread.
-5. If a finding cannot be anchored to a specific changed line (e.g. missing test coverage, architectural concern across the diff), keep it in the top-level summary comment instead of the inline review.
-
 #### Format
 - Critical → Moderate → Minor → Refactoring (DRY / Tech Debt Reduction)
-- Include file + line
+- Include file + line in the finding body
 - Include actionable fix
-- Inline review comments target specific lines; the summary comment aggregates them and lists items that have no single anchor line.
+- Post all findings inside the single PR comment — never as line-anchored review comments.
 
 - If no findings:
     - post: "No findings identified"

@@ -80,8 +80,7 @@ Before reviewing code, load and analyze the full JIRA issue:
   - Critical → Moderate → Minor → Refactoring (DRY / Tech Debt Reduction)
   - file + line
   - actionable fix
-- For each finding that maps to a concrete line in the PR diff, attach an inline review comment via the GitHub review API (`gh api -X POST repos/{owner}/{repo}/pulls/{pr}/reviews` with a `comments[]` array of `{path, line, side, body}` entries). Submit one review with all inline comments so the PR shows a single reviewer pass instead of scattered ad-hoc comments. Use `event=COMMENT` for advisory passes; reserve `event=REQUEST_CHANGES` for blocking Critical findings.
-- The top-level PR comment still aggregates severity counts and lists items that cannot be anchored to a specific line (missing test coverage, cross-diff architectural concerns).
+- Post all technical findings inside the single PR comment — never as line-anchored review comments. Include the `file:line` reference in the body of each finding instead.
 - This is the only place where technical details appear
 
 #### JIRA (non-technical summary only)

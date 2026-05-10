@@ -10,6 +10,7 @@ globs: []
     - @rules/php/core-standards.mdc
     - @rules/laravel/architecture.mdc (for Laravel projects)
 
+- Write all new tests using Pest syntax (`it()` / `test()` functional blocks). Do not introduce PHPUnit-style class-based tests for new test files. When modifying existing PHPUnit tests, prefer rewriting them to Pest via `@skills/rewrite-tests-pest/SKILL.md` rather than extending the legacy class.
 - Never use `describe()`; use top-level `it()` / `test()` only.
 - Test classes should be `final`.
 - Prefer local variables; avoid shared mutable state.

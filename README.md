@@ -117,6 +117,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `create-issue` | Create a tracker issue from provided task text while preserving original meaning and structure. |
 | `create-issues-from-text` | Batch-create issues from provided text with automatic structure detection. |
 | `pr-summary` | Summarize current PR changes for development and product teams in a clear markdown report. |
+| `skill-creator` | Scaffold a new Agent skill that follows project conventions and passes `skill-check` validation. |
 
 ## Code Review, Security & Architecture
 
@@ -131,7 +132,6 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `refactor-entry-point-to-action` | Refactor controller/job/command/listener entry-point logic into Action classes. |
 | `smartest-project-addition` | Propose one high-impact, low-risk project improvement. |
 | `understand-propose-implement-verify` | Enforce a strict 4-step loop: understand, propose, implement, verify. |
-| `skill-creator` | Scaffold a new Agent skill that follows project conventions and passes `skill-check` validation. |
 
 ## Testing & Quality Automation
 

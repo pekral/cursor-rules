@@ -1,0 +1,205 @@
+---
+description: Laravel queue debouncing rules for safe job design, urgency separation, and replaceable work
+globs: ["app/**/*.php", "routes/**/*.php", "tests/**/*.php"]
+alwaysApply: false
+---
+
+# Laravel Queue Debouncing
+
+## Core Principle
+- Debounce only work where the latest state safely replaces previous triggers.
+- Debounce belongs to a replaceable outcome, not to a generic entity.
+- A debounce key must describe what result may be safely replaced, not only which model changed.
+
+Good debounce keys describe the replaceable outcome:
+
+```text
+read-model:order:123
+crm-sync:user:42
+search-index:post:99
+usage-summary:account:7
+preview-render:document:15
+```
+
+Bad debounce keys are too generic and collapse unrelated business events:
+
+```text
+order:123
+user:42
+account:7
+project:15
+```
+
+## Allowed Use Cases
+Debouncing is allowed only for convergent work where intermediate states may be skipped safely:
+
+- Search index rebuilds
+- Cache refreshes
+- Read model rebuilds
+- CRM/profile snapshot syncs
+- Preview/render regeneration
+- Aggregate/statistical summary recalculation
+- Expensive derived data refreshes
+
+## Forbidden Use Cases
+Never debounce meaningful business events where each occurrence has its own meaning. Do not debounce:
+
+- Payments
+- Refunds
+- Password changes
+- Security alerts
+- Audit logs
+- Webhook event recording
+- Fulfillment or shipment transitions
+- User-visible notifications expected immediately
+- Anything where order, timing, or exact occurrence matters
+
+## Split Mixed-Urgency Workflows
+Split urgent and replaceable work into separate jobs. Urgent jobs must stay immediate and idempotent; convergent jobs may be debounced.
+
+Bad — one generic sync job hides both urgent and convergent side effects:
+
+```php
+SyncOrder::dispatch($order->id);
+```
+
+Good — explicit jobs with clear business meaning:
+
+```php
+ProcessCapturedPayment::dispatch($payment->id, $order->id);
+
+RefreshOrderReadModel::dispatch($order->id);
+SyncOrderSnapshotToCrm::dispatch($order->id);
+```
+
+## Idempotency Is Still Required
+Debounce does not replace idempotency.
+
+- Debounce answers: should we avoid running this repeated work too many times?
+- Idempotency answers: is the result still correct if this job runs more than once?
+
+Urgent jobs must not rely on debounce for safety — make them idempotent and dispatch them immediately.
+
+## Debounced Jobs Must Load Fresh State
+Pass identifiers into debounced jobs and load the latest state inside `handle()`. Never rely on serialized model snapshots — they may be stale by the time the debounce window closes.
+
+Good:
+
+```php
+final readonly class SyncUserSnapshotToCrm implements ShouldQueue
+{
+    public function __construct(
+        private int $userId,
+    ) {
+    }
+
+    public function debounceKey(): string
+    {
+        return "crm-sync:user:{$this->userId}";
+    }
+
+    public function debounceFor(): int
+    {
+        return 5;
+    }
+
+    public function handle(UserRepository $users, CrmSyncService $crm): void
+    {
+        $user = $users->findOrFail($this->userId);
+
+        $crm->syncUserSnapshot($user);
+    }
+}
+```
+
+Bad — passing a serialized model freezes state at dispatch time:
+
+```php
+public function __construct(
+    private User $user,
+) {
+}
+```
+
+## Review Checklist
+Reviewers must verify:
+
+- The job represents replaceable/convergent work.
+- The debounce key describes the replaceable outcome.
+- The debounce key is not only a generic model/entity key.
+- No payment, refund, security, audit, password, webhook, shipment, or notification event can be suppressed.
+- Mixed urgency has been split into separate jobs.
+- Urgent jobs are idempotent instead of debounced.
+- The job loads fresh state inside `handle()`.
+- Tests verify urgent and debounced side effects are dispatched separately.
+
+## Testing Requirements
+Add tests that verify urgent and convergent jobs are dispatched separately and that debounce keys describe the replaceable outcome.
+
+```php
+it('dispatches payment processing separately from read model refresh', function (): void {
+    Queue::fake();
+
+    $order = Order::factory()->create();
+    $payment = Payment::factory()->for($order)->create();
+
+    CapturePaymentAction::run($payment->id);
+
+    Queue::assertPushed(ProcessCapturedPayment::class);
+    Queue::assertPushed(RefreshOrderReadModel::class);
+});
+```
+
+```php
+it('uses a specific debounce key for order read model refresh', function (): void {
+    $job = new RefreshOrderReadModel(orderId: 123);
+
+    expect($job->debounceKey())->toBe('read-model:order:123');
+});
+```
+
+## Architecture Rules
+- Controllers, commands, listeners, jobs, and Livewire components must not decide debounce strategy ad hoc.
+- Debounce strategy belongs near the job class or the Action that dispatches it.
+- Do not hide multiple unrelated side effects inside one generic sync job.
+- Prefer small, explicit jobs with clear business meaning.
+- Use Actions for orchestration and dispatch jobs from there when the workflow contains multiple side effects.
+
+## Red Flags
+Reject or flag patterns where the debounce key is generic or where one job hides unrelated side effects:
+
+```php
+debounceKey(): string
+{
+    return "order:{$this->orderId}";
+}
+```
+
+```php
+debounceKey(): string
+{
+    return "user:{$this->userId}";
+}
+```
+
+```php
+debounceKey(): string
+{
+    return static::class.':'.$this->modelId;
+}
+```
+
+```php
+SyncOrder::dispatch($order->id);
+SyncUser::dispatch($user->id);
+ProcessEverythingLater::dispatch($model->id);
+```
+
+## Safe Rule Of Thumb
+Ask:
+
+```text
+If two matching events happen 500 ms apart, is it correct that one of them disappears?
+```
+
+If the answer is not clearly yes, do not debounce it. Use idempotency, unique jobs, locks, transactions, or separate queues instead.

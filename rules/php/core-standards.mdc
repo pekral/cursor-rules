@@ -89,6 +89,7 @@ globs: ["*"]
 
 ## Testing
 - Add or update tests for every meaningful behavior change.
+- Write all new tests using Pest syntax (`it()` / `test()` functional blocks); do not introduce PHPUnit-style class-based tests for new test files.
 - Prefer deterministic tests.
 - Use the arrange-act-assert structure when it improves readability.
 - Use clear, human-readable test names.

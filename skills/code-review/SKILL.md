@@ -122,9 +122,11 @@ Run this section over the PR diff only — never over untouched code.
 ### Validation
 - Verify acceptance criteria
 - **Coverage gate (mandatory):** every line, branch, and condition added or modified in the current PR diff must be covered by tests.
-  - Run the project coverage tool (e.g. `composer test:coverage` / `phpunit --coverage-*`) scoped to changed files.
+  - Before running coverage, discover the project's coverage command (prefer Phing target from `build.xml`/`phing.xml`; fall back to a Composer script in `composer.json` such as `test:coverage` or `coverage`). Do not assume a default command.
+  - Run the discovered command scoped to changed files.
   - Map the coverage report to the diff and list any uncovered added/changed lines as **Critical** findings.
   - If coverage tooling is unavailable or cannot be executed, raise that as a **Critical** finding instead of skipping the check.
+  - Always include a `## Coverage` section in the published review reporting the tool used, the command run, and the result for changed lines (or "tooling unavailable" with reason). Never finalize a review without it.
 - Identify missing test scenarios beyond raw coverage (edge cases, error paths, regressions).
 
 ---

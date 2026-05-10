@@ -108,6 +108,7 @@ Before reviewing code, load and analyze the full linked issue:
 - These three fields exist so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test directly from the PR comment.
 - Minor findings may omit these fields when no behavior change is implied.
 - If reviewed code violates project rules or architecture but is **out of scope** for the current PR, add a **Refactoring Proposals** section with issue drafts (justified by defined rules only)
+- The posted PR comment must always include a `## Coverage` section before the summary line. The section reports the tool used, command run, and coverage result for changed lines (or "tooling unavailable" with reason). Never post a CR comment without it.
 - End with summary line
 
 ## Output Format

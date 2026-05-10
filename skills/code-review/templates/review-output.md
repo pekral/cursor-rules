@@ -54,4 +54,12 @@ If any reviewed code violates project rules (`@rules/php/core-standards.mdc`, `@
 Only propose refactoring that is justified by defined rules or architecture — not stylistic preferences.
 If no refactoring opportunities are found, omit this section.
 
+## Coverage
+
+> Mandatory. Never finalize a review without this section.
+
+- **Tool:** name of the discovered coverage tool (Phing target, Composer script, etc.) or "not available" with reason.
+- **Command:** exact command that was executed.
+- **Result:** % covered for changed lines (or list any uncovered added/changed lines, which must also appear as Critical findings).
+
 **Summary: X Critical, Y Moderate, Z Minor, R Refactoring (DRY / Tech Debt Reduction)**

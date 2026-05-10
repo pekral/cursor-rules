@@ -106,6 +106,7 @@ Before reviewing code, load and analyze the full JIRA issue:
     - **Test Hint** — one sentence pointing at the test layer (unit, integration, feature) and entry point
 - These three fields exist so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test directly from the PR comment.
 - Minor findings may omit these fields when no behavior change is implied.
+- The posted PR comment must always include a `## Coverage` section before the summary line. The section reports the tool used, command run, and coverage result for changed lines (or "tooling unavailable" with reason). Never post a CR comment without it.
 - Use the template defined in `templates/github-output.md`
 
 ### JIRA (non-technical summary — only here)

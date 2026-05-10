@@ -56,8 +56,9 @@ globs: []
 
 ## Coverage
 - Every test change must be verified to be functional — run affected tests after each modification.
-- Ensure 100% code coverage for all changed or added code paths.
-- If coverage tooling exists in the project, use it to verify coverage after test changes.
+- Require 100% code coverage for every changed or added code path — applies equally to code modifications and code review.
+- Before running coverage, discover the project's coverage command (prefer Phing target from `build.xml`/`phing.xml`; fall back to a Composer script in `composer.json` such as `test:coverage` or `coverage`). Do not assume a default command.
+- Always report the coverage result (tool used, command, % covered for changed lines). If no coverage tooling can be discovered, state that explicitly and treat it as a blocking finding — never silently skip the check or push a report without it.
 
 ## Code Style and Quality Gates
 - Discover available fixers and checkers: prefer Phing targets (`build.xml`/`phing.xml`) over Composer scripts (`composer.json`).

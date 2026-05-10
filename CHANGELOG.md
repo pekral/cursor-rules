@@ -12,6 +12,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 - 🔧 **Changed**: move shared rule files from `rules/skills/` to `rules/`, update all skill references (#238)
 - 🐛 **Fixed**: `create-missing-tests-in-pr` and `test-like-human` skills now use shared `github-operations.mdc` / `jira-operations.mdc` rules instead of inline preferences (#237)
 - 🐛 **Fixed**: all mock rules now prefer partial mocks (`makePartial()`) over full mocks (#241)
+- ✨ **Added**: new Agent skill `skill-creator` for scaffolding new SKILL.md files that follow project conventions and pass `skill-check` validation (#432)
 
 ## [0.6.2] - 2026-04-07
 

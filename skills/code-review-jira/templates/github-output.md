@@ -52,4 +52,12 @@
 Only propose refactoring justified by defined rules — not stylistic preferences.
 Omit this section if no opportunities are found.
 
+## Coverage
+
+> Mandatory. Never post a CR comment without this section.
+
+- **Tool:** name of the discovered coverage tool (Phing target, Composer script, etc.) or "not available" with reason.
+- **Command:** exact command that was executed.
+- **Result:** % covered for changed lines (or list any uncovered added/changed lines, which must also appear as Critical findings).
+
 **Summary: X Critical, Y Moderate, Z Minor, R Refactoring (DRY / Tech Debt Reduction)**

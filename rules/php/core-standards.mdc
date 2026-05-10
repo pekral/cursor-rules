@@ -90,6 +90,7 @@ globs: ["*"]
 ## Testing
 - Add or update tests for every meaningful behavior change.
 - Write all new tests using Pest syntax (`it()` / `test()` functional blocks); do not introduce PHPUnit-style class-based tests for new test files.
+- Require 100% test coverage for every changed or added code path. Before running coverage, discover the project's coverage command (prefer Phing target from `build.xml`/`phing.xml`; fall back to a Composer script in `composer.json` such as `test:coverage` or `coverage`). Always report the result; never push or finalize a change without it.
 - Prefer deterministic tests.
 - Use the arrange-act-assert structure when it improves readability.
 - Use clear, human-readable test names.

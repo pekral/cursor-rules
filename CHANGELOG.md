@@ -15,6 +15,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 - ✨ **Added**: new Agent skill `skill-creator` for scaffolding new SKILL.md files that follow project conventions and pass `skill-check` validation (#432)
 - ✨ **Added**: new Laravel rule `laravel/queue-debouncing.mdc` covering safe queue debouncing, urgency separation, replaceable-work design, and review/testing requirements (#431)
 - 📝 **Changed**: testing rules now explicitly mandate Pest syntax (`it()` / `test()`) for all new test files; PHPUnit class-based tests are no longer allowed for new tests (#430)
+- 📝 **Changed**: rules and CR skills now require 100% test coverage for every changed code path, mandate discovering the project's coverage command (Phing → Composer) before running it, and require a `## Coverage` section in every published CR comment — never push a CR report without the coverage result (#429)
 
 ## [0.6.2] - 2026-04-07
 

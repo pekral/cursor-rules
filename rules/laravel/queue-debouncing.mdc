@@ -143,7 +143,7 @@ it('dispatches payment processing separately from read model refresh', function 
     $order = Order::factory()->create();
     $payment = Payment::factory()->for($order)->create();
 
-    CapturePaymentAction::run($payment->id);
+    app(CapturePaymentAction::class)($payment->id);
 
     Queue::assertPushed(ProcessCapturedPayment::class);
     Queue::assertPushed(RefreshOrderReadModel::class);

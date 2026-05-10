@@ -92,6 +92,7 @@ globs:
 - Avoid heavy logic in job constructors.
 - Define retries, timeout, and backoff explicitly or via config.
 - When reviewing jobs, verify whether queue behavior is configured in the job class or centrally in config.
+- When using an SQS FIFO queue or an SQS deduplicator package, the job class itself must expose a `deduplicationId(): string` method that returns the deduplication key. Do not configure the deduplication key outside the job (in dispatchers, middleware, service providers, or config callbacks) — the job is the source of truth for its own deduplication identity. Compose the key from stable, business-meaningful inputs (e.g. payload identifiers) so retries of the same logical event resolve to the same key.
 
 ## Middleware
 - Use middleware only for cross-cutting concerns.

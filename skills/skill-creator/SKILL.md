@@ -37,7 +37,7 @@ Focus on:
 ---
 
 ## Inputs the agent must collect
-Before generating any file, confirm with the user:
+Before generating any file, gather:
 - **Skill name** — kebab-case, ≤ 64 chars, unique under `skills/`
 - **Purpose** — one sentence describing what the skill does
 - **Trigger phrase** — the "Use when …" wording for the description
@@ -46,7 +46,7 @@ Before generating any file, confirm with the user:
 - **Integrations** — issue tracker, GitHub, MySQL, Telescope, etc. (or none)
 - **Output expectations** — markdown report, code change, PR comment, etc.
 
-If the user already provided enough context, restate the assumptions and continue without re-asking.
+If running interactively, confirm the inputs with the user. If running autonomously (e.g. invoked by `resolve-issue` or a scheduled workflow), infer the inputs from the triggering issue / PR description and state the assumptions in the final summary.
 
 ---
 
@@ -79,16 +79,31 @@ Rules from `skill-check.config.json`:
 - Body: ≤ 500 lines and ≤ 5000 tokens
 
 ### 4. Compose the body
-Use the following section order. Omit a section only when it does not apply.
+The repo accepts two body layouts. Pick one and stay consistent within the file.
+
+**Layout A — Constraints-first (preferred for new skills):**
+
+1. `## Constraints` — applied rules and hard limits (one bullet per item)
+2. `## Use when` — concrete triggers
+3. `## Required approach` or `## Execution` — numbered steps the agent must follow
+4. `## Output` or `## Output Format` — structure of what the skill returns
+5. `## Done when` — verifiable completion criteria
+
+Examples in the repo: `refactor-entry-point-to-action`, `smartest-project-addition`, `test-driven-development`, `test-like-human`, `security-review`.
+
+**Layout B — Title + Purpose (legacy, still acceptable):**
 
 1. `# <Title Case Name>`
 2. `## Purpose` — one short paragraph plus a bullet list of focus areas
-3. `## Constraints` — applied rules and hard limits (one bullet per item)
-4. `## Use when` — concrete triggers
-5. `## Execution` — numbered steps the agent must follow
-6. `## Output` or `## Output Format` — structure of what the skill returns
-7. `## Principles` — short guiding rules (optional)
-8. `## Done when` — verifiable completion criteria
+3. `## Constraints`
+4. `## Execution`
+5. `## Output` or `## Output Format`
+6. `## Principles` — short guiding rules (optional)
+7. `## Done when`
+
+Examples in the repo: `code-review`, `class-refactoring`, `create-test`, `analyze-problem`.
+
+Omit a section only when it does not apply.
 
 ### 5. Reference rules and other skills
 - Reference rule files as `@rules/<area>/<file>.mdc` or `.md` exactly as they exist on disk.
@@ -104,11 +119,11 @@ Use the following section order. Omit a section only when it does not apply.
 
 ## Quality Gates
 Run before declaring the skill done:
-- `composer skill-check-fix` — auto-fix `SKILL.md` formatting
-- `composer skill-check` — must report `PASS` with no warnings
+- `composer skill-check` — must report `PASS` with no warnings on the new file
+- If `skill-check` flags an auto-fixable warning, run `npx skill-check check skills/<slug> --fix --no-security-scan` (path-scoped) instead of `composer skill-check-fix`, which rewrites every skill in the tree and can pollute the diff with unrelated formatting changes
 - `composer build` — full project build (must finish without errors)
 
-If `skill-check` flags warnings on the new file, fix the SKILL.md until the report is clean. Do not silence checks.
+Do not silence checks; fix the SKILL.md content until the report is clean.
 
 ---
 

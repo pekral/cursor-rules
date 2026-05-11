@@ -170,6 +170,7 @@ Rules included in this package:
 | `laravel/filament.mdc`        | Filament v4 specific rules                                 | Filament |
 | `laravel/livewire.mdc`        | Livewire component rules and conventions                   | Livewire |
 | `laravel/queue-debouncing.mdc`| Safe Laravel queue debouncing, urgency separation, and replaceable work | Laravel  |
+| `laravel/dynamodb.mdc`        | DynamoDB query safety: scan prevention, key-targeted reads, Tinker debug | Laravel  |
 | `sql/optimalize.mdc`          | SQL query optimization, index design, schema standards     | Always   |
 | `security/backend.md`         | Backend security rules and OWASP Top 10 checks             | Always   |
 | `security/frontend.md`        | Frontend security rules (XSS, CSRF, CSP)                  | Frontend |

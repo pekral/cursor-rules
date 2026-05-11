@@ -20,8 +20,8 @@ Apply these rules whenever the project integrates with DynamoDB — via the `bao
 ## Required Access Patterns
 - `GetItem` / `BatchGetItem` — single-item or known-keys reads.
 - `Query` with a partition key (and optionally a sort key) — collection reads inside one partition.
-- `Query` against a Global Secondary Index (GSI) — non-primary-key access patterns. Pass the index name to the query (e.g. `->index('status-createdAt-index')`).
-- `Scan` is allowed only for explicit, documented offline/admin tasks (one-off backfills, maintenance scripts). The justification must live in code or in the PR description.
+- `Query` against a Global Secondary Index (GSI) — non-primary-key access patterns. Pass the index name to the query (`->index('status-createdAt-index')` with `baopham/laravel-dynamodb`; `IndexName` in `QueryInput` when calling the AWS SDK directly).
+- `Scan` is allowed only for explicit, documented offline/admin tasks (one-off backfills, maintenance scripts) — see the Review Checklist below for the justification requirement.
 
 Reject patterns that omit a key:
 
@@ -51,11 +51,12 @@ For every PR that touches DynamoDB code, reviewers must verify:
 - When a GSI is used, the index exists in the table definition and the query passes the correct index name.
 
 ## Testing and Debugging with Tinker
-- If Laravel Tinker is available in the project (check `composer.json` for `laravel/tinker`), use `php artisan tinker` for every ad-hoc DynamoDB query test or debug session instead of writing throwaway routes, commands, or seeders.
+- If Laravel Tinker is available in the project (check `composer.json` for `laravel/tinker`), use `php artisan tinker` for every ad-hoc DynamoDB query verification or debug session instead of writing throwaway routes, commands, or seeders.
+- Tinker complements but does not replace the Pest tests required by `@rules/code-testing/general.mdc` for every behavior change.
 - Use Tinker to:
   - Confirm whether a builder produces a `Query` or a `Scan` before merging — inspect the builder, dump the underlying AWS SDK request, or enable SDK logging.
   - Verify the shape of items returned by repositories against real data.
-  - Reproduce production-like read paths against the configured DynamoDB endpoint (live, LocalStack, or DynamoDB Local).
+  - Reproduce production-like read paths against the configured DynamoDB endpoint.
 - Never paste secrets or production credentials into Tinker — rely on the project's configured `.env` or IAM role.
 
 ## Red Flags

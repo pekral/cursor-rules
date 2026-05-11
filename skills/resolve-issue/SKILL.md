@@ -95,13 +95,13 @@ After implementation and pre-push quality gates pass, and **before creating the 
 
 1. Run `@skills/code-review/SKILL.md`
 2. If **Critical** or **Moderate** findings exist:
-   - Run `@skills/process-code-review/SKILL.md` to apply the fixes
+   - Apply the **Suggested Fix** snippet from each finding directly to the working tree
+   - Add or update a reproducer test for each finding using its **Faulty Example**, **Expected Behavior**, and **Test Hint**
+   - Re-run the pre-push quality gates on touched files
    - Repeat from step 1
 3. Iterate until no **Critical** or **Moderate** findings remain
 
-Notes:
-- The loop runs on the local working branch before a PR exists. Findings are applied directly to the working tree; no PR comments are produced at this stage.
-- Re-run the pre-push quality gates after each fix iteration on touched files.
+PR-comment processing via `@skills/process-code-review/SKILL.md` remains the path used **after** a PR exists; it is not part of this pre-PR loop because it requires an open PR to operate on.
 
 ## Testing
 

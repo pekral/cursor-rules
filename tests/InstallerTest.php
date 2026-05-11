@@ -1123,6 +1123,11 @@ test('unified resolve-issue skill requires code review before PR creation', func
 
     expect($content)->toContain('### Technical report → codebase tracker (GitHub PR)');
     expect($content)->toContain('### Non-technical report → original task tracker');
+
+    $reviewLoopSection = substr($content, $reviewLoopPos, $pullRequestPos - $reviewLoopPos);
+    expect($reviewLoopSection)->not->toContain('@skills/process-code-review/SKILL.md to apply');
+    expect($reviewLoopSection)->not->toContain('@skills/code-review-github/SKILL.md');
+    expect($reviewLoopSection)->not->toContain('@skills/code-review-jira/SKILL.md');
 });
 
 test('resolve-random skills are not shipped in source skills directory', function (): void {

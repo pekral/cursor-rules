@@ -72,7 +72,7 @@ Before reviewing code, load and analyze the full linked issue:
 
 #### Thread detection
 - Before posting, search for an existing code review comment on the PR:
-  - Read `comments[]` off the JSON loaded in step 1 and find one matching the CR format (e.g. contains "Summary:" with severity counts)
+  - Read `comments` off the JSON loaded in step 1 and find one matching the CR format (e.g. contains "Summary:" with severity counts)
   - Store its `url` (and the trailing `#issuecomment-<id>`) if found
 
 #### Posting strategy

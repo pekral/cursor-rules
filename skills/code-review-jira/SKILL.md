@@ -66,7 +66,7 @@ Before reviewing code, load and analyze the full JIRA issue:
 
 1. Restrict the analysis to lines added or modified in the PR — never review untouched code.
 2. For each changed block, apply `@skills/class-refactoring/SKILL.md` and look for:
-   - duplicated logic that already exists elsewhere (DRY)
+   - duplicated logic that already exists elsewhere (DRY) — verify the change reuses existing logic instead of introducing a parallel implementation, per `@rules/code-review/general.mdc` Reuse Existing Logic section
    - data shaping repeated across Actions/Services/controllers/jobs/listeners/Livewire/commands
    - oversized methods, deep nesting, mixed responsibilities introduced or amplified by the change
 3. Each finding must include the file path, the affected line range, and a concrete refactoring that *reduces* tech debt.

@@ -23,5 +23,10 @@ globs: []
 ## Scope
 - Focus only on relevant changes in the PR unless broader context is required.
 
+## Reuse Existing Logic
+- For every block of newly added or modified logic, search the codebase for an existing implementation that already does the same thing (helper, Service, Action, Data Builder, DTO, trait, ModelManager, Repository, scope, etc.).
+- If equivalent logic already exists, flag the change and require reusing it instead of introducing a parallel implementation.
+- The goal is unified logic across the application; parallel implementations of the same behavior are a finding.
+
 ## Safety
 - If context is incomplete, state assumptions instead of guessing.

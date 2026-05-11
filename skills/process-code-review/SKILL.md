@@ -40,6 +40,8 @@ For every Critical and Moderate finding, extract the reproducer fields published
 - **Expected Behavior** — the assertion target the test must verify
 - **Test Hint** — the layer (unit, integration, feature) and entry point
 
+For JIRA-originated reviews, read the reproducer fields off `comments[]` and `descriptionText` returned by `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>` instead of re-fetching the issue. Never call `acli` directly.
+
 Use these to write a failing test **before** applying the fix:
 
 1. Drop the Faulty Example into a new test case at the layer named in the Test Hint.

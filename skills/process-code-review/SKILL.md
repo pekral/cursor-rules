@@ -39,6 +39,7 @@ For every Critical and Moderate finding, extract the reproducer fields published
 - **Faulty Example** — the minimal snippet or input that reproduces the bug
 - **Expected Behavior** — the assertion target the test must verify
 - **Test Hint** — the layer (unit, integration, feature) and entry point
+- **Suggested Fix** — the minimal corrected snippet that resolves the finding (may be `n/a — <reason>` when the Fix narrative is sufficient)
 
 For JIRA-originated reviews, read the reproducer fields off `comments[]` and `descriptionText` returned by `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>` instead of re-fetching the issue. Never call `acli` directly.
 
@@ -46,9 +47,9 @@ Use these to write a failing test **before** applying the fix:
 
 1. Drop the Faulty Example into a new test case at the layer named in the Test Hint.
 2. Assert the Expected Behavior — the test must fail on the current code.
-3. Apply the fix from the finding; rerun the test until it passes.
+3. Apply the Suggested Fix snippet (or the Fix narrative when Suggested Fix is `n/a`); rerun the test until it passes.
 
-If a finding lacks one of these fields, request a CR rerun rather than guessing — the CR skills are responsible for providing them.
+If a finding lacks Faulty Example, Expected Behavior, or Test Hint, request a CR rerun rather than guessing — the CR skills are responsible for providing them. Suggested Fix may legitimately be `n/a` per the CR rules.
 
 ---
 

@@ -19,6 +19,10 @@
    ```
    Expected Behavior: what the correct outcome (return value, exception, side effect) must be.
    Test Hint: one-sentence outline of the test that would fail today and pass after the fix.
+   Suggested Fix:
+   ```php
+   // minimal corrected snippet that resolves the finding; must comply with @rules/php/core-standards.mdc (and @rules/laravel/architecture.mdc on Laravel projects)
+   ```
 
 ## Moderate
 
@@ -36,10 +40,11 @@
    Suggested refactoring: concrete consolidation step (Data Builder, DTO, Service, Action, Repository, etc.)
    Why: which rule from `@rules/laravel/architecture.mdc` or `@skills/class-refactoring/SKILL.md` is satisfied by the change.
 
-> **Faulty Example, Expected Behavior, and Test Hint are mandatory for every Critical and Moderate finding.** They feed `process-code-review` so each fix can be backed by a reproducer test.
+> **Faulty Example, Expected Behavior, Test Hint, and Suggested Fix are mandatory for every Critical and Moderate finding.** They feed `process-code-review` so each fix can be backed by a reproducer test and applied directly from the CR comment.
 > - Faulty Example must be a minimal, runnable snippet (or sample input/payload) — never paste secrets or real PII; redact with placeholders.
 > - Expected Behavior must be a single assertable statement (return value, thrown exception, persisted state, emitted event).
 > - Test Hint must point at the layer the test belongs in (unit, integration, feature) and the entry point to call.
+> - Suggested Fix must be a minimal corrected snippet that complies with `@rules/php/core-standards.mdc` and, on Laravel projects, with `@rules/laravel/architecture.mdc`. Use `n/a — <reason>` only when a snippet adds no value over the one-line Fix description.
 > - Minor findings may omit these fields when no behavior change is implied (e.g. naming, dead code).
 
 ## Refactoring Proposals

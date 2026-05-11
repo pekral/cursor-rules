@@ -25,14 +25,16 @@ Run a full code review for GitHub pull requests and publish findings directly to
 ## Execution
 
 ### 1. Load Context
-- Load PR, linked issue, and comments using CLI or MCP tools
+- Load PR context by running `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>` — the single deterministic entry point. Never call `gh issue view`, `gh pr view`, or `gh api /repos/.../issues/...` directly. Read PR header, description, comments, commits, files, reviews, status checks, and `closingIssues` off the resulting JSON document.
+- Load each linked issue (from `closingIssues[]`) the same way — pass its number or URL to the same script.
+- If the script is unavailable (missing tool, exit code 2/3) fall back to the GitHub MCP server. Always prefer the MCP fallback for data the script cannot cover: review-thread / line-anchored comments, per-commit check runs, and binary attachment contents.
 - If multiple PRs exist for one issue, review each independently
 - Before reviewing a PR, switch to the PR branch and pull latest changes
 
 #### Issue Context Analysis
 Before reviewing code, load and analyze the full linked issue:
 
-1. Fetch the complete GitHub issue — description, all comments, and any referenced attachments or links.
+1. Fetch the complete GitHub issue via `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>` — description, all comments, and any referenced attachments or links come off the resulting JSON document.
 2. Extract from the issue:
    - **Requirements and acceptance criteria** — what the code must do
    - **Expected behavior** — how the feature or fix should work
@@ -70,8 +72,8 @@ Before reviewing code, load and analyze the full linked issue:
 
 #### Thread detection
 - Before posting, search for an existing code review comment on the PR:
-  - Use `gh api` to list PR comments and find one matching the CR format (e.g. contains "Summary:" with severity counts)
-  - Store its `comment_id` if found
+  - Read `comments[]` off the JSON loaded in step 1 and find one matching the CR format (e.g. contains "Summary:" with severity counts)
+  - Store its `url` (and the trailing `#issuecomment-<id>`) if found
 
 #### Posting strategy
 - **If an existing CR comment is found (follow-up review):**

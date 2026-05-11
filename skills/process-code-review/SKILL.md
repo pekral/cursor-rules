@@ -28,8 +28,8 @@ metadata:
 
 ### For each PR:
 
-- Load all review comments (including threads and general comments)
-- Build a checklist from all review findings
+- Load PR context by running `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>` — the single deterministic entry point. Never call `gh issue view`, `gh pr view`, or `gh api /repos/.../issues/...` directly. Read review comments, files, commits, status checks, and `closingIssues` off the resulting JSON document. If the script is unavailable (missing tool, exit code 2/3) fall back to the GitHub MCP server, and always prefer the MCP fallback for review-thread / line-anchored comments that the script does not return.
+- Build a checklist from all review findings (general comments come from `comments[]`; line-anchored review-thread comments still need the MCP fallback)
 - Map each finding to a concrete code or test change
 
 #### Reproducer extraction (per finding)
@@ -41,7 +41,9 @@ For every Critical and Moderate finding, extract the reproducer fields published
 - **Test Hint** — the layer (unit, integration, feature) and entry point
 - **Suggested Fix** — the minimal corrected snippet that resolves the finding (may be `n/a — <reason>` when the Fix narrative is sufficient)
 
-For JIRA-originated reviews, read the reproducer fields off `comments[]` and `descriptionText` returned by `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>` instead of re-fetching the issue. Never call `acli` directly.
+Read the reproducer fields off `comments[]` and `body` / `descriptionText` returned by the deterministic loader for the originating tracker instead of re-fetching the issue:
+- **GitHub-originated reviews:** `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>`. Never call `gh issue view`, `gh pr view`, or `gh api /repos/.../issues/...` directly.
+- **JIRA-originated reviews:** `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>`. Never call `acli` directly.
 
 Use these to write a failing test **before** applying the fix:
 
@@ -110,7 +112,7 @@ If a finding lacks Faulty Example, Expected Behavior, or Test Hint, request a CR
 ### PR update
 
 - Find the original code review comment on the PR:
-  - Use `gh api` to list PR comments and identify the CR comment (e.g. contains "Summary:" with severity counts)
+  - Read `comments[]` off `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>` and identify the CR comment (e.g. contains "Summary:" with severity counts)
 - **If the original CR comment is found:**
   - Post resolved items and status updates as a new PR comment that references the original CR comment
   - GitHub does not support native replies to issue comments — use quoting (e.g. "> Replying to code review from {date}") to create a visual thread

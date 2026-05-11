@@ -1106,6 +1106,23 @@ test('unified resolve-issue skill requires code review before PR creation', func
     expect($content)->toContain('Code review loop passed with no Critical or Moderate findings');
     expect($content)->toContain('Security review completed');
     expect($content)->not->toContain('After checks pass, automatically push');
+
+    $reviewLoopPos = strpos($content, '## Code quality and review loop');
+    $testingPos = strpos($content, '## Testing');
+    $pullRequestPos = strpos($content, '## Pull request');
+    expect($reviewLoopPos)->not->toBeFalse();
+    expect($testingPos)->not->toBeFalse();
+    expect($pullRequestPos)->not->toBeFalse();
+
+    if (!is_int($reviewLoopPos) || !is_int($testingPos) || !is_int($pullRequestPos)) {
+        return;
+    }
+
+    expect($reviewLoopPos)->toBeLessThan($pullRequestPos);
+    expect($testingPos)->toBeLessThan($pullRequestPos);
+
+    expect($content)->toContain('### Technical report → codebase tracker (GitHub PR)');
+    expect($content)->toContain('### Non-technical report → original task tracker');
 });
 
 test('resolve-random skills are not shipped in source skills directory', function (): void {

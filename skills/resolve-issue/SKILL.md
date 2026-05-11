@@ -89,39 +89,66 @@ Before writing any code, decide how the in-scope work will be split into commits
 
 Follow the workflow defined in `references/quality-gates.md`.
 
+## Code quality and review loop
+
+After implementation and pre-push quality gates pass, and **before creating the pull request**, run the review loop on the local changes:
+
+1. Run `@skills/code-review/SKILL.md`
+2. If **Critical** or **Moderate** findings exist:
+   - Run `@skills/process-code-review/SKILL.md` to apply the fixes
+   - Repeat from step 1
+3. Iterate until no **Critical** or **Moderate** findings remain
+
+Notes:
+- The loop runs on the local working branch before a PR exists. Findings are applied directly to the working tree; no PR comments are produced at this stage.
+- Re-run the pre-push quality gates after each fix iteration on touched files.
+
+## Testing
+
+After the code review loop passes clean, and **still before creating the pull request**, validate the change:
+
+1. Run `@skills/security-review/SKILL.md`
+2. Run `@skills/test-like-human/SKILL.md`
+
+Resolve any **Critical** or **Moderate** findings from these skills before continuing. If a finding requires code changes, re-run the **Code quality and review loop** to re-validate.
+
 ## Pull request
+
+Once review and testing are clean:
+
 - Create a branch and commit changes following `@rules/git/general.mdc`
 - Create a pull request with:
   - clear description of the change
   - reference to the original issue
   - testing instructions
+  - **Summary** — concise overview of what changed and why
   - **TODO list** — if any **out-of-scope** items were identified in step 7, include them in the PR summary under a `## TODO` section as a checklist of potential follow-up tasks
-
-## Code quality and review loop
-
-After the pull request is created, run the following review loop:
-
-1. Run `@skills/code-review/SKILL.md`
-2. If **Critical** or **Moderate** findings exist:
-   - Run `@skills/process-code-review/SKILL.md` to fix them
-   - Repeat from step 1
-3. Iterate until no **Critical** or **Moderate** findings remain
-
-After the review loop passes clean:
-
-4. Run `@skills/security-review/SKILL.md`
-5. Run `@skills/test-like-human/SKILL.md`
 
 ## Final report
 
-Post the final report (code review result, security review result, and test-like-human result) back to the issue tracker where the assignment originated:
+Reporting is split by audience and destination:
 
-- **GitHub:** post as a comment on the original issue
-- **JIRA:** post as a JIRA comment (using JIRA formatting rules) understandable by non-technical testers and product managers, containing:
-  - **What changed:** a brief, plain-language summary of the fix or feature
-  - **How to test:** step-by-step instructions a tester can follow to verify the change works correctly
-  - **Risk areas and edge cases:** specific scenarios the tester should focus on to catch potential regressions or unexpected behavior
-- **Bugsnag:** post as a comment on the linked GitHub issue (if available)
+### Technical report → codebase tracker (GitHub PR)
+
+Post the technical report as a comment on the GitHub PR, since that is where the codebase and testing state live. It must contain:
+
+- **Code review summary** — outcome of `@skills/code-review/SKILL.md` (findings addressed during the loop and the final clean state)
+- **Security review summary** — outcome of `@skills/security-review/SKILL.md`
+- **Testing notes** — outcome of `@skills/test-like-human/SKILL.md`, including scenarios exercised and any caveats
+
+### Non-technical report → original task tracker
+
+Post the non-technical report on the issue tracker where the task with the assignment was created (the original tracker, regardless of where the PR lives):
+
+- **GitHub** (task filed as a GitHub issue): post as a comment on the original issue
+- **JIRA** (task filed in JIRA): post as a JIRA comment using JIRA formatting rules
+- **Bugsnag** (task originated from a Bugsnag error): post as a comment on the linked GitHub issue (if available)
+
+The non-technical report must be understandable by non-technical testers and product managers and contain:
+
+- **What changed:** a brief, plain-language summary of the fix or feature
+- **How to test:** step-by-step instructions a tester can follow to verify the change works correctly
+- **Risk areas and edge cases:** specific scenarios the tester should focus on to catch potential regressions or unexpected behavior
 
 ### JIRA-specific follow-up
 - Link the created PR back to the JIRA issue
@@ -137,9 +164,10 @@ Post the final report (code review result, security review result, and test-like
 - Tests cover affected logic with 100% coverage and pass
 - Pre-push fixers and checkers ran clean on all changed files
 - No sensitive data is exposed
-- Code review loop passed with no Critical or Moderate findings
-- Security review completed
-- Test-like-human completed
-- Final report posted to the issue tracker
-- A clean pull request is created
+- Code review loop passed with no Critical or Moderate findings **before the PR was created**
+- Security review completed **before the PR was created**
+- Test-like-human completed **before the PR was created**
+- A clean pull request is created with a summary
+- Technical report posted on the GitHub PR
+- Non-technical report posted on the original issue tracker
 - For JIRA issues: PR is linked back and a summary comment is posted

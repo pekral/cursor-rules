@@ -97,8 +97,9 @@ Avoid generic best-practice noise.
 - **Faulty Example** — minimal code snippet or attacker payload that reproduces the vulnerability (redact secrets, tokens, and PII)
 - **Expected Behavior** — single assertable security guarantee (rejection, authorization denial, escaped output, no side effect)
 - **Test Hint** — one sentence pointing at the test layer (unit, feature, HTTP) and entry point
+- **Suggested Fix** — minimal corrected code snippet that closes the vulnerability (parameterized query, authorization check, output escaping, signature verification, safer SDK call, etc.). Must comply with `@rules/php/core-standards.mdc`, `@rules/security/backend.mdc`, and, for Laravel projects, `@rules/laravel/architecture.mdc`. Use `n/a — <reason>` only when the fix is purely configurational (env var, web-server header) and is described in the Recommended Fix narrative.
 
-These fields exist so `@skills/process-code-review/SKILL.md` can turn each finding into a regression test without re-deriving the attack vector. Medium and Low findings may omit them when no behavior change is implied.
+These fields exist so `@skills/process-code-review/SKILL.md` can turn each finding into a regression test and apply the fix without re-deriving the attack vector. Medium and Low findings may omit them when no behavior change is implied.
 
 ### Output format
 

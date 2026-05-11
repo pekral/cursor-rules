@@ -106,7 +106,8 @@ Before reviewing code, load and analyze the full JIRA issue:
     - **Faulty Example** — minimal code snippet or input payload reproducing the issue (redact secrets/PII)
     - **Expected Behavior** — single assertable statement (return value, exception, persisted state, emitted event)
     - **Test Hint** — one sentence pointing at the test layer (unit, integration, feature) and entry point
-- These three fields exist so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test directly from the PR comment.
+    - **Suggested Fix** — minimal corrected code snippet that resolves the finding. Must comply with `@rules/php/core-standards.mdc` and, for Laravel projects, `@rules/laravel/architecture.mdc`. Use `n/a — <reason>` only when a snippet adds no value over the one-line Fix description (e.g. naming-only changes, dead-code removal, pointers to an existing helper whose name already says enough).
+- These four fields exist so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test and apply the fix directly from the PR comment.
 - Minor findings may omit these fields when no behavior change is implied.
 - The posted PR comment must always include a `## Coverage` section before the summary line. The section reports the tool used, command run, and coverage result for changed lines (or "tooling unavailable" with reason). Never post a CR comment without it.
 - Use the template defined in `templates/github-output.md`

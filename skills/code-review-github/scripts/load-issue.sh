@@ -9,6 +9,7 @@
 #   - a GitHub URL, e.g. https://github.com/<owner>/<repo>/issues/445
 #   - a GitHub URL, e.g. https://github.com/<owner>/<repo>/pull/123
 #   - any GitHub URL containing /issues/<N> or /pull/<N>
+#     (the optional `www.` host prefix is tolerated, e.g. https://www.github.com/...)
 #
 # Emits one JSON document on stdout with the following stable shape:
 #
@@ -94,7 +95,7 @@ extract_from_url() {
   # Echoes: "<owner> <repo> <number> <kind>"
   local url="$1"
   local path
-  path="$(printf '%s' "$url" | sed -nE 's#^https?://[^/]+/([^/]+)/([^/]+)/(issues|pull)/([0-9]+).*#\1 \2 \4 \3#p')"
+  path="$(printf '%s' "$url" | sed -nE 's#^https?://(www\.)?github\.com/([^/]+)/([^/]+)/(issues|pull)/([0-9]+).*#\2 \3 \5 \4#p')"
   if [[ -z "$path" ]]; then
     return 1
   fi
@@ -124,7 +125,7 @@ REPO=""
 NUMBER=""
 KIND=""
 
-if [[ "$INPUT" =~ ^https?://github\.com/ ]]; then
+if [[ "$INPUT" =~ ^https?://(www\.)?github\.com/ ]]; then
   parsed="$(extract_from_url "$INPUT" || true)"
   if [[ -z "$parsed" ]]; then
     echo "load-issue.sh: could not extract issue/PR from URL: $INPUT" >&2

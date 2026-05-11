@@ -1250,6 +1250,7 @@ test('github load-issue script is shipped, executable, and documents the same sh
     expect($content)->toContain('"closingIssues"');
     expect($content)->toContain('"closingPullRequests"');
     expect($content)->toContain('"statusCheckRollup"');
+    expect($content)->toContain('(www\.)?github\.com');
 });
 
 test('github-consuming skills route context loading through load-issue.sh', function (): void {

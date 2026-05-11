@@ -4,6 +4,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 
 ## [Unreleased]
 
+- 📝 **Changed**: code review skills (`code-review`, `code-review-github`, `code-review-jira`) and the shared `code-review/general.mdc` rule now require reviewers to flag newly added or modified logic that duplicates behavior already present elsewhere in the codebase — reuse the existing implementation to keep logic unified across the application (#440)
 - 🐛 **Fixed**: CR skills now systematically review all open PRs per issue instead of only one (#227)
 - 🐛 **Fixed**: JIRA skills now consistently prefer `acli` console tool via shared `jira-operations.mdc` rule (#228)
 - 🐛 **Fixed**: CR no longer flags custom named static constructors (`fromModel()`, `fromRequest()`) on Spatie DTOs as issues (#230)

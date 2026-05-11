@@ -4,6 +4,7 @@ All notable changes to `cursor-rules` will be documented in this file.
 
 ## [Unreleased]
 
+- ✨ **Added**: new Laravel rule `laravel/dynamodb.mdc` covering DynamoDB query safety — scan prevention for every query-builder change, required key-targeted access patterns (`GetItem` / `Query`), GSI usage, review checklist, and Tinker-based testing/debugging when `laravel/tinker` is available (#447)
 - 📝 **Changed**: code review and security-review skills (`code-review`, `code-review-github`, `code-review-jira`, `security-review`) and their output templates now require a **Suggested Fix** code snippet alongside Faulty Example / Expected Behavior / Test Hint for every Critical and Moderate finding (Critical/High for security). The snippet must comply with `@rules/php/core-standards.mdc` and, on Laravel projects, `@rules/laravel/architecture.mdc`. `process-code-review` reads the snippet and applies it directly when resolving the finding
 - 📝 **Changed**: code review skills (`code-review`, `code-review-github`, `code-review-jira`) and the shared `code-review/general.mdc` rule now require reviewers to flag newly added or modified logic that duplicates behavior already present elsewhere in the codebase — reuse the existing implementation to keep logic unified across the application (#440)
 - 🐛 **Fixed**: CR skills now systematically review all open PRs per issue instead of only one (#227)

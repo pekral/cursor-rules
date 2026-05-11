@@ -48,7 +48,7 @@ If a previous code review exists for the same PR:
 
 Before reviewing code, load and analyze the full issue context:
 
-1. Load the complete issue or task (description, all comments, and attachments) from the linked tracker (GitHub, JIRA, Bugsnag).
+1. Load the complete issue or task (description, all comments, and attachments) from the linked tracker (GitHub, JIRA, Bugsnag). For JIRA issues, call `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>` and read all fields off the resulting JSON document — never call `acli` directly. Fall back to the JIRA MCP server only when the script is unavailable or for data outside its scope (changelog, available transitions, friendly custom-field names).
 2. Extract from the issue:
    - **Requirements and acceptance criteria** — what the code must do
    - **Expected behavior** — how the feature or fix should work

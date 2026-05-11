@@ -29,8 +29,10 @@ Perform code review for JIRA issues by analyzing related pull requests and publi
 ## Execution
 
 ### 1. Load Context
-- Load JIRA issue, comments, and attachments using `acli`. If `acli` is unavailable, fall back to JIRA MCP server.
-- Identify all open PRs linked to the issue
+- Load JIRA context by running `./scripts/load-issue.sh <KEY|URL>` — the single deterministic entry point. Never call `acli` directly. Read issue header, description, comments, attachments, subtasks, issue links, custom fields, `devSummary`, and `pullRequests` off the resulting JSON document.
+- The script accepts a bare key (`ECOMAIL-1234`), a `/browse/<KEY>` URL, or any URL containing `?selectedIssue=<KEY>`.
+- If the script is unavailable (missing tool, exit code 2/3) fall back to the JIRA MCP server. Always prefer the MCP fallback for data the script cannot cover: changelog (`expand=changelog`), available next transitions, and friendly custom-field names (`expand=names`).
+- Identify all open PRs linked to the issue from the script's `pullRequests` array
 - Before reviewing a PR, switch to the PR branch and pull latest changes
 
 #### Issue Context Analysis

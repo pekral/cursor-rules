@@ -38,13 +38,13 @@ See `references/source-detection.md` for the detection table and rules.
    - **GitHub:** the issue repository must match the current Git remote origin.
    - **JIRA:** the issue project key must match the configured JIRA project for this repository.
    - If the issue does not belong to the current project, refuse to process it and inform the user.
-2. Fetch and analyze the issue from the detected source. For JIRA issues, use `acli` as the primary tool. If `acli` is unavailable, fall back to JIRA MCP server.
+2. Fetch and analyze the issue from the detected source. For JIRA issues, load context by running `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>` and read all fields off the resulting JSON document. Never call `acli` directly. If the script is unavailable (missing tool, exit code 2/3), fall back to the JIRA MCP server.
 3. Define exact requirements and expected behavior.
 4. Classify the task (bug or feature).
 
 ### Comment analysis
 
-5. Before analyzing the problem, fetch and read **all comments and replies** from the issue tracker (GitHub, JIRA, or Bugsnag):
+5. Before analyzing the problem, fetch and read **all comments and replies** from the issue tracker (GitHub, JIRA, or Bugsnag). For JIRA issues, read `comments[]` directly off the JSON loaded in step 2 — do not issue a second listing call:
    - Group comments by conversation thread (e.g., review threads, reply chains).
    - For each thread, determine:
      - **Current requirements** — requests or conditions that are still valid and unfulfilled.

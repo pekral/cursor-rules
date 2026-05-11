@@ -23,7 +23,7 @@
 #     "timeTracking": { "originalEstimate", "remainingEstimate", "timeSpent", "ratio" },
 #     "descriptionAdf":  <raw ADF or null>,
 #     "descriptionText": "<flattened plain text>",
-#     "descriptionMediaRefs": [ { "adfId", "altText", "filename", "attachmentId", "contentUrl", "mimeType" } ],
+#     "descriptionMediaRefs": [ { "adfId", "altText" } ],
 #     "issueLinks":  [ { "id", "type", "direction", "verb", "linkedKey", "linkedSummary", "linkedStatus", "linkedType" } ],
 #     "subtasks":    [ { "key", "summary", "status", "type" } ],
 #     "comments":    [ { "author", "body", "created", "visibility" } ],
@@ -35,9 +35,15 @@
 #
 # Notes:
 #   - `customFields` runs every customfield_* value through a universal Java/Groovy
-#     toString unwrap: any value that wraps `json={…}` is parsed back into JSON.
-#     Primitives, arrays, and already-structured objects pass through unchanged.
-#     No site-specific field IDs are hardcoded.
+#     toString unwrap: any string that starts with `{` and contains `json={…}` is
+#     parsed back into JSON. The leading-`{` anchor keeps the unwrap from firing
+#     on free-text fields that happen to mention `json={…}` in prose. Primitives,
+#     arrays, and already-structured objects pass through unchanged. No
+#     site-specific field IDs are hardcoded.
+#   - `descriptionMediaRefs[]` carries only `adfId` + `altText`. Correlating ADF
+#     media nodes back to entries in `attachments[]` requires an additional
+#     Atlassian Cloud Media API call, which is out of scope for this script;
+#     consumers should join on `attachments[]` themselves when needed.
 #   - `devSummary` is a convenience projection derived from
 #     customFields[$JIRA_DEV_SUMMARY_FIELD] (default `customfield_10000`,
 #     overridable via the JIRA_DEV_SUMMARY_FIELD env var). The shape stays
@@ -174,7 +180,7 @@ def tryParseTrimEnd:
   | .parsed;
 
 def unwrapJavaToString:
-  if type == "string" and test("json=\\{") then
+  if type == "string" and test("^\\{.*json=\\{") then
     (capture("json=(?<j>\\{.*\\})") | .j) as $candidate
     | (($candidate | fromjson?) // ($candidate | tryParseTrimEnd) // .)
   else .
@@ -217,7 +223,6 @@ def adfMedia:
 | ($f.description // null) as $desc
 | (if $desc == null then "" else ($desc | adfText) end) as $descText
 | (if $desc == null then [] else ($desc | adfMedia) end) as $descMedia
-| ($att | map({id: (.id // null), filename: (.filename // null), contentUrl: (.content // null), mimeType: (.mimeType // null)})) as $attIdx
 | {
     key: $key,
     url: (if $host != "" then "https://" + $host + "/browse/" + $key else null end),
@@ -248,9 +253,7 @@ def adfMedia:
     },
     descriptionAdf: $desc,
     descriptionText: ($descText | gsub("\n\n+"; "\n\n") | sub("\n+$"; "")),
-    descriptionMediaRefs: ($descMedia | map(. + {
-      filename: null, attachmentId: null, contentUrl: null, mimeType: null
-    })),
+    descriptionMediaRefs: $descMedia,
     issueLinks: ($links | map(
       if .outwardIssue then
         { id: .id, type: (.type.name // null), direction: "outward",

@@ -110,7 +110,7 @@ Run this section over the PR diff only — never over untouched code.
 
 1. List every block of changed lines (added or modified) per file.
 2. For each block, evaluate against `@skills/class-refactoring/SKILL.md`:
-   - duplicated logic that already exists elsewhere in the codebase (DRY)
+   - duplicated logic that already exists elsewhere in the codebase — diff-scoped pass of Core Analysis "Reuse of existing logic" (DRY); do not restate the rule, raise the finding once
    - data-shaping repeated across Actions/Services/controllers/jobs/listeners/Livewire/commands
    - oversized methods, deep nesting, mixed responsibilities introduced or amplified by the change
    - per-row DB operations in loops (link to the **Core Analysis** rule above)

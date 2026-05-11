@@ -1235,6 +1235,38 @@ test('github code review skills do not describe inline review comment workflow',
     }
 });
 
+test('github load-issue script is shipped, executable, and documents the same shape as JIRA', function (): void {
+    $packageDir = dirname(__DIR__);
+    $script = $packageDir . '/skills/code-review-github/scripts/load-issue.sh';
+
+    expect(file_exists($script))->toBeTrue();
+    expect(is_executable($script))->toBeTrue();
+
+    $content = (string) file_get_contents($script);
+    expect($content)->toStartWith('#!/usr/bin/env bash');
+    expect($content)->toContain('Usage: load-issue.sh <NUMBER|URL>');
+    expect($content)->toContain('"kind"');
+    expect($content)->toContain('"comments"');
+    expect($content)->toContain('"closingIssues"');
+    expect($content)->toContain('"closingPullRequests"');
+    expect($content)->toContain('"statusCheckRollup"');
+});
+
+test('github-consuming skills route context loading through load-issue.sh', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skills = [
+        $packageDir . '/skills/resolve-issue/SKILL.md',
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/process-code-review/SKILL.md',
+        $packageDir . '/skills/merge-github-pr/SKILL.md',
+    ];
+
+    foreach ($skills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('skills/code-review-github/scripts/load-issue.sh');
+    }
+});
+
 test('install with prune on non-existent target directory does nothing', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/skills/some-skill/SKILL.md', 'content');

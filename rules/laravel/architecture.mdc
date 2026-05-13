@@ -32,6 +32,18 @@ globs:
   - return a response or update UI state
 
 - Do not place business logic in controllers, jobs, commands, listeners, or Livewire components.
+
+## Business Logic Layers
+- Business logic must live **only** in one of the following six class types — no other class is an allowed home for business logic:
+  - **Actions** (`app/Actions/{Domain}/`) — orchestration of a single use case.
+  - **Model Services** (extending `BaseModelService`) — single-model domain operations.
+  - **Repositories** (`app/Repositories/{Domain}/`) — read-only data access (basic, reusable queries).
+  - **ModelManagers** (`app/ModelManagers/{Domain}/`) — write-only persistence (create, update, delete, batch writes).
+  - **Data Validators** (`app/DataValidators/{Domain}/`) — input validation that throws `ValidationException`.
+  - **Data Builders** (`app/DataBuilders/{Domain}/`) — mapping, hydration, and normalization of input into DTOs.
+- **Single-responsibility per file:** Each class file must own exactly one of the six responsibilities above. A single file must never mix concerns from two or more layers (e.g. validation + persistence, mapping + orchestration, querying + writing).
+- **Refactoring trigger:** When a class file contains business logic that spans more than one of the six layers, or contains business logic that does not fit any of the six layers, apply `@skills/class-refactoring/SKILL.md` to split the responsibilities into dedicated classes from the list above.
+- **Entry points and infrastructure exceptions:** Controllers, Jobs, Commands, Listeners, Livewire components, Middleware, FormRequests, DTOs, Enums, custom validation `Rule` classes, helper functions in `app/helpers.php`, and framework boilerplate are **not** business-logic layers. They must delegate to one of the six allowed homes above.
 - Legacy untouched code is a carve-out, but all new or materially changed flows must follow this architecture.
 - Multitenancy remains mandatory in every layer: all reads and writes must stay account-scoped.
 - **Invokeable call convention:** When calling Action classes, always use direct invocation `$action($params)` — never `$action->__invoke($params)`.
@@ -203,6 +215,8 @@ globs:
 
 ### CR Severity Rules
 - Mark as critical:
+  - business logic placed outside the six allowed layers (Actions, Model Services, Repositories, ModelManagers, Data Validators, Data Builders) — see "Business Logic Layers" section
+  - a single class file mixing responsibilities from two or more of the six business-logic layers (e.g. validation + persistence, mapping + orchestration)
   - new orchestration that bypasses Actions
   - inline `Validator::make()` inside Actions
   - `ValidationException` thrown directly inside Actions

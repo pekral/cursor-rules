@@ -214,11 +214,25 @@ final class Installer
             }
         } else {
             self::copy($src, $dst);
+            self::preserveExecutableBit($src, $dst);
         }
 
         InstallerHumanizer::appendIfNeeded($dst);
 
         return true;
+    }
+
+    private static function preserveExecutableBit(string $src, string $dst): void
+    {
+        $mode = fileperms($src);
+
+        if ($mode === false || ($mode & 0111) === 0) {
+            return;
+        }
+
+        set_error_handler(static fn (): bool => true);
+        chmod($dst, ($mode & 0777) | 0111);
+        restore_error_handler();
     }
 
     private static function removeExistingTarget(string $destination): void

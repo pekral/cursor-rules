@@ -1167,6 +1167,28 @@ test('architecture rules enumerate the six allowed business logic layers', funct
     expect($content)->toContain('@skills/class-refactoring/SKILL.md');
 });
 
+test('architecture bullets remain under the Architecture heading and Business Logic Layers sits before Actions', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    $architectureHeading = strpos($content, "\n## Architecture\n");
+    $multitenancyBullet = strpos($content, 'Multitenancy remains mandatory');
+    $customHelpersBullet = strpos($content, '**Custom Helpers:**');
+    $businessLogicHeading = strpos($content, "\n## Business Logic Layers\n");
+    $actionsHeading = strpos($content, "\n## Actions\n");
+
+    assert($architectureHeading !== false);
+    assert($multitenancyBullet !== false);
+    assert($customHelpersBullet !== false);
+    assert($businessLogicHeading !== false);
+    assert($actionsHeading !== false);
+
+    expect($architectureHeading)->toBeLessThan($multitenancyBullet);
+    expect($multitenancyBullet)->toBeLessThan($businessLogicHeading);
+    expect($customHelpersBullet)->toBeLessThan($businessLogicHeading);
+    expect($businessLogicHeading)->toBeLessThan($actionsHeading);
+});
+
 test('class-refactoring skill enforces the six business logic layers', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');

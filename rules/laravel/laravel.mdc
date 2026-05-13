@@ -10,7 +10,8 @@ globs:
 ---
 
 ## Architecture
-- Keep business logic out of controllers, middleware, Blade views, and Eloquent models.
+- Keep business logic out of controllers, middleware, and Blade views.
+- **Simple, self-contained domain logic** (predicates on the model's own attributes, computed values derived from already-loaded data, simple state derivations that touch nothing else) **may live as methods on the Eloquent model itself** — see the **Database and Eloquent** section for the boundary. Anything that needs external services, repositories, model managers, or new database queries goes through an Action.
 - Use Actions for orchestration-heavy use cases.
 - Treat controllers, jobs, events, listeners, and commands as entry points.
 - Entry points must stay slim: validate input, delegate work, return a response.
@@ -22,6 +23,7 @@ globs:
 - Repositories: read-only data access.
 - ModelManagers: write-only persistence.
 - Data Builders: multi-method classes that map, hydrate, or normalize input into DTOs. Not Action pattern — no `__invoke()`. Never query the database.
+- Eloquent Models: framework boilerplate (relationships, scopes, casts, accessors) **plus** simple self-contained domain methods on own data — see the **Database and Eloquent** section for the boundary.
 
 ## Validation
 - Use FormRequest classes for controller input validation.
@@ -57,7 +59,7 @@ globs:
 - All database read operations must be encapsulated in Repository classes — never inline Eloquent queries or `DB::` calls for data retrieval in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components. Delegate reads to a Repository.
 - All database write operations must be encapsulated in ModelManager classes (when using `pekral/arch-app-services`) — never perform inline persistence in Actions, Services, controllers, jobs, commands, listeners, or Livewire components.
 - Prefer Eloquent over Query Builder or raw SQL unless there is a measured reason not to.
-- Keep business logic out of models.
+- **Simple, self-contained domain logic may live as methods on the model.** Allowed: predicates on the model's own attributes (`$user->isActive()`), computed values from already-loaded data (`$invoice->getFormattedTotal()`), simple state derivations (`$order->canBeCancelled()`), and similar own-data helpers. **Forbidden on models:** anything that needs external services, repositories, model managers, new database queries beyond own loaded attributes, persistence side effects, multi-entity orchestration, or HTTP / queue / event dispatching — that work must move to an Action / Service per `@rules/laravel/architecture.mdc`.
 - Define relationships, scopes, casts, and accessors in models.
 - Use eager loading to avoid N+1 queries.
 - Do not query inside loops.

@@ -1153,18 +1153,32 @@ test('laravel rules prefer filled()/blank() helpers over strict empty-string com
     expect($content)->toContain('`=== \'\'`');
 });
 
-test('architecture rules enumerate the six allowed business logic layers', function (): void {
+test('architecture rules enumerate the seven allowed business logic layers including Eloquent models', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
 
     expect($content)->toContain('## Business Logic Layers');
+    expect($content)->toContain('seven class types');
     expect($content)->toContain('**Actions**');
     expect($content)->toContain('**Model Services**');
     expect($content)->toContain('**Repositories**');
     expect($content)->toContain('**ModelManagers**');
     expect($content)->toContain('**Data Validators**');
     expect($content)->toContain('**Data Builders**');
+    expect($content)->toContain('**Eloquent models**');
+    expect($content)->toContain('simple, self-contained domain methods');
     expect($content)->toContain('@skills/class-refactoring/SKILL.md');
+});
+
+test('laravel rules permit simple self-contained logic on Eloquent models', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('Simple, self-contained domain logic may live as methods on the model.');
+    expect($content)->toContain('$user->isActive()');
+    expect($content)->toContain('Forbidden on models');
+    expect($content)->not->toContain('Keep business logic out of models.');
+    expect($content)->not->toContain('Keep business logic out of controllers, middleware, Blade views, and Eloquent models.');
 });
 
 test('architecture bullets remain under the Architecture heading and Business Logic Layers sits before Actions', function (): void {
@@ -1252,17 +1266,19 @@ test('class-refactoring skill surfaces the speculative-interface refactoring', f
     expect($content)->toContain('@rules/php/core-standards.mdc');
 });
 
-test('class-refactoring skill enforces the six business logic layers', function (): void {
+test('class-refactoring skill enforces the seven business logic layers including Eloquent models', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
 
     expect($content)->toContain('Business Logic Layers');
+    expect($content)->toContain('seven allowed class types');
     expect($content)->toContain('**Actions**');
     expect($content)->toContain('**Model Services**');
     expect($content)->toContain('**Repositories**');
     expect($content)->toContain('**ModelManagers**');
     expect($content)->toContain('**Data Validators**');
     expect($content)->toContain('**Data Builders**');
+    expect($content)->toContain('**Eloquent model**');
 });
 
 test('code-review skill After Completion section runs test-like-human unconditionally', function (): void {

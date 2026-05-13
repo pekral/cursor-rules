@@ -32,6 +32,7 @@ globs:
   - return a response or update UI state
 
 - Do not place business logic in controllers, jobs, commands, listeners, or Livewire components.
+- Eloquent models are allowed to carry simple, self-contained domain methods (own-attribute predicates, computed values, simple state derivations) — see the **Business Logic Layers** section for the boundary.
 - Legacy untouched code is a carve-out, but all new or materially changed flows must follow this architecture.
 - Multitenancy remains mandatory in every layer: all reads and writes must stay account-scoped.
 - **Invokeable call convention:** When calling Action classes, always use direct invocation `$action($params)` — never `$action->__invoke($params)`.
@@ -47,16 +48,17 @@ globs:
 - **Custom Helpers:** Small utility functions that don't belong to any specific class (cache key generators, input validators, formatters) must be implemented as **global helper functions** in `app/helpers.php` (autoloaded via `composer.json` `files` key). Follow the [Laravel News helpers pattern](https://laravel-news.com/creating-helpers): plain functions, no wrapper classes, snake_case names. Do **not** create `final class` wrappers with a single static method for simple utility logic — use a helper function instead.
 
 ## Business Logic Layers
-- Business logic must live **only** in one of the following six class types — no other class is an allowed home for business logic:
+- Business logic must live **only** in one of the following seven class types — no other class is an allowed home for business logic:
   - **Actions** (`app/Actions/{Domain}/`) — orchestration of a single use case.
   - **Model Services** (extending `BaseModelService`) — single-model domain operations.
   - **Repositories** (`app/Repositories/{Domain}/`) — read-only data access (basic, reusable queries).
   - **ModelManagers** (`app/ModelManagers/{Domain}/`) — write-only persistence (create, update, delete, batch writes).
   - **Data Validators** (`app/DataValidators/{Domain}/`) — input validation that throws `ValidationException`.
   - **Data Builders** (`app/DataBuilders/{Domain}/`) — mapping, hydration, and normalization of input into DTOs.
-- **Single-responsibility per file:** Each class file must own exactly one of the six responsibilities above. A single file must never mix concerns from two or more layers (e.g. validation + persistence, mapping + orchestration, querying + writing).
-- **Refactoring trigger:** When a class file contains business logic that spans more than one of the six layers, or contains business logic that does not fit any of the six layers, apply `@skills/class-refactoring/SKILL.md` to split the responsibilities into dedicated classes from the list above.
-- **Entry points and infrastructure exceptions:** Controllers, Jobs, Commands, Listeners, Livewire components, Middleware, FormRequests, DTOs, Enums, custom validation `Rule` classes, helper functions in `app/helpers.php`, and framework boilerplate are **not** business-logic layers. They must delegate to one of the six allowed homes above.
+  - **Eloquent models** (`app/Models/`) — **only** simple, self-contained domain methods (predicates on own attributes, computed values from already-loaded data, simple state derivations). Allowed only when the method needs no external services, no repositories, no model managers, no new database queries beyond own loaded data, no persistence side effects, and no multi-entity orchestration. The moment a method needs any of those, it must move to one of the other six layers above.
+- **Single-responsibility per file:** Each class file must own exactly one of the seven responsibilities above. A single file must never mix concerns from two or more layers (e.g. validation + persistence on a model, mapping + orchestration in a Service, querying + writing). Eloquent models may carry framework boilerplate (relationships, scopes, casts, accessors) **and** simple domain methods because both are model-scoped responsibilities; they may not carry orchestration, persistence dispatch, or queries beyond own data.
+- **Refactoring trigger:** When a class file contains business logic that spans more than one of the seven layers, or contains business logic that does not fit any of the seven layers — including an Eloquent model method that crosses the simple-logic boundary above — apply `@skills/class-refactoring/SKILL.md` to split the responsibilities into dedicated classes from the list above.
+- **Entry points and infrastructure exceptions:** Controllers, Jobs, Commands, Listeners, Livewire components, Middleware, FormRequests, DTOs, Enums, custom validation `Rule` classes, helper functions in `app/helpers.php`, and framework boilerplate are **not** business-logic layers. They must delegate to one of the seven allowed homes above.
 
 ## Actions
 - Store all Actions under `app/Actions/{Domain}`.
@@ -214,8 +216,9 @@ globs:
 
 ### CR Severity Rules
 - Mark as critical:
-  - business logic placed outside the six allowed layers (Actions, Model Services, Repositories, ModelManagers, Data Validators, Data Builders) — see "Business Logic Layers" section
-  - a single class file mixing responsibilities from two or more of the six business-logic layers (e.g. validation + persistence, mapping + orchestration)
+  - business logic placed outside the seven allowed layers (Actions, Model Services, Repositories, ModelManagers, Data Validators, Data Builders, Eloquent models) — see "Business Logic Layers" section
+  - a single class file mixing responsibilities from two or more of the seven business-logic layers (e.g. validation + persistence, mapping + orchestration)
+  - Eloquent model method that crosses the simple-logic boundary — invoking external services, repositories, model managers, issuing new database queries beyond own loaded data, performing persistence side effects, or coordinating multiple entities (must move to an Action / Service / Repository / ModelManager per "Business Logic Layers")
   - new orchestration that bypasses Actions
   - inline `Validator::make()` inside Actions
   - `ValidationException` thrown directly inside Actions

@@ -94,6 +94,11 @@ Before reviewing code, load and analyze the full JIRA issue:
   - testing recommendations with step-by-step instructions
   - link to the GitHub PR for full technical details
 
+#### Linked GitHub issues (non-technical summary)
+- If the reviewed PR also references a GitHub issue (i.e. `closingIssues[]` of the GitHub PR JSON is non-empty), post the **same plain-language summary** as a comment on every linked GitHub issue using `gh issue comment <number> --body ...`.
+- Mirror the JIRA non-technical content above (overall status, key risks in business terms, testing recommendations, link to the PR). No file paths, no line numbers, no code, no severity labels.
+- The JIRA-side summary is the primary tracker comment; the GitHub-issue comment is a courtesy mirror so reviewers reading the GitHub issue see the same conclusion without opening JIRA.
+
 ---
 
 ## Output Rules

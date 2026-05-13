@@ -1,7 +1,7 @@
 ---
 name: code-review-github
 description: Use when perform code review for GitHub pull requests and post
-  findings as PR comments
+  findings as PR comments plus a non-technical summary to every linked issue
 license: MIT
 metadata:
   author: Petr Král (pekral.cz)
@@ -104,6 +104,7 @@ Before reviewing code, load and analyze the full linked issue:
   - **Link back to the PR** for full technical details.
 - Do not include file paths, line numbers, code snippets, or technical severity labels in the issue summary; technical content stays exclusively on the PR.
 - If `closingIssues[]` is empty, skip this step and note "no linked issue — issue summary skipped" in the PR comment summary line.
+- If `gh issue comment` returns a permission error (cross-repo issue, lacking write access), log the failure in the PR comment summary line and continue — do not abort the review.
 - For follow-up reviews, post a fresh summary comment on each linked issue rather than editing prior comments (matches the PR thread-detection behavior).
 
 ---
@@ -124,6 +125,7 @@ Before reviewing code, load and analyze the full linked issue:
 - Minor findings may omit these fields when no behavior change is implied.
 - If reviewed code violates project rules or architecture but is **out of scope** for the current PR, add a **Refactoring Proposals** section with issue drafts (justified by defined rules only)
 - The posted PR comment must always include a `## Coverage` section before the summary line. The section reports the tool used, command run, and coverage result for changed lines (or "tooling unavailable" with reason). Never post a CR comment without it.
+- The PR comment summary line must report the issue-tracker summary status — `posted summary to issue #N` (or comma-separated list when multiple), `no linked issue — issue summary skipped`, or `failed to post on issue #N: <reason>` when a permission / network error occurs. Never post a CR comment without it.
 - End with summary line
 
 ## Output Format

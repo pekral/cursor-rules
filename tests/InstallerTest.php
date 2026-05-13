@@ -1252,9 +1252,14 @@ test('code review skills publish a non-technical summary to the originating issu
     expect($github)->toContain('every linked issue');
     expect($github)->toContain('closingIssues[]');
     expect($github)->toContain('gh issue comment');
+    expect($github)->toContain('plus a non-technical summary to every linked issue');
+    expect($github)->toContain('issue-tracker summary status');
+    expect($github)->toContain('cross-repo issue, lacking write access');
 
     expect($jira)->toContain('#### Linked GitHub issues (non-technical summary)');
     expect($jira)->toContain('gh issue comment');
+    expect($jira)->toContain('no linked GitHub issue — mirror skipped');
+    expect($jira)->toContain('cross-repo issue, lacking write access');
 
     expect($canonical)->toContain('must** propagate a non-technical summary');
     expect($canonical)->toContain('every linked issue');

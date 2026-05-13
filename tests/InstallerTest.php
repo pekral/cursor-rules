@@ -1206,6 +1206,42 @@ test('code-review skill flags speculative interfaces in Core Analysis', function
     expect($content)->toContain('neither at least two non-test consumers nor at least two non-test implementations');
 });
 
+test('assignment-compliance-check skill exists with required sections', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skillPath = $packageDir . '/skills/assignment-compliance-check/SKILL.md';
+
+    expect(file_exists($skillPath))->toBeTrue();
+
+    $content = (string) file_get_contents($skillPath);
+
+    expect($content)->toContain('name: assignment-compliance-check');
+    expect($content)->toContain('## Constraints');
+    expect($content)->toContain('## Use when');
+    expect($content)->toContain('## Required approach');
+    expect($content)->toContain('## Output Format');
+    expect($content)->toContain('## Done when');
+    expect($content)->toContain('${HOME}/.cursor-rules-reports/assignment-compliance/');
+    expect($content)->toContain('Report **only Critical**');
+});
+
+test('every code review skill invokes assignment-compliance-check', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    foreach (['code-review', 'code-review-github', 'code-review-jira'] as $skill) {
+        $content = (string) file_get_contents($packageDir . '/skills/' . $skill . '/SKILL.md');
+        expect($content)->toContain('@skills/assignment-compliance-check/SKILL.md');
+    }
+});
+
+test('readme lists assignment-compliance-check and bumps skill count to 25', function (): void {
+    $packageDir = dirname(__DIR__);
+    $readme = (string) file_get_contents($packageDir . '/README.md');
+
+    expect($readme)->toContain('25 comprehensive Agent skills');
+    expect($readme)->toContain('25 skills for issue resolution');
+    expect($readme)->toContain('`assignment-compliance-check`');
+});
+
 test('class-refactoring skill surfaces the speculative-interface refactoring', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');

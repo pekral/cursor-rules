@@ -123,7 +123,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 
 | Skill | Description |
 |---|---|
-| `assignment-compliance-check` | Plain-language check that the PR implementation fulfills the linked issue's business requirements; writes a local markdown report and feeds Critical gaps into the CR comment. |
+| `assignment-compliance-check` | Plain-language check that the PR implementation fulfills the linked issue's business requirements; returns an Assignment Compliance section embedded directly in the CR comment (no file written). |
 | `code-review` | Senior PHP code review focused on architecture, risk, and behavior (read-only). |
 | `code-review-github` | Review GitHub pull requests with severity-based findings and review comments. |
 | `code-review-jira` | Review JIRA-linked changes with GitHub PR comments and structured findings. |

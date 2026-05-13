@@ -1194,8 +1194,8 @@ test('core standards forbid speculative project-owned interfaces', function (): 
     $content = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
 
     expect($content)->toContain('Do not introduce PHP `interface` types speculatively');
-    expect($content)->toContain('at least two non-test consumers or implementations');
-    expect($content)->toContain('test doubles, mocks, and fakes do not count');
+    expect($content)->toContain('at least two non-test consumers, and/or at least two non-test implementations');
+    expect($content)->toContain('test doubles, mocks, and fakes do not count toward either threshold');
 });
 
 test('code-review skill flags speculative interfaces in Core Analysis', function (): void {
@@ -1203,7 +1203,15 @@ test('code-review skill flags speculative interfaces in Core Analysis', function
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
 
     expect($content)->toContain('Speculative interfaces');
-    expect($content)->toContain('fewer than two non-test consumers or implementations');
+    expect($content)->toContain('neither at least two non-test consumers nor at least two non-test implementations');
+});
+
+test('class-refactoring skill surfaces the speculative-interface refactoring', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+
+    expect($content)->toContain('**Speculative interfaces:**');
+    expect($content)->toContain('@rules/php/core-standards.mdc');
 });
 
 test('class-refactoring skill enforces the six business logic layers', function (): void {

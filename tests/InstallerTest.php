@@ -1142,6 +1142,17 @@ test('query scopes rule is present in class refactoring skill', function (): voi
     expect($content)->toContain('query scopes');
 });
 
+test('laravel rules prefer filled()/blank() helpers over strict empty-string comparisons', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('## String Emptiness Checks');
+    expect($content)->toContain('`filled()`');
+    expect($content)->toContain('`blank()`');
+    expect($content)->toContain('`!== \'\'`');
+    expect($content)->toContain('`=== \'\'`');
+});
+
 test('code-review skill After Completion section runs test-like-human unconditionally', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');

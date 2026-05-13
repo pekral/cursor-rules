@@ -9,7 +9,6 @@ metadata:
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
 - Apply `@rules/git/general.mdc`
-- Apply `@rules/jira/general.mdc`
 - Output written to the local report file must be plain language understandable by a non-technical reader. Include short examples for every Critical gap.
 - Report **only Critical** functional / business-logic gaps. Do not report architecture, code style, test coverage, refactoring opportunities, or any other concern — those are owned by the other review skills.
 - Never modify code. This skill is read-only.
@@ -56,7 +55,8 @@ Do **not** report stylistic / architectural / test-coverage concerns even if you
 
 ### 5. Write the local markdown report
 - Resolve the report directory: `${HOME}/.cursor-rules-reports/assignment-compliance/`. Create it with `mkdir -p` if it does not exist.
-- Filename: `<owner>-<repo>-pr-<number>-<YYYYMMDD-HHmmss>.md` (timestamp in UTC, e.g. `20260513-160300`). The timestamp keeps re-runs side-by-side instead of overwriting.
+- If `$HOME` is unset (some CI runners, sandboxed agent invocations), fall back to `$(pwd)/../.cursor-rules-reports/assignment-compliance/` — a sibling of the project working directory, still outside the project repo — and state the resolved path explicitly in the summary returned to the caller.
+- Filename: `<owner>-<repo>-pr-<number>-<YYYYMMDD-HHmmss>-<short-sha>.md` where `<YYYYMMDD-HHmmss>` is the UTC timestamp at second resolution and `<short-sha>` is the first 7 characters of the PR's `headRefOid`. The SHA suffix guarantees uniqueness when two runs trigger inside the same second.
 - Use the layout in **Output Format** below. The body must be plain language; technical jargon (file paths, line numbers, class names) is allowed only inside the **Where in the code** subsection.
 
 ### 6. Return the report path to the caller
@@ -98,7 +98,7 @@ A reviewer wanted to know whether this pull request actually does what the origi
 ```
 
 ## Done when
-- A markdown report file exists at `${HOME}/.cursor-rules-reports/assignment-compliance/<owner>-<repo>-pr-<number>-<timestamp>.md`.
+- A markdown report file exists at `${HOME}/.cursor-rules-reports/assignment-compliance/<owner>-<repo>-pr-<number>-<timestamp>-<short-sha>.md` (or at the `$(pwd)/../.cursor-rules-reports/...` fallback when `$HOME` is unset).
 - The file is plain language and includes a short example for every Critical gap.
 - Only Critical functional / business-logic gaps are listed — no architecture / style / coverage findings.
 - The absolute report path is returned to the invoking CR skill, which embeds an `Assignment Compliance` section in the published PR comment with the same Critical bullets and a link to the local report.

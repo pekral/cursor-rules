@@ -98,6 +98,8 @@ Before reviewing code, load and analyze the full JIRA issue:
 - If the reviewed PR also references a GitHub issue (i.e. `closingIssues[]` of the GitHub PR JSON is non-empty), post the **same plain-language summary** as a comment on every linked GitHub issue using `gh issue comment <number> --body ...`.
 - Mirror the JIRA non-technical content above (overall status, key risks in business terms, testing recommendations, link to the PR). No file paths, no line numbers, no code, no severity labels.
 - The JIRA-side summary is the primary tracker comment; the GitHub-issue comment is a courtesy mirror so reviewers reading the GitHub issue see the same conclusion without opening JIRA.
+- If `closingIssues[]` is empty, skip this block and note "no linked GitHub issue — mirror skipped" in the PR comment summary line.
+- If `gh issue comment` returns a permission error (cross-repo issue, lacking write access), log the failure in the PR comment summary line and continue — do not abort the review.
 
 ---
 

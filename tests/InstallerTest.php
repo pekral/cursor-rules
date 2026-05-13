@@ -1247,12 +1247,13 @@ test('code-review skill enforces strict rule compliance and architecture conform
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
 
     expect($content)->toContain('**Strict rule compliance (mandatory walk-through)**');
-    expect($content)->toContain('walk **every** numbered or bulleted rule');
-    expect($content)->toContain('Each introduced violation is a separate finding citing');
+    expect($content)->toContain('scan the diff for any pattern that matches a numbered or bulleted rule');
+    expect($content)->toContain('raise one finding per matched violation');
     expect($content)->toContain('**Architecture conformance (Laravel)**');
+    expect($content)->toContain('section-by-section deep-dive for `@rules/laravel/architecture.mdc`');
     expect($content)->toContain('seven allowed homes including the Eloquent-model carve-out');
     expect($content)->toContain('Default severity for rule violations:');
-    expect($content)->toContain('every unexcused violation of an Apply\'d rule');
+    expect($content)->toContain('apply the **Strict rule compliance** stratification');
     expect($content)->not->toContain('Do not review formatting, linting, or trivial issues');
 });
 

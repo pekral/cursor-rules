@@ -53,7 +53,7 @@ Before reviewing code, load and analyze the full JIRA issue:
 ### 3. Run Reviews
 
 - For each PR:
-  - run @skills/assignment-compliance-check/SKILL.md — non-technical business-logic vs assignment check; produces a local markdown report at `${HOME}/.cursor-rules-reports/assignment-compliance/`. Include the Critical gaps and the local report path in the GitHub PR comment, and mirror the same Critical gaps (plain language only, no file paths) in the JIRA non-technical summary.
+  - run @skills/assignment-compliance-check/SKILL.md — non-technical business-logic vs assignment check. Returns an **Assignment Compliance** markdown section in memory (no file is written). Embed it verbatim into the GitHub PR comment, and mirror the same Critical gaps in plain language (no file paths, no code refs) inside the JIRA non-technical summary.
   - run @skills/code-review/SKILL.md
   - run @skills/security-review/SKILL.md
   - run @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes only on lines actually touched by the PR.

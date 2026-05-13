@@ -1206,7 +1206,7 @@ test('code-review skill flags speculative interfaces in Core Analysis', function
     expect($content)->toContain('neither at least two non-test consumers nor at least two non-test implementations');
 });
 
-test('assignment-compliance-check skill exists with required sections', function (): void {
+test('assignment-compliance-check skill exists with required sections and writes no files', function (): void {
     $packageDir = dirname(__DIR__);
     $skillPath = $packageDir . '/skills/assignment-compliance-check/SKILL.md';
 
@@ -1220,8 +1220,10 @@ test('assignment-compliance-check skill exists with required sections', function
     expect($content)->toContain('## Required approach');
     expect($content)->toContain('## Output Format');
     expect($content)->toContain('## Done when');
-    expect($content)->toContain('${HOME}/.cursor-rules-reports/assignment-compliance/');
     expect($content)->toContain('Report **only Critical**');
+    expect($content)->toContain('must not** write any output to disk');
+    expect($content)->toContain('No files were created on disk');
+    expect($content)->not->toContain('.cursor-rules-reports');
 });
 
 test('every code review skill invokes assignment-compliance-check', function (): void {

@@ -1,6 +1,6 @@
 ---
 name: assignment-compliance-check
-description: "Use when checking that the pull request implementation actually fulfills the business requirements stated in the linked issue or task. Reports only Critical functional gaps and writes a plain-language markdown report outside the repository so the reviewer can open it locally."
+description: "Use when checking that the pull request implementation actually fulfills the business requirements stated in the linked issue or task. Reports only Critical functional gaps as a plain-language section embedded in the code-review comment — no local file is created."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
@@ -9,11 +9,11 @@ metadata:
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
 - Apply `@rules/git/general.mdc`
-- Output written to the local report file must be plain language understandable by a non-technical reader. Include short examples for every Critical gap.
+- The skill **must not** write any output to disk. The result is returned to the invoking CR skill as an in-memory **Assignment Compliance** section and lives only inside the published CR comment. Local report files, cached transcripts, and any other persisted artifacts are forbidden — those files would either get versioned by accident or pile up on the reviewer's disk.
+- The returned section must be plain language understandable by a non-technical reader. Include a short example for every Critical gap.
 - Report **only Critical** functional / business-logic gaps. Do not report architecture, code style, test coverage, refactoring opportunities, or any other concern — those are owned by the other review skills.
 - Never modify code. This skill is read-only.
-- Do not expose secrets, internal infrastructure paths, or PII in the report.
-- The report file must live **outside the project repository** so the reviewer can open it without polluting the working tree.
+- Do not expose secrets, internal infrastructure paths, or PII in the section.
 
 ## Use when
 - A code review is being prepared for a PR linked to an issue or task (GitHub issue, JIRA ticket, Bugsnag report).
@@ -53,53 +53,42 @@ For every requirement from step 2, decide one of:
 
 Do **not** report stylistic / architectural / test-coverage concerns even if you notice them — those belong in `@skills/code-review/SKILL.md` and `@skills/security-review/SKILL.md`.
 
-### 5. Write the local markdown report
-- Resolve the report directory: `${HOME}/.cursor-rules-reports/assignment-compliance/`. Create it with `mkdir -p` if it does not exist.
-- If `$HOME` is unset (some CI runners, sandboxed agent invocations), fall back to `$(pwd)/../.cursor-rules-reports/assignment-compliance/` — a sibling of the project working directory, still outside the project repo — and state the resolved path explicitly in the summary returned to the caller.
-- Filename: `<owner>-<repo>-pr-<number>-<YYYYMMDD-HHmmss>-<short-sha>.md` where `<YYYYMMDD-HHmmss>` is the UTC timestamp at second resolution and `<short-sha>` is the first 7 characters of the PR's `headRefOid`. The SHA suffix guarantees uniqueness when two runs trigger inside the same second.
-- Use the layout in **Output Format** below. The body must be plain language; technical jargon (file paths, line numbers, class names) is allowed only inside the **Where in the code** subsection.
-
-### 6. Return the report path to the caller
-- The CR skill that invoked this skill includes both:
-  - the absolute path of the local report file (so the reviewer can open it), and
-  - a condensed **Assignment Compliance** section (Critical bullets only, no examples) inside the published CR comment.
-- If no Critical gaps were found, the report still gets written with a "No critical gaps identified — implementation satisfies every stated requirement" body, and the CR comment carries the same one-line statement.
+### 5. Return the section to the caller
+- Build the **Assignment Compliance** section using the template in **Output Format** below.
+- Return it as an in-memory string (or markdown chunk) to the invoking CR skill. **Do not write it to disk.** The CR skill embeds the section verbatim into the published PR comment.
+- When there are no Critical gaps, return a single-line section: *"No critical gaps identified — implementation satisfies every stated requirement."*
+- For JIRA-originated reviews, the GitHub PR comment carries the full section; the JIRA non-technical summary carries the same Critical bullets in plain language without any file path or code reference.
 
 ## Output Format
 
-Local report file template:
+Assignment Compliance section embedded in the CR comment:
 
 ```markdown
-# Assignment Compliance Check
+## Assignment Compliance
 
-- **Pull request:** <PR URL>
-- **Linked task:** <issue/JIRA/Bugsnag URL>
-- **Checked at:** <ISO-8601 UTC timestamp>
+- **Linked task:** <issue / JIRA / Bugsnag URL>
 - **Verdict:** <Critical gaps found: N> / <No critical gaps>
 
-## Why this report
-A reviewer wanted to know whether this pull request actually does what the original task asked for, in plain language. Architecture, security, and code-style notes live in the other review reports — this file lists only the business-behavior gaps that would surprise a tester or a product manager reading the issue.
+### Critical gaps
 
-## Critical gaps
-
-### 1. <short title in everyday language>
+#### 1. <short title in everyday language>
 - **What the task asked for:** <one sentence quoting or paraphrasing the requirement, with the source comment URL or "issue description">
 - **What the pull request does instead:** <one sentence describing the actual behavior implied by the diff>
 - **Example a tester would see:** <concrete input → expected output vs actual output, ideally taken from the example the reporter provided>
 - **Where in the code:** <file path(s) — kept in this subsection only, so the rest stays non-technical>
 
-(Repeat for every Critical gap. Omit the section entirely when there are no gaps.)
+(Repeat for every Critical gap. Omit the entire **Critical gaps** subsection when there are none.)
 
-## What is satisfied
+### What is satisfied
 - <one bullet per requirement the PR clearly meets, plain-language>
 
-## Open questions for the reviewer
+### Open questions for the reviewer
 - <optional — list requirements whose status could not be determined from the diff alone, with the reason>
 ```
 
 ## Done when
-- A markdown report file exists at `${HOME}/.cursor-rules-reports/assignment-compliance/<owner>-<repo>-pr-<number>-<timestamp>-<short-sha>.md` (or at the `$(pwd)/../.cursor-rules-reports/...` fallback when `$HOME` is unset).
-- The file is plain language and includes a short example for every Critical gap.
+- An **Assignment Compliance** section was produced in memory and returned to the invoking CR skill, which embedded it verbatim in the published PR comment.
+- No files were created on disk — neither in the repository nor in any external directory.
+- The section is plain language and includes a short example for every Critical gap.
 - Only Critical functional / business-logic gaps are listed — no architecture / style / coverage findings.
-- The absolute report path is returned to the invoking CR skill, which embeds an `Assignment Compliance` section in the published PR comment with the same Critical bullets and a link to the local report.
-- When there are no Critical gaps, the report still exists and explicitly states "No critical gaps identified".
+- When there are no Critical gaps, the section is the single-line statement "No critical gaps identified — implementation satisfies every stated requirement."

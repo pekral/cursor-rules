@@ -75,6 +75,8 @@ Before reviewing code, load and analyze the full JIRA issue:
 
 ### 4. Publish Results
 
+> **Quiet mode (loop iterations from `@skills/process-code-review/SKILL.md`):** when the caller explicitly requests "do not publish; return findings as in-memory markdown for this loop iteration only", **skip all publishing** below — no GitHub PR comment, no JIRA comment, no linked-GitHub-issue mirror. Return the assembled review markdown to the caller and stop. Only the final (publishing) call from `process-code-review` after convergence runs Publish Results in full.
+
 #### GitHub (technical findings only)
 - If a previous CR exists for the same PR, analyze all previous findings and classify each as: **Resolved**, **Deferred**, or **Still open**
 - Include a **Previous CR Status** section at the top of the GitHub comment (before new findings)
@@ -123,7 +125,17 @@ Before reviewing code, load and analyze the full JIRA issue:
 ### JIRA (non-technical summary — only here)
 - Never include file paths, line numbers, code snippets, or technical severity levels
 - Write in plain language understandable by non-developers
-- Use the template defined in `templates/jira-output.md`
+- **Format the comment as JIRA Wiki Markup**, not GitHub-flavoured Markdown — JIRA UI does not render Markdown headings (`#`), bold (`**`), fenced code blocks (` ``` `), Markdown links (`[label](url)`), or Markdown tables (`|...|`). The reviewer must see the comment formatted in the JIRA web UI, not raw text. Conversion cheatsheet:
+    - Heading: `## Heading` → `h2. Heading` (`### Heading` → `h3. Heading`)
+    - Bold: `**bold**` → `*bold*`
+    - Italic: `*italic*` or `_italic_` → `_italic_`
+    - Inline code: `` `code` `` → `{{code}}`
+    - Code block: ` ```php ... ``` ` → `{code:php} ... {code}`
+    - Bullet list: `- item` → `* item`
+    - Numbered list: `1. item` → `# item`
+    - Link: `[label](https://example.com)` → `[label|https://example.com]`
+    - Quote: `> text` → `{quote}text{quote}`
+- Use the template defined in `templates/jira-output.md` — that template is already written in JIRA Wiki Markup; do not "translate" it back to Markdown when posting via `acli` / JIRA MCP server.
 
 ---
 

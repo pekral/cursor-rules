@@ -14,8 +14,18 @@ globs: []
 - If no JIRA tool is available, stop and report that JIRA access is not available.
 
 ## Comments Format
-- Always use JIRA Wiki Markup.
+- Always use JIRA Wiki Markup so the JIRA web UI renders the comment as formatted text. Posting Markdown leaves raw `#`, `**`, `[label](url)`, and ``` ``` ``` characters visible in the UI, which is unreadable. Convert before sending via `acli` / JIRA MCP server.
 - Do not use Markdown syntax:
     - no fenced code blocks
     - no `#` headings
     - no markdown tables
+- Wiki markup conversion cheatsheet (apply to every JIRA comment):
+    - Heading: `## Heading` → `h2. Heading` (`### Heading` → `h3. Heading`)
+    - Bold: `**bold**` → `*bold*`
+    - Italic: `*italic*` or `_italic_` → `_italic_`
+    - Inline code: `` `code` `` → `{{code}}`
+    - Code block: ` ```php ... ``` ` → `{code:php} ... {code}`
+    - Bullet list: `- item` → `* item`
+    - Numbered list: `1. item` → `# item`
+    - Link: `[label](https://example.com)` → `[label|https://example.com]`
+    - Quote: `> text` → `{quote}text{quote}`

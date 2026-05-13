@@ -82,14 +82,25 @@ If a finding lacks Faulty Example, Expected Behavior, or Test Hint, request a CR
 
 ---
 
-### Review loop
+### Review loop (mandatory — convergence gate)
 
-- Run the appropriate review skill:
-  - GitHub: @skills/code-review-github/SKILL.md
-  - JIRA: @skills/code-review-jira/SKILL.md
+This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, or **Completion** until the loop converges. The final report (technical and non-technical) is published only **once**, after convergence.
 
-- Fix findings and repeat until:
-  - No **Critical** or **Moderate** issues remain
+1. Initialise `iteration = 1` and `maxIterations = 5` (safety net to avoid runaway loops).
+2. Run the appropriate review skill:
+   - GitHub: `@skills/code-review-github/SKILL.md`
+   - JIRA: `@skills/code-review-jira/SKILL.md`
+   The review run **must not** publish to the PR or to the issue tracker — capture findings in memory only. (See **Quiet review runs** below for how to suppress publishing.)
+3. Count `criticalCount` and `moderateCount` in the latest review.
+4. If `criticalCount + moderateCount == 0` → **converged**, exit the loop.
+5. Otherwise, apply the **Suggested Fix** snippet from each Critical / Moderate finding using the **Reproducer extraction** workflow above, run pre-push quality gates on touched files, increment `iteration`, and go back to step 2.
+6. If `iteration > maxIterations` and the loop still has not converged, **stop and surface the remaining findings** to the user — do not push or publish a partial report. The user must triage the residual findings manually before any final report goes out.
+
+#### Quiet review runs (during the loop)
+
+- During iterations 1…N–1 of the loop, invoke the review skill with the explicit instruction "do not publish; return findings as in-memory markdown for this loop iteration only". Both `code-review-github` and `code-review-jira` honour the suppression: no PR comment, no JIRA comment, no linked-issue summary is posted while the loop is still iterating.
+- The very last iteration (the one that observes `criticalCount + moderateCount == 0`) is the **only** iteration whose output is published — that publication is performed by the **PR update** + **Completion** steps below, not by the review skill itself.
+- Loop iterations may write quality-gate output (composer scripts, build logs) to the local terminal — that is not "publishing" and is allowed.
 
 ---
 
@@ -99,7 +110,9 @@ If a finding lacks Faulty Example, Expected Behavior, or Test Hint, request a CR
 - Run available fixers on all changed files and fix any violations
 - Run available checkers/analyzers on all changed files and resolve all reported errors
 
-### Finalization
+### Finalization (only after Review loop converged)
+
+**Precondition:** the Review loop above must have exited with `criticalCount + moderateCount == 0`. If the loop hit `maxIterations` without converging, do not proceed — return the remaining findings to the user for manual triage instead.
 
 - Run @skills/test-like-human/SKILL.md if changes are testable
 - Commit and push changes
@@ -109,7 +122,9 @@ If a finding lacks Faulty Example, Expected Behavior, or Test Hint, request a CR
 
 ---
 
-### PR update
+### PR update (only after Review loop converged)
+
+**Precondition:** same as Finalization — convergence required.
 
 - Find the original code review comment on the PR:
   - Read `comments[]` off `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>` and identify the CR comment (e.g. contains "Summary:" with severity counts)
@@ -138,16 +153,18 @@ Rules:
 
 ---
 
-### Completion
+### Completion (final, single publish)
 
-- Trigger final review:
-  - GitHub: @skills/code-review-github/SKILL.md
-  - JIRA: @skills/code-review-jira/SKILL.md
+**Precondition:** Review loop has converged (`criticalCount + moderateCount == 0`).
 
-- Share a concise completion report:
+- Trigger the final review run **with publishing enabled** — this is the **only** review whose output reaches the PR / issue tracker:
+  - GitHub: `@skills/code-review-github/SKILL.md`
+  - JIRA: `@skills/code-review-jira/SKILL.md`
+- Share a concise completion report (in-conversation, not on the tracker):
   - PR link
   - resolved items
-  - remaining blockers (if any)
+  - loop iteration count and final convergence status
+  - remaining blockers (if any — should be empty when convergence was reached)
 
 ---
 

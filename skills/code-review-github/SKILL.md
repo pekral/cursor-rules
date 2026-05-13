@@ -71,6 +71,8 @@ Before reviewing code, load and analyze the full linked issue:
 
 ### 4. Post Results
 
+> **Quiet mode (loop iterations from `@skills/process-code-review/SKILL.md`):** when the caller explicitly requests "do not publish; return findings as in-memory markdown for this loop iteration only", **skip the entire Post Results step** — do not post the PR comment, do not post the linked-issue summary. Return the assembled review markdown to the caller and stop. Only the very last (publishing) call from `process-code-review` after convergence runs Post Results in full.
+
 #### Thread detection
 - Before posting, search for an existing code review comment on the PR:
   - Read `comments` off the JSON loaded in step 1 and find one matching the CR format (e.g. contains "Summary:" with severity counts)

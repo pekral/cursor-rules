@@ -1242,6 +1242,67 @@ test('assignment-compliance-check skill exists with required sections and writes
     expect($content)->not->toContain('.cursor-rules-reports');
 });
 
+test('process-code-review enforces a convergence loop with quiet iterations and a single final publish', function (): void {
+    $packageDir = dirname(__DIR__);
+    $process = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+
+    expect($process)->toContain('### Review loop (mandatory — convergence gate)');
+    expect($process)->toContain('`maxIterations = 5`');
+    expect($process)->toContain('`criticalCount + moderateCount == 0`');
+    expect($process)->toContain('do not publish; return findings as in-memory markdown for this loop iteration only');
+    expect($process)->toContain('### Finalization (only after Review loop converged)');
+    expect($process)->toContain('### PR update (only after Review loop converged)');
+    expect($process)->toContain('### Completion (final, single publish)');
+
+    expect($github)->toContain('Quiet mode (loop iterations from `@skills/process-code-review/SKILL.md`)');
+    expect($github)->toContain('skip the entire Post Results step');
+    expect($jira)->toContain('Quiet mode (loop iterations from `@skills/process-code-review/SKILL.md`)');
+    expect($jira)->toContain('skip all publishing');
+});
+
+test('JIRA comment template uses Wiki Markup so the JIRA UI renders it formatted', function (): void {
+    $packageDir = dirname(__DIR__);
+    $template = (string) file_get_contents($packageDir . '/skills/code-review-jira/templates/jira-output.md');
+    $rule = (string) file_get_contents($packageDir . '/rules/jira/general.mdc');
+    $skill = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+
+    expect($template)->toContain('h2. Code Review Status');
+    expect($template)->toContain('h3. Key risks');
+    expect($template)->toContain('h3. Testing recommendations');
+    expect($template)->toContain('[GitHub PR|https://github.com/');
+    expect($template)->not->toContain('## Code Review Status');
+    expect($template)->not->toContain('```');
+
+    expect($rule)->toContain('Wiki markup conversion cheatsheet');
+    expect($rule)->toContain('`{code:php} ... {code}`');
+    expect($rule)->toContain('`[label|https://example.com]`');
+
+    expect($skill)->toContain('Format the comment as JIRA Wiki Markup');
+    expect($skill)->toContain('`{code:php} ... {code}`');
+});
+
+test('GitHub PR comment templates use a compact AI-parseable header with severity icons', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    foreach (['code-review-github/templates/pr-comment-output.md', 'code-review-jira/templates/github-output.md'] as $path) {
+        $content = (string) file_get_contents($packageDir . '/skills/' . $path);
+
+        expect($content)->toContain('# Code Review');
+        expect($content)->toContain('**Status:** clean / needs-fix');
+        expect($content)->toContain('**Counts:** Critical {n} · Moderate {n} · Minor {n} · Refactoring {n}');
+        expect($content)->toContain('### 🔴 Critical 1.');
+        expect($content)->toContain('### 🟠 Moderate 1.');
+        expect($content)->toContain('### 🟡 Minor 1.');
+        expect($content)->toContain('- **Location:**');
+        expect($content)->toContain('- **Rule:**');
+        expect($content)->toContain('- **Faulty Example:**');
+        expect($content)->toContain('- **Suggested fix:**');
+        expect($content)->toContain('```php');
+    }
+});
+
 test('code-review skill enforces strict rule compliance and architecture conformance', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
@@ -1390,8 +1451,8 @@ test('code review templates include refactoring tech debt section', function ():
 
     foreach ($templates as $template) {
         $content = (string) file_get_contents($template);
-        expect($content)->toContain('## Refactoring (DRY / Tech Debt Reduction)');
-        expect($content)->toContain('R Refactoring (DRY / Tech Debt Reduction)');
+        expect($content)->toContain('## Refactoring (DRY / tech debt)');
+        expect($content)->toContain('{n} Refactoring');
     }
 });
 

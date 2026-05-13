@@ -1153,6 +1153,33 @@ test('laravel rules prefer filled()/blank() helpers over strict empty-string com
     expect($content)->toContain('`=== \'\'`');
 });
 
+test('architecture rules enumerate the six allowed business logic layers', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($content)->toContain('## Business Logic Layers');
+    expect($content)->toContain('**Actions**');
+    expect($content)->toContain('**Model Services**');
+    expect($content)->toContain('**Repositories**');
+    expect($content)->toContain('**ModelManagers**');
+    expect($content)->toContain('**Data Validators**');
+    expect($content)->toContain('**Data Builders**');
+    expect($content)->toContain('@skills/class-refactoring/SKILL.md');
+});
+
+test('class-refactoring skill enforces the six business logic layers', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+
+    expect($content)->toContain('Business Logic Layers');
+    expect($content)->toContain('**Actions**');
+    expect($content)->toContain('**Model Services**');
+    expect($content)->toContain('**Repositories**');
+    expect($content)->toContain('**ModelManagers**');
+    expect($content)->toContain('**Data Validators**');
+    expect($content)->toContain('**Data Builders**');
+});
+
 test('code-review skill After Completion section runs test-like-human unconditionally', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');

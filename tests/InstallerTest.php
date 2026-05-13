@@ -1189,6 +1189,23 @@ test('architecture bullets remain under the Architecture heading and Business Lo
     expect($businessLogicHeading)->toBeLessThan($actionsHeading);
 });
 
+test('core standards forbid speculative project-owned interfaces', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
+
+    expect($content)->toContain('Do not introduce PHP `interface` types speculatively');
+    expect($content)->toContain('at least two non-test consumers or implementations');
+    expect($content)->toContain('test doubles, mocks, and fakes do not count');
+});
+
+test('code-review skill flags speculative interfaces in Core Analysis', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('Speculative interfaces');
+    expect($content)->toContain('fewer than two non-test consumers or implementations');
+});
+
 test('class-refactoring skill enforces the six business logic layers', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');

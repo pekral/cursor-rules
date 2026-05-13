@@ -49,6 +49,7 @@ Before reviewing code, load and analyze the full linked issue:
 ### 3. Run Reviews
 
 - Always run:
+    - @skills/assignment-compliance-check/SKILL.md — non-technical business-logic vs assignment check; produces a local markdown report at `${HOME}/.cursor-rules-reports/assignment-compliance/` and a condensed **Assignment Compliance** section that must be included in the published PR comment (with a link to the local report).
     - @skills/code-review/SKILL.md
     - @skills/security-review/SKILL.md
     - @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes that apply to lines actually touched by the PR. Do not propose changes outside the diff.

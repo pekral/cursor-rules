@@ -97,6 +97,7 @@ Run this section only when the diff integrates with, modifies, or depends on a t
 ### Specialized Reviews
 
 - Always run:
+    - @skills/assignment-compliance-check/SKILL.md — verifies the PR implementation satisfies the business requirements stated in the linked issue / task. Writes a non-technical markdown report to `${HOME}/.cursor-rules-reports/assignment-compliance/` and returns the absolute path. Include the report path **and** the Critical gaps from that report as an **Assignment Compliance** section in the final CR comment.
     - @skills/security-review/SKILL.md
     - @skills/mysql-problem-solver/SKILL.md
     - @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Use it to surface concrete tech-debt-reducing changes (DRY duplication, single-responsibility breaches, oversized methods) that apply to lines actually touched by the PR. Do not propose changes that fall outside the diff.

@@ -1242,6 +1242,20 @@ test('assignment-compliance-check skill exists with required sections and writes
     expect($content)->not->toContain('.cursor-rules-reports');
 });
 
+test('code-review skill enforces strict rule compliance and architecture conformance', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('**Strict rule compliance (mandatory walk-through)**');
+    expect($content)->toContain('walk **every** numbered or bulleted rule');
+    expect($content)->toContain('Each introduced violation is a separate finding citing');
+    expect($content)->toContain('**Architecture conformance (Laravel)**');
+    expect($content)->toContain('seven allowed homes including the Eloquent-model carve-out');
+    expect($content)->toContain('Default severity for rule violations:');
+    expect($content)->toContain('every unexcused violation of an Apply\'d rule');
+    expect($content)->not->toContain('Do not review formatting, linting, or trivial issues');
+});
+
 test('code review skills publish a non-technical summary to the originating issue tracker', function (): void {
     $packageDir = dirname(__DIR__);
     $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');

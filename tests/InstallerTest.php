@@ -1216,6 +1216,35 @@ test('code review templates include refactoring tech debt section', function ():
     }
 });
 
+test('install preserves executable bit on shipped scripts', function (): void {
+    $root = installerCreateProjectRoot();
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
+        ob_end_clean();
+
+        $installedScripts = [
+            $root . '/.cursor/skills/code-review-github/scripts/load-issue.sh',
+            $root . '/.cursor/skills/code-review-jira/scripts/load-issue.sh',
+        ];
+
+        foreach ($installedScripts as $script) {
+            expect(is_file($script))->toBeTrue($script . ' should exist after install');
+            expect(is_executable($script))->toBeTrue($script . ' must be executable after install');
+        }
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
 test('github code review skills do not describe inline review comment workflow', function (): void {
     $packageDir = dirname(__DIR__);
     $githubFacingSkills = [

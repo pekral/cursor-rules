@@ -154,6 +154,7 @@ Run this section over the PR diff only — never over untouched code.
     - **Suggested Fix** — minimal corrected code snippet that resolves the finding. Must comply with `@rules/php/core-standards.mdc` and, for Laravel projects, `@rules/laravel/architecture.mdc`. Use `n/a — <reason>` only when a snippet adds no value over the one-line Fix description (e.g. naming-only changes, dead-code removal, pointers to an existing helper whose name already says enough).
 - These four fields exist so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test and apply the fix without re-deriving context.
 - Minor findings may omit these fields when no behavior change is implied (naming, dead code, etc.).
+- This skill is read-only and does not publish anywhere itself. The wrapper skills that consume its output (`@skills/code-review-github/SKILL.md`, `@skills/code-review-jira/SKILL.md`) **must** propagate a non-technical summary (overall status, key risks in plain language, testing recommendations, link back to the PR) to **every linked issue** in the originating tracker — GitHub issue, JIRA ticket, or both — in addition to posting the technical findings on the PR.
 
 ---
 

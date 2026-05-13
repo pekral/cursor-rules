@@ -1242,6 +1242,24 @@ test('assignment-compliance-check skill exists with required sections and writes
     expect($content)->not->toContain('.cursor-rules-reports');
 });
 
+test('code review skills publish a non-technical summary to the originating issue tracker', function (): void {
+    $packageDir = dirname(__DIR__);
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+    $canonical = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($github)->toContain('#### Issue tracker summary (mandatory)');
+    expect($github)->toContain('every linked issue');
+    expect($github)->toContain('closingIssues[]');
+    expect($github)->toContain('gh issue comment');
+
+    expect($jira)->toContain('#### Linked GitHub issues (non-technical summary)');
+    expect($jira)->toContain('gh issue comment');
+
+    expect($canonical)->toContain('must** propagate a non-technical summary');
+    expect($canonical)->toContain('every linked issue');
+});
+
 test('every code review skill invokes assignment-compliance-check', function (): void {
     $packageDir = dirname(__DIR__);
 

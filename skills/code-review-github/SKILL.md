@@ -95,6 +95,17 @@ Before reviewing code, load and analyze the full linked issue:
 - If no findings:
     - post: "No findings identified"
 
+#### Issue tracker summary (mandatory)
+- After posting the PR comment, post a **non-technical summary comment** to **every linked issue** listed in `closingIssues[]` of the JSON loaded in step 1 (use `gh issue comment <number> --body ...`).
+- The summary mirrors the JIRA non-technical block in `@skills/code-review-jira/SKILL.md` and contains:
+  - **Overall status** — `clean` / `has issues` (with the Critical / Moderate / Minor counts).
+  - **Key risks** described in plain language (no file paths, no code snippets, no severity jargon — translate each Critical / Moderate finding into a one-sentence business risk).
+  - **Testing recommendations** — the same step-by-step instructions a tester would follow to validate the change.
+  - **Link back to the PR** for full technical details.
+- Do not include file paths, line numbers, code snippets, or technical severity labels in the issue summary; technical content stays exclusively on the PR.
+- If `closingIssues[]` is empty, skip this step and note "no linked issue — issue summary skipped" in the PR comment summary line.
+- For follow-up reviews, post a fresh summary comment on each linked issue rather than editing prior comments (matches the PR thread-detection behavior).
+
 ---
 
 ## Output Rules

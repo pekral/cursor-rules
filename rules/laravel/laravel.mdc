@@ -121,3 +121,7 @@ globs:
     - middleware, exceptions, routes in `bootstrap/app.php`
     - providers in `bootstrap/providers.php`
     - console configuration in `routes/console.php`
+
+## String Emptiness Checks
+- In conditions, prefer the Laravel `filled()` / `blank()` helpers over `!== ''` / `=== ''` comparisons. Write `filled($value)` instead of `$value !== ''` and `blank($value)` instead of `$value === ''`.
+- Keep the raw `!== ''` / `=== ''` form only when the exact PHP semantics matter (e.g. a `null`, whitespace-only, or empty-collection value must be treated as non-empty).

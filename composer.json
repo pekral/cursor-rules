@@ -34,7 +34,7 @@
     "composer-plugin-api": "^2.0"
   },
   "require-dev": {
-    "composer/composer": "^2.9.7",
+    "composer/composer": "^2.9.8",
     "ergebnis/composer-normalize": "^2.51.0",
     "laravel/pint": "^1.29.1",
     "pekral/phpcs-rules": "^0.4.8",

@@ -1177,6 +1177,8 @@ test('laravel rules permit simple self-contained logic on Eloquent models', func
     expect($content)->toContain('Simple, self-contained domain logic may live as methods on the model.');
     expect($content)->toContain('$user->isActive()');
     expect($content)->toContain('Forbidden on models');
+    expect($content)->toContain('$user->sendWelcomeEmail()');
+    expect($content)->toContain('lazy-load relationships count as new database queries');
     expect($content)->not->toContain('Keep business logic out of models.');
     expect($content)->not->toContain('Keep business logic out of controllers, middleware, Blade views, and Eloquent models.');
 });

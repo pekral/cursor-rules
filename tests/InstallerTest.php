@@ -1255,8 +1255,10 @@ test('assignment-compliance-check publishes to the originating issue tracker ins
     expect($compliance)->toContain('no linked issue — assignment compliance skipped');
     expect($compliance)->toContain('failed to publish assignment compliance on');
     expect($compliance)->toContain('**must not** embed the Assignment Compliance content into the PR comment');
+    expect($compliance)->toContain('The comment carries no file paths, line numbers, or code snippets');
     expect($compliance)->not->toContain('embedded in the published CR comment');
     expect($compliance)->not->toContain('Embed the returned section verbatim');
+    expect($compliance)->not->toContain('Where in the code');
 
     foreach ([$canonical, $github, $jira] as $wrapper) {
         expect($wrapper)->toContain('**Do not embed**');

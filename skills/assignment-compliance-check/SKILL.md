@@ -1,6 +1,6 @@
 ---
 name: assignment-compliance-check
-description: "Use when checking that the pull request implementation actually fulfills the business requirements stated in the linked issue or task. Reports only Critical functional gaps as a plain-language section embedded in the code-review comment — no local file is created."
+description: "Use when checking that the pull request implementation actually fulfills the business requirements stated in the linked issue or task. Reports only Critical functional gaps as a plain-language comment on the originating issue tracker — no local file is created and the report is not embedded in the PR comment."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
@@ -9,11 +9,13 @@ metadata:
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
 - Apply `@rules/git/general.mdc`
-- The skill **must not** write any output to disk. The result is returned to the invoking CR skill as an in-memory **Assignment Compliance** section and lives only inside the published CR comment. Local report files, cached transcripts, and any other persisted artifacts are forbidden — those files would either get versioned by accident or pile up on the reviewer's disk.
-- The returned section must be plain language understandable by a non-technical reader. Include a short example for every Critical gap.
+- Apply `@rules/jira/general.mdc`
+- The skill **must not** write any output to disk. The report is published as a dedicated comment on the originating issue tracker (GitHub issue or JIRA ticket) — local report files, cached transcripts, and any other persisted artifacts are forbidden.
+- The report **must not** be embedded into the PR comment produced by `@skills/code-review/SKILL.md`, `@skills/code-review-github/SKILL.md`, or `@skills/code-review-jira/SKILL.md`. The PR comment carries technical findings; the issue tracker comment carries assignment compliance.
+- The published comment must be plain language understandable by a non-technical reader. Include a short example for every Critical gap.
 - Report **only Critical** functional / business-logic gaps. Do not report architecture, code style, test coverage, refactoring opportunities, or any other concern — those are owned by the other review skills.
-- Never modify code. This skill is read-only.
-- Do not expose secrets, internal infrastructure paths, or PII in the section.
+- Never modify code. This skill is read-only with respect to the codebase.
+- Do not expose secrets, internal infrastructure paths, or PII in the comment.
 
 ## Use when
 - A code review is being prepared for a PR linked to an issue or task (GitHub issue, JIRA ticket, Bugsnag report).
@@ -53,20 +55,29 @@ For every requirement from step 2, decide one of:
 
 Do **not** report stylistic / architectural / test-coverage concerns even if you notice them — those belong in `@skills/code-review/SKILL.md` and `@skills/security-review/SKILL.md`.
 
-### 5. Return the section to the caller
-- Build the **Assignment Compliance** section using the template in **Output Format** below.
-- Return it as an in-memory string (or markdown chunk) to the invoking CR skill. **Do not write it to disk.** The CR skill embeds the section verbatim into the published PR comment.
-- When there are no Critical gaps, return a single-line section: *"No critical gaps identified — implementation satisfies every stated requirement."*
-- For JIRA-originated reviews, the GitHub PR comment carries the full section; the JIRA non-technical summary carries the same Critical bullets in plain language without any file path or code reference.
+### 5. Publish the report to the issue tracker
+
+> **Quiet mode (loop iterations from `@skills/process-code-review/SKILL.md`):** when the calling CR skill forwards "do not publish; return findings as in-memory markdown for this loop iteration only", **skip the publishing step** — return the assembled Assignment Compliance markdown to the caller and stop. The caller still does not embed it into the PR comment; the in-memory return is used only to count compliance gaps in the loop's convergence math. Only the final (publishing) call from `process-code-review` after convergence runs publishing in full.
+
+- Build the **Assignment Compliance** comment using the template in **Output Format** below.
+- Publish it as a dedicated comment on the originating issue tracker:
+  - **GitHub-originated:** post via `gh issue comment <number> --body ...` against every linked issue listed in `closingIssues[]` of the PR JSON loaded by the caller. Use GitHub-flavoured Markdown.
+  - **JIRA-originated:** post via `acli` or the JIRA MCP server to the JIRA ticket. Convert the comment body to **JIRA Wiki Markup** per `@rules/jira/general.mdc` before sending (`h2.` / `h3.` headings, `*bold*`, `_italic_`, `{{inline}}`, `{code:php}…{code}`, `* / # bullets`, `[label|url]`, `{quote}`).
+  - **Bugsnag-originated:** post to the linked GitHub issue using the GitHub branch above.
+- When there are no Critical gaps, the comment body is the single line: *"No critical gaps identified — implementation satisfies every stated requirement."*
+- If no linked issue exists (`closingIssues[]` empty for GitHub PRs, or no JIRA ticket detected for JIRA-originated), do not publish anywhere. Return the status `no linked issue — assignment compliance skipped` to the caller so the CR skill can include it in its PR comment summary line.
+- If `gh issue comment` / `acli` returns a permission or network error, log the failure status `failed to publish assignment compliance on <tracker>: <reason>` and return it to the caller — do not abort the calling review. The caller surfaces the failure in the PR comment summary line.
+- The CR wrapper skills (`code-review`, `code-review-github`, `code-review-jira`) **must not** embed the Assignment Compliance content into the PR comment.
 
 ## Output Format
 
-Assignment Compliance section embedded in the CR comment:
+Assignment Compliance comment posted to the issue tracker (Markdown shown; convert to Wiki Markup for JIRA per `@rules/jira/general.mdc`):
 
 ```markdown
 ## Assignment Compliance
 
 - **Linked task:** <issue / JIRA / Bugsnag URL>
+- **Pull request:** <PR URL>
 - **Verdict:** <Critical gaps found: N> / <No critical gaps>
 
 ### Critical gaps
@@ -75,7 +86,6 @@ Assignment Compliance section embedded in the CR comment:
 - **What the task asked for:** <one sentence quoting or paraphrasing the requirement, with the source comment URL or "issue description">
 - **What the pull request does instead:** <one sentence describing the actual behavior implied by the diff>
 - **Example a tester would see:** <concrete input → expected output vs actual output, ideally taken from the example the reporter provided>
-- **Where in the code:** <file path(s) — kept in this subsection only, so the rest stays non-technical>
 
 (Repeat for every Critical gap. Omit the entire **Critical gaps** subsection when there are none.)
 
@@ -86,9 +96,12 @@ Assignment Compliance section embedded in the CR comment:
 - <optional — list requirements whose status could not be determined from the diff alone, with the reason>
 ```
 
+The comment carries no file paths, line numbers, or code snippets — the issue tracker audience is non-technical reviewers and product owners. Technical details belong on the PR.
+
 ## Done when
-- An **Assignment Compliance** section was produced in memory and returned to the invoking CR skill, which embedded it verbatim in the published PR comment.
+- An **Assignment Compliance** comment was published to the originating issue tracker (or the `no linked issue` / `failed to publish` status was returned to the caller when publishing was not possible).
+- The PR comment produced by the calling CR skill does **not** contain an Assignment Compliance section.
 - No files were created on disk — neither in the repository nor in any external directory.
-- The section is plain language and includes a short example for every Critical gap.
+- The comment is plain language and includes a short example for every Critical gap.
 - Only Critical functional / business-logic gaps are listed — no architecture / style / coverage findings.
-- When there are no Critical gaps, the section is the single-line statement "No critical gaps identified — implementation satisfies every stated requirement."
+- When there are no Critical gaps, the comment is the single-line statement "No critical gaps identified — implementation satisfies every stated requirement."

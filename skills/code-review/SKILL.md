@@ -99,7 +99,7 @@ Run this section only when the diff integrates with, modifies, or depends on a t
 ### Specialized Reviews
 
 - Always run:
-    - @skills/assignment-compliance-check/SKILL.md — verifies the PR implementation satisfies the business requirements stated in the linked issue / task. Returns an **Assignment Compliance** markdown section in memory (no file is written). Embed the returned section verbatim into the final CR comment.
+    - @skills/assignment-compliance-check/SKILL.md — verifies the PR implementation satisfies the business requirements stated in the linked issue / task. The skill publishes the **Assignment Compliance** report as a dedicated comment on the originating issue tracker (GitHub issue or JIRA ticket) and returns only a status string to the caller (`posted`, `no linked issue — assignment compliance skipped`, or `failed to publish …`). **Do not embed** the report into the PR comment — that comment carries technical findings only. Surface the returned status in the PR comment summary line.
     - @skills/security-review/SKILL.md
     - @skills/mysql-problem-solver/SKILL.md
     - @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Use it to surface concrete tech-debt-reducing changes (DRY duplication, single-responsibility breaches, oversized methods) that apply to lines actually touched by the PR. Do not propose changes that fall outside the diff.

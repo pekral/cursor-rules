@@ -53,7 +53,7 @@ Before reviewing code, load and analyze the full JIRA issue:
 ### 3. Run Reviews
 
 - For each PR:
-  - run @skills/assignment-compliance-check/SKILL.md — non-technical business-logic vs assignment check. Returns an **Assignment Compliance** markdown section in memory (no file is written). Embed it verbatim into the GitHub PR comment, and mirror the same Critical gaps in plain language (no file paths, no code refs) inside the JIRA non-technical summary.
+  - run @skills/assignment-compliance-check/SKILL.md — non-technical business-logic vs assignment check. The skill publishes the **Assignment Compliance** report as a dedicated JIRA comment on the originating ticket (converted to JIRA Wiki Markup per `@rules/jira/general.mdc`) and returns only a status string (`posted to <KEY>`, `no linked issue — assignment compliance skipped`, or `failed to publish …`). **Do not embed** the report into the GitHub PR comment and **do not duplicate** its Critical gaps inside the JIRA non-technical summary — the dedicated compliance comment carries that content. Surface the returned status in the GitHub PR comment summary line.
   - run @skills/code-review/SKILL.md
   - run @skills/security-review/SKILL.md
   - run @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes only on lines actually touched by the PR.

@@ -116,7 +116,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `merge-github-pr` | Safely merge GitHub pull requests that are ready for deployment. |
 | `create-issue` | Create a tracker issue from provided task text while preserving original meaning and structure. |
 | `create-issues-from-text` | Batch-create issues from provided text with automatic structure detection. |
-| `pr-summary` | Summarize current PR changes for development and product teams in a clear markdown report. |
+| `pr-summary` | Summarize current PR changes for development and product teams as a short two-section comment (Summary of changes + How to test), rendered as GitHub Markdown for PR comments or JIRA Wiki Markup for JIRA issue comments. |
 | `skill-creator` | Scaffold a new Agent skill that follows project conventions and passes `skill-check` validation. |
 
 ## Code Review, Security & Architecture

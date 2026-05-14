@@ -55,6 +55,11 @@ SELECT * FROM users WHERE (SELECT COUNT(*) FROM orders WHERE orders.user_id = us
 SELECT * FROM users WHERE EXISTS (SELECT 1 FROM orders WHERE orders.user_id = users.id);
 ```
 
+## Reuse existing indexes first
+- Before adding a new index, verify that the query cannot be rewritten to hit an existing one. Re-order `WHERE` / `JOIN` / `ORDER BY` columns to match an existing composite index (left-to-right rule), strip functions wrapping indexed columns (SARGable rewrite), and project only the columns the index already covers (covering query).
+- During code review of new or modified SQL / Eloquent / query-builder code, locate the current schema (migrations, model `$table` metadata, live `SHOW INDEX` when DB access is available) and flag every query that bypasses an existing index that could satisfy it. The fix is a query rewrite, not a new index.
+- Add a new index only when the existing schema genuinely lacks one that can cover the query, EXPLAIN confirms the gap, and the rewrite alternative has been ruled out. Then follow the **Index Design** constraints below (composite order, 3–5 indexes per table, drop redundant).
+
 ## Index Design
 - Index columns used in `WHERE`, `JOIN`, `ORDER BY`, `GROUP BY`.
 - Composite index order must match query filter/sort (left-to-right rule).

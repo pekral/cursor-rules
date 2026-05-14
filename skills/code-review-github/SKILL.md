@@ -55,7 +55,7 @@ Before reviewing code, load and analyze the full linked issue:
     - @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes that apply to lines actually touched by the PR. Do not propose changes outside the diff.
 
 - Run conditionally:
-    - Database changes → @skills/mysql-problem-solver/SKILL.md
+    - Database changes → @skills/mysql-problem-solver/SKILL.md — when reviewing new or modified SQL / Eloquent / query-builder queries, prefer rewriting the query to reuse an existing schema index over proposing a new one (see `@rules/sql/optimalize.mdc` "Reuse existing indexes first")
     - Shared state → @skills/race-condition-review/SKILL.md
     - Third-party API or service changes → ensure the **Third-Party API & Service Analysis** step from `@skills/code-review/SKILL.md` is executed for the diff
 

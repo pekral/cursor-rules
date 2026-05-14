@@ -1242,6 +1242,35 @@ test('assignment-compliance-check skill exists with required sections and writes
     expect($content)->not->toContain('.cursor-rules-reports');
 });
 
+test('assignment-compliance-check publishes to the originating issue tracker instead of embedding into the PR comment', function (): void {
+    $packageDir = dirname(__DIR__);
+    $compliance = (string) file_get_contents($packageDir . '/skills/assignment-compliance-check/SKILL.md');
+    $canonical = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+
+    expect($compliance)->toContain('### 5. Publish the report to the issue tracker');
+    expect($compliance)->toContain('`gh issue comment <number> --body ...`');
+    expect($compliance)->toContain('Convert the comment body to **JIRA Wiki Markup**');
+    expect($compliance)->toContain('no linked issue — assignment compliance skipped');
+    expect($compliance)->toContain('failed to publish assignment compliance on');
+    expect($compliance)->toContain('**must not** embed the Assignment Compliance content into the PR comment');
+    expect($compliance)->not->toContain('embedded in the published CR comment');
+    expect($compliance)->not->toContain('Embed the returned section verbatim');
+
+    foreach ([$canonical, $github, $jira] as $wrapper) {
+        expect($wrapper)->toContain('**Do not embed**');
+        expect($wrapper)->not->toContain('Embed the returned section verbatim');
+        expect($wrapper)->not->toContain('Embed it verbatim into the GitHub PR comment');
+    }
+
+    expect($github)->toContain('posted to issue #N');
+    expect($github)->toContain('no linked issue — assignment compliance skipped');
+
+    expect($jira)->toContain('dedicated JIRA comment on the originating ticket');
+    expect($jira)->toContain('**do not duplicate** its Critical gaps inside the JIRA non-technical summary');
+});
+
 test('process-code-review enforces a convergence loop with quiet iterations and a single final publish', function (): void {
     $packageDir = dirname(__DIR__);
     $process = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');

@@ -49,7 +49,7 @@ Before reviewing code, load and analyze the full linked issue:
 ### 3. Run Reviews
 
 - Always run:
-    - @skills/assignment-compliance-check/SKILL.md — non-technical business-logic vs assignment check. Returns an **Assignment Compliance** markdown section in memory (no file is written). Embed the returned section verbatim into the published PR comment.
+    - @skills/assignment-compliance-check/SKILL.md — non-technical business-logic vs assignment check. The skill publishes the **Assignment Compliance** report as a dedicated comment on every linked GitHub issue listed in `closingIssues[]` and returns only a status string (`posted to issue #N`, `no linked issue — assignment compliance skipped`, or `failed to publish …`). **Do not embed** the report into the PR comment — keep the PR comment focused on technical findings and surface the returned status in the summary line.
     - @skills/code-review/SKILL.md
     - @skills/security-review/SKILL.md
     - @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes that apply to lines actually touched by the PR. Do not propose changes outside the diff.

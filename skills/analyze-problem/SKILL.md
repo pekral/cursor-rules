@@ -36,71 +36,47 @@ Focus on:
 - Analyze the problem and all available context.
 - If relevant, load issue, comments, and attachments using available CLI or MCP tools.
 - Prefer issue-tracker-specific tools over generic browsing.
-- Separate facts from assumptions.
-- Generate multiple plausible hypotheses.
-- Identify the most probable root cause.
-- Define how to validate it.
-- Suggest minimal, low-risk next steps.
+- Walk through the Analysis Framework below in order — do not skip steps.
+- Separate facts from assumptions and from hypotheses.
+- Identify the most probable root cause and how to validate it.
+- Recommend the smallest safe solution and explain rejected alternatives.
 
 ---
 
-## Analysis Structure
+## Analysis Framework
 
-### 1. Problem Summary
-- Clearly restate the problem in your own words
-- Interpret, do not copy
+Apply these 10 steps in order. Each step feeds the next — never jump ahead to a solution before evidence and root cause are settled.
 
-### 2. Known Facts
-- Only verified information
-- No assumptions
-
-### 3. Assumptions
-- Inferred but not confirmed
-
-### 4. Missing Information
-- Unknowns that affect confidence or validation
-
-### 5. Hypotheses
-- At least 2 plausible explanations
-- Prefer competing explanations
-- Group when useful:
-    - code
-    - configuration
-    - infrastructure
-    - data
-    - external dependencies
-
-### 6. Hypothesis Evaluation
-For each hypothesis:
-- why it could be true
-- why it might be false
-- likelihood: high / medium / low
-
-### 7. Most Probable Root Cause
-- Select the most likely explanation
-- Explain why it is stronger than others
-- Explicitly state uncertainty if present
-
-### 8. Validation Plan
-Define how to confirm or reject the root cause:
-- logs to inspect
-- commands to run
-- code paths to check
-- experiments to perform
-
-### 9. Next Steps
-- Minimal, actionable steps
-- Do not provide full implementation
-
-### 10. Stakeholder Explanation
-- Explain the issue in simple terms
-- Focus on impact, cause, and next step
+1. **Context extraction** — what we actually know from the assignment, comments, attachments, and surrounding code.
+2. **Problem statement** — one precise sentence describing the real problem.
+3. **Expected vs actual behavior** — what should happen, and what is happening instead.
+4. **Evidence** — logs, screenshots, issue comments, files, reproduction steps. Verified facts only.
+5. **Root cause hypothesis** — the most likely cause, clearly separated from facts. State certainty.
+6. **Impact / risk** — who and what is affected (users, business, technical, risk areas).
+7. **Smallest safe solution** — the smallest, lowest-risk fix that addresses the root cause.
+8. **Alternatives rejected** — competing solutions considered and why they were not chosen.
+9. **Verification plan** — manual checks, automated tests, edge cases, and regression checks.
+10. **Non-technical summary** — plain-language explanation for PM, support, or business stakeholders.
 
 ---
 
-## Output Format
+## Output Structure
 
-Use the template defined in `templates/analysis-report.md`.
+The output uses the template at `templates/analysis-report.md`. The template has 11 sections that map onto the framework above:
+
+1. **Summary** — short summary (covers steps 1–2)
+2. **Problem Definition** — problem statement, expected/actual behavior, affected area, problem type (steps 2–3)
+3. **Verified Facts** — verified facts only (step 4)
+4. **Assumptions and Missing Information** — assumptions and unknowns (supports step 5)
+5. **Probable Root Cause** — root cause, certainty, alternative causes (step 5)
+6. **Problem Impact** — user/business impact, technical impact, risk areas (step 6)
+7. **Recommended Solution** — recommended solution, things to avoid, side effects (steps 7–8)
+8. **Implementation Outline** — likely change locations, recommended steps, architecture notes (step 7)
+9. **Solution Verification** — manual checks, automated tests, edge cases, regression checks (step 9)
+10. **Non-Technical Explanation** — explanation for non-technical stakeholders (step 10)
+11. **Final Recommendation** — final recommendation, priority, next step
+
+Fill every section. If a section has nothing to report, write a short explicit note (e.g. `No missing information.`) instead of leaving placeholders.
 
 ---
 

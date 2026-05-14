@@ -65,7 +65,7 @@ See `references/source-detection.md` for the detection table and rules.
 
 Before writing any code, decide how the in-scope work will be split into commits within the PR.
 
-1. **Detect existing phases** in the issue description and the kept comments. Phase markers include explicit headings such as `Fáze 1` / `Phase 1`, numbered milestones, ordered acceptance-criteria blocks, or a step-by-step plan written by the reporter.
+1. **Detect existing phases** in the issue description and the kept comments. Phase markers include explicit headings such as `Phase 1`, numbered milestones, ordered acceptance-criteria blocks, or a step-by-step plan written by the reporter.
 2. **If phases exist:** treat each phase as exactly **one commit**. Keep the original phase order as commit order. Do not merge, reorder, or re-scope phases.
 3. **If no phases exist but the assignment is long or covers multiple distinct concerns:** propose a phased breakdown — each phase must be independently reviewable and yield a working state — then map **one phase per commit**.
 4. **If the assignment is small and atomic:** keep it as a single commit. Do not invent artificial phases.

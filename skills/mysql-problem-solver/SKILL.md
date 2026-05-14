@@ -55,6 +55,7 @@ Focus on:
 Look for:
 - full scans
 - weak join strategy
+- existing index bypassed — query could hit a covering index already in the schema but the column order, a wrapping function, or extra projected columns prevent it. Preferred fix is a query rewrite (column re-ordering, SARGable rewrite, covering projection), not a new index (see `@rules/sql/optimalize.mdc` "Reuse existing indexes first").
 - missing or ineffective indexes
 - non-SARGable filters
 - poor sort/group plans
@@ -65,12 +66,13 @@ Look for:
 
 ### 5. Propose Optimizations
 Recommend only justified changes, such as:
-- query rewrite
+- query rewrite to reuse an existing schema index (preferred — verify which indexes already exist via migrations / `SHOW INDEX` before proposing a new one; reorder `WHERE` / `JOIN` / `ORDER BY` columns to match an existing composite index, drop functions wrapping indexed columns, and project only columns the index already covers)
+- query rewrite (general)
 - Eloquent/query builder rewrite
 - eager loading change
 - pagination change
 - batching per-row loops into a single bulk operation — ModelManager batch methods (`batchUpdate`, `batchInsert`), `whereIn(...)->delete()` for deletes, or one bulk read keyed in memory for lookups (see `@rules/sql/optimalize.mdc` "Batch over per-row operations")
-- index addition or replacement
+- index addition or replacement (only when the existing schema cannot cover the query and EXPLAIN confirms the gap after the rewrite alternative has been ruled out)
 - redundant index removal
 - splitting one query into smaller ones
 

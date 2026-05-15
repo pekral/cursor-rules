@@ -22,6 +22,11 @@ metadata:
 
 See `references/source-detection.md` for the detection table and rules.
 
+## Preparation
+
+Before starting the resolution flow:
+- Switch to the `main` branch and pull the latest changes so the working tree reflects the current state of the repository before creating the feature branch.
+
 ## Required approach
 - Fully analyze the issue (description, comments, attachments)
 - Clearly define scope before writing code
@@ -83,9 +88,10 @@ Before writing any code, decide how the in-scope work will be split into commits
 ### Continue
 11. Implement the solution for all **in-scope** items identified in step 7.
 12. Ensure no sensitive data is exposed in error/validation messages.
-13. Run tests for affected areas and confirm correctness.
-14. Add or update tests to cover the new or fixed behavior.
-15. Verify 100% code coverage for all changed or added code paths — if coverage tooling exists, run it and confirm the result before proceeding.
+13. If the implementation introduced new database migrations, run them (`php artisan migrate` for Laravel projects, or the project-specific equivalent) before executing the affected tests or creating the pull request.
+14. Run tests for affected areas and confirm correctness.
+15. Add or update tests to cover the new or fixed behavior.
+16. Verify 100% code coverage for all changed or added code paths — if coverage tooling exists, run it and confirm the result before proceeding.
 
 ## Pre-push quality gates
 
@@ -143,7 +149,7 @@ Post the technical report as a comment on the GitHub PR, since that is where the
 Post the non-technical report on the issue tracker where the task with the assignment was created (the original tracker, regardless of where the PR lives):
 
 - **GitHub** (task filed as a GitHub issue): post as a comment on the original issue
-- **JIRA** (task filed in JIRA): post as a JIRA comment using JIRA formatting rules
+- **JIRA** (task filed in JIRA): post as a JIRA comment formatted with JIRA Wiki Markup per `@rules/jira/general.mdc` (no Markdown headings, fenced code blocks, or tables)
 - **Bugsnag** (task originated from a Bugsnag error): post as a comment on the linked GitHub issue (if available)
 
 The non-technical report must be understandable by non-technical testers and product managers and contain:
@@ -152,8 +158,12 @@ The non-technical report must be understandable by non-technical testers and pro
 - **How to test:** step-by-step instructions a tester can follow to verify the change works correctly
 - **Risk areas and edge cases:** specific scenarios the tester should focus on to catch potential regressions or unexpected behavior
 
+### GitHub-specific follow-up
+- If the original repository uses a `ready for review` (or equivalent) label, apply it to the source issue once the PR is open to signal it is ready for reviewers. Skip this step when the project does not use such labels.
+
 ### JIRA-specific follow-up
-- Link the created PR back to the JIRA issue
+- Link the created PR back to the JIRA issue.
+- Do not change the JIRA issue status — per `@rules/jira/general.mdc`, status transitions are handled by humans only.
 
 ## References
 
@@ -173,3 +183,6 @@ The non-technical report must be understandable by non-technical testers and pro
 - Technical report posted on the GitHub PR
 - Non-technical report posted on the original issue tracker
 - For JIRA issues: PR is linked back and a summary comment is posted
+
+## Output Humanization
+- Use [blader/humanizer](https://github.com/blader/humanizer) for all skill outputs to keep the text natural and human-friendly.

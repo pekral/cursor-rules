@@ -143,7 +143,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `rewrite-tests-pest` | Rewrite tests to PEST style while preserving behavior and conventions. |
 | `test-like-human` | Validate PR behavior from user perspective using scenario-driven testing. |
 | `test-driven-development` | Enforce strict red-green-refactor flow for bugfixes and features. |
-| `tester-cookbook` | Turn a JIRA task and its linked PRs into a click-by-click manual-testing cookbook for a non-technical QA tester, delivered as a JIRA Wiki Markup comment. |
+| `tester-cookbook` | Turn a JIRA task and its linked PRs into a concise QA report for a non-technical tester — focused on what to report back to the dev team, optionally with brief steps to reach the result — delivered as a JIRA Wiki Markup comment. |
 
 ## Platform & Data
 

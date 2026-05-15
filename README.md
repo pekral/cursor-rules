@@ -123,10 +123,10 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 
 | Skill | Description |
 |---|---|
-| `assignment-compliance-check` | Plain-language check that the PR implementation fulfills the linked issue's business requirements; returns an Assignment Compliance section embedded directly in the CR comment (no file written). |
+| `assignment-compliance-check` | Plain-language check that the PR implementation fulfills the linked issue's business requirements; reports only Critical functional gaps as a dedicated comment on the originating issue tracker — no local file written and never embedded in the PR comment. |
 | `code-review` | Senior PHP code review focused on architecture, risk, and behavior (read-only). |
-| `code-review-github` | Review GitHub pull requests with severity-based findings and review comments. |
-| `code-review-jira` | Review JIRA-linked changes with GitHub PR comments and structured findings. |
+| `code-review-github` | Review GitHub pull requests; posts technical findings on the PR and a non-technical `pr-summary` comment on every linked GitHub issue. |
+| `code-review-jira` | Review changes linked to a JIRA ticket; posts technical findings on the GitHub PR and a non-technical `pr-summary` comment on the JIRA ticket (with mirrored summary on any linked GitHub issues). |
 | `process-code-review` | Process existing review feedback, resolve comments, and prepare next review cycle. |
 | `security-review` | OWASP-focused security review (injection, auth, SSRF, exposure, misconfigurations). |
 | `class-refactoring` | Refactor PHP classes using SOLID and Laravel best practices with testability focus. |
@@ -185,11 +185,11 @@ All `.mdc` and `.md` files are ready for automatic injection by Cursor so every 
 ### Composer Scripts
 
 ```bash
-composer check              # run full quality check (normalize, phpcs, pint, rector, phpstan, audit, tests)
-composer fix                # run all automatic fixes (normalize, rector, pint, phpcs)
-composer build              # fix then check
+composer check              # run full quality check (skill-check, normalize, phpcs, pint, rector, phpstan, audit, tests)
+composer fix                # run all automatic fixes (skill-check-fix, normalize, rector, pint, phpcs)
+composer build              # install (cursor-rules install --force) then fix then check
 composer analyse            # run PHPStan static analysis
-composer test:coverage       # run tests with 100% coverage
+composer test:coverage      # run tests with 100% coverage
 composer coverage           # alias for test:coverage
 composer security-audit     # run security audit of dependencies
 ```
@@ -197,12 +197,16 @@ composer security-audit     # run security audit of dependencies
 ### Individual Commands
 
 ```bash
-composer phpcs-check        # PHP CodeSniffer check
-composer phpcs-fix          # PHP CodeSniffer fix
-composer pint-check         # Laravel Pint check
-composer pint-fix           # Laravel Pint fix
-composer rector-check       # Rector check (dry-run)
-composer rector-fix         # Rector fix
+composer skill-check                # SKILL.md linter (validation + scoring across every skill)
+composer skill-check-fix            # SKILL.md linter with auto-fix
+composer composer-normalize-check   # validate composer.json normalization (dry-run)
+composer composer-normalize-fix     # apply composer.json normalization
+composer phpcs-check                # PHP CodeSniffer check
+composer phpcs-fix                  # PHP CodeSniffer fix
+composer pint-check                 # Laravel Pint check
+composer pint-fix                   # Laravel Pint fix
+composer rector-check               # Rector check (dry-run)
+composer rector-fix                 # Rector fix
 ```
 
 ### Testing

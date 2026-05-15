@@ -100,6 +100,7 @@ Repeat until the body is clean. **Do not publish a comment that still contains f
 ## Related skills (to disambiguate)
 - `@skills/pr-summary/SKILL.md` — short, two-section business summary for PR / JIRA. Not a structured testing cookbook.
 - `@skills/test-like-human/SKILL.md` — the agent runs the tests itself. This skill only writes instructions for a human tester.
+- **interactive-testing** (when available in the host environment, not shipped with this package) — interactive browser-driven validation. Different flow: an agent walks through scenarios live in a browser instead of producing written instructions for a human tester.
 
 ## Output
 - A single JIRA comment, in Wiki Markup, posted to the originating task.

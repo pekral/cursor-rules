@@ -98,13 +98,9 @@ Before reviewing code, load and analyze the full linked issue:
     - post: "No findings identified"
 
 #### Issue tracker summary (mandatory)
-- After posting the PR comment, post a **non-technical summary comment** to **every linked issue** listed in `closingIssues[]` of the JSON loaded in step 1 (use `gh issue comment <number> --body ...`).
-- The summary mirrors the JIRA non-technical block in `@skills/code-review-jira/SKILL.md` and contains:
-  - **Overall status** — `clean` / `has issues` (with the Critical / Moderate / Minor counts).
-  - **Key risks** described in plain language (no file paths, no code snippets, no severity jargon — translate each Critical / Moderate finding into a one-sentence business risk).
-  - **Testing recommendations** — the same step-by-step instructions a tester would follow to validate the change.
-  - **Link back to the PR** for full technical details.
-- Do not include file paths, line numbers, code snippets, or technical severity labels in the issue summary; technical content stays exclusively on the PR.
+- After posting the PR comment, delegate the **non-technical summary on every linked issue** listed in `closingIssues[]` of the JSON loaded in step 1 to `@skills/pr-summary/SKILL.md`. This CR skill must not author its own non-technical template — the goal is a uniform *"Summary of changes + How to test"* output across both trackers that non-technical project managers understand and can act on.
+- Invoke `@skills/pr-summary/SKILL.md` with the **GitHub** tracker target so it renders `@skills/pr-summary/templates/pr-summary-github.md` in GitHub Markdown and posts via `gh issue comment <number>` on every entry in `closingIssues[]`. `pr-summary` mirrors the same format that `@skills/code-review-jira/SKILL.md` posts to JIRA, so reviewers reading either tracker see the same summary.
+- `pr-summary` enforces the no-file-paths / no-line-numbers / no-code-snippets / no-severity-jargon contract by design; technical content stays exclusively on the PR comment.
 - If `closingIssues[]` is empty, skip this step and note "no linked issue — issue summary skipped" in the PR comment summary line.
 - If `gh issue comment` returns a permission error (cross-repo issue, lacking write access), log the failure in the PR comment summary line and continue — do not abort the review.
 - For follow-up reviews, post a fresh summary comment on each linked issue rather than editing prior comments (matches the PR thread-detection behavior).

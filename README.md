@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **25 comprehensive Agent skills** for automated workflows (v0.8)
+- **26 comprehensive Agent skills** for automated workflows (v0.8)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -101,7 +101,7 @@ vendor/bin/cursor-rules install --editor=cursor --symlink     # prefer symlinks 
 
 # 🎯 Skills Overview — **v0.8**
 
-> Current release includes 25 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
+> Current release includes 26 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -143,6 +143,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `rewrite-tests-pest` | Rewrite tests to PEST style while preserving behavior and conventions. |
 | `test-like-human` | Validate PR behavior from user perspective using scenario-driven testing. |
 | `test-driven-development` | Enforce strict red-green-refactor flow for bugfixes and features. |
+| `tester-cookbook` | Turn a JIRA task and its linked PRs into a click-by-click manual-testing cookbook for a non-technical QA tester, delivered as a JIRA Wiki Markup comment. |
 
 ## Platform & Data
 

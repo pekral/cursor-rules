@@ -89,17 +89,14 @@ Before reviewing code, load and analyze the full JIRA issue:
 - This is the only place where technical details appear
 
 #### JIRA (non-technical summary only)
-- Never post file paths, line numbers, code snippets, or technical severity levels to JIRA
-- Post a plain-language summary:
-  - overall status (clean / has issues)
-  - key risks described in business terms
-  - testing recommendations with step-by-step instructions
-  - link to the GitHub PR for full technical details
+- Delegate the non-technical JIRA comment to `@skills/pr-summary/SKILL.md`. This CR skill must not author its own JIRA summary — the goal is a uniform *"Summary of changes + How to test"* output that non-technical project managers understand and can act on, identical to what `pr-summary` produces for any other audience.
+- Invoke `@skills/pr-summary/SKILL.md` with the **JIRA** tracker target so it renders `@skills/pr-summary/templates/pr-summary-jira.md` in JIRA Wiki Markup and posts the comment on the originating JIRA ticket via `acli` (JIRA MCP server fallback).
+- Never post file paths, line numbers, code snippets, technical severity levels, or finding counts to JIRA — `pr-summary` already enforces this constraint by design; technical content stays exclusively on the GitHub PR comment.
+- When the CR run yields Critical / Moderate findings that block merge, surface that signal in the GitHub PR comment summary line; the JIRA comment stays focused on what changed and how to test it.
 
 #### Linked GitHub issues (non-technical summary)
-- If the reviewed PR also references a GitHub issue (i.e. `closingIssues[]` of the GitHub PR JSON is non-empty), post the **same plain-language summary** as a comment on every linked GitHub issue using `gh issue comment <number> --body ...`.
-- Mirror the JIRA non-technical content above (overall status, key risks in business terms, testing recommendations, link to the PR). No file paths, no line numbers, no code, no severity labels.
-- The JIRA-side summary is the primary tracker comment; the GitHub-issue comment is a courtesy mirror so reviewers reading the GitHub issue see the same conclusion without opening JIRA.
+- If the reviewed PR also references a GitHub issue (i.e. `closingIssues[]` of the GitHub PR JSON is non-empty), delegate the linked-GitHub-issue comment to `@skills/pr-summary/SKILL.md` (GitHub tracker target). The skill renders `@skills/pr-summary/templates/pr-summary-github.md` in GitHub Markdown and posts via `gh issue comment <number>` on each entry in `closingIssues[]`.
+- The JIRA-side summary is the primary tracker comment; the GitHub-issue comment is a courtesy mirror so reviewers reading the GitHub issue see the same *"Summary of changes + How to test"* output without opening JIRA. Both comments come from `pr-summary`, so they are guaranteed to match.
 - If `closingIssues[]` is empty, skip this block and note "no linked GitHub issue — mirror skipped" in the PR comment summary line.
 - If `gh issue comment` returns a permission error (cross-repo issue, lacking write access), log the failure in the PR comment summary line and continue — do not abort the review.
 
@@ -123,19 +120,9 @@ Before reviewing code, load and analyze the full JIRA issue:
 - Use the template defined in `templates/github-output.md`
 
 ### JIRA (non-technical summary — only here)
-- Never include file paths, line numbers, code snippets, or technical severity levels
-- Write in plain language understandable by non-developers
-- **Format the comment as JIRA Wiki Markup**, not GitHub-flavoured Markdown — JIRA UI does not render Markdown headings (`#`), bold (`**`), fenced code blocks (` ``` `), Markdown links (`[label](url)`), or Markdown tables (`|...|`). The reviewer must see the comment formatted in the JIRA web UI, not raw text. Conversion cheatsheet:
-    - Heading: `## Heading` → `h2. Heading` (`### Heading` → `h3. Heading`)
-    - Bold: `**bold**` → `*bold*`
-    - Italic: `*italic*` or `_italic_` → `_italic_`
-    - Inline code: `` `code` `` → `{{code}}`
-    - Code block: ` ```php ... ``` ` → `{code:php} ... {code}`
-    - Bullet list: `- item` → `* item`
-    - Numbered list: `1. item` → `# item`
-    - Link: `[label](https://example.com)` → `[label|https://example.com]`
-    - Quote: `> text` → `{quote}text{quote}`
-- Use the template defined in `templates/jira-output.md` — that template is already written in JIRA Wiki Markup; do not "translate" it back to Markdown when posting via `acli` / JIRA MCP server.
+- The non-technical JIRA comment is **produced and posted by `@skills/pr-summary/SKILL.md`**, not by this skill. Invoke `pr-summary` with the JIRA tracker target; do not author or embed a custom template here.
+- `pr-summary` enforces the no-file-paths / no-line-numbers / no-code-snippets / no-severity-jargon contract by design — plain language understandable by non-developers, in two sections: *Summary of changes* and *How to test*.
+- The JIRA Wiki Markup conversion (`h2.` / `h3.` headings, `*bold*`, `_italic_`, `{{inline}}`, `{code:php} ... {code}`, `*` / `#` bullets, `[label|url]`, `{quote}`) is handled by `@skills/pr-summary/templates/pr-summary-jira.md` per `@rules/jira/general.mdc`. Do not "translate" the output back to GitHub Markdown when posting via `acli` / JIRA MCP server.
 
 ---
 

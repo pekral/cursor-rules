@@ -1293,25 +1293,24 @@ test('process-code-review enforces a convergence loop with quiet iterations and 
     expect($jira)->toContain('skip all publishing');
 });
 
-test('JIRA comment template uses Wiki Markup so the JIRA UI renders it formatted', function (): void {
+test('JIRA non-technical CR summary delegates to pr-summary Wiki Markup template', function (): void {
     $packageDir = dirname(__DIR__);
-    $template = (string) file_get_contents($packageDir . '/skills/code-review-jira/templates/jira-output.md');
+    $template = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-jira.md');
     $rule = (string) file_get_contents($packageDir . '/rules/jira/general.mdc');
     $skill = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
 
-    expect($template)->toContain('h2. Code Review Status');
-    expect($template)->toContain('h3. Key risks');
-    expect($template)->toContain('h3. Testing recommendations');
-    expect($template)->toContain('[GitHub PR|https://github.com/');
-    expect($template)->not->toContain('## Code Review Status');
+    expect($template)->toContain('h2. Summary of changes');
+    expect($template)->toContain('h2. How to test');
+    expect($template)->not->toContain('## Summary of changes');
     expect($template)->not->toContain('```');
 
     expect($rule)->toContain('Wiki markup conversion cheatsheet');
     expect($rule)->toContain('`{code:php} ... {code}`');
     expect($rule)->toContain('`[label|https://example.com]`');
 
-    expect($skill)->toContain('Format the comment as JIRA Wiki Markup');
-    expect($skill)->toContain('`{code:php} ... {code}`');
+    expect($skill)->toContain('Delegate the non-technical JIRA comment to `@skills/pr-summary/SKILL.md`');
+    expect($skill)->toContain('@skills/pr-summary/templates/pr-summary-jira.md');
+    expect(is_file($packageDir . '/skills/code-review-jira/templates/jira-output.md'))->toBeFalse();
 });
 
 test('GitHub PR comment templates use a compact AI-parseable header with severity icons', function (): void {
@@ -1349,7 +1348,7 @@ test('code-review skill enforces strict rule compliance and architecture conform
     expect($content)->not->toContain('Do not review formatting, linting, or trivial issues');
 });
 
-test('code review skills publish a non-technical summary to the originating issue tracker', function (): void {
+test('code review skills delegate the non-technical issue-tracker summary to pr-summary', function (): void {
     $packageDir = dirname(__DIR__);
     $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
     $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
@@ -1362,14 +1361,19 @@ test('code review skills publish a non-technical summary to the originating issu
     expect($github)->toContain('plus a non-technical summary to every linked issue');
     expect($github)->toContain('issue-tracker summary status');
     expect($github)->toContain('cross-repo issue, lacking write access');
+    expect($github)->toContain('@skills/pr-summary/SKILL.md');
+    expect($github)->toContain('@skills/pr-summary/templates/pr-summary-github.md');
 
     expect($jira)->toContain('#### Linked GitHub issues (non-technical summary)');
     expect($jira)->toContain('gh issue comment');
     expect($jira)->toContain('no linked GitHub issue — mirror skipped');
     expect($jira)->toContain('cross-repo issue, lacking write access');
+    expect($jira)->toContain('@skills/pr-summary/SKILL.md');
+    expect($jira)->toContain('@skills/pr-summary/templates/pr-summary-jira.md');
 
-    expect($canonical)->toContain('must** propagate a non-technical summary');
+    expect($canonical)->toContain('must** delegate the non-technical summary');
     expect($canonical)->toContain('every linked issue');
+    expect($canonical)->toContain('@skills/pr-summary/SKILL.md');
 });
 
 test('every code review skill invokes assignment-compliance-check', function (): void {

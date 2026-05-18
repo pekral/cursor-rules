@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Pekral\CursorRules;
 
-use RuntimeException;
 use SimpleXMLElement;
 
 final class CoverageDiffCheck
@@ -167,7 +166,7 @@ final class CoverageDiffCheck
         libxml_use_internal_errors($previous);
 
         if (!$xml instanceof SimpleXMLElement || !isset($xml->project)) {
-            throw new RuntimeException('Invalid Clover XML: missing <project> root.');
+            throw CoverageDiffCheckFailure::invalidCloverXml('missing <project> root');
         }
 
         return $xml->project;

@@ -169,6 +169,7 @@ Rules included in this package:
 | `code-testing/general.mdc`    | Testing conventions and quality standards                  | Always   |
 | `refactoring/general.mdc`     | Shared refactoring definition (legacy → modern, incremental migration) | Refactor |
 | `jira/general.mdc`            | JIRA CLI usage and formatting rules                        | JIRA     |
+| `reports/general.mdc`         | Language rule for reports published to issue trackers (assignment language) | Always   |
 | `laravel/architecture.mdc`    | Laravel architecture and conventions                       | Laravel  |
 | `laravel/laravel.mdc`         | Laravel-specific rules and patterns                        | Laravel  |
 | `laravel/filament.mdc`        | Filament v4 specific rules                                 | Filament |

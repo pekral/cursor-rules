@@ -10,9 +10,9 @@ metadata:
 - Apply @rules/php/core-standards.mdc
 - Apply @rules/git/general.mdc
 - Apply @rules/jira/general.mdc
+- Apply @rules/reports/general.mdc — every CR reply comment, resolved-items update, and mirrored linked-issue summary published by this skill must be written in the language of the source assignment (Czech assignment → Czech comments; English assignment → English comments). Code identifiers, file paths, line numbers, and severity labels follow the rule's *Scope clarifications*.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
-- Never combine multiple languages in your answer
-- All CR output must be written in English
+- Never combine multiple languages within a single CR comment — pick the assignment language and stay in it for every prose sentence.
 - Never push direct changes to the main branch
 - If the pull request has merge conflicts with the base branch, stop and report it
 - Do not introduce new logic unrelated to review feedback
@@ -117,8 +117,8 @@ This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, 
 - Run @skills/test-like-human/SKILL.md if changes are testable
 - Commit and push changes
 - If PR does not exist, create it according to @rules/git/general.mdc
-  - Title in English
-  - Body in assignment language
+  - Title in English (per `@rules/git/general.mdc`)
+  - Body in the assignment language (per `@rules/reports/general.mdc`)
 
 ---
 

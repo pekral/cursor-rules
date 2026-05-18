@@ -22,7 +22,7 @@ Perform structured code review focused on:
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Output findings only (no praise)
 - **Read-only skill** — never modify code, never stage / commit / push changes, and never run any git write operation (`git add`, `git commit`, `git push`, `git reset`, `git checkout -- …`, etc.). Switching to the relevant branch and `git pull` to read the latest diff are allowed; mutating the working tree or pushing to the remote is not. Output is the review markdown only.
-- All output must be in English
+- Apply @rules/reports/general.mdc — the review markdown handed to `code-review-github` / `code-review-jira` for publishing on the PR / linked issue must be written in the language of the source assignment (Czech assignment → Czech findings; English assignment → English findings). Code identifiers, severity labels per the rule, and quoted rule names stay verbatim.
 - Do not duplicate findings the project's fixers already auto-correct (Pint, PHPCS, Rector — pure whitespace, import ordering, unused-use, single-line vs multi-line argument splits). Those are caught by the build. **Do** flag every rule violation a fixer does not cover — architectural breaches, structural rules, missing return types, untyped DTO boundaries, naming bound to a domain rule, testing-pattern violations, etc.
 
 ---

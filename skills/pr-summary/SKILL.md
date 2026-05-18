@@ -10,8 +10,8 @@ metadata:
 - Apply @rules/php/core-standards.mdc
 - Apply @rules/git/general.mdc
 - Apply @rules/jira/general.mdc when the target is a JIRA issue
+- Apply @rules/reports/general.mdc — the published comment must be written in the language of the source assignment (Czech assignment → Czech comment; English assignment → English comment). Code identifiers stay verbatim per the rule's *Scope clarifications*.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
-- Match the language of the target tracker (issue/PR description): write the comment in the same language a reader of the target would expect.
 - Focus on the "why" and business impact, not on implementation details — but keep enough technical context (which integration, payload, table, endpoint, etc.) that a developer can still follow what changed.
 - Do not include code snippets, file paths, line numbers, or diff fragments. The summary is for humans, not for static analysis.
 - **Always credit the real change author(s)**, not the agent or identity running the CR / publishing step. Extract authors from git commit history (`git log --pretty='%an <%ae>' base..HEAD | sort -u`) and from PR metadata (`author.login` and `commits[].author.login` returned by `skills/code-review-github/scripts/load-issue.sh`). When the target is GitHub, prefer `@github-handle`; when the target is JIRA, prefer the JIRA-account display name returned by the JIRA loader, otherwise fall back to the git `Name <email>`. Multiple authors are listed comma-separated in commit order. Never silently drop the Authors line — when authorship cannot be determined, write *"Authors: unknown — git history did not yield a recognisable identity"*.

@@ -21,7 +21,7 @@ De-risk the next implementation step (`/resolve-issue`, TDD, or CR) by **front-l
 - **Read-only for production code.** This skill never modifies production source files. It is allowed to: create temporary seeders / factories / Tinker scripts under `database/seeders/`, `database/factories/`, or a scratch directory; insert rows into the **development** database; create scratch Pest tests that reproduce the bug. It is **never** allowed to mutate the production database, run destructive migrations, drop tables, push to the remote, or modify code in `src/` / `app/` outside of seed-only fixtures.
 - Never invent values that are not derivable from the assignment, the codebase, or the existing dev database. When a required value (account ID, contact phone, enum case, config key) cannot be resolved, list it as a gap — do not guess.
 - Never expose secrets, production credentials, or PII when seeding. Use test fixtures (`+420604240203`-style sentinels, `qa-*` aliases) explicitly tagged as such.
-- Output must match the language of the assignment when the report is published to the tracker; in-conversation status is in English.
+- Apply `@rules/reports/general.mdc` — when a context-preparation summary is published to the tracker (via `@skills/pr-summary/SKILL.md`), it must be written in the language of the source assignment. The in-conversation `ready` / `blocked` status is allowed to stay in English.
 
 ---
 

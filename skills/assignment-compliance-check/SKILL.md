@@ -10,6 +10,7 @@ metadata:
 - Apply `@rules/php/core-standards.mdc`
 - Apply `@rules/git/general.mdc`
 - Apply `@rules/jira/general.mdc`
+- Apply `@rules/reports/general.mdc` — the **Assignment Compliance** comment published to the originating issue tracker must be written in the language of the linked assignment (Czech issue / JIRA description → Czech comment; English → English). Linked-task / PR URLs, author handles, and severity labels follow the rule's *Scope clarifications*.
 - The skill **must not** write any output to disk. The report is published as a dedicated comment on the originating issue tracker (GitHub issue or JIRA ticket) — local report files, cached transcripts, and any other persisted artifacts are forbidden.
 - The report **must not** be embedded into the PR comment produced by `@skills/code-review/SKILL.md`, `@skills/code-review-github/SKILL.md`, or `@skills/code-review-jira/SKILL.md`. The PR comment carries technical findings; the issue tracker comment carries assignment compliance.
 - The published comment must be plain language understandable by a non-technical reader. Include a short example for every Critical gap.

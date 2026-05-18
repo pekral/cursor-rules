@@ -19,7 +19,7 @@ Perform code review for JIRA issues by analyzing related pull requests and publi
 ## Constraints
 - Apply @rules/jira/general.mdc
 - Apply @rules/git/general.mdc
-- Apply @rules/reports/general.mdc — every comment posted to the GitHub PR, every JIRA comment, and every mirrored linked-GitHub-issue summary must be written in the language of the source JIRA assignment (Czech JIRA description → Czech comments; English JIRA description → English comments). Code identifiers, file paths, line numbers, and severity labels follow the rule's *Scope clarifications*.
+- Apply @rules/reports/general.mdc. The **GitHub PR technical comment** this skill posts (Status / Counts / Findings / Refactoring / Database Analysis / Coverage / Summary) stays in canonical English per the rule's *Exception — technical CR findings on the GitHub PR*. The **JIRA comment** delegated to `@skills/pr-summary/SKILL.md` and the **mirrored linked-GitHub-issue summary** follow the language of the source JIRA assignment. Never mix languages inside the same comment; never use bilingual *Kritické (Critical)* style parentheses.
 - **Read-only skill** — never modify code, never stage / commit / push changes, and never run any git write operation (`git add`, `git commit`, `git push`, `git reset`, `git checkout -- …`, etc.). Switching to the relevant branch and `git pull` to read the latest diff are allowed; mutating the working tree or pushing to the remote is not. Publishing is limited to PR / linked-issue comments via `gh` and to JIRA ticket comments via `acli`.
 - JIRA output must be understandable for non-developers
 - Output findings only (no praise)

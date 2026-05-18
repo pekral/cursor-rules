@@ -2140,3 +2140,49 @@ test('readme rules overview lists the reports/general.mdc rule', function (): vo
     expect($readme)->toContain('`reports/general.mdc`');
     expect($readme)->toContain('Language rule for reports published to issue trackers');
 });
+
+test('reports/general.mdc declares the GitHub-PR technical-CR English exception', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/reports/general.mdc');
+
+    expect($content)->toContain('Exception — technical CR findings on the GitHub PR');
+    expect($content)->toContain('canonical English');
+    expect($content)->toContain('@skills/code-review-github/SKILL.md');
+    expect($content)->toContain('@skills/process-code-review/SKILL.md');
+    expect($content)->toContain('exception does **not** extend to');
+    expect($content)->toContain('pr-summary');
+});
+
+test('reports/general.mdc bans bilingual parentheses and mid-comment language mixing', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/reports/general.mdc');
+
+    expect($content)->toContain('never mix that language with another natural language');
+    expect($content)->toContain('No bilingual parentheses');
+    expect($content)->toContain('Kritické (Critical)');
+    expect((bool) preg_match('/use the Czech equivalents \(e\.g\. \*Kritické\*, \*Závažné\*, \*Drobné\*\)/', $content))->toBeFalse();
+});
+
+test('CR wrapper skills carry the GitHub-PR English exception in their constraints', function (): void {
+    $packageDir = dirname(__DIR__);
+    $crWrapperSkills = [
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/process-code-review/SKILL.md',
+        $packageDir . '/skills/security-review/SKILL.md',
+        $packageDir . '/skills/security-threat-analysis/SKILL.md',
+        $packageDir . '/skills/resolve-issue/SKILL.md',
+    ];
+
+    foreach ($crWrapperSkills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+
+        $namesException = str_contains($content, 'Exception — technical CR findings on the GitHub PR');
+        $mentionsCanonicalEnglish = str_contains($content, 'canonical English');
+
+        expect($namesException && $mentionsCanonicalEnglish)->toBeTrue(
+            $skillFile . ' must cite the GitHub-PR technical-CR English exception from @rules/reports/general.mdc',
+        );
+    }
+});

@@ -1385,7 +1385,7 @@ test('every code review skill invokes assignment-compliance-check', function ():
     }
 });
 
-test('readme lists tester-cookbook and bumps skill count to 27', function (): void {
+test('readme bumps skill count to 27 and lists tester-cookbook and security-threat-analysis', function (): void {
     $packageDir = dirname(__DIR__);
     $readme = (string) file_get_contents($packageDir . '/README.md');
 

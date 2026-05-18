@@ -9,7 +9,7 @@ metadata:
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
 - Apply `@rules/git/general.mdc`
-- Apply `@rules/reports/general.mdc` — every report this skill (or its delegates) publishes to an issue tracker — technical PR comment, non-technical issue / JIRA comment, mirrored Bugsnag-linked GitHub comment — must be written in the language of the source assignment. Code identifiers, file paths, severity labels, and CLI commands follow the rule's *Scope clarifications*.
+- Apply `@rules/reports/general.mdc`. The **final technical report** this skill posts on the GitHub PR (code-review / security-review / test-like-human summary block) stays in canonical English per the rule's *Exception — technical CR findings on the GitHub PR*. The **non-technical report** posted on the original issue / JIRA ticket / Bugsnag-linked GitHub issue follows the language of the source assignment. Code identifiers, file paths, severity labels, and CLI commands stay verbatim regardless of the surrounding prose language; never mix two natural languages inside a single comment.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Follow project architecture and testing rules
 - Do not expose sensitive/internal details in user-facing messages

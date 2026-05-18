@@ -10,9 +10,9 @@ metadata:
 - Apply @rules/php/core-standards.mdc
 - Apply @rules/git/general.mdc
 - Apply @rules/jira/general.mdc
-- Apply @rules/reports/general.mdc — every CR reply comment, resolved-items update, and mirrored linked-issue summary published by this skill must be written in the language of the source assignment (Czech assignment → Czech comments; English assignment → English comments). Code identifiers, file paths, line numbers, and severity labels follow the rule's *Scope clarifications*.
+- Apply @rules/reports/general.mdc. **CR reply comments and resolved-items updates posted on the GitHub PR** stay in canonical English per the rule's *Exception — technical CR findings on the GitHub PR* (they extend the technical CR thread). The **mirrored non-technical summary** delegated to `@skills/pr-summary/SKILL.md` on the linked issue / JIRA ticket follows the language of the source assignment. Never mix languages inside the same comment; never use bilingual *Kritické (Critical)* style parentheses.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
-- Never combine multiple languages within a single CR comment — pick the assignment language and stay in it for every prose sentence.
+- Never mix two natural languages inside a single CR comment. The English exception applies to entire comments — not to inline parenthetical glosses.
 - Never push direct changes to the main branch
 - If the pull request has merge conflicts with the base branch, stop and report it
 - Do not introduce new logic unrelated to review feedback

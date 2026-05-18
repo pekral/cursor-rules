@@ -13,6 +13,8 @@ metadata:
 - The skill **must not** write any output to disk. The report is published as a dedicated comment on the originating issue tracker (GitHub issue or JIRA ticket) — local report files, cached transcripts, and any other persisted artifacts are forbidden.
 - The report **must not** be embedded into the PR comment produced by `@skills/code-review/SKILL.md`, `@skills/code-review-github/SKILL.md`, or `@skills/code-review-jira/SKILL.md`. The PR comment carries technical findings; the issue tracker comment carries assignment compliance.
 - The published comment must be plain language understandable by a non-technical reader. Include a short example for every Critical gap.
+- The published comment **must credit the real change author(s)** in the `Authors` line — resolved exactly as `@skills/pr-summary/SKILL.md` resolves them (git history `%an <%ae>` + PR `author.login` + `commits[].author.login`, JIRA display name when the target is JIRA). Never list the agent / CR identity. When authorship cannot be determined, write `unknown — git history did not yield a recognisable identity`.
+- The published comment **must include the `Available behind` line whenever the change is reachable only behind a test parameter** (feature flag, ENV switch, query-string parameter, request header, A/B variant, admin toggle, allow-listed account). Detect the gating toggle the same way `@skills/pr-summary/SKILL.md` does (scan the diff for `config('…')` / `env('…')` checks, GrowthBook / Unleash / LaunchDarkly calls, query / header gates, allow-list middleware), name the toggle, and state the value required to reach the change. Omit the line entirely only when the change is reachable unconditionally.
 - Report **only Critical** functional / business-logic gaps. Do not report architecture, code style, test coverage, refactoring opportunities, or any other concern — those are owned by the other review skills.
 - Never modify code. This skill is read-only with respect to the codebase.
 - Do not expose secrets, internal infrastructure paths, or PII in the comment.
@@ -78,6 +80,8 @@ Assignment Compliance comment posted to the issue tracker (Markdown shown; conve
 
 - **Linked task:** <issue / JIRA / Bugsnag URL>
 - **Pull request:** <PR URL>
+- **Authors:** <@github-handle or JIRA display name of the real change author(s), comma-separated in commit order — resolved exactly as `@skills/pr-summary/SKILL.md` resolves them; never the agent / CR identity>
+- **Available behind:** <optional — present only when the change is reachable only behind a test parameter (feature flag, ENV switch, query string, admin toggle, allow-listed account); name the toggle and the value required to reach it. Omit the line entirely when the change is reachable unconditionally.>
 - **Verdict:** <Critical gaps found: N> / <No critical gaps>
 
 ### Critical gaps
@@ -85,7 +89,7 @@ Assignment Compliance comment posted to the issue tracker (Markdown shown; conve
 #### 1. <short title in everyday language>
 - **What the task asked for:** <one sentence quoting or paraphrasing the requirement, with the source comment URL or "issue description">
 - **What the pull request does instead:** <one sentence describing the actual behavior implied by the diff>
-- **Example a tester would see:** <concrete input → expected output vs actual output, ideally taken from the example the reporter provided>
+- **Example a tester would see:** <concrete input → expected output vs actual output, ideally taken from the example the reporter provided; when *Available behind* is set, the example must start by enabling the gating toggle>
 
 (Repeat for every Critical gap. Omit the entire **Critical gaps** subsection when there are none.)
 

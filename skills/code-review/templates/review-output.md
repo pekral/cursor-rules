@@ -67,10 +67,23 @@
 
 ---
 
+## Database Analysis
+
+> Mandatory when the diff touches database operations (raw SQL, Eloquent / query-builder calls, eager loads, model scopes, ModelManager / Repository methods, migrations, seeders, DynamoDB / NoSQL access). Omit the entire section when no DB operations are present in the diff — never leave a placeholder or fold it into Coverage.
+
+- **Trigger:** {DB operations detected vs. trigger skipped — never empty when the section is present}
+- **Inspected:** {bullet list of `file:line` for each query / migration / Eloquent statement analysed}
+- **EXPLAIN / static analysis:** {summary of `@skills/mysql-problem-solver/SKILL.md` output — note "no DB access — static analysis only" when EXPLAIN could not be run}
+- **Findings:**
+  1. **{Critical / Moderate / Minor}** — `file:line` — one-sentence problem
+     **Suggested Fix:** {query rewrite to reuse an existing index per `@rules/sql/optimalize.mdc`, batch operation per "Batch over per-row operations", or new-index proposal justified by EXPLAIN when no existing index covers the query}
+
+---
+
 ## Coverage
 
-- **Tool:** {discovered coverage command name, or "not available — <reason>"}
-- **Command:** `<exact command run>`
+- **Tool:** {discovered **diff-scoped** coverage script (Phing `test:coverage:diff` / `coverage:diff`, Composer `test:coverage:diff`, or project-specific `*coverage*diff*`) — or "diff-scoped tooling unavailable — <reason>". Never the full-suite `test:coverage` / `coverage` / Phing `coverage` — full-suite belongs to release gates, not CR.}
+- **Command:** `<exact command run — e.g. `composer test:coverage:diff`>`
 - **Result:** {% covered for changed lines, or list uncovered added/changed lines — which must also appear as Critical findings}
 
 ---

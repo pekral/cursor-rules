@@ -53,9 +53,16 @@ For each impact identified in step 2, look up the corresponding visible label in
 - **Internal-only changes (no UI footprint)** — surface them in the dev-team report ("ask dev team to confirm X"); do not invent UI steps the tester cannot perform.
 
 ### 4. Compose the comment
-Use the following minimal structure. Skip the first section when it does not add value (for example when the change is verifiable purely from the dev-team report — a notification text change, a label rename in the report).
+Every comment opens with two metadata lines (in JIRA Wiki Markup), then the body sections. The body skips the first section when it does not add value (for example when the change is verifiable purely from the dev-team report — a notification text change, a label rename in the report).
 
-- **Brief steps to reach the result** (optional) — at most a handful of bullets, each one a single click-path line, just enough for the tester to land on the affected screen. No precondition tables, no scenario enumeration, no edge-case matrices. Example: *"Open Campaigns → new SMS campaign → send to test number `+420604240203` → open *Recipient activity* on the campaign detail."*
+**Metadata lines (always at the top of the comment, in this order):**
+
+- *Authors:* the real change author(s) — JIRA display name when the JIRA loader can match the committer, otherwise the GitHub handle `@handle`, otherwise the git `Name <email>` form. Comma-separated in commit order, deduped. Resolved exactly as `@skills/pr-summary/SKILL.md` resolves authors (`git log --pretty='%an <%ae>' base..HEAD`, plus PR `author.login` and `commits[].author.login`). Never list the agent / publishing identity. When authorship cannot be determined, write *Authors: unknown — git history did not yield a recognisable identity*.
+- *Available behind:* present only when the verified change is reachable only behind a test parameter (admin switch label _GoSMS API version_, ENV {{BETA_PRICING=1}}, query {{?preview=1}}, feature toggle, allow-listed account). Name the switch label exactly as it appears in the admin UI when one exists (per the forbidden-vocabulary rule — UI labels, not feature keys). When the change is reachable for every user unconditionally, omit the line entirely.
+
+**Body sections:**
+
+- **Brief steps to reach the result** (optional) — at most a handful of bullets, each one a single click-path line, just enough for the tester to land on the affected screen. No precondition tables, no scenario enumeration, no edge-case matrices. When *Available behind* is set, the **first** bullet must be the click-path that enables the gating switch. Example: *"Open Administration → switches → enable *GoSMS API version v2* → Campaigns → new SMS campaign → send to test number `+420604240203` → open *Recipient activity* on the campaign detail."*
 - **What to report back to the dev team** (required) — concrete visible symptoms the tester should flag if observed, written so the tester only needs to recognise them in the UI. Each bullet is one symptom, framed in plain language: *"contacts stuck in status *Waiting* for over an hour"*, *"credits charged even for contacts marked *Invalid number*"*, *"the SMS arrived but the report shows *Not delivered*"*, *"the *GoSMS API version* switch is missing from the admin screen"*. Never list error codes, never mention Bugsnag, never reference internal class or queue names.
 
 ### 5. Convert to JIRA Wiki Markup

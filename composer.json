@@ -162,6 +162,10 @@
     "test:coverage": [
       "echo \"📊 Running coverage tests with PCOV...\"",
       "php -d pcov.enabled=1 -d pcov.directory=src -d pcov.exclude=~tests~ -d xdebug.mode=off vendor/bin/pest --coverage tests --min=100"
+    ],
+    "test:coverage:diff": [
+      "echo \"📊 Running diff-scoped coverage (PCOV → Xdebug fallback; Laravel-aware)...\"",
+      "bin/test-coverage-diff"
     ]
   }
 }

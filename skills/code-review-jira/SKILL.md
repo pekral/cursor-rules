@@ -19,7 +19,7 @@ Perform code review for JIRA issues by analyzing related pull requests and publi
 ## Constraints
 - Apply @rules/jira/general.mdc
 - Apply @rules/git/general.mdc
-- Never modify code
+- **Read-only skill** — never modify code, never stage / commit / push changes, and never run any git write operation (`git add`, `git commit`, `git push`, `git reset`, `git checkout -- …`, etc.). Switching to the relevant branch and `git pull` to read the latest diff are allowed; mutating the working tree or pushing to the remote is not. Publishing is limited to PR / linked-issue comments via `gh` and to JIRA ticket comments via `acli`.
 - GitHub output must be in English
 - JIRA output must be understandable for non-developers
 - Output findings only (no praise)
@@ -59,7 +59,7 @@ Before reviewing code, load and analyze the full JIRA issue:
   - run @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes only on lines actually touched by the PR.
 
 - Run conditionally:
-  - DB changes → @skills/mysql-problem-solver/SKILL.md — when reviewing new or modified SQL / Eloquent / query-builder queries, prefer rewriting the query to reuse an existing schema index over proposing a new one (see `@rules/sql/optimalize.mdc` "Reuse existing indexes first")
+  - **Database operations detected in the diff → `@skills/mysql-problem-solver/SKILL.md` is mandatory.** Trigger pattern list is owned by `@skills/code-review/SKILL.md` Specialized Reviews (raw SQL, Eloquent / query-builder calls, eager loads, model scopes, ModelManager / Repository methods, migrations, seeders, DynamoDB / NoSQL access). Capture its findings and surface them on the GitHub PR comment under the dedicated `## Database Analysis` section (see Output Rules) — never silently fold them into the Critical / Moderate / Minor buckets. The JIRA non-technical comment **does not** carry this section (it stays plain-language via `pr-summary`).
   - Shared state → @skills/race-condition-review/SKILL.md
   - Third-party API or service changes → ensure the **Third-Party API & Service Analysis** step from `@skills/code-review/SKILL.md` is executed for the diff
 
@@ -89,13 +89,15 @@ Before reviewing code, load and analyze the full JIRA issue:
 - This is the only place where technical details appear
 
 #### JIRA (non-technical summary only)
-- Delegate the non-technical JIRA comment to `@skills/pr-summary/SKILL.md`. This CR skill must not author its own JIRA summary — the goal is a uniform *"Summary of changes + How to test"* output that non-technical project managers understand and can act on, identical to what `pr-summary` produces for any other audience.
+- Delegate the non-technical JIRA comment to `@skills/pr-summary/SKILL.md`. This CR skill must not author its own JIRA summary — the goal is a uniform *"Authors / Available behind / Summary of changes / How to test"* output that non-technical project managers understand and can act on, identical to what `pr-summary` produces for any other audience.
+- When invoking `pr-summary`, pass through the PR `author.login` + `commits[].author.login` set and the git `%an <%ae>` log so the published JIRA comment credits the **real change author(s)** (JIRA display name when the JIRA loader can match a committer; otherwise the GitHub handle; otherwise the git `Name <email>`). Never the agent / CR identity. Confirm the `Authors` line is present in the published comment.
+- When invoking `pr-summary`, also pass through any **test-parameter gating** detected in the diff (feature flag, ENV switch, query-string parameter, request header, admin toggle, allow-list) so the published comment carries the `Available behind` line and folds the toggle-enabling step into `How to test` step 1.
 - Invoke `@skills/pr-summary/SKILL.md` with the **JIRA** tracker target so it renders `@skills/pr-summary/templates/pr-summary-jira.md` in JIRA Wiki Markup and posts the comment on the originating JIRA ticket via `acli` (JIRA MCP server fallback).
 - Never post file paths, line numbers, code snippets, technical severity levels, or finding counts to JIRA — `pr-summary` already enforces this constraint by design; technical content stays exclusively on the GitHub PR comment.
 - When the CR run yields Critical / Moderate findings that block merge, surface that signal in the GitHub PR comment summary line; the JIRA comment stays focused on what changed and how to test it.
 
 #### Linked GitHub issues (non-technical summary)
-- If the reviewed PR also references a GitHub issue (i.e. `closingIssues[]` of the GitHub PR JSON is non-empty), delegate the linked-GitHub-issue comment to `@skills/pr-summary/SKILL.md` (GitHub tracker target). The skill renders `@skills/pr-summary/templates/pr-summary-github.md` in GitHub Markdown and posts via `gh issue comment <number>` on each entry in `closingIssues[]`.
+- If the reviewed PR also references a GitHub issue (i.e. `closingIssues[]` of the GitHub PR JSON is non-empty), delegate the linked-GitHub-issue comment to `@skills/pr-summary/SKILL.md` (GitHub tracker target). The skill renders `@skills/pr-summary/templates/pr-summary-github.md` in GitHub Markdown and posts via `gh issue comment <number>` on each entry in `closingIssues[]`. Pass the same author + test-parameter-gating context as the JIRA invocation above — the mirrored comment must carry the same `Authors` and `Available behind` lines.
 - The JIRA-side summary is the primary tracker comment; the GitHub-issue comment is a courtesy mirror so reviewers reading the GitHub issue see the same *"Summary of changes + How to test"* output without opening JIRA. Both comments come from `pr-summary`, so they are guaranteed to match.
 - If `closingIssues[]` is empty, skip this block and note "no linked GitHub issue — mirror skipped" in the PR comment summary line.
 - If `gh issue comment` returns a permission error (cross-repo issue, lacking write access), log the failure in the PR comment summary line and continue — do not abort the review.
@@ -116,7 +118,8 @@ Before reviewing code, load and analyze the full JIRA issue:
     - **Suggested Fix** — minimal corrected code snippet that resolves the finding. Must comply with `@rules/php/core-standards.mdc` and, for Laravel projects, `@rules/laravel/architecture.mdc`. Use `n/a — <reason>` only when a snippet adds no value over the one-line Fix description (e.g. naming-only changes, dead-code removal, pointers to an existing helper whose name already says enough).
 - These four fields exist so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test and apply the fix directly from the PR comment.
 - Minor findings may omit these fields when no behavior change is implied.
-- The posted PR comment must always include a `## Coverage` section before the summary line. The section reports the tool used, command run, and coverage result for changed lines (or "tooling unavailable" with reason). Never post a CR comment without it.
+- When the diff touches database operations (per the trigger list in `@skills/code-review/SKILL.md` Specialized Reviews), the posted GitHub PR comment must include a dedicated `## Database Analysis` section **before** `## Coverage`. The section reports the queries / migrations inspected, the `mysql-problem-solver` findings (with severity mirroring Critical / Moderate / Minor), and the proposed query rewrite / index reuse / batching fix per `@rules/sql/optimalize.mdc`. When no DB operations are present, omit the section entirely. The JIRA non-technical comment (produced by `pr-summary`) never includes this section.
+- The posted PR comment must always include a `## Coverage` section before the summary line. The section reports the **diff-scoped** script discovered (per the discovery order in `@skills/code-review/SKILL.md` Coverage gate — Phing `test:coverage:diff` / `coverage:diff`, Composer `test:coverage:diff`, or any project-specific `*coverage*diff*` script; this repository ships `composer test:coverage:diff`), the exact command run, and the coverage result for changed lines (or "diff-scoped tooling unavailable" with reason). Never substitute full-suite coverage output (`composer test:coverage`, `pest --coverage` on the whole suite, Phing `coverage`) and never post a CR comment without this section.
 - Use the template defined in `templates/github-output.md`
 
 ### JIRA (non-technical summary — only here)

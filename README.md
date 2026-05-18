@@ -124,11 +124,12 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | Skill | Description |
 |---|---|
 | `assignment-compliance-check` | Plain-language check that the PR implementation fulfills the linked issue's business requirements; reports only Critical functional gaps as a dedicated comment on the originating issue tracker — no local file written and never embedded in the PR comment. |
+| `prepare-issue-context` | Pre-flight data + codebase prep before `/resolve-issue`, TDD, or CR. Extracts every assignment scenario, maps each to a code path, seeds the dev DB with the records the scenario depends on, and surfaces gaps so the implementing agent never has to guess. |
 | `code-review` | Senior PHP code review focused on architecture, risk, and behavior (read-only). |
-| `code-review-github` | Review GitHub pull requests; posts technical findings on the PR and a non-technical `pr-summary` comment on every linked GitHub issue. |
-| `code-review-jira` | Review changes linked to a JIRA ticket; posts technical findings on the GitHub PR and a non-technical `pr-summary` comment on the JIRA ticket (with mirrored summary on any linked GitHub issues). |
+| `code-review-github` | Review GitHub pull requests; posts technical findings on the PR and a non-technical `pr-summary` comment on every linked GitHub issue (read-only on the codebase; publishes only comments via `gh`). |
+| `code-review-jira` | Review changes linked to a JIRA ticket; posts technical findings on the GitHub PR and a non-technical `pr-summary` comment on the JIRA ticket (read-only on the codebase; publishes only comments via `gh` and `acli`). |
 | `process-code-review` | Process existing review feedback, resolve comments, and prepare next review cycle. |
-| `security-review` | OWASP-focused security review (injection, auth, SSRF, exposure, misconfigurations). |
+| `security-review` | OWASP-focused security review (injection, auth, SSRF, exposure, misconfigurations) — read-only. |
 | `security-threat-analysis` | Analyze a specific security threat from a referenced source (CVE, GHSA, advisory, blog post). Produces a human-readable remediation report with ordered, agent-actionable steps and a verification check. |
 | `class-refactoring` | Refactor PHP classes using SOLID and Laravel best practices with testability focus. |
 | `refactor-entry-point-to-action` | Refactor controller/job/command/listener entry-point logic into Action classes. |

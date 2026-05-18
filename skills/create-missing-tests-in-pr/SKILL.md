@@ -36,7 +36,7 @@ metadata:
     scenarios, edge cases, regression coverage, and coverage gaps.
 -   Analyze the current branch changes against the review findings.
 -   Verify whether the recommended tests already exist in the codebase.
--   Check whether current changes have 100% coverage.
+-   Check whether current changes have 100% coverage **using only the diff-scoped coverage command** (discovery order per `@skills/code-review/SKILL.md` Coverage gate — Phing `test:coverage:diff` / `coverage:diff`, Composer `test:coverage:diff`, or any project-specific `*coverage*diff*` script; this repository ships `composer test:coverage:diff`). Never run the project-wide coverage command (`composer test:coverage`, Phing `coverage`, `pest --coverage --min=100` on the whole suite) — if no diff-scoped script is available, stop and report it as a blocker.
 -   If coverage is incomplete or recommended test scenarios are missing,
     use @skills/create-test/SKILL.md.
 -   Follow existing project test conventions, helpers, patterns, and
@@ -51,8 +51,8 @@ metadata:
     repeated test cases.
 -   After adding or updating tests, run only the necessary tests for the
     current changes.
--   If coverage tooling exists, verify that current changes are covered
-    with 100% coverage.
+-   If a diff-scoped coverage tool exists, verify that current changes are covered
+    with 100% coverage. Use only the diff-scoped command (e.g. `composer test:coverage:diff`) — do not fall back to the full-suite coverage command.
 -   If fixers or test-related wrappers exist in the project, use them (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`).
 -   Do not run the whole test suite unless it is required for the
     changed files workflow.

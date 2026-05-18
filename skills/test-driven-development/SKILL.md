@@ -24,6 +24,10 @@ If you did not watch the test fail, you do not know whether it tests the right t
 - Changing behavior
 - Refactoring code that should remain behaviorally stable
 
+## Pre-flight (mandatory before the first RED)
+
+Before writing the first failing test, run `@skills/prepare-issue-context/SKILL.md` with `MODE=tdd` and the assignment reference, scoped to the scenario(s) the upcoming RED step will cover. The skill seeds the development database with the records the failing test will depend on and captures a reproduction record (entry point + inputs + observed output) that becomes the *arrange* block of the first test. If the skill returns `blocked: <count> open gap(s)`, stop and surface the gaps — writing a RED test against missing or guessed fixtures is the most common cause of stub-grade tests that drift from real behavior.
+
 ## Required cycle
 
 ### 1. RED

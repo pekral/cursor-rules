@@ -9,6 +9,7 @@ metadata:
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
 - Apply `@rules/git/general.mdc`
+- Apply `@rules/reports/general.mdc` — every report this skill (or its delegates) publishes to an issue tracker — technical PR comment, non-technical issue / JIRA comment, mirrored Bugsnag-linked GitHub comment — must be written in the language of the source assignment. Code identifiers, file paths, severity labels, and CLI commands follow the rule's *Scope clarifications*.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Follow project architecture and testing rules
 - Do not expose sensitive/internal details in user-facing messages

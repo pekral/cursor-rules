@@ -16,7 +16,7 @@ Run a full code review for GitHub pull requests and publish findings directly to
 
 ## Constraints
 - Apply @rules/git/general.mdc
-- All output posted to GitHub must be in English
+- Apply @rules/reports/general.mdc — every PR comment, linked-issue comment, and mirrored summary posted to GitHub must be written in the language of the source assignment (issue / JIRA description). Code identifiers, file paths, line numbers, and severity labels follow the rule's *Scope clarifications*.
 - **Read-only skill** — never modify code, never stage / commit / push changes, and never run any git write operation (`git add`, `git commit`, `git push`, `git reset`, `git checkout -- …`, etc.). Switching to the relevant branch and `git pull` to read the latest diff are allowed; mutating the working tree or pushing to the remote is not. Publishing is limited to PR / linked-issue comments via `gh`.
 - Output findings only (no praise)
 

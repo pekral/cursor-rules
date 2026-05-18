@@ -1,0 +1,33 @@
+---
+description: Language rule for reports published to issue trackers (GitHub, JIRA, Bugsnag)
+alwaysApply: false
+globs: []
+---
+
+## Tracker-Published Reports — Language
+
+Every report a skill publishes to an issue tracker **must be written in the same language as the source assignment**. When the GitHub issue / JIRA ticket / Bugsnag-linked issue description is in Czech, the published report is in Czech; when it is in English, the published report is in English. This applies to every tracker target and every tracker output, including:
+
+- technical code-review findings posted as a GitHub PR comment
+- non-technical PR / issue / JIRA summaries (`pr-summary`, `assignment-compliance-check`, `tester-cookbook`)
+- security-review reports published on the PR or linked issue
+- analyze-problem / resolve-issue / test-like-human reports surfaced on the tracker
+- process-code-review reply comments
+
+### How to detect the assignment language
+1. Read the issue description and the most recent author-written comment off the deterministic loader (`skills/code-review-github/scripts/load-issue.sh` for GitHub, `skills/code-review-jira/scripts/load-issue.sh` for JIRA). The wording the reporter used there is the canonical signal.
+2. When the issue body is empty or contains only a screenshot, fall back to the language of the linked JIRA ticket, the parent epic, or the PR description written by the same reporter.
+3. When no signal is available, default to English and state the assumption in the published report's footer.
+
+### Scope clarifications
+- **Code identifiers stay verbatim.** Class names, file paths, function names, error codes, enum cases, configuration keys, route paths, and similar machine-readable tokens keep their original form regardless of the surrounding prose language. Do not translate `App\Actions\ProcessPayment` into the assignment language.
+- **PR titles and commit messages stay in English** per `@rules/git/general.mdc`. The language-matching rule applies to report bodies posted as comments / descriptions, not to git metadata.
+- **In-conversation status, terminal output, and debug logs may stay in English.** Only tracker-facing reports follow the assignment language.
+- **Severity labels follow the report language.** When the report is in Czech, use the Czech equivalents (e.g. *Kritické*, *Závažné*, *Drobné*) and keep the original English term in parentheses on the first occurrence so cross-language readers can map them. When the report is in English, keep the canonical *Critical / Moderate / Minor* labels.
+- **Do not mix languages within a single comment.** Pick the assignment language and stick to it for every prose sentence in the report.
+
+### Failure modes to avoid
+- Posting an English CR comment on a Czech-language JIRA ticket because the skill's default was English.
+- Translating code identifiers (class / method / enum names) along with the prose.
+- Posting in the language of the agent's chat session instead of the language of the assignment.
+- Switching mid-comment between Czech and English when quoting requirements verbatim — quote the requirement verbatim, then explain it in the assignment language.

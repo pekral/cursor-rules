@@ -13,7 +13,7 @@ metadata:
 - Apply `@rules/code-review/frontend.mdc`
 - Apply `@rules/code-review/mobile.mdc`
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
-- Output must be in English
+- Apply @rules/reports/general.mdc — when the audit report is published to a tracker (PR comment, linked-issue comment), it must be written in the language of the source assignment. Code identifiers, file paths, CWE / OWASP labels, and severity labels follow the rule's *Scope clarifications*.
 - Focus on realistic, exploitable issues
 - Never reveal secrets
 - **Read-only skill** — never modify code, never stage / commit / push changes, and never run any git write operation (`git add`, `git commit`, `git push`, `git reset`, `git checkout -- …`, etc.). Switching to the relevant branch and `git pull` to read the latest diff are allowed; mutating the working tree or pushing to the remote is not. Output is the audit report only.

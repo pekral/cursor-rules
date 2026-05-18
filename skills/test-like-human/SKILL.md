@@ -10,6 +10,7 @@ metadata:
 - Apply `@rules/php/core-standards.mdc`
 - Apply `@rules/git/general.mdc`
 - Apply `@rules/jira/general.mdc`
+- Apply `@rules/reports/general.mdc` — the tracker comment delegated to `@skills/pr-summary/SKILL.md` and any per-scenario annotations folded into it must be written in the language of the source assignment. The in-conversation dev-team follow-up may stay in English.
 - Output must be human-readable (no technical logs or internal details)
 - Focus on user-visible behavior, not implementation
 

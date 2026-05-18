@@ -11,7 +11,7 @@ metadata:
 - Apply `@rules/security/backend.md`
 - Apply `@rules/security/frontend.md`
 - Apply `@rules/security/mobile.md`
-- Output must be in English
+- Apply `@rules/reports/general.mdc` — when the remediation report is published to a tracker (issue comment, PR comment, JIRA comment), it must be written in the language of the source assignment (issue / advisory write-up framed in the project's tracker). CVE / GHSA identifiers, CWE / OWASP labels, package names, and code identifiers stay verbatim per the rule's *Scope clarifications*.
 - Never include exploit payloads in a form ready for live attack; always redact secrets, PII, and identifying tokens
 - Do not modify code in this skill — it produces a report only
 - Do not duplicate `@skills/security-review/SKILL.md`; that skill audits the whole project, this skill analyzes one referenced external threat

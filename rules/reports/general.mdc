@@ -22,9 +22,11 @@ The single, narrowly scoped exception: **the technical code-review comment poste
 
 - `@skills/code-review-github/SKILL.md` PR comments (full CR template — Status, Counts, Findings, Refactoring, Coverage, Summary line)
 - `@skills/code-review-jira/SKILL.md` GitHub-side PR comments (the technical findings half of its split publish)
+- `@skills/code-review/SKILL.md` review markdown — produced for the wrappers above and never published directly, but the output is shaped for the exception channel and therefore stays English at source
 - `@skills/process-code-review/SKILL.md` reply comments on the PR (resolved-items follow-up)
 - `@skills/security-review/SKILL.md` audit findings when they are folded into the GitHub PR comment
 - `@skills/security-threat-analysis/SKILL.md` remediation reports when posted as a PR comment
+- `@skills/resolve-issue/SKILL.md` final technical report posted on the PR (code-review / security-review / test-like-human summary block) — same channel as the CR wrappers above
 
 These comments stay in English because they (a) are machine-parsed by `@skills/process-code-review/SKILL.md` for reproducer extraction; (b) carry severity labels (*Critical / Moderate / Minor* / *High / Low*), structured field labels (*Location*, *Rule*, *Impact*, *Faulty Example*, *Expected Behavior*, *Test Hint*, *Suggested Fix*), and rule references that already exist in English elsewhere in the codebase; (c) live next to code identifiers, error messages, and discussion threads from non-Czech contributors. Translating them creates parsing breakage and cross-language drift without helping the reader.
 

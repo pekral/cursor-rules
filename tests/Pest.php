@@ -88,6 +88,28 @@ function installerCountFiles(string $dir): int
     return $count;
 }
 
+/**
+ * Builds a Clover XML document from a list of [file path, list of [line, type, count]] tuples.
+ *
+ * @param array<array{0: string, 1: array<array{0: int, 1: string, 2: int}>}> $files
+ */
+function coverageDiffCheckBuildClover(array $files): string
+{
+    $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<coverage><project>";
+
+    foreach ($files as [$path, $lines]) {
+        $xml .= sprintf('<file name="%s">', htmlspecialchars($path, ENT_XML1 | ENT_QUOTES));
+
+        foreach ($lines as [$num, $type, $count]) {
+            $xml .= sprintf('<line num="%d" type="%s" count="%d"/>', $num, $type, $count);
+        }
+
+        $xml .= '</file>';
+    }
+
+    return $xml . '</project></coverage>';
+}
+
 function installerRestoreEnvAndCleanup(string|false $homeBefore, string $originalCwd, string $root): void
 {
     if ($homeBefore !== false && $homeBefore !== '') {

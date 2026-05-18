@@ -1,12 +1,15 @@
+*Authors:* [JIRA display name(s) — or {{Name <email>}} when no JIRA account matches; comma-separated in commit order; never the agent / CR identity]
+*Available behind:* [optional — present only when the change is reachable only behind a test parameter; name the toggle (admin switch label _New pricing preview_, ENV {{BETA_PRICING=1}}, query {{?preview=1}}, feature key {{feature.new_pricing}}) and the value required to reach it; omit this line entirely when the change is reachable unconditionally]
+
 h2. Summary of changes
 
 *[Short headline naming the change — one line]*
 
-[One paragraph (3–5 sentences) in plain language explaining the business reason, the affected area, and just enough technical context (integration, payload, table, endpoint, …) that a developer can locate the change without reading the diff.]
+[One paragraph (3–5 sentences) in plain language explaining the business reason, the affected area, and just enough technical context (integration, payload, table, endpoint, …) that a developer can locate the change without reading the diff. Phrase impersonally — _The change …_, _This update …_ — never first person.]
 
 h2. How to test
 
-# [First action a tester performs]
+# [If _Available behind_ is set, this step *must* enable the toggle / supply the parameter / switch the admin flag — naming the exact value]
 # [Next action a tester performs]
 # [Outcome the tester verifies]
 

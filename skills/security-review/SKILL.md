@@ -16,6 +16,7 @@ metadata:
 - Output must be in English
 - Focus on realistic, exploitable issues
 - Never reveal secrets
+- **Read-only skill** — never modify code, never stage / commit / push changes, and never run any git write operation (`git add`, `git commit`, `git push`, `git reset`, `git checkout -- …`, etc.). Switching to the relevant branch and `git pull` to read the latest diff are allowed; mutating the working tree or pushing to the remote is not. Output is the audit report only.
 
 ## Scope
 Perform a focused security review with emphasis on:

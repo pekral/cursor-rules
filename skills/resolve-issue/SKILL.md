@@ -59,9 +59,13 @@ Before starting the resolution flow:
      - **Outdated items** — requests superseded by newer comments or decisions.
    - Use only the **current requirements** (combined with the issue description) as input for the next step.
 
+### Context preparation (mandatory pre-flight)
+
+Run `@skills/prepare-issue-context/SKILL.md` with `MODE=resolve-issue` and the same issue reference. It extracts every scenario from the assignment's *Jak otestovat* / acceptance criteria, maps each scenario to a concrete code path, seeds the development database with the records the scenarios depend on, and runs a one-shot reproduction. Stop immediately and surface the gap list to the user when the skill returns `blocked: <count> open gap(s)` — do **not** continue into problem analysis with incomplete context, because an implementing agent forced to guess at missing data is the most common source of hallucinated fixes. The scenario table the skill produces is the canonical input for the next step.
+
 ### Problem analysis
 
-6. Run `@skills/analyze-problem/SKILL.md` using the issue description, current requirements from comment analysis, and any available context as input.
+6. Run `@skills/analyze-problem/SKILL.md` using the issue description, the scenario table from the context-preparation pre-flight, the current requirements from comment analysis, and any available context as input.
 7. Review the analysis output and split the identified items into two groups:
    - **In scope** — items that directly match the issue requirements. These will be implemented.
    - **Out of scope** — items that are valid findings but fall outside the current issue. These will be added to the PR summary as a TODO list for future tasks.

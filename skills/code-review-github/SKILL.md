@@ -17,7 +17,7 @@ Run a full code review for GitHub pull requests and publish findings directly to
 ## Constraints
 - Apply @rules/git/general.mdc
 - All output posted to GitHub must be in English
-- Never modify code
+- **Read-only skill** — never modify code, never stage / commit / push changes, and never run any git write operation (`git add`, `git commit`, `git push`, `git reset`, `git checkout -- …`, etc.). Switching to the relevant branch and `git pull` to read the latest diff are allowed; mutating the working tree or pushing to the remote is not. Publishing is limited to PR / linked-issue comments via `gh`.
 - Output findings only (no praise)
 
 ---
@@ -55,7 +55,7 @@ Before reviewing code, load and analyze the full linked issue:
     - @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes that apply to lines actually touched by the PR. Do not propose changes outside the diff.
 
 - Run conditionally:
-    - Database changes → @skills/mysql-problem-solver/SKILL.md — when reviewing new or modified SQL / Eloquent / query-builder queries, prefer rewriting the query to reuse an existing schema index over proposing a new one (see `@rules/sql/optimalize.mdc` "Reuse existing indexes first")
+    - **Database operations detected in the diff → `@skills/mysql-problem-solver/SKILL.md` is mandatory.** Trigger pattern list is owned by `@skills/code-review/SKILL.md` Specialized Reviews (raw SQL, Eloquent / query-builder calls, eager loads, model scopes, ModelManager / Repository methods, migrations, seeders, DynamoDB / NoSQL access). Capture its findings and surface them in the published PR comment under the dedicated `## Database Analysis` section (see Output Rules) — never silently fold them into the Critical / Moderate / Minor buckets.
     - Shared state → @skills/race-condition-review/SKILL.md
     - Third-party API or service changes → ensure the **Third-Party API & Service Analysis** step from `@skills/code-review/SKILL.md` is executed for the diff
 
@@ -98,7 +98,9 @@ Before reviewing code, load and analyze the full linked issue:
     - post: "No findings identified"
 
 #### Issue tracker summary (mandatory)
-- After posting the PR comment, delegate the **non-technical summary on every linked issue** listed in `closingIssues[]` of the JSON loaded in step 1 to `@skills/pr-summary/SKILL.md`. This CR skill must not author its own non-technical template — the goal is a uniform *"Summary of changes + How to test"* output across both trackers that non-technical project managers understand and can act on.
+- After posting the PR comment, delegate the **non-technical summary on every linked issue** listed in `closingIssues[]` of the JSON loaded in step 1 to `@skills/pr-summary/SKILL.md`. This CR skill must not author its own non-technical template — the goal is a uniform *"Authors / Available behind / Summary of changes / How to test"* output across both trackers that non-technical project managers understand and can act on.
+- When invoking `pr-summary`, pass through the PR `author.login` + `commits[].author.login` set and the git `%an <%ae>` log so the published summary credits the **real change author(s)**, never the agent or the identity running this CR. `pr-summary` resolves and prints those identities in its `Authors` line — confirm the line is present in the published comment.
+- When invoking `pr-summary`, also pass through any **test-parameter gating** detected in the diff (feature flag, ENV switch, query-string parameter, request header, admin toggle, allow-list) so the published summary carries the `Available behind` line and folds the toggle-enabling step into `How to test` step 1. When the diff contains no such gate, confirm with `pr-summary` that the line is omitted intentionally rather than forgotten.
 - Invoke `@skills/pr-summary/SKILL.md` with the **GitHub** tracker target so it renders `@skills/pr-summary/templates/pr-summary-github.md` in GitHub Markdown and posts via `gh issue comment <number>` on every entry in `closingIssues[]`. `pr-summary` mirrors the same format that `@skills/code-review-jira/SKILL.md` posts to JIRA, so reviewers reading either tracker see the same summary.
 - `pr-summary` enforces the no-file-paths / no-line-numbers / no-code-snippets / no-severity-jargon contract by design; technical content stays exclusively on the PR comment.
 - If `closingIssues[]` is empty, skip this step and note "no linked issue — issue summary skipped" in the PR comment summary line.
@@ -122,7 +124,8 @@ Before reviewing code, load and analyze the full linked issue:
 - These four fields exist so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test and apply the fix directly from the PR comment.
 - Minor findings may omit these fields when no behavior change is implied.
 - If reviewed code violates project rules or architecture but is **out of scope** for the current PR, add a **Refactoring Proposals** section with issue drafts (justified by defined rules only)
-- The posted PR comment must always include a `## Coverage` section before the summary line. The section reports the tool used, command run, and coverage result for changed lines (or "tooling unavailable" with reason). Never post a CR comment without it.
+- When the diff touches database operations (per the trigger list in `@skills/code-review/SKILL.md` Specialized Reviews), the posted PR comment must include a dedicated `## Database Analysis` section **before** `## Coverage`. The section reports the queries / migrations inspected, the `mysql-problem-solver` findings (with severity mirroring Critical / Moderate / Minor), and the proposed query rewrite / index reuse / batching fix per `@rules/sql/optimalize.mdc`. When no DB operations are present, omit the section entirely.
+- The posted PR comment must always include a `## Coverage` section before the summary line. The section reports the **diff-scoped** script discovered (per the discovery order in `@skills/code-review/SKILL.md` Coverage gate — Phing `test:coverage:diff` / `coverage:diff`, Composer `test:coverage:diff`, or any project-specific `*coverage*diff*` script; this repository ships `composer test:coverage:diff`), the exact command run, and the coverage result for changed lines (or "diff-scoped tooling unavailable" with reason). Never substitute full-suite coverage output (`composer test:coverage`, `pest --coverage` on the whole suite, Phing `coverage`) and never post a CR comment without this section.
 - The PR comment summary line must report the issue-tracker summary status — `posted summary to issue #N` (or comma-separated list when multiple), `no linked issue — issue summary skipped`, or `failed to post on issue #N: <reason>` when a permission / network error occurs. Never post a CR comment without it.
 - End with summary line
 

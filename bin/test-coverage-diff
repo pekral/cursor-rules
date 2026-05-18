@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# Diff-scoped coverage gate for code-review skills.
+#
+# - Discovers changed PHP source files vs the base ref (origin/main → main → master → HEAD~1, or COVERAGE_DIFF_BASE).
+# - Picks coverage driver: PCOV if loaded, else Xdebug in coverage mode; aborts when neither is available.
+# - Picks source directory layout: Laravel projects (artisan + laravel/framework in composer.json) cover app/ and any extra src/;
+#   non-framework projects cover src/.
+# - Runs Pest with --coverage-clover=coverage.diff.xml and delegates the gap analysis to bin/coverage-diff-check.php.
+#
+# Intended to be invoked via `composer test:coverage:diff` from CR skills. Exits 0 when every changed line is covered,
+# 1 when a gap exists, 2 for environment / tooling problems.
+
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "${ROOT_DIR}"
+
+BASE_REF="${COVERAGE_DIFF_BASE:-}"
+if [[ -z "${BASE_REF}" ]]; then
+    if git rev-parse --verify --quiet origin/main >/dev/null; then
+        BASE_REF="origin/main"
+    elif git rev-parse --verify --quiet main >/dev/null; then
+        BASE_REF="main"
+    elif git rev-parse --verify --quiet origin/master >/dev/null; then
+        BASE_REF="origin/master"
+    elif git rev-parse --verify --quiet master >/dev/null; then
+        BASE_REF="master"
+    else
+        BASE_REF="HEAD~1"
+    fi
+fi
+
+IS_LARAVEL=0
+if [[ -f artisan ]] && grep -q '"laravel/framework"' composer.json 2>/dev/null; then
+    IS_LARAVEL=1
+fi
+
+SOURCE_DIRS=()
+if [[ "${IS_LARAVEL}" -eq 1 ]]; then
+    [[ -d app ]] && SOURCE_DIRS+=("app")
+    [[ -d src ]] && SOURCE_DIRS+=("src")
+else
+    [[ -d src ]] && SOURCE_DIRS+=("src")
+    [[ -d app ]] && SOURCE_DIRS+=("app")
+fi
+
+if [[ "${#SOURCE_DIRS[@]}" -eq 0 ]]; then
+    echo "❌ test-coverage-diff: no source directory (app/ or src/) found at ${ROOT_DIR}"
+    exit 2
+fi
+
+collect_changed() {
+    local ref="$1"
+    {
+        git diff --name-only --diff-filter=ACMRTUXB "${ref}...HEAD" -- "${SOURCE_DIRS[@]}" 2>/dev/null || true
+        git diff --name-only --diff-filter=ACMRTUXB -- "${SOURCE_DIRS[@]}" 2>/dev/null || true
+        git diff --name-only --cached --diff-filter=ACMRTUXB -- "${SOURCE_DIRS[@]}" 2>/dev/null || true
+        git ls-files --others --exclude-standard -- "${SOURCE_DIRS[@]}" 2>/dev/null || true
+    } | awk 'NF && /\.php$/' | sort -u
+}
+
+CHANGED_FILES="$(collect_changed "${BASE_REF}")"
+
+if [[ -z "${CHANGED_FILES}" ]]; then
+    echo "📊 No PHP source files changed against ${BASE_REF} — diff-scoped coverage skipped."
+    exit 0
+fi
+
+LOADED_MODULES="$(php -m)"
+if echo "${LOADED_MODULES}" | grep -qi '^pcov$'; then
+    COVERAGE_FLAGS=(-d pcov.enabled=1 -d "pcov.directory=$(IFS=,; echo "${SOURCE_DIRS[*]}")" -d pcov.exclude='~tests~' -d xdebug.mode=off)
+    DRIVER="PCOV"
+elif echo "${LOADED_MODULES}" | grep -qi '^xdebug$'; then
+    COVERAGE_FLAGS=(-d xdebug.mode=coverage)
+    DRIVER="Xdebug"
+else
+    echo "❌ test-coverage-diff: neither PCOV nor Xdebug is loaded — install one and re-run."
+    exit 2
+fi
+
+PEST_BIN="vendor/bin/pest"
+if [[ ! -x "${PEST_BIN}" ]]; then
+    echo "❌ test-coverage-diff: ${PEST_BIN} not found — install dev dependencies first."
+    exit 2
+fi
+
+CLOVER_PATH="${COVERAGE_DIFF_CLOVER:-coverage.diff.xml}"
+
+echo "📊 Diff-scoped coverage (driver: ${DRIVER}, base: ${BASE_REF}, layout: $([ "${IS_LARAVEL}" -eq 1 ] && echo Laravel || echo plain-PHP))"
+echo "${CHANGED_FILES}" | sed 's/^/  · /'
+
+PEST_ARGS=(--coverage-clover "${CLOVER_PATH}" tests)
+if [[ "${IS_LARAVEL}" -eq 1 ]]; then
+    PEST_ARGS+=(--colors=never)
+fi
+
+php "${COVERAGE_FLAGS[@]}" "${PEST_BIN}" "${PEST_ARGS[@]}"
+
+php bin/coverage-diff-check.php "${CLOVER_PATH}" "${BASE_REF}"

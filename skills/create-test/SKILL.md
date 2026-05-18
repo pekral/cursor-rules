@@ -45,7 +45,7 @@ Create or update tests to cover current changes according to project conventions
 
 ### 5. Verify Coverage
 - Ensure 100% code coverage for all changed or added code paths
-- If coverage tooling exists, run it and verify the result
+- If coverage tooling exists, run **only the diff-scoped command** (discovery order per `@skills/code-review/SKILL.md` Coverage gate — Phing `test:coverage:diff` / `coverage:diff`, Composer `test:coverage:diff`, or any project-specific `*coverage*diff*` script; this repository ships `composer test:coverage:diff`) and verify the result. Do not run the full-suite coverage command (`composer test:coverage`, Phing `coverage`, `pest --coverage --min=100` on the whole suite) — full-suite coverage is for release gates, not for verifying current changes.
 
 ### 6. Code Style and Quality Gates
 - Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`)

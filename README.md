@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **26 comprehensive Agent skills** for automated workflows (v0.8)
+- **27 comprehensive Agent skills** for automated workflows (v0.8)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -101,7 +101,7 @@ vendor/bin/cursor-rules install --editor=cursor --symlink     # prefer symlinks 
 
 # 🎯 Skills Overview — **v0.8**
 
-> Current release includes 26 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
+> Current release includes 27 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -129,6 +129,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `code-review-jira` | Review changes linked to a JIRA ticket; posts technical findings on the GitHub PR and a non-technical `pr-summary` comment on the JIRA ticket (with mirrored summary on any linked GitHub issues). |
 | `process-code-review` | Process existing review feedback, resolve comments, and prepare next review cycle. |
 | `security-review` | OWASP-focused security review (injection, auth, SSRF, exposure, misconfigurations). |
+| `security-threat-analysis` | Analyze a specific security threat from a referenced source (CVE, GHSA, advisory, blog post). Produces a human-readable remediation report with ordered, agent-actionable steps and a verification check. |
 | `class-refactoring` | Refactor PHP classes using SOLID and Laravel best practices with testability focus. |
 | `refactor-entry-point-to-action` | Refactor controller/job/command/listener entry-point logic into Action classes. |
 | `smartest-project-addition` | Propose one high-impact, low-risk project improvement. |

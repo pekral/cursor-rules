@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use Pekral\CursorRules\CoverageDiffCheck;
+use Pekral\CursorRules\CoverageDiffCheckFailure;
 
 it('parseUnifiedDiff returns the expected changed-line map', function (string $diff, array $expected): void {
     expect(CoverageDiffCheck::parseUnifiedDiff($diff))->toBe($expected);
@@ -156,7 +157,7 @@ it('findGapsInClover walks files nested under <package> in addition to direct <p
 
 it('findGapsInClover throws when the XML is malformed', function (): void {
     CoverageDiffCheck::findGapsInClover('<not-xml', ['src/Foo.php' => [1 => true]], '/repo');
-})->throws(RuntimeException::class, 'Invalid Clover XML');
+})->throws(CoverageDiffCheckFailure::class, 'Invalid Clover XML');
 
 it('findGapsInClover throws when the XML has no <project> root', function (): void {
     CoverageDiffCheck::findGapsInClover(
@@ -164,7 +165,7 @@ it('findGapsInClover throws when the XML has no <project> root', function (): vo
         ['src/Foo.php' => [1 => true]],
         '/repo',
     );
-})->throws(RuntimeException::class, 'Invalid Clover XML');
+})->throws(CoverageDiffCheckFailure::class, 'Invalid Clover XML');
 
 it('discoverChangedLines returns an array shape for the current repository state', function (): void {
     $result = CoverageDiffCheck::discoverChangedLines('HEAD');

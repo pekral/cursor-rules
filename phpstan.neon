@@ -3,6 +3,7 @@ parameters:
     paths:
         - src
         - tests
+        - bin
     tmpDir: build/phpstan
     treatPhpDocTypesAsCertain: false
 

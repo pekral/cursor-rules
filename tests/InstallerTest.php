@@ -1275,6 +1275,30 @@ test('assignment-compliance-check returns markdown to the caller without publish
     expect($jira)->not->toContain('**do not duplicate** its Critical gaps inside the JIRA non-technical summary');
 });
 
+test('refactoring requires pre-refactor 100% coverage and unchanged tests in the refactor commit (issue #493)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $rule = (string) file_get_contents($packageDir . '/rules/refactoring/general.mdc');
+    $classRefactoring = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($rule)->toContain('## Test Coverage Contract (mandatory — issue #493)');
+    expect($rule)->toContain('Before the refactor commit — verify 100% coverage of the target lines.');
+    expect($rule)->toContain('Add missing tests in a dedicated commit before the refactor commit.');
+    expect($rule)->toContain('The refactor commit must not modify pre-existing tests.');
+    expect($rule)->toContain('`test(scope): cover <area> before refactor`');
+    expect($rule)->toContain('**Enforce the Test Coverage Contract above on every refactor PR.**');
+
+    expect($classRefactoring)->toContain('### Test Coverage Gate (mandatory pre-flight — issue #493)');
+    expect($classRefactoring)->toContain('**If coverage is below 100% on the target lines, stop and write the missing tests first.**');
+    expect($classRefactoring)->toContain('**Do not modify pre-existing tests inside the refactor commit.**');
+    expect($classRefactoring)->toContain('`@rules/refactoring/general.mdc` Test Coverage Contract');
+
+    expect($codeReview)->toContain('**Refactoring test-coverage contract (issue #493)**');
+    expect($codeReview)->toContain('Walk the PR commit history and verify the refactor commit is **preceded by a dedicated test commit**');
+    expect($codeReview)->toContain('Verify the refactor commit **modifies no pre-existing test file**');
+    expect($codeReview)->toContain('Run `vendor/bin/test-coverage-diff` against the refactor commit alone');
+});
+
 test('CR run produces one consolidated linked-tracker comment per linked issue (issue #498)', function (): void {
     $packageDir = dirname(__DIR__);
     $prSummary = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');

@@ -7,10 +7,27 @@
 #   non-framework projects cover src/.
 # - Runs Pest with --coverage-clover=coverage.diff.xml and delegates the gap analysis to bin/coverage-diff-check.php.
 #
-# Intended to be invoked via `composer test:coverage:diff` from CR skills. Exits 0 when every changed line is covered,
-# 1 when a gap exists, 2 for environment / tooling problems.
+# Designed to be invoked as `vendor/bin/test-coverage-diff` (composer-installed binary) from any
+# consuming project — also works as `composer test:coverage:diff` inside this package. Exits 0
+# when every changed line is covered, 1 when a gap exists, 2 for environment / tooling problems.
 
 set -euo pipefail
+
+# Resolve the physical location of this script (follows symlinks composer creates under vendor/bin)
+# so that bin/coverage-diff-check.php is found next to it, not in the consuming project's bin/.
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [[ -L "${SCRIPT_PATH}" ]]; do
+    LINK_DIR="$(cd "$(dirname "${SCRIPT_PATH}")" && pwd)"
+    SCRIPT_PATH="$(readlink "${SCRIPT_PATH}")"
+    [[ "${SCRIPT_PATH}" != /* ]] && SCRIPT_PATH="${LINK_DIR}/${SCRIPT_PATH}"
+done
+SCRIPT_DIR="$(cd "$(dirname "${SCRIPT_PATH}")" && pwd)"
+HELPER_PHP="${SCRIPT_DIR}/coverage-diff-check.php"
+
+if [[ ! -f "${HELPER_PHP}" ]]; then
+    echo "❌ test-coverage-diff: helper script not found at ${HELPER_PHP}"
+    exit 2
+fi
 
 ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "${ROOT_DIR}"
@@ -96,4 +113,4 @@ fi
 
 php "${COVERAGE_FLAGS[@]}" "${PEST_BIN}" "${PEST_ARGS[@]}"
 
-php bin/coverage-diff-check.php "${CLOVER_PATH}" "${BASE_REF}"
+php "${HELPER_PHP}" "${CLOVER_PATH}" "${BASE_REF}"

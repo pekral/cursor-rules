@@ -83,7 +83,7 @@ final class InstallerClaudeSettings
             return 0;
         }
 
-        self::ensureDirectoryExists(dirname($settingsPath));
+        InstallerPath::ensureDirectory(dirname($settingsPath));
         self::writeSettings($settingsPath, $merged);
 
         return $added;
@@ -196,21 +196,6 @@ final class InstallerClaudeSettings
 
         if ($written === false) {
             throw InstallerFailure::settingsJsonWriteFailed($path, 'file_put_contents returned false');
-        }
-    }
-
-    private static function ensureDirectoryExists(string $directory): void
-    {
-        if (is_dir($directory)) {
-            return;
-        }
-
-        set_error_handler(static fn (): bool => true);
-        $created = mkdir($directory, 0777, true);
-        restore_error_handler();
-
-        if (!$created && !is_dir($directory)) {
-            throw InstallerFailure::directoryCreationFailed($directory);
         }
     }
 

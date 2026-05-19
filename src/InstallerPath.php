@@ -54,6 +54,29 @@ final class InstallerPath
         return $home === false || $home === '' ? null : $home;
     }
 
+    /**
+     * Idempotently create a directory tree. Throws InstallerFailure when the path
+     * is occupied by a regular file or when mkdir cannot complete the tree.
+     */
+    public static function ensureDirectory(string $directory): void
+    {
+        if (is_dir($directory)) {
+            return;
+        }
+
+        if (is_file($directory)) {
+            throw InstallerFailure::directoryCreationFailed($directory);
+        }
+
+        set_error_handler(static fn (): bool => true);
+        $created = mkdir($directory, 0777, true);
+        restore_error_handler();
+
+        if (!$created && !is_dir($directory)) {
+            throw InstallerFailure::directoryCreationFailed($directory);
+        }
+    }
+
     public static function resolveRulesSource(string $root): string
     {
         $packageSource = self::getPackageDirectory() . '/rules';

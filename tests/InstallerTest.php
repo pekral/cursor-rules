@@ -1243,21 +1243,22 @@ test('assignment-compliance-check skill exists with required sections and writes
     expect($content)->not->toContain('.cursor-rules-reports');
 });
 
-test('assignment-compliance-check publishes to the originating issue tracker instead of embedding into the PR comment', function (): void {
+test('assignment-compliance-check returns markdown to the caller without publishing on its own', function (): void {
     $packageDir = dirname(__DIR__);
     $compliance = (string) file_get_contents($packageDir . '/skills/assignment-compliance-check/SKILL.md');
     $canonical = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
     $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
     $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
 
-    expect($compliance)->toContain('### 5. Publish the report to the issue tracker');
-    expect($compliance)->toContain('`gh issue comment <number> --body ...`');
-    expect($compliance)->toContain('Convert the comment body to **JIRA Wiki Markup**');
+    expect($compliance)->toContain('### 5. Return the report to the caller');
+    expect($compliance)->toContain(
+        '**Do not call `gh issue comment`, `acli`, the GitHub MCP server\'s `add_issue_comment`, or any JIRA write endpoint.**',
+    );
     expect($compliance)->toContain('no linked issue — assignment compliance skipped');
-    expect($compliance)->toContain('failed to publish assignment compliance on');
-    expect($compliance)->toContain('**must not** embed the Assignment Compliance content into the PR comment');
-    expect($compliance)->toContain('The comment carries no file paths, line numbers, or code snippets');
-    expect($compliance)->not->toContain('embedded in the published CR comment');
+    expect($compliance)->toContain('single consolidated linked-tracker comment authored by `@skills/pr-summary/SKILL.md`');
+    expect($compliance)->toContain('**must not** embed the Assignment Compliance content into the **GitHub PR** comment');
+    expect($compliance)->not->toContain('post via `gh issue comment <number> --body ...`');
+    expect($compliance)->not->toContain('post via `acli`');
     expect($compliance)->not->toContain('Embed the returned section verbatim');
     expect($compliance)->not->toContain('Where in the code');
 
@@ -1267,11 +1268,37 @@ test('assignment-compliance-check publishes to the originating issue tracker ins
         expect($wrapper)->not->toContain('Embed it verbatim into the GitHub PR comment');
     }
 
-    expect($github)->toContain('posted to issue #N');
     expect($github)->toContain('no linked issue — assignment compliance skipped');
+    expect($github)->toContain('one consolidated comment** per CR run');
 
-    expect($jira)->toContain('dedicated JIRA comment on the originating ticket');
-    expect($jira)->toContain('**do not duplicate** its Critical gaps inside the JIRA non-technical summary');
+    expect($jira)->toContain('one consolidated comment** per CR run');
+    expect($jira)->not->toContain('**do not duplicate** its Critical gaps inside the JIRA non-technical summary');
+});
+
+test('CR run produces one consolidated linked-tracker comment per linked issue (issue #498)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $prSummary = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+    $githubTemplate = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-github.md');
+    $jiraTemplate = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-jira.md');
+
+    expect($prSummary)->toContain('Embedded blocks (consolidation contract — issue #498)');
+    expect($prSummary)->toContain('append them **verbatim** after `How to test`');
+    expect($prSummary)->toContain('published once per linked tracker target');
+
+    expect($github)->toContain('#### Linked-issue consolidated summary (mandatory — single comment per linked issue)');
+    expect($github)->toContain('Consolidation contract (issue #498)');
+    expect($github)->toContain('exactly one comment per linked issue');
+
+    expect($jira)->toContain('#### JIRA (consolidated non-technical comment — one per CR run)');
+    expect($jira)->toContain('Consolidation contract (issue #498)');
+    expect($jira)->toContain('one consolidated JIRA comment');
+
+    expect($githubTemplate)->toContain('{embedded_blocks}');
+    expect($githubTemplate)->toContain('@skills/assignment-compliance-check/SKILL.md');
+    expect($jiraTemplate)->toContain('{embedded_blocks}');
+    expect($jiraTemplate)->toContain('@skills/assignment-compliance-check/SKILL.md');
 });
 
 test('process-code-review enforces a convergence loop with quiet iterations and a single final publish', function (): void {
@@ -1309,7 +1336,7 @@ test('JIRA non-technical CR summary delegates to pr-summary Wiki Markup template
     expect($rule)->toContain('`{code:php} ... {code}`');
     expect($rule)->toContain('`[label|https://example.com]`');
 
-    expect($skill)->toContain('Delegate the non-technical JIRA comment to `@skills/pr-summary/SKILL.md`');
+    expect($skill)->toContain('Delegate the JIRA comment to `@skills/pr-summary/SKILL.md`');
     expect($skill)->toContain('@skills/pr-summary/templates/pr-summary-jira.md');
     expect(is_file($packageDir . '/skills/code-review-jira/templates/jira-output.md'))->toBeFalse();
 });
@@ -1355,7 +1382,7 @@ test('code review skills delegate the non-technical issue-tracker summary to pr-
     $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
     $canonical = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
 
-    expect($github)->toContain('#### Issue tracker summary (mandatory)');
+    expect($github)->toContain('#### Linked-issue consolidated summary (mandatory — single comment per linked issue)');
     expect($github)->toContain('every linked issue');
     expect($github)->toContain('closingIssues[]');
     expect($github)->toContain('gh issue comment');
@@ -1365,14 +1392,14 @@ test('code review skills delegate the non-technical issue-tracker summary to pr-
     expect($github)->toContain('@skills/pr-summary/SKILL.md');
     expect($github)->toContain('@skills/pr-summary/templates/pr-summary-github.md');
 
-    expect($jira)->toContain('#### Linked GitHub issues (non-technical summary)');
+    expect($jira)->toContain('#### Linked GitHub issues (consolidated mirror — one per linked issue per CR run)');
     expect($jira)->toContain('gh issue comment');
     expect($jira)->toContain('no linked GitHub issue — mirror skipped');
     expect($jira)->toContain('cross-repo issue, lacking write access');
     expect($jira)->toContain('@skills/pr-summary/SKILL.md');
     expect($jira)->toContain('@skills/pr-summary/templates/pr-summary-jira.md');
 
-    expect($canonical)->toContain('must** delegate the non-technical summary');
+    expect($canonical)->toContain('must** delegate the **single consolidated comment on every linked issue**');
     expect($canonical)->toContain('every linked issue');
     expect($canonical)->toContain('@skills/pr-summary/SKILL.md');
 });

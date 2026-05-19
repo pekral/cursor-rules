@@ -12,3 +12,7 @@
 1. [If *Available behind* is set, this step **must** enable the toggle / supply the parameter / switch the admin flag — naming the exact value]
 2. [Next action a tester performs]
 3. [Outcome the tester verifies]
+
+{embedded_blocks}
+
+> Render the `{embedded_blocks}` slot only when the calling CR wrapper passes one or more markdown blocks (typically the `## Assignment Compliance` block returned by `@skills/assignment-compliance-check/SKILL.md`). Each block is appended verbatim, in the order received, separated by a single blank line. When no blocks are passed, omit this slot entirely — including the surrounding blank lines — so the comment ends right after `How to test`.

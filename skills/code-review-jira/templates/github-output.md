@@ -1,5 +1,7 @@
 # Code Review
 
+> **Section visibility — render only sections that have content.** Always render the header block (Status / Counts / Coverage / Linked-tracker mirror), the `## Coverage` section, and the final `Summary` line. Every other section is conditional: omit its heading and body entirely when it has no items. Never emit `None.` / `Not applicable.` / `n/a` placeholders for empty sections — drop the whole section instead. The Counts line in the header is the single source of "zero" signal; the goal is a clean, scannable PR comment a human can read at a glance.
+
 **Status:** clean / needs-fix
 **Counts:** Critical {n} · Moderate {n} · Minor {n} · Refactoring {n}
 **Coverage:** {result} (tool: {name or "not available — <reason>"})
@@ -9,7 +11,7 @@
 
 ## Previous CR Status
 
-> Only on follow-up reviews. Omit on first review.
+> Render only on follow-up reviews that have at least one previous finding to classify. Omit on first reviews and on follow-up reviews whose previous-finding list is empty.
 
 | # | Finding | Status |
 |---|---------|--------|
@@ -18,6 +20,8 @@
 ---
 
 ## Findings
+
+> Render only when at least one Critical, Moderate, or Minor finding exists. Within this section, render only the severity sub-headings that have items — omit the others entirely. When all three severities are empty, omit the entire `## Findings` parent heading.
 
 ### 🔴 Critical 1. <short title>
 
@@ -48,7 +52,7 @@
 
 ## Refactoring (DRY / tech debt)
 
-> Only items on lines touched by this PR. Each item must reduce tech debt — no stylistic preferences.
+> Render only when at least one in-scope refactoring item exists. Only items on lines touched by this PR. Each item must reduce tech debt — no stylistic preferences. Omit the entire section when there are no items.
 
 1. **Location:** `path/to/file.php:42`
    **Problem:** one sentence.
@@ -59,7 +63,7 @@
 
 ## Refactoring proposals
 
-> Out-of-scope structural improvements justified by rules. Omit when none.
+> Render only when at least one out-of-scope structural improvement is justified by a rule. Omit the entire section when there are no items.
 
 1. **Title:** short, actionable issue title
    **Scope:** affected file(s) or area

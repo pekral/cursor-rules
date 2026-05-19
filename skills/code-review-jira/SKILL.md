@@ -110,6 +110,7 @@ Before reviewing code, load and analyze the full JIRA issue:
 - All technical findings go exclusively to GitHub PR comments
 - Include: file paths, line numbers, code references, severity levels, concrete fixes
 - Findings only — no praise, no explanations of what was checked
+- **Omit empty sections entirely.** Only the header block (Status / Counts / Coverage / Linked-tracker mirror), the `## Coverage` section, and the final `Summary` line are always rendered in the GitHub PR comment. Every other section — `Previous CR Status`, `Findings` (including each severity sub-heading), `Refactoring (DRY / tech debt)`, `Refactoring proposals`, and `Database Analysis` — appears **only when it has at least one item**. Never emit `None.` / `Not applicable.` / `n/a` placeholders for empty sections; drop the whole heading and body instead. The Counts line is the single source of "zero" signal so a clean review stays scannable.
 - Use severity levels: Critical, Moderate, Minor
 - Each **Critical** and **Moderate** finding must include:
     - **Faulty Example** — minimal code snippet or input payload reproducing the issue (redact secrets/PII)

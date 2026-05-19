@@ -95,7 +95,7 @@ Before reviewing code, load and analyze the full linked issue:
 - Post all findings inside the single PR comment — never as line-anchored review comments.
 
 - If no findings:
-    - post: "No findings identified"
+    - post the header block (Status / Counts / Coverage / Issue tracker summary), the `## Coverage` section, and the final `Summary` line only. Omit every other section entirely. Do not append a "No findings identified" line — the Counts line `Critical 0 · Moderate 0 · Minor 0 · Refactoring 0` already signals the clean state and the omitted sections confirm there is nothing to fix.
 
 #### Issue tracker summary (mandatory)
 - After posting the PR comment, delegate the **non-technical summary on every linked issue** listed in `closingIssues[]` of the JSON loaded in step 1 to `@skills/pr-summary/SKILL.md`. This CR skill must not author its own non-technical template — the goal is a uniform *"Authors / Available behind / Summary of changes / How to test"* output across both trackers that non-technical project managers understand and can act on.
@@ -114,6 +114,7 @@ Before reviewing code, load and analyze the full linked issue:
 - Findings only
 - No praise
 - No “what was checked”
+- **Omit empty sections entirely.** Only the header block (Status / Counts / Coverage / Issue tracker summary), the `## Coverage` section, and the final `Summary` line are always rendered in the PR comment. Every other section — `Previous CR Status`, `Findings` (including each severity sub-heading), `Refactoring (DRY / Tech Debt Reduction)`, `Refactoring Proposals`, and `Database Analysis` — appears **only when it has at least one item**. Never emit `None.` / `Not applicable.` / `n/a` placeholders for empty sections; drop the whole heading and body instead. The Counts line is the single source of "zero" signal so a clean review stays scannable.
 - Use exactly three severity levels: Critical, Moderate, Minor
 - Add a **Refactoring (DRY / Tech Debt Reduction)** section after the Minor findings whenever the diff contains in-scope tech-debt-reducing changes (DRY duplication, oversized methods, mixed responsibilities). Each item must include `file:line` and a concrete refactoring step.
 - Each **Critical** and **Moderate** finding must include:

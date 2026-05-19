@@ -62,7 +62,8 @@
     }
   },
   "bin": [
-    "bin/cursor-rules"
+    "bin/cursor-rules",
+    "bin/test-coverage-diff"
   ],
   "archive": {
     "exclude": [

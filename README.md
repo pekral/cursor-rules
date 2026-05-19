@@ -200,6 +200,16 @@ composer coverage           # alias for test:coverage
 composer security-audit     # run security audit of dependencies
 ```
 
+### Diff-scoped coverage in consuming projects
+
+This package ships a ready-to-use diff-scoped coverage runner so the CR skills do not need to create a per-project `composer test:coverage:diff` script. Once installed via Composer, invoke it directly from the consuming project's root:
+
+```bash
+vendor/bin/test-coverage-diff
+```
+
+It auto-discovers the base ref (`origin/main` → `main` → `origin/master` → `master` → `HEAD~1`, overridable via `COVERAGE_DIFF_BASE`), picks the available coverage driver (PCOV first, then Xdebug), and auto-detects Laravel layouts (`app/` + `src/`) vs non-framework layouts (`src/`). It exits `0` when every changed line is covered, `1` on an uncovered-changed-line gap, and `2` on environment / tooling problems. The CR skills (`code-review`, `code-review-github`, `code-review-jira`, `process-code-review`, `create-missing-tests-in-pr`, `create-test`) use this binary as the canonical diff-scoped entry point.
+
 ### Individual Commands
 
 ```bash

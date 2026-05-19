@@ -160,6 +160,7 @@ Run this section over the PR diff only — never over untouched code.
 
 - Output only findings
 - No praise, no summaries of what was checked
+- **Omit empty sections entirely.** Only the header block (Status / Counts / Coverage / tracker-status line), the `## Coverage` section, and the final `Summary` line are always rendered. Every other section — `Previous CR Status`, `Findings` (including each severity sub-heading), `Refactoring (DRY / tech debt)`, `Refactoring proposals`, `Database Analysis`, and any specialized-review sub-section — appears **only when it has at least one item**. Never emit `None.` / `Not applicable.` / `n/a` placeholders for empty sections; drop the whole heading and body instead. The Counts line in the header is the single source of "zero" signal so a clean review stays scannable.
 - Use severity levels:
     - Critical
     - Moderate

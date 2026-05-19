@@ -1499,6 +1499,40 @@ test('code review templates include refactoring tech debt section', function ():
     }
 });
 
+test('code review output omits empty sections instead of rendering placeholders', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    $templates = [
+        $packageDir . '/skills/code-review/templates/review-output.md',
+        $packageDir . '/skills/code-review-github/templates/pr-comment-output.md',
+        $packageDir . '/skills/code-review-jira/templates/github-output.md',
+    ];
+
+    foreach ($templates as $template) {
+        $content = (string) file_get_contents($template);
+        expect($content)->toContain('Section visibility — render only sections that have content.');
+        expect($content)->toContain('Render only when at least one Critical, Moderate, or Minor finding exists.');
+        expect($content)->toContain('Render only when at least one in-scope refactoring item exists.');
+        expect($content)->toContain('Render only when at least one out-of-scope structural improvement is justified by a rule.');
+        expect($content)->toContain('Render only on follow-up reviews that have at least one previous finding to classify.');
+    }
+
+    $skills = [
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+    ];
+
+    foreach ($skills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('**Omit empty sections entirely.**');
+        expect($content)->toContain('the single source of "zero" signal');
+    }
+
+    $githubSkill = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    expect($githubSkill)->not->toContain('post: "No findings identified"');
+});
+
 test('install preserves executable bit on shipped scripts', function (): void {
     $root = installerCreateProjectRoot();
     $cwd = getcwd();

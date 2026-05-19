@@ -1419,33 +1419,39 @@ test('class-refactoring skill enforces the seven business logic layers including
     expect($content)->toContain('**Eloquent model**');
 });
 
-test('code-review skill After Completion section runs test-like-human unconditionally', function (): void {
+test('code-review skill After Completion section keeps test-like-human on demand', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
 
-    expect($content)->toMatch('/##\s*After Completion[^#]*Always run @skills\/test-like-human\/SKILL\.md, regardless of code review findings\./s');
-    expect($content)->not->toContain('If no **Critical** or **Moderate**');
+    expect($content)->not->toMatch('/##\s*After Completion[^#]*Always run @skills\/test-like-human\/SKILL\.md/s');
+    expect($content)->toMatch('/##\s*After Completion[^#]*Do \*\*not\*\* auto-invoke `@skills\/test-like-human\/SKILL\.md`/s');
 });
 
-test('code-review-jira skill After Completion section runs test-like-human unconditionally', function (): void {
+test('code-review-jira skill After Completion section keeps test-like-human on demand', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
 
-    expect($content)->toMatch('/##\s*After Completion[^#]*Always run @skills\/test-like-human\/SKILL\.md, regardless of code review findings\./s');
-    expect($content)->not->toContain('If no **Critical** or **Moderate**');
+    expect($content)->not->toMatch('/##\s*After Completion[^#]*Always run @skills\/test-like-human\/SKILL\.md/s');
+    expect($content)->toMatch('/##\s*After Completion[^#]*Do \*\*not\*\* auto-invoke `@skills\/test-like-human\/SKILL\.md`/s');
 });
 
-test('test-like-human guard rejects gating regressions', function (): void {
-    $guardRegex = '/##\s*After Completion[^#]*Always run @skills\/test-like-human\/SKILL\.md, regardless of code review findings\./s';
-    $regressionWithGating = "## After Completion\n\n- If no **Critical** or **Moderate** findings:\n  - run @skills/test-like-human/SKILL.md\n";
-    $regressionWithoutRegardless = "## After Completion\n\n- Always run @skills/test-like-human/SKILL.md\n";
-    $regressionDirectiveOutsideSection = "## Other Section\n\n"
-        . "- Always run @skills/test-like-human/SKILL.md, regardless of code review findings.\n"
-        . "## After Completion\n\n- something else\n";
+test('CR and resolution skills never auto-invoke test-like-human', function (): void {
+    $packageDir = dirname(__DIR__);
+    $forbiddenSubstrings = [
+        'Always run @skills/test-like-human/SKILL.md, regardless of code review findings',
+        'Run @skills/test-like-human/SKILL.md if changes are testable',
+        '- Run `@skills/test-like-human/SKILL.md`',
+        '2. Run `@skills/test-like-human/SKILL.md`',
+    ];
+    $skills = ['code-review', 'code-review-github', 'code-review-jira', 'process-code-review', 'resolve-issue'];
 
-    expect((bool) preg_match($guardRegex, $regressionWithGating))->toBeFalse();
-    expect((bool) preg_match($guardRegex, $regressionWithoutRegardless))->toBeFalse();
-    expect((bool) preg_match($guardRegex, $regressionDirectiveOutsideSection))->toBeFalse();
+    foreach ($skills as $skill) {
+        $content = (string) file_get_contents($packageDir . '/skills/' . $skill . '/SKILL.md');
+
+        foreach ($forbiddenSubstrings as $needle) {
+            expect($content)->not->toContain($needle);
+        }
+    }
 });
 
 test('every code review skill references class-refactoring skill', function (): void {

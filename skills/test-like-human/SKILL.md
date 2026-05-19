@@ -18,6 +18,8 @@ metadata:
 - You need to validate a pull request from a real user perspective
 - You want structured testing based on PR instructions
 
+This skill runs **on demand only** — never auto-chained from `@skills/code-review/SKILL.md`, `@skills/code-review-github/SKILL.md`, `@skills/code-review-jira/SKILL.md`, `@skills/process-code-review/SKILL.md`, or `@skills/resolve-issue/SKILL.md`. Invoke it explicitly via `/test-like-human` (or the equivalent in-conversation request) after the CR has been published, when a real user-perspective validation is genuinely wanted.
+
 ## Required approach
 
 ### 1. Understand the context

@@ -81,7 +81,7 @@ Provide a brief markdown summary including:
 -   Confirm whether current changes now meet the required test coverage (must be 100%).
 -   If something is still missing, clearly describe the blocker or
     uncovered scenario.
-- Ask for create new commit with missing tests
+- Create a new commit with the missing tests
 - If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!
 
 ## Principles

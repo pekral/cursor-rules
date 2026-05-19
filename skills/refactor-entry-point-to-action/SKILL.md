@@ -22,7 +22,7 @@ metadata:
 Always include:
 - Entry-point file path
 - Target method (`Class::method`)
-- Expected Action class name and domain folder, or ask to propose one
+- Expected Action class name and domain folder (optional — the skill proposes a default name and domain when not provided, instead of asking the user)
 - Any response/signature compatibility constraints
 
 Example input:

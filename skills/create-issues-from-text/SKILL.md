@@ -29,7 +29,7 @@ Split a complex assignment into multiple clear, structured issues.
 
 ### 2. Propose Breakdown
 - List steps with short descriptions
-- Wait for confirmation (if not explicitly skipped)
+- Proceed directly to step 3; do not gate on a confirmation round when the breakdown is unambiguous
 
 ### 3. Create Issues
 - One issue per step

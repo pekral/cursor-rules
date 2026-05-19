@@ -90,6 +90,24 @@ Run this section only when the diff integrates with, modifies, or depends on a t
 - Repository scope — verify Repositories expose only basic, reusable queries (`find`, `findBy{Attribute}`, `all`, simple `where` lookups, pagination of a base scope). Feature-specific or use-case–specific query methods in Repositories are a finding; specialization belongs in a Service (single-model) or Action (cross-model / cross-feature) composing basic Repository methods (see `@rules/laravel/architecture.mdc` Repositories and ModelManagers section)
 - Data Modification (DRY) — enumerate every place in the changes that modifies data before it is saved or passed downstream (DTO mapping, payload shaping, key renaming, default fallbacks, format normalization, business-driven derivation). Cross-check against existing entry points; if the same shaping appears in more than one Action / Service / controller / job / listener / Livewire component / command, flag it and require consolidation into the canonical layer (Data Builder, DTO named constructor, Data Validator, ModelManager, Repository — see `@rules/laravel/architecture.mdc` Data Modification (DRY) section). Output the list of modification places explicitly in the review so the duplication picture is visible.
 
+### Highest-Priority Fast Track
+
+Apply this subsection only when the source issue is flagged as **highest priority**, so the bug fix can deploy as fast as possible without sacrificing the Critical / Moderate gate.
+
+1. **Detect highest priority** from the issue context already loaded under **Issue Context Analysis**:
+   - **GitHub:** any label whose name matches (case-insensitively) `priority: highest`, `priority/highest`, `priority-highest`, `p0`, `urgent`, or `blocker`.
+   - **JIRA:** the native `priority` field equals `Highest` or `Blocker`.
+   - **Bugsnag:** the linked GitHub issue carries one of the GitHub labels above.
+   If no signal matches, skip the rest of this subsection and run the review normally.
+2. **Narrow the review scope** to whatever directly affects the bug fix and its safe deployment. Out-of-scope improvements that the diff merely happens to sit near must be moved to **Refactoring Proposals** as follow-up items, never blockers.
+3. **Keep the resolution gate at Critical and Moderate.** No widening, no narrowing — those two severities still block the merge, exactly as in the default flow. State this explicitly in the review header so the caller does not have to infer it.
+4. **Demote non-blocking sections to follow-up only.** Still emit them so nothing is lost, but mark each entry as *follow-up; does not block merge*:
+   - **Minor** findings (naming, dead code, wording nits without a binding rule).
+   - **Refactoring & Tech Debt (DRY) Analysis** entries that propose changes beyond the literal bug fix.
+   - **Refactoring Proposals** drafted for separate issues.
+   Critical and Moderate findings, the **Strict rule compliance** walk-through, the **Coverage gate**, the **Database Analysis** section, and every **Specialized Review** that the diff triggers stay mandatory and blocking — fast-track never skips them.
+5. **Record the fast-track decision** in the review output: the matched signal (label name or JIRA priority value), the deferred sections, and a one-line reminder that the gate remained Critical + Moderate.
+
 ### Named Arguments Review
 - Would positional arguments be ambiguous?
 - Are there boolean, null, array, or repeated scalar values?

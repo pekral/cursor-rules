@@ -70,10 +70,9 @@
 ## Database Analysis
 
 > Mandatory when the diff touches database operations (raw SQL, Eloquent / query-builder calls, eager loads, model scopes, ModelManager / Repository methods, migrations, seeders, DynamoDB / NoSQL access). Omit the entire section when no DB operations are present in the diff — never leave a placeholder or fold it into Coverage.
+>
+> Report only findings (errors) and their fix recommendations. Never include the trigger decision, an inspected `file:line` list, or an EXPLAIN / static-analysis summary — those belong to the internal investigation, not the published review.
 
-- **Trigger:** {DB operations detected vs. trigger skipped — never empty when the section is present}
-- **Inspected:** {bullet list of `file:line` for each query / migration / Eloquent statement analysed}
-- **EXPLAIN / static analysis:** {summary of `@skills/mysql-problem-solver/SKILL.md` output — note "no DB access — static analysis only" when EXPLAIN could not be run}
 - **Findings:**
   1. **{Critical / Moderate / Minor}** — `file:line` — one-sentence problem
      **Suggested Fix:** {query rewrite to reuse an existing index per `@rules/sql/optimalize.mdc`, batch operation per "Batch over per-row operations", or new-index proposal justified by EXPLAIN when no existing index covers the query}

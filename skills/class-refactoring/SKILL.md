@@ -32,6 +32,16 @@ Focus on:
 
 ## Execution
 
+### Test Coverage Gate (mandatory pre-flight — issue #493)
+
+Before touching any line of structure, satisfy the **Test Coverage Contract** defined in `@rules/refactoring/general.mdc`:
+
+1. Run the diff-scoped coverage command (`vendor/bin/test-coverage-diff` first, then the fallbacks listed in `@rules/php/core-standards.mdc` Testing section) against the *current* code that the refactor will touch. Every line, branch, and condition must already be at 100%.
+2. **If coverage is below 100% on the target lines, stop and write the missing tests first.** Use `@skills/create-test/SKILL.md` to author them; commit them in a dedicated `test(scope): cover <area> before refactor` commit per `@rules/git/general.mdc` Allowed Types. The pre-refactor coverage commit and the refactor commit are **always two separate commits** — never squash them and never mix new tests into the refactor commit.
+3. Only after the coverage gate is green may the refactor proceed.
+
+### Refactoring steps
+
 - Analyze the class and identify the highest-impact refactoring.
 - Follow the incremental process from `@rules/refactoring/general.mdc` (stabilize → identify entry points → introduce Action pattern → split responsibilities → modernize → DRY → concurrency). Never propose a big-bang rewrite.
 - Fix any obvious pre-existing bugs before refactoring (separate commit).
@@ -40,6 +50,7 @@ Focus on:
   - reduce complexity
   - improve naming
   - extract responsibilities where needed
+- **Do not modify pre-existing tests inside the refactor commit.** The safety net authored under the Test Coverage Gate above is what proves behavior is preserved — rewriting or restructuring those tests in the same commit invalidates the proof. The only allowed test edits in the refactor commit are mechanical renames forced by the refactor itself (e.g. namespace move), and they must be flagged in the commit body. New tests that cover newly introduced code paths belong in a separate `test(scope): …` commit *after* the refactor.
 - Avoid unnecessary changes outside the scope.
 - Prefer small, safe transformations over large rewrites.
 
@@ -73,9 +84,9 @@ Focus on:
 
 ## Testing
 
-- Ensure all changes are covered by tests.
-- Add missing tests for modified behavior.
-- Do not modify existing tests unless necessary for consistency.
+- The **Test Coverage Gate** in the Execution section is the binding rule — pre-existing target lines must be at 100% coverage *before* the refactor, written into a dedicated `test(scope): cover <area> before refactor` commit per `@rules/refactoring/general.mdc` Test Coverage Contract.
+- Inside the refactor commit, pre-existing tests **must remain unchanged** (mechanical-rename exemption only, flagged in the commit body). Editing the safety net inside the structural change voids the behavior-preservation proof.
+- New tests covering code paths introduced by the refactor go in a separate `test(scope): …` commit *after* the refactor.
 - Prefer realistic tests over heavy mocking.
 
 ---

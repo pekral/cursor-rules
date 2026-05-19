@@ -76,6 +76,7 @@ vendor/bin/cursor-rules install --editor=codex                # install for Code
 vendor/bin/cursor-rules install --editor=all                  # install for Cursor, Claude, and Codex
 vendor/bin/cursor-rules install --editor=cursor --force       # overwrite existing files
 vendor/bin/cursor-rules install --editor=cursor --symlink     # prefer symlinks (fallback to copy)
+vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whitelist this package's bundled scripts in ~/.claude/settings.json
 ```
 
 ### Installer Flow
@@ -92,10 +93,12 @@ vendor/bin/cursor-rules install --editor=cursor --symlink     # prefer symlinks 
 
 | Option            | Description                                                                 |
 |-------------------|-----------------------------------------------------------------------------|
-| `--editor=EDITOR` | Target editor (required): `cursor`, `claude`, `codex`, `all`.              |
-| `--force`         | Overwrite files that already exist in the target directory.                |
-| `--symlink`       | Create symlinks when the OS permits; automatically falls back to copy.     |
-| *(default)*       | Only copy missing files and keep existing content untouched.              |
+| `--editor=EDITOR`         | Target editor (required): `cursor`, `claude`, `codex`, `all`.                                                                                              |
+| `--force`                 | Overwrite files that already exist in the target directory.                                                                                                 |
+| `--symlink`               | Create symlinks when the OS permits; automatically falls back to copy.                                                                                      |
+| `--prune`                 | Remove files in target that no longer exist in source.                                                                                                       |
+| `--allow-bundled-scripts` | Opt-in. With `--editor=claude` or `--editor=all`, idempotently appends a narrow allow-list for this package's bundled scripts (`load-issue.sh` for GitHub and JIRA) to `~/.claude/settings.json`, so Claude Code stops prompting on every run. Other entries in `settings.json` are preserved. No effect when the editor target is `cursor` / `codex` or when `HOME` / `USERPROFILE` is not set. |
+| *(default)*               | Only copy missing files and keep existing content untouched.                                                                                                |
 
 ---
 

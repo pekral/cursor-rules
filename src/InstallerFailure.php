@@ -29,4 +29,14 @@ final class InstallerFailure extends RuntimeException
         return new self(sprintf('Cannot remove: %s', $path));
     }
 
+    public static function settingsJsonInvalid(string $path, string $reason): self
+    {
+        return new self(sprintf('Cannot parse Claude settings file %s: %s.', $path, $reason));
+    }
+
+    public static function settingsJsonWriteFailed(string $path, string $reason): self
+    {
+        return new self(sprintf('Cannot write Claude settings file %s: %s.', $path, $reason));
+    }
+
 }

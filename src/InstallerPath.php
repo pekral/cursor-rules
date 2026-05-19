@@ -39,9 +39,19 @@ final class InstallerPath
     public static function normalizeCliArguments(array $argv): array
     {
         $rawArguments = implode(' ', $argv);
-        $parts = preg_split('/\s+|(?=--(?:force|symlink|prune|editor=))/', trim($rawArguments), -1, PREG_SPLIT_NO_EMPTY);
+        $parts = preg_split('/\s+|(?=--(?:force|symlink|prune|allow-bundled-scripts|editor=))/', trim($rawArguments), -1, PREG_SPLIT_NO_EMPTY);
 
         return is_array($parts) && $parts !== [] ? $parts : $argv;
+    }
+
+    /**
+     * User home directory resolved from HOME / USERPROFILE, or null when neither is set.
+     */
+    public static function resolveHomeDirectoryOrNull(): ?string
+    {
+        $home = self::resolveHomeDirectory();
+
+        return $home === false || $home === '' ? null : $home;
     }
 
     public static function resolveRulesSource(string $root): string

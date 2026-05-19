@@ -9,7 +9,7 @@ metadata:
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
 - Apply `@rules/git/general.mdc`
-- Apply `@rules/reports/general.mdc`. The **final technical report** this skill posts on the GitHub PR (code-review / security-review / test-like-human summary block) stays in canonical English per the rule's *Exception — technical CR findings on the GitHub PR*. The **non-technical report** posted on the original issue / JIRA ticket / Bugsnag-linked GitHub issue follows the language of the source assignment. Code identifiers, file paths, severity labels, and CLI commands stay verbatim regardless of the surrounding prose language; never mix two natural languages inside a single comment.
+- Apply `@rules/reports/general.mdc`. The **final technical report** this skill posts on the GitHub PR (code-review and security-review summary block) stays in canonical English per the rule's *Exception — technical CR findings on the GitHub PR*. The **non-technical report** posted on the original issue / JIRA ticket / Bugsnag-linked GitHub issue follows the language of the source assignment. Code identifiers, file paths, severity labels, and CLI commands stay verbatim regardless of the surrounding prose language; never mix two natural languages inside a single comment.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Follow project architecture and testing rules
 - Do not expose sensitive/internal details in user-facing messages
@@ -121,9 +121,10 @@ PR-comment processing via `@skills/process-code-review/SKILL.md` remains the pat
 After the code review loop passes clean, and **still before creating the pull request**, validate the change:
 
 1. Run `@skills/security-review/SKILL.md`
-2. Run `@skills/test-like-human/SKILL.md`
 
-Resolve any **Critical** or **Moderate** findings from these skills before continuing. If a finding requires code changes, re-run the **Code quality and review loop** to re-validate.
+Resolve any **Critical** or **Moderate** finding from the security review before continuing. If a finding requires code changes, re-run the **Code quality and review loop** to re-validate.
+
+`@skills/test-like-human/SKILL.md` is **not** part of this gate. It runs **on demand only** (via `/test-like-human` or an explicit follow-up after the PR is open); resolve-issue must never auto-chain into it.
 
 ## Pull request
 
@@ -147,7 +148,6 @@ Post the technical report as a comment on the GitHub PR, since that is where the
 
 - **Code review summary** — outcome of `@skills/code-review/SKILL.md` (findings addressed during the loop and the final clean state)
 - **Security review summary** — outcome of `@skills/security-review/SKILL.md`
-- **Testing notes** — outcome of `@skills/test-like-human/SKILL.md`, including scenarios exercised and any caveats
 
 ### Non-technical report → original task tracker
 
@@ -183,7 +183,6 @@ The non-technical report must be understandable by non-technical testers and pro
 - No sensitive data is exposed
 - Code review loop passed with no Critical or Moderate findings **before the PR was created**
 - Security review completed **before the PR was created**
-- Test-like-human completed **before the PR was created**
 - A clean pull request is created with a summary
 - Technical report posted on the GitHub PR
 - Non-technical report posted on the original issue tracker

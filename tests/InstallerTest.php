@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use Pekral\CursorRules\Installer;
+use Pekral\CursorRules\InstallerClaudeSettings;
 use Pekral\CursorRules\InstallerFailure;
 use Pekral\CursorRules\InstallerPath;
 use Pekral\CursorRules\InstallerPruner;
@@ -2184,5 +2185,437 @@ test('CR wrapper skills carry the GitHub-PR English exception in their constrain
         expect($namesException && $mentionsCanonicalEnglish)->toBeTrue(
             $skillFile . ' must cite the GitHub-PR technical-CR English exception from @rules/reports/general.mdc',
         );
+    }
+});
+
+test('help text documents the --allow-bundled-scripts flag', function (): void {
+    ob_start();
+    $exitCode = Installer::run(['cursor-rules']);
+    $output = (string) ob_get_clean();
+
+    expect($exitCode)->toBe(0);
+    expect($output)->toContain('--allow-bundled-scripts');
+    expect($output)->toContain('~/.claude/settings.json');
+    expect($output)->toContain('Opt-in');
+});
+
+test('normalizeCliArguments splits --allow-bundled-scripts from a concatenated argv blob', function (): void {
+    $normalized = InstallerPath::normalizeCliArguments(['cursor-rules', 'install', '--editor=claude--allow-bundled-scripts']);
+
+    expect($normalized)->toContain('--editor=claude');
+    expect($normalized)->toContain('--allow-bundled-scripts');
+});
+
+test('resolveHomeDirectoryOrNull returns the HOME value when set', function (): void {
+    $homeBefore = getenv('HOME');
+    $userProfileBefore = getenv('USERPROFILE');
+    putenv('HOME=/tmp/fake-home-' . bin2hex(random_bytes(2)));
+
+    try {
+        $home = InstallerPath::resolveHomeDirectoryOrNull();
+
+        expect($home)->toBeString();
+        expect($home)->toStartWith('/tmp/fake-home-');
+    } finally {
+        if ($homeBefore !== false && $homeBefore !== '') {
+            putenv('HOME=' . $homeBefore);
+        } else {
+            putenv('HOME');
+        }
+
+        if ($userProfileBefore !== false && $userProfileBefore !== '') {
+            putenv('USERPROFILE=' . $userProfileBefore);
+        }
+    }
+});
+
+test('resolveHomeDirectoryOrNull returns null when neither HOME nor USERPROFILE is set', function (): void {
+    $homeBefore = getenv('HOME');
+    $userProfileBefore = getenv('USERPROFILE');
+    putenv('HOME');
+    putenv('USERPROFILE');
+
+    try {
+        $home = InstallerPath::resolveHomeDirectoryOrNull();
+
+        expect($home)->toBeNull();
+    } finally {
+        if ($homeBefore !== false && $homeBefore !== '') {
+            putenv('HOME=' . $homeBefore);
+        }
+
+        if ($userProfileBefore !== false && $userProfileBefore !== '') {
+            putenv('USERPROFILE=' . $userProfileBefore);
+        }
+    }
+});
+
+test('InstallerClaudeSettings exposes the two bundled-script permission patterns', function (): void {
+    $patterns = InstallerClaudeSettings::getBundledScriptPermissions();
+
+    expect($patterns)->toBe([
+        'Bash(*skills/code-review-github/scripts/load-issue.sh:*)',
+        'Bash(*skills/code-review-jira/scripts/load-issue.sh:*)',
+    ]);
+});
+
+test('InstallerClaudeSettings resolveSettingsPath joins HOME with /.claude/settings.json', function (): void {
+    expect(InstallerClaudeSettings::resolveSettingsPath('/tmp/fakehome'))->toBe('/tmp/fakehome/.claude/settings.json');
+});
+
+test('ensureBundledScriptPermissions creates a fresh settings.json with both patterns', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+
+    try {
+        $added = InstallerClaudeSettings::ensureBundledScriptPermissions($home);
+
+        expect($added)->toBe(2);
+
+        $settingsPath = $home . '/.claude/settings.json';
+        expect(is_file($settingsPath))->toBeTrue();
+        expect(InstallerClaudeSettings::loadAllowList($home))
+            ->toBe(InstallerClaudeSettings::getBundledScriptPermissions());
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions merges into existing settings.json without dropping unrelated keys', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, (string) json_encode([
+        'theme' => 'dark',
+        'permissions' => [
+            'allow' => ['Bash(git status:*)'],
+            'deny' => ['Bash(rm -rf:*)'],
+        ],
+    ], JSON_PRETTY_PRINT));
+
+    try {
+        $added = InstallerClaudeSettings::ensureBundledScriptPermissions($home);
+
+        expect($added)->toBe(2);
+        expect(InstallerClaudeSettings::loadAllowList($home))->toBe([
+            'Bash(git status:*)',
+            'Bash(*skills/code-review-github/scripts/load-issue.sh:*)',
+            'Bash(*skills/code-review-jira/scripts/load-issue.sh:*)',
+        ]);
+
+        $raw = (string) file_get_contents($settingsPath);
+        expect($raw)->toContain('"theme": "dark"');
+        expect($raw)->toContain('"Bash(rm -rf:*)"');
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions is idempotent on a settings.json that already has both entries', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+
+    try {
+        $firstAdded = InstallerClaudeSettings::ensureBundledScriptPermissions($home);
+        $secondAdded = InstallerClaudeSettings::ensureBundledScriptPermissions($home);
+
+        expect($firstAdded)->toBe(2);
+        expect($secondAdded)->toBe(0);
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions recovers when permissions key is the wrong shape', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, (string) json_encode([
+        'permissions' => 'not-an-array',
+    ]));
+
+    try {
+        $added = InstallerClaudeSettings::ensureBundledScriptPermissions($home);
+
+        expect($added)->toBe(2);
+        expect(InstallerClaudeSettings::loadAllowList($home))
+            ->toBe(InstallerClaudeSettings::getBundledScriptPermissions());
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions recovers when permissions.allow is the wrong shape', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, (string) json_encode([
+        'permissions' => ['allow' => 'string-not-array'],
+    ]));
+
+    try {
+        $added = InstallerClaudeSettings::ensureBundledScriptPermissions($home);
+
+        expect($added)->toBe(2);
+        expect(InstallerClaudeSettings::loadAllowList($home))
+            ->toBe(InstallerClaudeSettings::getBundledScriptPermissions());
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions drops non-string entries from allow before merging', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, (string) json_encode([
+        'permissions' => ['allow' => ['Bash(git status:*)', 42, null]],
+    ]));
+
+    try {
+        InstallerClaudeSettings::ensureBundledScriptPermissions($home);
+
+        expect(InstallerClaudeSettings::loadAllowList($home))->toBe([
+            'Bash(git status:*)',
+            'Bash(*skills/code-review-github/scripts/load-issue.sh:*)',
+            'Bash(*skills/code-review-jira/scripts/load-issue.sh:*)',
+        ]);
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions skips when settings.json content is empty whitespace', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, "   \n  \n");
+
+    try {
+        $added = InstallerClaudeSettings::ensureBundledScriptPermissions($home);
+
+        expect($added)->toBe(2);
+        expect(InstallerClaudeSettings::loadAllowList($home))
+            ->toBe(InstallerClaudeSettings::getBundledScriptPermissions());
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions raises InstallerFailure when settings.json is malformed JSON', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, '{not-valid-json');
+
+    try {
+        expect(static fn (): int => InstallerClaudeSettings::ensureBundledScriptPermissions($home))
+            ->toThrow(InstallerFailure::class);
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions raises InstallerFailure when top-level value is not an object', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, '"a string"');
+
+    try {
+        expect(static fn (): int => InstallerClaudeSettings::ensureBundledScriptPermissions($home))
+            ->toThrow(InstallerFailure::class);
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions raises InstallerFailure when settings.json target is a directory (write fails)', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerEnsureDirectory($settingsPath);
+
+    try {
+        expect(static fn (): int => InstallerClaudeSettings::ensureBundledScriptPermissions($home))
+            ->toThrow(InstallerFailure::class);
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions raises InstallerFailure when ~/.claude path is a file (mkdir fails)', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    installerEnsureDirectory($home);
+    file_put_contents($home . '/.claude', 'blocker file');
+
+    try {
+        expect(static fn (): int => InstallerClaudeSettings::ensureBundledScriptPermissions($home))
+            ->toThrow(InstallerFailure::class);
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('install --editor=claude --allow-bundled-scripts writes the permissions and reports them', function (): void {
+    $root = installerCreateProjectRoot();
+    $homeEnv = getenv('HOME');
+    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
+    putenv('HOME=' . $root);
+
+    if (getenv('USERPROFILE') !== false) {
+        putenv('USERPROFILE=' . $root);
+    }
+
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=claude', '--allow-bundled-scripts']);
+        $output = (string) ob_get_clean();
+
+        expect($output)->toContain('Allowed 2 bundled-script permission(s) in ~/.claude/settings.json.');
+
+        $settingsPath = $root . '/.claude/settings.json';
+        expect(is_file($settingsPath))->toBeTrue();
+        expect(InstallerClaudeSettings::loadAllowList($root))
+            ->toBe(InstallerClaudeSettings::getBundledScriptPermissions());
+    } finally {
+        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
+    }
+});
+
+test('install --editor=all --allow-bundled-scripts writes the permissions to ~/.claude/settings.json', function (): void {
+    $root = installerCreateProjectRoot();
+    $homeEnv = getenv('HOME');
+    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
+    putenv('HOME=' . $root);
+
+    if (getenv('USERPROFILE') !== false) {
+        putenv('USERPROFILE=' . $root);
+    }
+
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=all', '--allow-bundled-scripts']);
+        ob_end_clean();
+
+        $settingsPath = $root . '/.claude/settings.json';
+        expect(is_file($settingsPath))->toBeTrue();
+    } finally {
+        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
+    }
+});
+
+test('install --editor=cursor --allow-bundled-scripts does not write settings.json', function (): void {
+    $root = installerCreateProjectRoot();
+    $homeEnv = getenv('HOME');
+    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
+    putenv('HOME=' . $root);
+
+    if (getenv('USERPROFILE') !== false) {
+        putenv('USERPROFILE=' . $root);
+    }
+
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--allow-bundled-scripts']);
+        $output = (string) ob_get_clean();
+
+        expect($output)->not->toContain('Allowed');
+        expect(is_file($root . '/.claude/settings.json'))->toBeFalse();
+    } finally {
+        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
+    }
+});
+
+test('install --editor=claude without --allow-bundled-scripts leaves settings.json untouched', function (): void {
+    $root = installerCreateProjectRoot();
+    $homeEnv = getenv('HOME');
+    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
+    putenv('HOME=' . $root);
+
+    if (getenv('USERPROFILE') !== false) {
+        putenv('USERPROFILE=' . $root);
+    }
+
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=claude']);
+        $output = (string) ob_get_clean();
+
+        expect($output)->not->toContain('Allowed');
+        expect(is_file($root . '/.claude/settings.json'))->toBeFalse();
+    } finally {
+        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
+    }
+});
+
+test('install --editor=claude --allow-bundled-scripts with HOME unset is a no-op for settings.json', function (): void {
+    $root = installerCreateProjectRoot();
+    $homeBefore = getenv('HOME');
+    $userProfileBefore = getenv('USERPROFILE');
+    putenv('HOME');
+    putenv('USERPROFILE');
+
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=claude', '--allow-bundled-scripts']);
+        $output = (string) ob_get_clean();
+
+        expect($output)->not->toContain('Allowed');
+    } finally {
+        if ($homeBefore !== false && $homeBefore !== '') {
+            putenv('HOME=' . $homeBefore);
+        }
+
+        if ($userProfileBefore !== false && $userProfileBefore !== '') {
+            putenv('USERPROFILE=' . $userProfileBefore);
+        }
+
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install --editor=claude --allow-bundled-scripts is idempotent across two consecutive runs', function (): void {
+    $root = installerCreateProjectRoot();
+    $homeEnv = getenv('HOME');
+    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
+    putenv('HOME=' . $root);
+
+    if (getenv('USERPROFILE') !== false) {
+        putenv('USERPROFILE=' . $root);
+    }
+
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=claude', '--allow-bundled-scripts']);
+        ob_end_clean();
+
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=claude', '--allow-bundled-scripts']);
+        $secondOutput = (string) ob_get_clean();
+
+        expect($secondOutput)->not->toContain('Allowed');
+        expect(InstallerClaudeSettings::loadAllowList($root))
+            ->toBe(InstallerClaudeSettings::getBundledScriptPermissions());
+    } finally {
+        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
     }
 });

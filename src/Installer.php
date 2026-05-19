@@ -22,6 +22,7 @@ final class Installer
         $force = in_array('--force', $normalizedArgv, true);
         $symlink = in_array('--symlink', $normalizedArgv, true);
         $prune = in_array('--prune', $normalizedArgv, true);
+        $allowBundledScripts = in_array('--allow-bundled-scripts', $normalizedArgv, true);
 
         try {
             if ($command === 'help') {
@@ -42,7 +43,7 @@ final class Installer
                 return 1;
             }
 
-            return self::install($force, $symlink, $prune, $editor);
+            return self::install($force, $symlink, $prune, $editor, $allowBundledScripts);
         } catch (InstallerFailure $exception) {
             fwrite(STDERR, $exception->getMessage() . PHP_EOL);
 
@@ -70,17 +71,21 @@ final class Installer
     private static function showHelp(): int
     {
         echo "Usage:\n";
-        echo "  vendor/bin/cursor-rules install --editor=EDITOR [--force] [--symlink] [--prune]\n\n";
+        echo "  vendor/bin/cursor-rules install --editor=EDITOR [--force] [--symlink] [--prune] [--allow-bundled-scripts]\n\n";
         echo "Options:\n";
-        echo "  --editor=EDITOR Target editor (required): cursor, claude, codex, all.\n";
-        echo "  --force         Overwrite existing files.\n";
-        echo "  --symlink       Create symlinks instead of copying (falls back to copy on Windows).\n";
-        echo "  --prune         Remove files in target that no longer exist in source.\n";
+        echo "  --editor=EDITOR         Target editor (required): cursor, claude, codex, all.\n";
+        echo "  --force                 Overwrite existing files.\n";
+        echo "  --symlink               Create symlinks instead of copying (falls back to copy on Windows).\n";
+        echo "  --prune                 Remove files in target that no longer exist in source.\n";
+        echo "  --allow-bundled-scripts Whitelist this package's bundled scripts in ~/.claude/settings.json\n";
+        echo "                          so Claude Code stops asking for confirmation on each run. Opt-in;\n";
+        echo "                          only effective with --editor=claude or --editor=all. Adds specific\n";
+        echo "                          patterns (load-issue.sh) rather than blanket-allowing everything.\n";
 
         return 0;
     }
 
-    private static function install(bool $force, bool $symlink, bool $prune, string $editor): int
+    private static function install(bool $force, bool $symlink, bool $prune, string $editor, bool $allowBundledScripts): int
     {
         $root = InstallerPath::resolveProjectRoot();
 
@@ -106,9 +111,14 @@ final class Installer
 
         $claudeMdSource = InstallerPath::isClaudeMdEditor($editor) ? InstallerPath::resolveClaudeMdSource() : null;
         $claudeMdCopied = self::installSingleFile($claudeMdSource, InstallerPath::resolveClaudeMdTarget($root));
+        $permissionsAdded = InstallerClaudeSettings::applyIfRequested($allowBundledScripts, $editor);
         $total = $rulesCopied + $skillsCopied + $claudeMdCopied;
 
         echo sprintf('Cursor rules installed (%d files, %d pruned).%s', $total, $rulesPruned + $skillsPruned, PHP_EOL);
+
+        if ($permissionsAdded > 0) {
+            echo sprintf('Allowed %d bundled-script permission(s) in ~/.claude/settings.json.%s', $permissionsAdded, PHP_EOL);
+        }
 
         return 0;
     }

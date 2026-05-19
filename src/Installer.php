@@ -145,7 +145,7 @@ final class Installer
 
     private static function installDirectory(string $source, string $targetDir, bool $force, bool $symlink): int
     {
-        self::ensureDirectoryExists($targetDir);
+        InstallerPath::ensureDirectory($targetDir);
         self::replicateDirectories($source, $targetDir);
 
         $files = self::listFiles($source);
@@ -177,7 +177,7 @@ final class Installer
         $dst = $targetDir . '/' . $relativePath;
         $dirName = dirname($dst);
 
-        self::ensureDirectoryExists($dirName);
+        InstallerPath::ensureDirectory($dirName);
 
         $effectiveForce = $force || self::isSecurityRule($relativePath);
 
@@ -191,25 +191,6 @@ final class Installer
     private static function isSecurityRule(string $relativePath): bool
     {
         return str_starts_with($relativePath, 'security/') || str_starts_with($relativePath, 'security\\');
-    }
-
-    private static function ensureDirectoryExists(string $directory): void
-    {
-        if (is_dir($directory)) {
-            return;
-        }
-
-        if (is_file($directory)) {
-            throw InstallerFailure::directoryCreationFailed($directory);
-        }
-
-        set_error_handler(static fn (): bool => true);
-        $created = mkdir($directory, 0777, true);
-        restore_error_handler();
-
-        if (!$created && !is_dir($directory)) {
-            throw InstallerFailure::directoryCreationFailed($directory);
-        }
     }
 
     private static function installFile(string $src, string $dst, bool $symlink): bool
@@ -307,7 +288,7 @@ final class Installer
 
             $relativePath = self::extractFilePath($directory, $source);
 
-            self::ensureDirectoryExists($targetDir . '/' . $relativePath);
+            InstallerPath::ensureDirectory($targetDir . '/' . $relativePath);
         }
     }
 

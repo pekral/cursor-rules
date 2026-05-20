@@ -1437,12 +1437,18 @@ test('every code review skill invokes assignment-compliance-check', function ():
     }
 });
 
-test('readme bumps skill count to 27 and lists tester-cookbook and security-threat-analysis', function (): void {
+test('readme reports the current skill count and lists tester-cookbook and security-threat-analysis', function (): void {
     $packageDir = dirname(__DIR__);
     $readme = (string) file_get_contents($packageDir . '/README.md');
+    $entries = scandir($packageDir . '/skills');
+    assert($entries !== false);
+    $skillCount = count(array_filter(
+        $entries,
+        static fn (string $entry): bool => $entry !== '.' && $entry !== '..' && is_dir($packageDir . '/skills/' . $entry),
+    ));
 
-    expect($readme)->toContain('27 comprehensive Agent skills');
-    expect($readme)->toContain('27 skills for issue resolution');
+    expect($readme)->toContain($skillCount . ' comprehensive Agent skills');
+    expect($readme)->toContain($skillCount . ' skills for issue resolution');
     expect($readme)->toContain('`tester-cookbook`');
     expect($readme)->toContain('`security-threat-analysis`');
 });

@@ -44,7 +44,7 @@ globs: ["*"]
 - Extract deeply nested conditionals into well-named methods where it improves readability.
 - Prefer small, simple classes or functions unless state is genuinely needed.
 - Prefer typed DTOs over raw arrays across important boundaries.
-- When a method requires more than 4 parameters, introduce a dedicated DTO and pass it as a single argument instead of a long parameter list.
+- When a method, function, closure, constructor, `__invoke()`, or other callable requires more than 4 parameters, introduce a dedicated typed DTO (preferably `final readonly` with promoted constructor properties) and pass it as a single argument instead of a long parameter list. Promoted constructor properties count as parameters; a variadic (`...$args`) counts as one. The only exempt cases are entry-point signatures fixed by an external framework / vendor contract that the project cannot change — controller actions whose argument list is resolved by the service container, magic methods bound by the framework, event listeners whose signature is dictated by the dispatched event, and methods overriding a parent / interface owned by `vendor/`. The exemption must be cited explicitly wherever the rule is enforced (CR finding, refactoring proposal) with the parent class / interface and a one-line reason.
 - Use `readonly` for immutable data where practical.
 - Use PHP attributes when they provide a cleaner and more idiomatic solution than manual wiring.
 

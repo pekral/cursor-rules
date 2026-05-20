@@ -32,14 +32,15 @@ use Pekral\CursorRules\CoverageDiffCheck;
 
 $cloverPath = $argv[1] ?? null;
 $baseRef = $argv[2] ?? null;
+$restrictToFiles = array_slice($argv, 3);
 
 if (!is_string($cloverPath) || $cloverPath === '' || !is_file($cloverPath)) {
-    fwrite(STDERR, "coverage-diff-check: usage: coverage-diff-check.php <clover.xml> <base-ref>\n");
+    fwrite(STDERR, "coverage-diff-check: usage: coverage-diff-check.php <clover.xml> <base-ref> [<file> ...]\n");
     exit(2);
 }
 
 if (!is_string($baseRef) || $baseRef === '') {
-    fwrite(STDERR, "coverage-diff-check: usage: coverage-diff-check.php <clover.xml> <base-ref>\n");
+    fwrite(STDERR, "coverage-diff-check: usage: coverage-diff-check.php <clover.xml> <base-ref> [<file> ...]\n");
     exit(2);
 }
 
@@ -50,7 +51,7 @@ if ($projectRoot === '') {
     exit(2);
 }
 
-$changedLines = CoverageDiffCheck::discoverChangedLines($baseRef);
+$changedLines = CoverageDiffCheck::discoverChangedLines($baseRef, $restrictToFiles);
 
 if ($changedLines === []) {
     echo "📊 No changed PHP lines detected — diff-scoped coverage clean.\n";

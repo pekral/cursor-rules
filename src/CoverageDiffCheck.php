@@ -76,42 +76,53 @@ final class CoverageDiffCheck
     /**
      * Runs `git diff` against the given base ref and the working tree, returning the aggregated changed-line map.
      *
+     * When $restrictToFiles is non-empty, only diffs for the listed files are aggregated. The allow-list lets
+     * callers (typically an AI agent that already knows which files changed) scope the run without losing the
+     * precise line-level coverage filtering.
+     *
+     * @param array<int, string> $restrictToFiles
      * @return array<string, array<int, true>>
      */
-    public static function discoverChangedLines(string $baseRef): array
+    public static function discoverChangedLines(string $baseRef, array $restrictToFiles = []): array
     {
+        $allowList = self::normaliseAllowList($restrictToFiles);
         $changed = [];
 
-        foreach (self::diffCommands($baseRef) as $command) {
+        foreach (self::diffCommands($baseRef, $allowList) as $command) {
             $changed = self::mergeChangedLines($changed, self::parseUnifiedDiff((string) shell_exec($command)));
         }
 
-        foreach (self::untrackedPhpFiles() as $file) {
+        foreach (self::untrackedPhpFiles($allowList) as $file) {
             $command = sprintf('git diff --no-index --unified=0 /dev/null %s 2>/dev/null', escapeshellarg($file));
             $changed = self::mergeChangedLines($changed, self::parseUnifiedDiff((string) shell_exec($command)));
         }
 
-        return $changed;
+        return $allowList === [] ? $changed : self::filterByAllowList($changed, $allowList);
     }
 
     /**
+     * @param array<int, string> $allowList
      * @return array<int, string>
      */
-    private static function diffCommands(string $baseRef): array
+    private static function diffCommands(string $baseRef, array $allowList): array
     {
+        $pathspec = self::buildPathspec($allowList);
+
         return [
-            sprintf('git diff --unified=0 --diff-filter=ACMRTUXB %s...HEAD -- 2>/dev/null', escapeshellarg($baseRef)),
-            'git diff --unified=0 --diff-filter=ACMRTUXB -- 2>/dev/null',
-            'git diff --unified=0 --cached --diff-filter=ACMRTUXB -- 2>/dev/null',
+            sprintf('git diff --unified=0 --diff-filter=ACMRTUXB %s...HEAD -- %s2>/dev/null', escapeshellarg($baseRef), $pathspec),
+            sprintf('git diff --unified=0 --diff-filter=ACMRTUXB -- %s2>/dev/null', $pathspec),
+            sprintf('git diff --unified=0 --cached --diff-filter=ACMRTUXB -- %s2>/dev/null', $pathspec),
         ];
     }
 
     /**
+     * @param array<int, string> $allowList
      * @return iterable<string>
      */
-    private static function untrackedPhpFiles(): iterable
+    private static function untrackedPhpFiles(array $allowList): iterable
     {
-        $output = (string) shell_exec('git ls-files --others --exclude-standard 2>/dev/null');
+        $command = sprintf('git ls-files --others --exclude-standard -- %s2>/dev/null', self::buildPathspec($allowList));
+        $output = (string) shell_exec($command);
 
         foreach (explode("\n", $output) as $line) {
             $trimmed = trim($line);
@@ -120,6 +131,58 @@ final class CoverageDiffCheck
                 yield $trimmed;
             }
         }
+    }
+
+    /**
+     * @param array<int, string> $restrictToFiles
+     * @return array<int, string>
+     */
+    private static function normaliseAllowList(array $restrictToFiles): array
+    {
+        $allowList = [];
+
+        foreach ($restrictToFiles as $file) {
+            $trimmed = trim($file);
+
+            if ($trimmed !== '') {
+                $allowList[$trimmed] = $trimmed;
+            }
+        }
+
+        return array_values($allowList);
+    }
+
+    /**
+     * @param array<int, string> $allowList
+     */
+    private static function buildPathspec(array $allowList): string
+    {
+        if ($allowList === []) {
+            return '';
+        }
+
+        $quoted = array_map(static fn (string $path): string => escapeshellarg($path), $allowList);
+
+        return implode(' ', $quoted) . ' ';
+    }
+
+    /**
+     * @param array<string, array<int, true>> $changed
+     * @param array<int, string> $allowList
+     * @return array<string, array<int, true>>
+     */
+    private static function filterByAllowList(array $changed, array $allowList): array
+    {
+        $allowedKeys = array_flip($allowList);
+        $filtered = [];
+
+        foreach ($changed as $file => $lines) {
+            if (isset($allowedKeys[$file])) {
+                $filtered[$file] = $lines;
+            }
+        }
+
+        return $filtered;
     }
 
     /**

@@ -187,6 +187,32 @@ it('discoverChangedLines aggregates the parsed diff into a changed-line map', fu
     }
 });
 
+it('discoverChangedLines restricts the result to the caller-supplied file allow-list', function (): void {
+    $tempDir = sys_get_temp_dir() . '/coverage-diff-allowlist-' . bin2hex(random_bytes(4));
+    installerEnsureDirectory($tempDir);
+    $originalCwd = getcwd();
+    chdir($tempDir);
+
+    try {
+        shell_exec('git init --quiet -b main 2>&1');
+        shell_exec('git -c user.email=t@t.local -c user.name=Tester commit --allow-empty --quiet -m initial 2>&1');
+
+        file_put_contents($tempDir . '/Kept.php', "<?php\necho 'kept';\n");
+        file_put_contents($tempDir . '/Filtered.php', "<?php\necho 'filtered';\n");
+
+        $result = CoverageDiffCheck::discoverChangedLines('HEAD', ['Kept.php']);
+
+        expect($result)->toHaveKey('Kept.php');
+        expect($result)->not->toHaveKey('Filtered.php');
+    } finally {
+        if (is_string($originalCwd)) {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($tempDir);
+    }
+});
+
 it('discoverChangedLines picks up untracked PHP files via git ls-files', function (): void {
     $tempDir = sys_get_temp_dir() . '/coverage-diff-untracked-' . bin2hex(random_bytes(4));
     installerEnsureDirectory($tempDir);

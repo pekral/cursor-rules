@@ -44,6 +44,7 @@ globs: ["*"]
 - Extract deeply nested conditionals into well-named methods where it improves readability.
 - Prefer small, simple classes or functions unless state is genuinely needed.
 - Prefer typed DTOs over raw arrays across important boundaries.
+- When a method requires more than 4 parameters, introduce a dedicated DTO and pass it as a single argument instead of a long parameter list.
 - Use `readonly` for immutable data where practical.
 - Use PHP attributes when they provide a cleaner and more idiomatic solution than manual wiring.
 

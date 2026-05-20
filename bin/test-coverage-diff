@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 # Diff-scoped coverage gate for code-review skills.
 #
-# - Discovers changed PHP source files vs the base ref (origin/main → main → master → HEAD~1, or COVERAGE_DIFF_BASE).
+# Usage: vendor/bin/test-coverage-diff [<file> ...]
+#
+# - Optional positional arguments are paths to PHP source files the caller already knows are changed
+#   (typically passed in by an AI agent or CI script). When supplied, both git-diff discovery and the
+#   coverage gap check are scoped to those paths only. When omitted, the script auto-discovers
+#   changed PHP source files vs the base ref (origin/main → main → master → HEAD~1, or COVERAGE_DIFF_BASE).
 # - Picks coverage driver: PCOV if loaded, else Xdebug in coverage mode; aborts when neither is available.
 # - Picks source directory layout: Laravel projects (artisan + laravel/framework in composer.json) cover app/ and any extra src/;
 #   non-framework projects cover src/.
@@ -12,6 +17,8 @@
 # when every changed line is covered, 1 when a gap exists, 2 for environment / tooling problems.
 
 set -euo pipefail
+
+REQUESTED_FILES=("$@")
 
 # Resolve the physical location of this script (follows symlinks composer creates under vendor/bin)
 # so that bin/coverage-diff-check.php is found next to it, not in the consuming project's bin/.
@@ -76,7 +83,31 @@ collect_changed() {
     } | awk 'NF && /\.php$/' | sort -u
 }
 
-CHANGED_FILES="$(collect_changed "${BASE_REF}")"
+normalize_requested() {
+    if [[ "${#REQUESTED_FILES[@]}" -eq 0 ]]; then
+        return
+    fi
+
+    local file
+    for file in "${REQUESTED_FILES[@]}"; do
+        [[ -z "${file}" ]] && continue
+        if [[ "${file}" != *.php ]]; then
+            echo "❌ test-coverage-diff: argument '${file}' is not a PHP file" >&2
+            exit 2
+        fi
+        if [[ ! -f "${file}" ]]; then
+            echo "❌ test-coverage-diff: argument '${file}' does not exist" >&2
+            exit 2
+        fi
+        echo "${file}"
+    done | sort -u
+}
+
+if [[ "${#REQUESTED_FILES[@]}" -gt 0 ]]; then
+    CHANGED_FILES="$(normalize_requested)"
+else
+    CHANGED_FILES="$(collect_changed "${BASE_REF}")"
+fi
 
 if [[ -z "${CHANGED_FILES}" ]]; then
     echo "📊 No PHP source files changed against ${BASE_REF} — diff-scoped coverage skipped."
@@ -103,7 +134,12 @@ fi
 
 CLOVER_PATH="${COVERAGE_DIFF_CLOVER:-coverage.diff.xml}"
 
-echo "📊 Diff-scoped coverage (driver: ${DRIVER}, base: ${BASE_REF}, layout: $([ "${IS_LARAVEL}" -eq 1 ] && echo Laravel || echo plain-PHP))"
+SCOPE_LABEL="auto-discovered"
+if [[ "${#REQUESTED_FILES[@]}" -gt 0 ]]; then
+    SCOPE_LABEL="explicit args (${#REQUESTED_FILES[@]} file(s))"
+fi
+
+echo "📊 Diff-scoped coverage (driver: ${DRIVER}, base: ${BASE_REF}, layout: $([ "${IS_LARAVEL}" -eq 1 ] && echo Laravel || echo plain-PHP), scope: ${SCOPE_LABEL})"
 echo "${CHANGED_FILES}" | sed 's/^/  · /'
 
 PEST_ARGS=(--coverage-clover "${CLOVER_PATH}" tests)
@@ -113,4 +149,9 @@ fi
 
 php "${COVERAGE_FLAGS[@]}" "${PEST_BIN}" "${PEST_ARGS[@]}"
 
-php "${HELPER_PHP}" "${CLOVER_PATH}" "${BASE_REF}"
+HELPER_ARGS=("${CLOVER_PATH}" "${BASE_REF}")
+while IFS= read -r changed_file; do
+    [[ -n "${changed_file}" ]] && HELPER_ARGS+=("${changed_file}")
+done <<< "${CHANGED_FILES}"
+
+php "${HELPER_PHP}" "${HELPER_ARGS[@]}"

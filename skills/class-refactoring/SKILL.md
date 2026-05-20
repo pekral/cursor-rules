@@ -69,6 +69,7 @@ Before touching any line of structure, satisfy the **Test Coverage Contract** de
 - Extract intention-revealing private methods when it improves clarity.
 - Avoid deep nesting and complex conditionals.
 - Keep method signatures clear and minimal.
+- **Method parameter count (>4 → DTO):** when a method, function, closure, constructor, `__invoke()`, or other callable accepts more than 4 parameters, propose extracting a dedicated typed DTO (preferably `final readonly` with promoted constructor properties) and passing it as a single argument, per `@rules/php/core-standards.mdc` Structure section. Promoted constructor properties count as parameters; a variadic (`...$args`) counts as one. The only exempt cases are entry-point signatures fixed by an external framework / vendor contract that the project cannot change (controller actions resolved by the service container, magic methods bound by the framework, event listeners whose signature is dictated by the dispatched event, methods overriding a parent / interface owned by `vendor/`); cite the exemption explicitly in the proposal with the parent class / interface and a one-line reason.
 
 ---
 

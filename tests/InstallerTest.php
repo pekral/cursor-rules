@@ -1315,14 +1315,84 @@ test('CR run produces one consolidated linked-tracker comment per linked issue (
     expect($github)->toContain('Consolidation contract (issue #498)');
     expect($github)->toContain('exactly one comment per linked issue');
 
-    expect($jira)->toContain('#### JIRA (consolidated non-technical comment — one per CR run)');
+    expect($jira)->toContain('#### JIRA (consolidated non-technical comment — single-comment upsert per actor)');
     expect($jira)->toContain('Consolidation contract (issue #498)');
-    expect($jira)->toContain('one consolidated JIRA comment');
+    expect($jira)->toContain('exactly one JIRA comment per (ticket, acli actor)');
 
     expect($githubTemplate)->toContain('{embedded_blocks}');
     expect($githubTemplate)->toContain('@skills/assignment-compliance-check/SKILL.md');
     expect($jiraTemplate)->toContain('{embedded_blocks}');
     expect($jiraTemplate)->toContain('@skills/assignment-compliance-check/SKILL.md');
+});
+
+test('CR skills publish through a single-comment upsert helper keyed by the current actor', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    $githubScript = $packageDir . '/skills/code-review-github/scripts/upsert-comment.sh';
+    $jiraScript = $packageDir . '/skills/code-review-jira/scripts/upsert-comment.sh';
+
+    expect(is_file($githubScript))->toBeTrue();
+    expect(is_executable($githubScript))->toBeTrue();
+    expect(is_file($jiraScript))->toBeTrue();
+    expect(is_executable($jiraScript))->toBeTrue();
+
+    $githubScriptBody = (string) file_get_contents($githubScript);
+    expect($githubScriptBody)->toContain('MARKER_KEY="${3:-cr-comment}"');
+    expect($githubScriptBody)->toContain('<!-- ${MARKER_KEY}:actor=${ACTOR} -->');
+    expect($githubScriptBody)->toContain('gh api user --jq .login');
+    expect($githubScriptBody)->toContain('repos/${NWO}/issues/comments/${EXISTING_ID}');
+    expect($githubScriptBody)->toContain('-X PATCH');
+    expect($githubScriptBody)->toContain('action=updated');
+    expect($githubScriptBody)->toContain('action=created');
+    expect($githubScriptBody)->toContain('jq -s -r --arg marker');
+    expect($githubScriptBody)->toContain('-f body=@-');
+    expect($githubScriptBody)->not->toContain('-F body=@-');
+
+    $jiraScriptBody = (string) file_get_contents($jiraScript);
+    expect($jiraScriptBody)->toContain('MARKER_KEY="${3:-cr-comment}"');
+    expect($jiraScriptBody)->toContain('{anchor:${MARKER_KEY}-actor-${ACTOR_SLUG}}');
+    expect($jiraScriptBody)->toContain('acli jira me --json');
+    expect($jiraScriptBody)->toContain('acli jira workitem comment edit');
+    expect($jiraScriptBody)->toContain('acli jira workitem comment add');
+    expect($jiraScriptBody)->toMatch('/if ! grep -Fq "\$MARKER" <<<"\$BODY"; then\s+BODY="\$\{BODY\}\s+\$\{MARKER\}"/');
+
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+    $prSummary = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');
+
+    foreach ([$github, $jira, $prSummary] as $skill) {
+        expect($skill)->toContain('skills/code-review-github/scripts/upsert-comment.sh');
+        expect($skill)->toContain('<!-- cr-comment:actor=<gh-login> -->');
+    }
+
+    expect($jira)->toContain('skills/code-review-jira/scripts/upsert-comment.sh');
+    expect($jira)->toContain('{anchor:cr-comment-actor-<slug>}');
+    expect($prSummary)->toContain('skills/code-review-jira/scripts/upsert-comment.sh');
+    expect($prSummary)->toContain('{anchor:cr-comment-actor-<slug>}');
+
+    foreach ([$github, $jira] as $skill) {
+        expect(stripos($skill, 'single-comment upsert'))->not->toBeFalse();
+        expect($skill)->toContain('edit the existing comment in place');
+        expect($skill)->not->toContain('Replying to code review from');
+    }
+
+    $processCodeReview = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+    expect($processCodeReview)->toContain('skills/code-review-github/scripts/upsert-comment.sh');
+    expect($processCodeReview)->toContain('cr-status');
+    expect($processCodeReview)->toContain('<!-- cr-status:actor=<gh-login> -->');
+    expect($processCodeReview)->toContain('{anchor:cr-status-actor-<slug>}');
+    expect($processCodeReview)->not->toContain('Replying to code review from');
+    expect($processCodeReview)->not->toContain('Post resolved items and status updates as a new PR comment');
+
+    foreach ([
+        $packageDir . '/skills/code-review-github/templates/pr-comment-output.md',
+        $packageDir . '/skills/code-review-jira/templates/github-output.md',
+        $packageDir . '/skills/code-review/templates/review-output.md',
+    ] as $template) {
+        $body = (string) file_get_contents($template);
+        expect($body)->toContain('**Last updated:**');
+        expect($body)->not->toContain('## Previous CR Status');
+    }
 });
 
 test('process-code-review enforces a convergence loop with quiet iterations and a single final publish', function (): void {
@@ -1409,15 +1479,15 @@ test('code review skills delegate the non-technical issue-tracker summary to pr-
     expect($github)->toContain('#### Linked-issue consolidated summary (mandatory — single comment per linked issue)');
     expect($github)->toContain('every linked issue');
     expect($github)->toContain('closingIssues[]');
-    expect($github)->toContain('gh issue comment');
+    expect($github)->toContain('skills/code-review-github/scripts/upsert-comment.sh');
     expect($github)->toContain('plus a non-technical summary to every linked issue');
     expect($github)->toContain('issue-tracker summary status');
     expect($github)->toContain('cross-repo issue, lacking write access');
     expect($github)->toContain('@skills/pr-summary/SKILL.md');
     expect($github)->toContain('@skills/pr-summary/templates/pr-summary-github.md');
 
-    expect($jira)->toContain('#### Linked GitHub issues (consolidated mirror — one per linked issue per CR run)');
-    expect($jira)->toContain('gh issue comment');
+    expect($jira)->toContain('#### Linked GitHub issues (consolidated mirror — single-comment upsert per linked issue per actor)');
+    expect($jira)->toContain('skills/code-review-github/scripts/upsert-comment.sh');
     expect($jira)->toContain('no linked GitHub issue — mirror skipped');
     expect($jira)->toContain('cross-repo issue, lacking write access');
     expect($jira)->toContain('@skills/pr-summary/SKILL.md');
@@ -1571,7 +1641,6 @@ test('code review output omits empty sections instead of rendering placeholders'
         expect($content)->toContain('Render only when at least one Critical, Moderate, or Minor finding exists.');
         expect($content)->toContain('Render only when at least one in-scope refactoring item exists.');
         expect($content)->toContain('Render only when at least one out-of-scope structural improvement is justified by a rule.');
-        expect($content)->toContain('Render only on follow-up reviews that have at least one previous finding to classify.');
     }
 
     $skills = [

@@ -126,14 +126,11 @@ This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, 
 
 **Precondition:** same as Finalization — convergence required.
 
-- Find the original code review comment on the PR:
-  - Read `comments[]` off `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>` and identify the CR comment (e.g. contains "Summary:" with severity counts)
-- **If the original CR comment is found:**
-  - Post resolved items and status updates as a new PR comment that references the original CR comment
-  - GitHub does not support native replies to issue comments — use quoting (e.g. "> Replying to code review from {date}") to create a visual thread
-- **If original comment cannot be found or edited:**
-  - Add a new top-level PR comment with resolved-point status
-- Mark resolved items (checkbox or inline) in all cases
+- Publish the resolved-items report through the **single-comment upsert helper** using the dedicated `cr-status` marker namespace, so the status comment lives in its own per-(PR, actor) slot — separate from the CR comment (`cr-comment` namespace) — and follow-up converge runs edit it in place instead of stacking on top of it. Concretely:
+  - GitHub PR: `skills/code-review-github/scripts/upsert-comment.sh <PR-NUMBER|URL> - cr-status` (body on stdin). The helper appends `<!-- cr-status:actor=<gh-login> -->` to the body, locates any prior `cr-status`-namespaced comment by the same actor, and either PATCHes it or POSTs a fresh one. Action (`created|updated`) is logged on stderr; include it in the in-conversation completion report.
+  - JIRA-originated reviews that also mirror to a JIRA ticket: `skills/code-review-jira/scripts/upsert-comment.sh <KEY|URL> - cr-status`. The helper appends `{anchor:cr-status-actor-<slug>}` and edits / adds the comment via `acli` (JIRA MCP fallback on exit code 4).
+- Do **not** quote / reply to the CR comment and do **not** open a new top-level PR comment outside the upsert flow — the upsert convention replaces the previous quoting-based visual thread entirely. The CR comment (`cr-comment` namespace) stays untouched by this skill; only the actor-owned `cr-status` comment is edited.
+- Mark resolved items (checkbox or inline) inside the upserted body in all cases.
 
 #### Per-item justification (required)
 

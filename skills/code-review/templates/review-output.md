@@ -5,16 +5,9 @@
 **Status:** clean / needs-fix
 **Counts:** Critical {n} · Moderate {n} · Minor {n} · Refactoring {n}
 **Coverage:** {result} (tool: {name or "not available — <reason>"})
+**Last updated:** {ISO-8601 timestamp of this CR run}
 
----
-
-## Previous CR Status
-
-> Render only on follow-up reviews that have at least one previous finding to classify. Omit on first reviews and on follow-up reviews whose previous-finding list is empty.
-
-| # | Finding | Status |
-|---|---------|--------|
-| 1 | <previous finding title> | ✅ Resolved / ⏳ Deferred / ❌ Still open |
+> **Single-comment upsert:** the CR wrapper (`code-review-github` / `code-review-jira`) publishes this output as **one comment per (PR | linked issue | JIRA ticket, actor)** keyed by an actor marker (`<!-- cr-comment:actor=<gh-login> -->` for GitHub, `{anchor:cr-comment-actor-<slug>}` for JIRA). Follow-up CR runs **edit that comment in place**, so history is preserved by the tracker's edit history — never re-create a `Previous CR Status` section in the body.
 
 ---
 

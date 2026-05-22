@@ -33,16 +33,9 @@ Perform structured code review focused on:
 - Identify changes vs main branch.
 - Deduplicate previous findings.
 
-### Previous CR Analysis
+### Cross-run history
 
-If a previous code review exists for the same PR:
-
-1. Load all previous CR findings from PR comments.
-2. Classify each previous finding into one of these statuses:
-   - **Resolved** — the finding was fixed in subsequent commits.
-   - **Deferred** — the finding was acknowledged but intentionally left for a future task.
-   - **Still open** — the finding was not addressed and remains valid.
-3. Include this classification as a **Previous CR Status** section in the output (before new findings).
+The CR wrappers publish the review through a **single-comment upsert** keyed by the current actor identity (see `@skills/code-review-github/SKILL.md` and `@skills/code-review-jira/SKILL.md`). Follow-up runs edit that one comment in place, so the per-run audit trail lives in the tracker's edit history. Do not load prior CR findings from PR comments and do not author a `Previous CR Status` section in the output — the upsert convention makes it redundant.
 
 ### Issue Context Analysis
 
@@ -165,7 +158,7 @@ Run this section over the PR diff only — never over untouched code.
 
 - Output only findings
 - No praise, no summaries of what was checked
-- **Omit empty sections entirely.** Only the header block (Status / Counts / Coverage / tracker-status line), the `## Coverage` section, and the final `Summary` line are always rendered. Every other section — `Previous CR Status`, `Findings` (including each severity sub-heading), `Refactoring (DRY / tech debt)`, `Refactoring proposals`, `Database Analysis`, and any specialized-review sub-section — appears **only when it has at least one item**. Never emit `None.` / `Not applicable.` / `n/a` placeholders for empty sections; drop the whole heading and body instead. The Counts line in the header is the single source of "zero" signal so a clean review stays scannable.
+- **Omit empty sections entirely.** Only the header block (Status / Counts / Coverage / Last updated / tracker-status line), the `## Coverage` section, and the final `Summary` line are always rendered. Every other section — `Findings` (including each severity sub-heading), `Refactoring (DRY / tech debt)`, `Refactoring proposals`, `Database Analysis`, and any specialized-review sub-section — appears **only when it has at least one item**. Never emit `None.` / `Not applicable.` / `n/a` placeholders for empty sections; drop the whole heading and body instead. The Counts line in the header is the single source of "zero" signal so a clean review stays scannable. **History across CR runs** is preserved by the tracker's edit history on the upserted comment — never re-create a `Previous CR Status` section in the body.
 - Use severity levels:
     - Critical
     - Moderate

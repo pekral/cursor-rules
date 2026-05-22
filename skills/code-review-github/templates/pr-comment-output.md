@@ -1,21 +1,14 @@
 # Code Review
 
-> **Section visibility — render only sections that have content.** Always render the header block (Status / Counts / Coverage / Issue tracker summary), the `## Coverage` section, and the final `Summary` line. Every other section is conditional: omit its heading and body entirely when it has no items. Never emit `None.` / `Not applicable.` / `n/a` placeholders for empty sections — drop the whole section instead. The Counts line in the header is the single source of "zero" signal; the goal is a clean, scannable PR comment a human can read at a glance.
+> **Section visibility — render only sections that have content.** Always render the header block (Status / Counts / Coverage / Last updated / Issue tracker summary), the `## Coverage` section, and the final `Summary` line. Every other section is conditional: omit its heading and body entirely when it has no items. Never emit `None.` / `Not applicable.` / `n/a` placeholders for empty sections — drop the whole section instead. The Counts line in the header is the single source of "zero" signal; the goal is a clean, scannable PR comment a human can read at a glance.
+>
+> **Single-comment upsert:** this template is rendered into one comment per (PR, GitHub actor) keyed by the hidden marker `<!-- cr-comment:actor=<gh-login> -->` (auto-appended by `skills/code-review-github/scripts/upsert-comment.sh`). Follow-up CR runs **edit this comment in place** — never append a new one. The `Last updated` line below carries the most recent run timestamp so reviewers see freshness at a glance; the previous content is preserved in GitHub's edit history.
 
 **Status:** clean / needs-fix
 **Counts:** Critical {n} · Moderate {n} · Minor {n} · Refactoring {n}
 **Coverage:** {result} (tool: {name or "not available — <reason>"})
+**Last updated:** {ISO-8601 timestamp of this CR run}
 **Issue tracker summary:** {posted summary to issue #N | no linked issue — issue summary skipped | failed to post on issue #N: <reason>}
-
----
-
-## Previous CR Status
-
-> Render only on follow-up reviews that have at least one previous finding to classify. Omit on first reviews and on follow-up reviews whose previous-finding list is empty.
-
-| # | Finding | Status |
-|---|---------|--------|
-| 1 | <previous finding title> | ✅ Resolved / ⏳ Deferred / ❌ Still open |
 
 ---
 

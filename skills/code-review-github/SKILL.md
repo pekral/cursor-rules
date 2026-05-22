@@ -73,20 +73,11 @@ Before reviewing code, load and analyze the full linked issue:
 
 > **Quiet mode (loop iterations from `@skills/process-code-review/SKILL.md`):** when the caller explicitly requests "do not publish; return findings as in-memory markdown for this loop iteration only", **skip the entire Post Results step** — do not post the PR comment, do not post the linked-issue summary. Return the assembled review markdown to the caller and stop. Only the very last (publishing) call from `process-code-review` after convergence runs Post Results in full.
 
-#### Thread detection
-- Before posting, search for an existing code review comment on the PR:
-  - Read `comments` off the JSON loaded in step 1 and find one matching the CR format (e.g. contains "Summary:" with severity counts)
-  - Store its `url` (and the trailing `#issuecomment-<id>`) if found
-
-#### Posting strategy
-- **If an existing CR comment is found (follow-up review):**
-    - Analyze all previous CR findings and classify each as: **Resolved**, **Deferred**, or **Still open**
-    - Include a **Previous CR Status** section at the top of the new review comment (before any new findings)
-    - Post **detailed findings** as a new PR comment that references the original CR comment (quote its first line or link to it)
-    - GitHub does not support native replies to issue comments — use quoting (e.g. "> Replying to code review from {date}") to create a visual thread
-
-- **If no existing CR comment is found (first review):**
-    - Post findings as a single PR comment using CLI tools
+#### Single-comment upsert (per actor)
+- Every CR run owns **exactly one PR comment per GitHub actor**. The comment is keyed by the marker `<!-- cr-comment:actor=<gh-login> -->` (auto-appended by the upsert helper) so follow-up runs **edit the existing comment in place** instead of stacking new comments — no quoting, no "Replying to …" threads, no detached follow-up posts.
+- Publish via `skills/code-review-github/scripts/upsert-comment.sh <PR-NUMBER|URL> -` (body on stdin). The helper detects the current actor (`gh api user --jq .login`), searches the PR comments for the marker, and either PATCHes the existing comment or POSTs a fresh one. The published URL is emitted on stdout; the action (`created|updated`) on stderr — log it in the PR comment summary line.
+- If the upsert helper exits with code 2 (missing tool) or 3 (API failure), fall back to the GitHub MCP server: list comments, locate the marker, then `updateIssueComment` (or `addIssueComment` when absent). Never bypass the marker convention by posting through raw `gh issue comment` / `gh pr comment` — that path stacks duplicates and is forbidden.
+- Pre-existing CR comments published **before** this convention was introduced are left untouched. The first marker-scoped run after the change creates a clean comment alongside them; no migration / deletion is performed.
 
 #### Format
 - Critical → Moderate → Minor → Refactoring (DRY / Tech Debt Reduction)
@@ -102,11 +93,11 @@ Before reviewing code, load and analyze the full linked issue:
 - **Consolidation contract (issue #498):** invoke `pr-summary` exactly once per linked issue and pass it the `## Assignment Compliance` markdown block returned by `@skills/assignment-compliance-check/SKILL.md` as an embedded block. `pr-summary` appends the block verbatim after `How to test` and publishes **one consolidated comment** containing both the change summary and the assignment-compliance verdict. The CR run posts **exactly one comment per linked issue** — never a separate `gh issue comment` for assignment compliance on top of it.
 - When invoking `pr-summary`, pass through the PR `author.login` + `commits[].author.login` set and the git `%an <%ae>` log so the published summary credits the **real change author(s)**, never the agent or the identity running this CR. `pr-summary` resolves and prints those identities in its `Authors` line — confirm the line is present in the published comment.
 - When invoking `pr-summary`, also pass through any **test-parameter gating** detected in the diff (feature flag, ENV switch, query-string parameter, request header, admin toggle, allow-list) so the published summary carries the `Available behind` line and folds the toggle-enabling step into `How to test` step 1. When the diff contains no such gate, confirm with `pr-summary` that the line is omitted intentionally rather than forgotten.
-- Invoke `@skills/pr-summary/SKILL.md` with the **GitHub** tracker target so it renders `@skills/pr-summary/templates/pr-summary-github.md` in GitHub Markdown and posts via `gh issue comment <number>` on every entry in `closingIssues[]`. `pr-summary` mirrors the same format that `@skills/code-review-jira/SKILL.md` posts to JIRA, so reviewers reading either tracker see the same consolidated comment.
+- Invoke `@skills/pr-summary/SKILL.md` with the **GitHub** tracker target so it renders `@skills/pr-summary/templates/pr-summary-github.md` in GitHub Markdown and **upserts** the comment via `skills/code-review-github/scripts/upsert-comment.sh` on every entry in `closingIssues[]` (one comment per linked issue, per actor — keyed by the marker `<!-- cr-comment:actor=<gh-login> -->`). `pr-summary` mirrors the same format that `@skills/code-review-jira/SKILL.md` posts to JIRA, so reviewers reading either tracker see the same consolidated comment.
 - `pr-summary` enforces the no-file-paths / no-line-numbers / no-code-snippets / no-severity-jargon contract by design; technical content stays exclusively on the PR comment. The embedded `Assignment Compliance` block follows the same constraint — it carries plain-language gap descriptions only.
 - If `closingIssues[]` is empty, skip this step and note "no linked issue — issue summary skipped" in the PR comment summary line. `assignment-compliance-check` returns the same status in that case so the wrapper does not even build an embedded block.
-- If `gh issue comment` returns a permission error (cross-repo issue, lacking write access), log the failure in the PR comment summary line and continue — do not abort the review.
-- For follow-up reviews, post a fresh consolidated comment on each linked issue rather than editing prior comments (matches the PR thread-detection behavior). The "one consolidated comment per CR run" rule applies within a single run, not across runs.
+- If the upsert helper or the GitHub MCP fallback returns a permission error (cross-repo issue, lacking write access), log the failure in the PR comment summary line and continue — do not abort the review.
+- For follow-up reviews, the upsert helper **edits the actor's existing linked-issue comment in place** instead of posting a new one. The "one consolidated comment per CR run" rule therefore extends across runs too — each (linked issue, GitHub actor) pair has exactly one comment that gets updated. Old comments authored before this convention was introduced are left in place untouched.
 
 ---
 
@@ -115,7 +106,7 @@ Before reviewing code, load and analyze the full linked issue:
 - Findings only
 - No praise
 - No “what was checked”
-- **Omit empty sections entirely.** Only the header block (Status / Counts / Coverage / Issue tracker summary), the `## Coverage` section, and the final `Summary` line are always rendered in the PR comment. Every other section — `Previous CR Status`, `Findings` (including each severity sub-heading), `Refactoring (DRY / Tech Debt Reduction)`, `Refactoring Proposals`, and `Database Analysis` — appears **only when it has at least one item**. Never emit `None.` / `Not applicable.` / `n/a` placeholders for empty sections; drop the whole heading and body instead. The Counts line is the single source of "zero" signal so a clean review stays scannable.
+- **Omit empty sections entirely.** Only the header block (Status / Counts / Coverage / Last updated / Issue tracker summary), the `## Coverage` section, and the final `Summary` line are always rendered in the PR comment. Every other section — `Findings` (including each severity sub-heading), `Refactoring (DRY / Tech Debt Reduction)`, `Refactoring Proposals`, and `Database Analysis` — appears **only when it has at least one item**. Never emit `None.` / `Not applicable.` / `n/a` placeholders for empty sections; drop the whole heading and body instead. The Counts line is the single source of "zero" signal so a clean review stays scannable. **History across CR runs** is preserved by GitHub's edit history on the upserted comment — never re-create a `Previous CR Status` section in the body.
 - Use exactly three severity levels: Critical, Moderate, Minor
 - Add a **Refactoring (DRY / Tech Debt Reduction)** section after the Minor findings whenever the diff contains in-scope tech-debt-reducing changes (DRY duplication, oversized methods, mixed responsibilities). Each item must include `file:line` and a concrete refactoring step.
 - Each **Critical** and **Moderate** finding must include:

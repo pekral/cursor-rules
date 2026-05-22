@@ -1,0 +1,66 @@
+---
+description: Criteria and selection process for choosing a Composer dependency from Packagist or a GitHub-hosted VCS repository
+alwaysApply: false
+globs: []
+---
+
+## Scope
+
+Apply this rule **every time a skill needs to propose a new Composer dependency** — whether the package is being looked up on Packagist (the default registry), on GitHub directly (VCS repository, private fork, unpublished package), or on any other Composer-compatible source. The goal is to keep the project off abandoned and unmaintained libraries and to make the selection auditable.
+
+The rule does **not** trigger for:
+
+- bumping a version of a package that is **already** in `composer.json` — that is owned by `@skills/composer-update/SKILL.md` (the activity gate below still applies if the bump uncovers an abandoned upstream)
+- removing a package — no activity check needed
+- internal `pekral/*` or other first-party packages owned by the same organisation — the *Activity gate* below is informational only, the *Compatibility gate* still applies
+
+## Activity gate (mandatory — every candidate must pass before it can be considered)
+
+A candidate package qualifies only when **all** of the following hold. Evaluate each candidate against the canonical source (Packagist for registered packages, the GitHub repository for VCS / unregistered packages) — never guess from memory or from the package name alone.
+
+1. **Recent activity (≤ 12 months).** The most recent commit on the default branch **and** the most recent tagged release must both be no older than 12 months from today's date. A package with a recent commit but no release in the last 12 months still qualifies *only* when the recent commit is on the default branch and the project's release cadence (visible from prior tags) is documented as low-frequency-by-design (PSR specs, mature standalone utilities). Cite the documented cadence in the selection note.
+2. **Not archived.** The GitHub repository must not be archived (`archived: false` in the repo metadata).
+3. **Not abandoned on Packagist.** When the candidate is registered on Packagist, the package page must not carry the `abandoned` flag. When abandoned with a documented replacement, follow the replacement pointer and re-run the whole selection against the suggested successor — never adopt an abandoned package even if it still appears active on GitHub.
+4. **Tagged release exists.** The repository ships at least one Composer-installable tagged release (`v*`, `*.*.*`, or any SemVer tag Composer recognises). Composer's `dev-main` / `dev-master` constraints do **not** qualify a candidate; depending on a moving branch is prohibited.
+5. **Issue tracker is responsive.** Open issues / PRs receive at least one maintainer reply within the last 12 months. A repository with > 50 open issues and zero maintainer activity in the last 12 months fails this gate even when the commit history looks healthy (drive-by commits without triage are not maintenance).
+
+If a candidate fails **any** of the gates above, mark it as **disqualified** in the selection note (with the specific gate it failed) and move on to the next candidate. Do not silently downgrade the criterion.
+
+## Compatibility gate (mandatory — applied to every gate-1 candidate)
+
+The candidate must additionally:
+
+1. **Match the project's PHP constraint.** Compare the candidate's `composer.json` `require.php` against the consuming project's `composer.json` `require.php`. A candidate that requires a newer PHP than the project ships disqualifies unless the project is willing to bump PHP — flag the trade-off explicitly in the selection note.
+2. **Match framework constraints.** When the project uses Laravel / Symfony / a Filament version, the candidate must declare a compatible constraint (`illuminate/*`, `symfony/*`, `filament/filament`). Reject candidates that pin to a major version the project does not run.
+3. **Carry an OSI-approved license** compatible with the consuming project (MIT, BSD-2/3, Apache-2.0, ISC, LGPL-2.1+, MPL-2.0). Unlicensed packages, proprietary licenses, or licenses with copyleft incompatible with the consuming project's distribution model disqualify automatically.
+4. **Have working CI** on the default branch (status badge green, or the most recent CI run on `main`/`master` succeeded). A repository with red CI on the default branch disqualifies — adoption ships latent bugs.
+
+## Selection process (mandatory — produce an audit trail before recommending)
+
+1. **Enumerate 2–3 realistic candidates.** Pull them from Packagist search (`composer search <keyword>` or `https://packagist.org/?query=<keyword>`), from the GitHub topic / awesome-list discovery, and from the issue / PR discussion if reviewers named specific packages. A single-candidate "selection" is not a selection — when only one candidate exists, document the search you performed and explicitly state that no alternative was found.
+2. **Run every candidate through the Activity gate + Compatibility gate above.** Tabulate the result so each `pass/fail` is visible.
+3. **Score the surviving candidates** on the following secondary signals (no candidate is rejected on these alone; they are tie-breakers):
+   - **Adoption** — Packagist install count (`Installs`) or GitHub star count, whichever is higher.
+   - **Documentation** — `README.md` length, presence of a usage example, presence of a hosted docs site.
+   - **Test surface** — visible test directory, declared test framework (Pest / PHPUnit), test count.
+   - **Maintainer diversity** — multiple contributors with merged PRs in the last 12 months versus a single-maintainer project (single-maintainer projects are not disqualified, but flagged as a bus-factor risk).
+   - **Type-safety / API ergonomics** — typed return values, strict types declaration, immutability of DTOs, attribute-based wiring; matches the consuming project's `@rules/php/core-standards.mdc` expectations.
+4. **Recommend the highest-scoring surviving candidate.** Document the choice in the agent output as:
+
+   ```
+   ### Proposed dependency: <vendor/package>
+   - **Activity:** last commit <YYYY-MM-DD>, last release <vX.Y.Z @ YYYY-MM-DD>
+   - **Compatibility:** PHP <constraint>, framework <constraint>, license <SPDX>
+   - **Adoption:** <packagist-installs> installs, <gh-stars> stars
+   - **Alternatives considered:** <vendor/alt-1> (failed: <reason>), <vendor/alt-2> (passed but lower score: <reason>)
+   - **Why this one:** <one-sentence justification tied to the scoring signals above>
+   ```
+
+5. **If no candidate passes the Activity gate + Compatibility gate**, do **not** silently relax the rule. Stop, report a blocker to the user with the table of disqualifications, and let the user decide whether to (a) wait for an active alternative, (b) approve an exception with a written justification, or (c) implement the functionality in-project instead of adopting a dependency. Document the user decision in the PR description / commit body when the exception is granted.
+
+## Code Review Application
+
+- Treat this rule as authoritative when reviewing PRs that add a new dependency to `composer.json`.
+- A PR that adds a `require` / `require-dev` entry **without** a selection note covering Activity + Compatibility gates is a **Critical** finding (the audit trail is part of the contract, not optional).
+- A PR that adopts an archived / abandoned / branch-pinned package is a **Critical** finding regardless of the rest of the diff.
+- A PR that adopts a single-maintainer package without flagging the bus-factor risk is a **Moderate** finding (the gate still passes, but the risk must be acknowledged).

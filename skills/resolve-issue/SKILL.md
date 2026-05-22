@@ -8,6 +8,7 @@ metadata:
 
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
+- Apply `@rules/php/dependency-selection.mdc` — whenever the resolution flow needs to add a new Composer dependency (Packagist or a GitHub-hosted VCS repository), run the Activity gate + Compatibility gate from that rule before recommending a package, and embed the selection note in the PR description. When no candidate passes the gates, stop and surface the disqualification table to the user instead of adopting an inactive library.
 - Apply `@rules/git/general.mdc`
 - Apply `@rules/reports/general.mdc`. The **final technical report** this skill posts on the GitHub PR (code-review and security-review summary block) stays in canonical English per the rule's *Exception — technical CR findings on the GitHub PR*. The **non-technical report** posted on the original issue / JIRA ticket / Bugsnag-linked GitHub issue follows the language of the source assignment. Code identifiers, file paths, severity labels, and CLI commands stay verbatim regardless of the surrounding prose language; never mix two natural languages inside a single comment.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`

@@ -16,6 +16,7 @@ Analyze dependency updates after `composer update`, detect conflicts, and summar
 
 ## Constraints
 - Apply @rules/php/core-standards.mdc
+- Apply @rules/php/dependency-selection.mdc — this skill primarily *bumps* existing packages (rule out of scope per its *Scope* section), but a bump frequently uncovers an upstream that has been archived or marked abandoned. When that happens, re-run the Activity gate + Compatibility gate against the suggested replacement (or against a fresh search if no replacement is documented) before recommending the migration. Never silently keep an archived / abandoned package in the lockfile just because the bump compiles.
 - Output Markdown only
 
 ---

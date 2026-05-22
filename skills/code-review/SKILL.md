@@ -19,6 +19,7 @@ Perform structured code review focused on:
 - Apply @rules/php/core-standards.mdc
 - Apply @rules/code-review/general.mdc
 - Apply @rules/refactoring/general.mdc — use the shared refactoring definition when assessing refactoring changes or when proposing refactoring; reject big-bang rewrites and prefer incremental migration.
+- Apply @rules/php/dependency-selection.mdc — when the PR diff adds a new `require` / `require-dev` entry to `composer.json`, walk the Activity + Compatibility gates from that rule against the PR description / commit body. A missing selection note is a **Critical** finding; an adopted archived / abandoned / branch-pinned package is a **Critical** finding on the spot; a single-maintainer adoption without bus-factor flag is a **Moderate** finding.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Output findings only (no praise)
 - **Read-only skill** — never modify code, never stage / commit / push changes, and never run any git write operation (`git add`, `git commit`, `git push`, `git reset`, `git checkout -- …`, etc.). Switching to the relevant branch and `git pull` to read the latest diff are allowed; mutating the working tree or pushing to the remote is not. Output is the review markdown only.

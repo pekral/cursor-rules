@@ -2804,11 +2804,15 @@ test('dependency-selection rule gates every new Composer package on activity and
     expect($rule)->toContain('## Compatibility gate (mandatory');
     expect($rule)->toContain('Match the project\'s PHP constraint.');
     expect($rule)->toContain('OSI-approved license');
+    expect($rule)->toContain('no CI configured at all');
+    expect($rule)->toContain('quality risk under the *Test surface* scoring signal');
 
     expect($rule)->toContain('## Selection process (mandatory');
     expect($rule)->toContain('Enumerate 2–3 realistic candidates.');
     expect($rule)->toContain('Alternatives considered:');
     expect($rule)->toContain('### Proposed dependency:');
+    expect($rule)->toContain('### Proposed dependency: spatie/laravel-data');
+    expect($rule)->toContain('Concrete rendered example');
 
     expect($rule)->toContain('do **not** silently relax the rule');
     expect($rule)->toContain('Stop, report a blocker to the user');
@@ -2821,6 +2825,8 @@ test('dependency-selection rule gates every new Composer package on activity and
         $packageDir . '/skills/class-refactoring/SKILL.md',
         $packageDir . '/skills/composer-update/SKILL.md',
         $packageDir . '/skills/security-threat-analysis/SKILL.md',
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/security-review/SKILL.md',
     ];
 
     foreach ($callers as $caller) {

@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **28 comprehensive Agent skills** for automated workflows (v0.8.1)
+- **29 comprehensive Agent skills** for automated workflows (v0.8.1)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -104,7 +104,7 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 
 # 🎯 Skills Overview — **v0.8.1**
 
-> Current release includes 28 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
+> Current release includes 29 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -116,6 +116,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 |---|---|
 | `analyze-problem` | Structured problem analysis for debugging, root cause identification, and breaking down complex issues. |
 | `resolve-issue` | Unified issue resolution for GitHub, JIRA, and Bugsnag. Detects the tracker from the provided link, runs `analyze-problem` before implementation, validates with tests, and creates a PR. |
+| `autoresolve-oldest-github-issue` | Picks the oldest open GitHub issue (optionally filtered by label, default `Resolve_by_AI`) and chains `resolve-issue` → `code-review-github` → `process-code-review` → `merge-github-pr` against the resulting PR. Stops on any documented blocker (merge conflict, failing CI, residual Critical/Moderate findings). |
 | `merge-github-pr` | Safely merge GitHub pull requests that are ready for deployment. |
 | `create-issue` | Create a tracker issue from provided task text while preserving original meaning and structure. |
 | `create-issues-from-text` | Batch-create issues from provided text with automatic structure detection. |

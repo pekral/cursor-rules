@@ -8,6 +8,7 @@ metadata:
 
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
+- Apply `@rules/php/dependency-selection.mdc` — when the audit recommends replacing a vulnerable package with a hardened alternative, run the Activity gate + Compatibility gate on the proposed replacement before recommending the swap. Never trade a vulnerable-but-maintained package for an archived / abandoned / branch-pinned one in the name of security.
 - Apply `@rules/code-review/general.mdc`
 - Apply `@rules/security/backend.mdc`
 - Apply `@rules/code-review/frontend.mdc`

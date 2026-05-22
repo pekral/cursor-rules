@@ -33,7 +33,7 @@ The candidate must additionally:
 1. **Match the project's PHP constraint.** Compare the candidate's `composer.json` `require.php` against the consuming project's `composer.json` `require.php`. A candidate that requires a newer PHP than the project ships disqualifies unless the project is willing to bump PHP — flag the trade-off explicitly in the selection note.
 2. **Match framework constraints.** When the project uses Laravel / Symfony / a Filament version, the candidate must declare a compatible constraint (`illuminate/*`, `symfony/*`, `filament/filament`). Reject candidates that pin to a major version the project does not run.
 3. **Carry an OSI-approved license** compatible with the consuming project (MIT, BSD-2/3, Apache-2.0, ISC, LGPL-2.1+, MPL-2.0). Unlicensed packages, proprietary licenses, or licenses with copyleft incompatible with the consuming project's distribution model disqualify automatically.
-4. **Have working CI** on the default branch (status badge green, or the most recent CI run on `main`/`master` succeeded). A repository with red CI on the default branch disqualifies — adoption ships latent bugs.
+4. **Have working CI** on the default branch (status badge green, or the most recent CI run on `main`/`master` succeeded). A repository with **red** CI on the default branch disqualifies — adoption ships latent bugs. A repository with **no CI configured at all** (no `.github/workflows/`, no `.gitlab-ci.yml`, no `.circleci/`, no badge in the README, no equivalent on a self-hosted runner) is **not** automatically disqualified here, but the absence must be recorded in the selection note as a **quality risk under the *Test surface* scoring signal** and downgrades that signal to zero. Treat *no CI* as a stronger negative signal than *red CI* on the secondary scoring (no CI hides bugs; red CI at least surfaces them).
 
 ## Selection process (mandatory — produce an audit trail before recommending)
 
@@ -54,6 +54,17 @@ The candidate must additionally:
    - **Adoption:** <packagist-installs> installs, <gh-stars> stars
    - **Alternatives considered:** <vendor/alt-1> (failed: <reason>), <vendor/alt-2> (passed but lower score: <reason>)
    - **Why this one:** <one-sentence justification tied to the scoring signals above>
+   ```
+
+   Concrete rendered example (Laravel project picking a typed-data DTO library):
+
+   ```
+   ### Proposed dependency: spatie/laravel-data
+   - **Activity:** last commit 2026-04-18, last release v4.11.0 @ 2026-04-15
+   - **Compatibility:** PHP ^8.2, illuminate/* ^11.0, license MIT
+   - **Adoption:** 6,800,000 installs, 2,500 stars
+   - **Alternatives considered:** cuyz/valinor (failed Activity gate: last release 2024-09 @ 2024-09-12, > 12 months old), spatie/data-transfer-object (failed Compatibility gate: marked abandoned on Packagist with replacement pointer to spatie/laravel-data)
+   - **Why this one:** highest adoption among the candidates, fresh release cadence, ships typed return values + attribute-based mapping that match @rules/php/core-standards.mdc Structure section.
    ```
 
 5. **If no candidate passes the Activity gate + Compatibility gate**, do **not** silently relax the rule. Stop, report a blocker to the user with the table of disqualifications, and let the user decide whether to (a) wait for an active alternative, (b) approve an exception with a written justification, or (c) implement the functionality in-project instead of adopting a dependency. Document the user decision in the PR description / commit body when the exception is granted.

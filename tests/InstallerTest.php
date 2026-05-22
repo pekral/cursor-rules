@@ -2786,6 +2786,49 @@ test('install --editor=claude --allow-bundled-scripts is idempotent across two c
     }
 });
 
+test('dependency-selection rule gates every new Composer package on activity and compatibility', function (): void {
+    $packageDir = dirname(__DIR__);
+    $rulePath = $packageDir . '/rules/php/dependency-selection.mdc';
+
+    expect(is_file($rulePath))->toBeTrue();
+
+    $rule = (string) file_get_contents($rulePath);
+
+    expect($rule)->toContain('## Activity gate (mandatory');
+    expect($rule)->toContain('Recent activity (≤ 12 months).');
+    expect($rule)->toContain('Not archived.');
+    expect($rule)->toContain('Not abandoned on Packagist.');
+    expect($rule)->toContain('Tagged release exists.');
+    expect($rule)->toContain('Issue tracker is responsive.');
+
+    expect($rule)->toContain('## Compatibility gate (mandatory');
+    expect($rule)->toContain('Match the project\'s PHP constraint.');
+    expect($rule)->toContain('OSI-approved license');
+
+    expect($rule)->toContain('## Selection process (mandatory');
+    expect($rule)->toContain('Enumerate 2–3 realistic candidates.');
+    expect($rule)->toContain('Alternatives considered:');
+    expect($rule)->toContain('### Proposed dependency:');
+
+    expect($rule)->toContain('do **not** silently relax the rule');
+    expect($rule)->toContain('Stop, report a blocker to the user');
+
+    expect($rule)->toContain('## Code Review Application');
+    expect($rule)->toContain('**Critical** finding');
+
+    $callers = [
+        $packageDir . '/skills/resolve-issue/SKILL.md',
+        $packageDir . '/skills/class-refactoring/SKILL.md',
+        $packageDir . '/skills/composer-update/SKILL.md',
+        $packageDir . '/skills/security-threat-analysis/SKILL.md',
+    ];
+
+    foreach ($callers as $caller) {
+        $body = (string) file_get_contents($caller);
+        expect($body)->toContain('@rules/php/dependency-selection.mdc');
+    }
+});
+
 test('composer.json declares bin/test-coverage-diff as a vendor binary alongside bin/cursor-rules', function (): void {
     $packageDir = dirname(__DIR__);
     $composerRaw = (string) file_get_contents($packageDir . '/composer.json');

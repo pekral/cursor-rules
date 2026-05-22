@@ -23,6 +23,7 @@ Focus on:
 ## Constraints
 - Apply @rules/refactoring/general.mdc — shared definition of refactoring, recommended incremental process, and "no big-bang rewrite" rule.
 - Apply @rules/php/core-standards.mdc
+- Apply @rules/php/dependency-selection.mdc — when the refactor proposes extracting behavior into an external Composer package or replacing a hand-rolled helper with a library, run the Activity gate + Compatibility gate from that rule before recommending the dependency. A refactor that adopts an archived / abandoned / branch-pinned package is rejected on the spot.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Apply @rules/code-testing/general.mdc
 - Never change behavior

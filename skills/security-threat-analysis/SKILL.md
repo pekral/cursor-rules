@@ -8,6 +8,7 @@ metadata:
 
 ## Constraints
 - Apply `@rules/php/core-standards.mdc`
+- Apply `@rules/php/dependency-selection.mdc` — when the remediation playbook proposes adopting a **new** Composer package (e.g. a hardened replacement for a vulnerable library, or a security helper not previously installed), run the Activity gate + Compatibility gate from that rule and embed the selection note in the playbook step. Pin upgrades of an already-installed package fall under `@skills/composer-update/SKILL.md` discovery and do not need the full selection process.
 - Apply `@rules/security/backend.md`
 - Apply `@rules/security/frontend.md`
 - Apply `@rules/security/mobile.md`

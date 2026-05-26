@@ -168,11 +168,17 @@ EXISTING_ID="$(printf '%s' "$COMMENTS_JSON" \
       | (.id // empty)
     ')"
 
+# `gh api` only honors `@-` (read value from stdin) for the typed `-F/--field`
+# flag. The raw-string `-f/--raw-field` flag treats `@-` as a literal value,
+# which would publish a comment whose body is the two characters `@-`. Build
+# the JSON payload via jq and feed it through `--input -` so the body stays a
+# string regardless of its content (a body that happens to be `true` or an
+# integer would otherwise be coerced by `-F` type inference).
 if [[ -n "$EXISTING_ID" ]]; then
-  RESPONSE="$(printf '%s' "$BODY" | gh api \
+  RESPONSE="$(jq -n --arg body "$BODY" '{body:$body}' | gh api \
     "repos/${NWO}/issues/comments/${EXISTING_ID}" \
     -X PATCH \
-    -f body=@- \
+    --input - \
     || true)"
   if [[ -z "$RESPONSE" ]]; then
     echo "upsert-comment.sh: PATCH failed on comment ${EXISTING_ID}" >&2
@@ -181,10 +187,10 @@ if [[ -n "$EXISTING_ID" ]]; then
   printf '%s' "$RESPONSE" | jq -r '.html_url'
   echo "action=updated id=${EXISTING_ID}" >&2
 else
-  RESPONSE="$(printf '%s' "$BODY" | gh api \
+  RESPONSE="$(jq -n --arg body "$BODY" '{body:$body}' | gh api \
     "repos/${NWO}/issues/${NUMBER}/comments" \
     -X POST \
-    -f body=@- \
+    --input - \
     || true)"
   if [[ -z "$RESPONSE" ]]; then
     echo "upsert-comment.sh: POST failed on ${NWO}#${NUMBER}" >&2

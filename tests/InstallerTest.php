@@ -1345,8 +1345,15 @@ test('CR skills publish through a single-comment upsert helper keyed by the curr
     expect($githubScriptBody)->toContain('action=updated');
     expect($githubScriptBody)->toContain('action=created');
     expect($githubScriptBody)->toContain('jq -s -r --arg marker');
-    expect($githubScriptBody)->toContain('-f body=@-');
+    // Issue #519: `gh api -f body=@-` published a comment whose body was the
+    // literal string `@-` because only the typed `-F/--field` flag expands
+    // `@-` to stdin. The script now builds a JSON payload via jq and feeds
+    // it through `--input -`, so neither `-f body=@-` nor `-F body=@-`
+    // should appear.
+    expect($githubScriptBody)->not->toContain('-f body=@-');
     expect($githubScriptBody)->not->toContain('-F body=@-');
+    expect($githubScriptBody)->toContain('jq -n --arg body "$BODY" \'{body:$body}\'');
+    expect($githubScriptBody)->toContain('--input -');
 
     $jiraScriptBody = (string) file_get_contents($jiraScript);
     expect($jiraScriptBody)->toContain('MARKER_KEY="${3:-cr-comment}"');

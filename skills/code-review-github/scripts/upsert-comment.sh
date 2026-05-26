@@ -133,9 +133,32 @@ if [[ -z "$BODY" ]]; then
   exit 1
 fi
 
-ACTOR="$(gh api user --jq .login 2>/dev/null || true)"
+# Resolve the current GitHub actor through `gh api user`. Earlier revisions
+# discarded both stderr and the exit code, which collapsed every failure mode
+# (expired token, rate limit, network blip) into the same misleading
+# "is gh authenticated?" message. Capture stderr to surface the actual cause
+# and retry up to three times so a single transient API hiccup does not abort
+# the whole CR comment publish — see issue #519.
+ACTOR_STDERR="$(mktemp)"
+trap 'rm -f "$ACTOR_STDERR"' EXIT
+ACTOR=""
+ACTOR_ERR=""
+for attempt in 1 2 3; do
+  : > "$ACTOR_STDERR"
+  if ACTOR="$(gh api user --jq .login 2>"$ACTOR_STDERR")" && [[ -n "$ACTOR" ]]; then
+    break
+  fi
+  ACTOR=""
+  ACTOR_ERR="$(cat "$ACTOR_STDERR")"
+  [[ $attempt -lt 3 ]] && sleep 1
+done
+
 if [[ -z "$ACTOR" ]]; then
-  echo "upsert-comment.sh: failed to resolve current GitHub actor — is gh authenticated?" >&2
+  if [[ -n "$ACTOR_ERR" ]]; then
+    echo "upsert-comment.sh: failed to resolve current GitHub actor after 3 attempts: ${ACTOR_ERR}" >&2
+  else
+    echo "upsert-comment.sh: failed to resolve current GitHub actor — is gh authenticated? (run: gh auth status)" >&2
+  fi
   exit 3
 fi
 

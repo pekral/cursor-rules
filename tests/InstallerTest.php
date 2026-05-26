@@ -1340,6 +1340,18 @@ test('CR skills publish through a single-comment upsert helper keyed by the curr
     expect($githubScriptBody)->toContain('MARKER_KEY="${3:-cr-comment}"');
     expect($githubScriptBody)->toContain('<!-- ${MARKER_KEY}:actor=${ACTOR} -->');
     expect($githubScriptBody)->toContain('gh api user --jq .login');
+    // Issue #519: a transient `gh api user` failure (rate limit, network blip,
+    // token refresh) used to crash with a misleading "is gh authenticated?"
+    // message because stderr and exit code were both swallowed. The script
+    // now retries up to three times, captures the underlying stderr, and
+    // surfaces the real error to the caller.
+    expect($githubScriptBody)->toContain('ACTOR_STDERR="$(mktemp)"');
+    expect($githubScriptBody)->toContain('trap \'rm -f "$ACTOR_STDERR"\' EXIT');
+    expect($githubScriptBody)->toContain('for attempt in 1 2 3; do');
+    expect($githubScriptBody)->toContain('gh api user --jq .login 2>"$ACTOR_STDERR"');
+    expect($githubScriptBody)->toContain('failed to resolve current GitHub actor after 3 attempts');
+    expect($githubScriptBody)->toContain('(run: gh auth status)');
+    expect($githubScriptBody)->not->toContain('gh api user --jq .login 2>/dev/null');
     expect($githubScriptBody)->toContain('repos/${NWO}/issues/comments/${EXISTING_ID}');
     expect($githubScriptBody)->toContain('-X PATCH');
     expect($githubScriptBody)->toContain('action=updated');

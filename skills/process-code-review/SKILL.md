@@ -76,7 +76,7 @@ If a finding lacks Faulty Example, Expected Behavior, or Test Hint, request a CR
 
 - If tests are required or missing:
   - Run @skills/create-missing-tests-in-pr/SKILL.md
-- Ensure current changes have 100% coverage by running the **diff-scoped** coverage command only (discovery order per `@skills/code-review/SKILL.md` Coverage gate — `vendor/bin/test-coverage-diff` from this package, Phing `test:coverage:diff` / `coverage:diff`, Composer `test:coverage:diff`, or any project-specific `*coverage*diff*` script). Never run the full-suite coverage command during a CR / review loop iteration.
+- Ensure current changes have 100% coverage **for the changed files only**, using the project's available coverage tooling (per the Coverage gate in `@skills/code-review/SKILL.md`). Do not gate on the full-suite coverage percentage during a CR / review loop iteration.
 - Run only relevant tests for changed files
 - If migrations were added, run `php artisan migrate`
 

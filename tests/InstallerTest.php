@@ -1296,7 +1296,7 @@ test('refactoring requires pre-refactor 100% coverage and unchanged tests in the
     expect($codeReview)->toContain('**Refactoring test-coverage contract (issue #493)**');
     expect($codeReview)->toContain('Walk the PR commit history and verify the refactor commit is **preceded by a dedicated test commit**');
     expect($codeReview)->toContain('Verify the refactor commit **modifies no pre-existing test file**');
-    expect($codeReview)->toContain('Run `vendor/bin/test-coverage-diff` against the refactor commit alone');
+    expect($codeReview)->toContain('Verify the coverage of the refactor commit alone');
 });
 
 test('CR run produces one consolidated linked-tracker comment per linked issue (issue #498)', function (): void {
@@ -2851,81 +2851,5 @@ test('dependency-selection rule gates every new Composer package on activity and
     foreach ($callers as $caller) {
         $body = (string) file_get_contents($caller);
         expect($body)->toContain('@rules/php/dependency-selection.mdc');
-    }
-});
-
-test('composer.json declares bin/test-coverage-diff as a vendor binary alongside bin/cursor-rules', function (): void {
-    $packageDir = dirname(__DIR__);
-    $composerRaw = (string) file_get_contents($packageDir . '/composer.json');
-    /** @var array{bin: array<int, string>} $composer */
-    $composer = json_decode($composerRaw, true, 512, JSON_THROW_ON_ERROR);
-
-    expect($composer['bin'])->toBeArray();
-    expect($composer['bin'])->toContain('bin/cursor-rules');
-    expect($composer['bin'])->toContain('bin/test-coverage-diff');
-});
-
-test('bin/test-coverage-diff resolves coverage-diff-check.php via its own physical location, not the project bin/', function (): void {
-    $packageDir = dirname(__DIR__);
-    $script = (string) file_get_contents($packageDir . '/bin/test-coverage-diff');
-
-    expect($script)->toContain('SCRIPT_PATH="${BASH_SOURCE[0]}"');
-    expect($script)->toContain('readlink "${SCRIPT_PATH}"');
-    expect($script)->toContain('HELPER_PHP="${SCRIPT_DIR}/coverage-diff-check.php"');
-    expect($script)->toContain('php "${HELPER_PHP}"');
-    expect((bool) preg_match('/^\s*php\s+bin\/coverage-diff-check\.php/m', $script))->toBeFalse();
-});
-
-test('bin/test-coverage-diff is executable and starts with a bash shebang', function (): void {
-    $packageDir = dirname(__DIR__);
-    $scriptPath = $packageDir . '/bin/test-coverage-diff';
-
-    expect(is_file($scriptPath))->toBeTrue();
-    expect(is_executable($scriptPath))->toBeTrue();
-
-    $script = (string) file_get_contents($scriptPath);
-
-    expect($script)->toStartWith('#!/usr/bin/env bash');
-});
-
-test('bin/test-coverage-diff invoked via a symlinked path finds the helper and exits cleanly when no PHP changes are present', function (): void {
-    $packageDir = dirname(__DIR__);
-    $scratchDir = sys_get_temp_dir() . '/test-coverage-diff-' . bin2hex(random_bytes(4));
-    installerEnsureDirectory($scratchDir . '/vendor/bin');
-    symlink($packageDir . '/bin/test-coverage-diff', $scratchDir . '/vendor/bin/test-coverage-diff');
-
-    $cwd = getcwd();
-    $originalCwd = $cwd !== false ? $cwd : '';
-
-    try {
-        chdir($scratchDir);
-
-        $envScript = '/usr/bin/env';
-
-        expect(is_executable($envScript))->toBeTrue();
-
-        $output = (string) shell_exec(
-            'cd ' . escapeshellarg($scratchDir) . ' && '
-            . 'git init --quiet && '
-            . 'git config user.email test@example.com && '
-            . 'git config user.name "test" && '
-            . 'echo "{}" > composer.json && '
-            . 'git add composer.json && '
-            . 'git commit --quiet -m "init" && '
-            . 'mkdir src && '
-            . 'echo "<?php echo 1;" > src/Stub.php && '
-            . 'git add src && '
-            . 'git commit --quiet -m "stub" && '
-            . 'vendor/bin/test-coverage-diff 2>&1',
-        );
-
-        expect($output)->not->toContain('helper script not found');
-        expect($output)->toMatch('/(diff-scoped coverage skipped|PCOV nor Xdebug is loaded|vendor\/bin\/pest)/');
-    } finally {
-        if ($originalCwd !== '') {
-            chdir($originalCwd);
-        }
-
-        installerRemoveDirectory($scratchDir);
     }
 });

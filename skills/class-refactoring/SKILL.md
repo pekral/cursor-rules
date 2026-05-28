@@ -37,7 +37,7 @@ Focus on:
 
 Before touching any line of structure, satisfy the **Test Coverage Contract** defined in `@rules/refactoring/general.mdc`:
 
-1. Run the diff-scoped coverage command (`vendor/bin/test-coverage-diff` first, then the fallbacks listed in `@rules/php/core-standards.mdc` Testing section) against the *current* code that the refactor will touch. Every line, branch, and condition must already be at 100%.
+1. Verify coverage of the *current* code that the refactor will touch, using the project's available coverage tooling scoped to those files (per `@rules/php/core-standards.mdc` Testing section). Every line, branch, and condition must already be at 100%.
 2. **If coverage is below 100% on the target lines, stop and write the missing tests first.** Use `@skills/create-test/SKILL.md` to author them; commit them in a dedicated `test(scope): cover <area> before refactor` commit per `@rules/git/general.mdc` Allowed Types. The pre-refactor coverage commit and the refactor commit are **always two separate commits** — never squash them and never mix new tests into the refactor commit.
 3. Only after the coverage gate is green may the refactor proceed.
 

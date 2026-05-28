@@ -78,8 +78,8 @@
 
 ## Coverage
 
-- **Tool:** {discovered **diff-scoped** coverage script (Phing `test:coverage:diff` / `coverage:diff`, Composer `test:coverage:diff`, or project-specific `*coverage*diff*`) — or "diff-scoped tooling unavailable — <reason>". Never the full-suite `test:coverage` / `coverage` / Phing `coverage` — full-suite belongs to release gates, not CR.}
-- **Command:** `<exact command run — e.g. `composer test:coverage:diff`>`
+- **Tool:** {project's available coverage tooling used to verify the changed files (Phing coverage target, Composer `test:coverage` / `coverage`, or `vendor/bin/pest --coverage-clover` / PHPUnit `--coverage-clover`) — or "coverage tooling unavailable — <reason>". Assess the changed files only; do not gate on a project-wide coverage percentage.}
+- **Command:** `<exact command run — e.g. `vendor/bin/pest --coverage-clover=coverage.xml`>`
 - **Result:** {% covered for changed lines, or list uncovered added/changed lines — which must also appear as Critical findings}
 
 ---

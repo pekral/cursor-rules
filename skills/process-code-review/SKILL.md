@@ -29,7 +29,27 @@ metadata:
 ### For each PR:
 
 - Load PR context by running `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>` — the single deterministic entry point. Never call `gh issue view`, `gh pr view`, or `gh api /repos/.../issues/...` directly. Read review comments, files, commits, status checks, and `closingIssues` off the resulting JSON document. If the script is unavailable (missing tool, exit code 2/3) fall back to the GitHub MCP server, and always prefer the MCP fallback for review-thread / line-anchored comments that the script does not return.
-- Build a checklist from all review findings (general comments come from `comments[]`; line-anchored review-thread comments still need the MCP fallback)
+- **Load unresolved reviewer threads (mandatory, GitHub).** `load-issue.sh` returns general `comments[]` and `reviews[]` but never the line-anchored review threads nor their resolved/unresolved state. Fetch them deterministically with the GraphQL `reviewThreads` connection — this is **not** one of the forbidden REST endpoints (`gh issue view`, `gh pr view`, `gh api /repos/.../issues/...`):
+  ```
+  gh api graphql -f query='
+  query($owner:String!,$repo:String!,$number:Int!,$cursor:String){
+    repository(owner:$owner,name:$repo){
+      pullRequest(number:$number){
+        reviewThreads(first:100, after:$cursor){
+          pageInfo{ hasNextPage endCursor }
+          nodes{
+            id isResolved path line
+            comments(first:100){ nodes{ author{login} body url createdAt } }
+          }
+        }
+      }
+    }
+  }' -F owner=<owner> -F repo=<repo> -F number=<number>
+  ```
+  **Do not accept a truncated list** — the "every unresolved thread" guarantee depends on completeness. When `reviewThreads.pageInfo.hasNextPage` is `true`, repeat the query with `-F cursor=<endCursor>` until it is `false`; when any thread's `comments.nodes` reaches the page size, page that thread's comments the same way. If `gh api graphql` is unavailable, fall back to the GitHub MCP server for the same thread list plus its resolved state.
+- Build the checklist from **both** sources:
+  1. Structured CR findings published by the review skills (general comments come from `comments[]`).
+  2. **Unresolved reviewer threads** from the `reviewThreads` query — add every thread where `isResolved == false` (human reviewer **and** bot) as a checklist item, and **skip every thread where `isResolved == true`**. Record each thread's `id` so it can be marked resolved once its fix lands (see **Resolve addressed reviewer threads** below).
 - Map each finding to a concrete code or test change
 
 #### Reproducer extraction (per finding)
@@ -51,7 +71,9 @@ Use these to write a failing test **before** applying the fix:
 2. Assert the Expected Behavior — the test must fail on the current code.
 3. Apply the Suggested Fix snippet (or the Fix narrative when Suggested Fix is `n/a`); rerun the test until it passes.
 
-If a finding lacks Faulty Example, Expected Behavior, or Test Hint, request a CR rerun rather than guessing — the CR skills are responsible for providing them. Suggested Fix may legitimately be `n/a` per the CR rules.
+If a **CR-skill finding** lacks Faulty Example, Expected Behavior, or Test Hint, request a CR rerun rather than guessing — the CR skills are responsible for providing them. Suggested Fix may legitimately be `n/a` per the CR rules.
+
+**Free-form reviewer threads are exempt from the reproducer requirement.** Unresolved threads written by human reviewers will not carry the four structured fields. Do **not** request a CR rerun for them and do **not** block. Instead, derive the intent from the comment text, apply the minimal best-effort fix that satisfies it, and add or adjust a test at your discretion (a regression test when the comment describes a behavior bug; none when it is a naming / readability / dead-code remark). Keep the change scoped strictly to what the reviewer asked for. The exemption removes only the mandatory reproducer workflow — a behavior-changing best-effort fix still has to satisfy the diff-scoped coverage gate enforced by the **Review loop** below (`@rules/php/core-standards.mdc` Testing).
 
 ---
 
@@ -132,6 +154,18 @@ This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, 
 - Do **not** quote / reply to the CR comment and do **not** open a new top-level PR comment outside the upsert flow — the upsert convention replaces the previous quoting-based visual thread entirely. The CR comment (`cr-comment` namespace) stays untouched by this skill; only the actor-owned `cr-status` comment is edited.
 - Mark resolved items (checkbox or inline) inside the upserted body in all cases.
 
+#### Resolve addressed reviewer threads (GitHub)
+
+After the fixes are committed and pushed (Finalization above), mark every reviewer review thread whose finding was **actually fixed** as resolved, using the thread `id` captured during intake:
+
+```
+gh api graphql -f query='mutation($threadId:ID!){ resolveReviewThread(input:{threadId:$threadId}){ thread{ isResolved } } }' -F threadId=<thread-id>
+```
+
+- Resolve **only** threads that were fixed. Leave a thread unresolved when its point was rejected or deferred, and record the rejection reason in the `cr-status` report instead of resolving it.
+- If `gh api graphql` is unavailable, fall back to the GitHub MCP server's resolve-review-thread operation.
+- Resolving a thread is a GitHub PR state change, not a code change — it stays within the read-fixes-push-resolve flow this skill already owns and never touches the protected main branch.
+
 #### Per-item justification (required)
 
 Every resolved review point in the PR comment **must** include a brief justification using this format:
@@ -160,6 +194,7 @@ Rules:
 - Share a concise completion report (in-conversation, not on the tracker):
   - PR link
   - resolved items
+  - reviewer threads resolved (count) and any left unresolved with the rejection / deferral reason
   - loop iteration count and final convergence status
   - remaining blockers (if any — should be empty when convergence was reached)
 
@@ -172,4 +207,5 @@ Rules:
 - Do not introduce new bugs while fixing existing ones
 - Keep changes traceable to review comments
 - Ensure every review comment is explicitly addressed
+- Treat unresolved GitHub reviewer threads as first-class checklist items; skip already-resolved threads, and resolve a thread only after its fix lands
 - Avoid unnecessary commits or noise

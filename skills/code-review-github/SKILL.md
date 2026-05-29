@@ -52,9 +52,10 @@ Before reviewing code, load and analyze the full linked issue:
     - @skills/assignment-compliance-check/SKILL.md — non-technical business-logic vs assignment check. The skill **does not publish anywhere itself** — it returns the assembled `## Assignment Compliance` markdown block (or the status `no linked issue — assignment compliance skipped` when `closingIssues[]` is empty). The CR wrapper passes the returned block as an embedded block to `@skills/pr-summary/SKILL.md` so the linked-issue audience reads **one consolidated comment** per CR run (per issue #498). **Do not embed** the block into the PR comment — keep the PR comment focused on technical findings and surface the consolidated-comment status in the summary line.
     - @skills/code-review/SKILL.md
     - @skills/security-review/SKILL.md
-    - @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes that apply to lines actually touched by the PR. Do not propose changes outside the diff.
+    - @skills/class-refactoring/SKILL.md **with `MODE=cr`** — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes that apply to lines actually touched by the PR. `MODE=cr` guarantees no code changes, commits, fixers, or review chaining. Do not propose changes outside the diff.
 
 - Run conditionally:
+    - **Diff is a refactoring (behavior-preserving structural change per `@rules/refactoring/general.mdc`) → run the full refactoring skill set read-only.** When the PR restructures existing code without adding a feature or changing observable behavior, additionally invoke `@skills/refactor-entry-point-to-action/SKILL.md` **with `MODE=cr`** to surface the entry-point → Action proposals. **Both refactoring skills run read-only — no code changes, no commits, no fixers, no review chaining — `MODE=cr` enforces this.** Fold their output into the **Refactoring (DRY / Tech Debt Reduction)** section (in-scope) and **Refactoring Proposals** section (out-of-scope) of the PR comment.
     - **Database operations detected in the diff → `@skills/mysql-problem-solver/SKILL.md` is mandatory.** Trigger pattern list is owned by `@skills/code-review/SKILL.md` Specialized Reviews (raw SQL, Eloquent / query-builder calls, eager loads, model scopes, ModelManager / Repository methods, migrations, seeders, DynamoDB / NoSQL access). Capture its findings and surface them in the published PR comment under the dedicated `## Database Analysis` section (see Output Rules) — never silently fold them into the Critical / Moderate / Minor buckets.
     - Shared state → @skills/race-condition-review/SKILL.md
     - Third-party API or service changes → ensure the **Third-Party API & Service Analysis** step from `@skills/code-review/SKILL.md` is executed for the diff
@@ -62,10 +63,11 @@ Before reviewing code, load and analyze the full linked issue:
 #### Refactoring & Tech Debt (DRY) Analysis (PR diff only)
 
 1. Restrict the analysis to lines added or modified in the PR — never review untouched code.
-2. For each changed block, apply `@skills/class-refactoring/SKILL.md` and look for:
+2. For each changed block, apply `@skills/class-refactoring/SKILL.md` (run with `MODE=cr` — read-only) and look for:
    - duplicated logic that already exists elsewhere (DRY) — verify the change reuses existing logic instead of introducing a parallel implementation, per `@rules/code-review/general.mdc` Reuse Existing Logic section
    - data shaping repeated across Actions/Services/controllers/jobs/listeners/Livewire/commands
    - oversized methods, deep nesting, mixed responsibilities introduced or amplified by the change
+   - when the PR is itself a refactoring (see the conditional trigger in **Run Reviews**), also fold in the entry-point → Action proposals from `@skills/refactor-entry-point-to-action/SKILL.md` run with `MODE=cr`
 3. Each finding must include the file path, the affected line range, and a concrete refactoring that *reduces* tech debt.
 4. In-scope refactorings go into the **Refactoring (DRY / Tech Debt Reduction)** section of the PR comment template. Out-of-scope structural problems still belong in **Refactoring Proposals**.
 

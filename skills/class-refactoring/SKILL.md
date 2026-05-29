@@ -20,6 +20,15 @@ Focus on:
 
 ---
 
+## Modes
+
+This skill runs in one of two modes, selected by the caller via `MODE` (default `apply`):
+
+- **`apply` (default)** — full refactoring: modify code, author the pre-refactor coverage commit, run fixers / checkers, and chain the After Completion review. Every step below behaves as written unless it is explicitly flagged for `MODE=cr`.
+- **`cr` (read-only lens — invoked by `@skills/code-review/SKILL.md`, `code-review-github`, `code-review-jira`)** — **never modify code, never author tests, never stage / commit / push, never run fixers or checkers, and never chain any After Completion review.** Scope the analysis to the lines added or modified by the PR diff and return the refactoring opportunities as markdown only, for the CR to fold into its Refactoring (DRY / tech debt) and Refactoring proposals sections. Every "apply / extract / split / consolidate" instruction below is emitted as a written proposal, not applied to code; the Test Coverage Gate becomes a read-only audit (report coverage gaps as findings, do not author tests).
+
+---
+
 ## Constraints
 - Apply @rules/refactoring/general.mdc — shared definition of refactoring, recommended incremental process, and "no big-bang rewrite" rule.
 - Apply @rules/php/core-standards.mdc
@@ -34,6 +43,8 @@ Focus on:
 ## Execution
 
 ### Test Coverage Gate (mandatory pre-flight — issue #493)
+
+> **`MODE=cr`:** do not write tests or commits. Run the coverage check read-only and report any target lines below 100% coverage as a refactoring finding (a refactor cannot land safely without them) — then continue the analysis. The steps below that author tests / commits apply to `MODE=apply` only.
 
 Before touching any line of structure, satisfy the **Test Coverage Contract** defined in `@rules/refactoring/general.mdc`:
 
@@ -86,6 +97,7 @@ Before touching any line of structure, satisfy the **Test Coverage Contract** de
 
 ## Testing
 
+- **`MODE=cr`:** this section is apply-mode only — the read-only lens audits coverage per the Test Coverage Gate note and reports gaps as findings; it never authors tests or commits.
 - The **Test Coverage Gate** in the Execution section is the binding rule — pre-existing target lines must be at 100% coverage *before* the refactor, written into a dedicated `test(scope): cover <area> before refactor` commit per `@rules/refactoring/general.mdc` Test Coverage Contract.
 - Inside the refactor commit, pre-existing tests **must remain unchanged** (mechanical-rename exemption only, flagged in the commit body). Editing the safety net inside the structural change voids the behavior-preservation proof.
 - New tests covering code paths introduced by the refactor go in a separate `test(scope): …` commit *after* the refactor.
@@ -95,11 +107,13 @@ Before touching any line of structure, satisfy the **Test Coverage Contract** de
 
 ## Output
 
-- Refactored code
-- Short explanation of changes:
-  - what was improved
-  - why it matters
-- Summary of test coverage impact
+- **`MODE=apply`:**
+  - Refactored code
+  - Short explanation of changes:
+    - what was improved
+    - why it matters
+  - Summary of test coverage impact
+- **`MODE=cr`:** refactoring opportunities as markdown only (no code) — for each, the `file:line` on the PR diff, the structural problem in one sentence, the concrete consolidation step (target layer per `@rules/laravel/architecture.mdc`), and the rule reference it satisfies. The CR places in-scope items in its **Refactoring (DRY / tech debt)** section and out-of-scope structural problems in **Refactoring proposals**.
 
 ---
 
@@ -115,11 +129,15 @@ Before touching any line of structure, satisfy the **Test Coverage Contract** de
 
 ## Pre-push quality gates
 
+> Skip this entire section in `MODE=cr` — a read-only lens pushes nothing.
+
 - Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`)
 - Run available fixers on all changed files and fix any violations
 - Run available checkers/analyzers on all changed files and resolve all reported errors
 
 ## After Completion
+
+> Skip this entire section in `MODE=cr` — the CR is the caller, so chaining back into it would recurse. Return the findings to the caller and stop.
 
 - Run @skills/code-review/SKILL.md
 - Resolve findings via @skills/process-code-review/SKILL.md

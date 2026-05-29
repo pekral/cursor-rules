@@ -6,13 +6,20 @@ metadata:
   author: "Petr Král (pekral.cz)"
 ---
 
+## Modes
+
+This skill runs in one of two modes, selected by the caller via `MODE` (default `apply`):
+
+- **`apply` (default)** — perform the entry-point → Action refactoring: create / update the Action, move orchestration, run fixers / checkers, and chain the After Completion review. The Execution and Done-when steps below behave as written.
+- **`cr` (read-only lens — invoked by `@skills/code-review/SKILL.md`, `code-review-github`, `code-review-jira`)** — **never modify code, never create files, never stage / commit / push, never run fixers or checkers, and never chain `code-review` / `process-code-review`.** Scope the analysis to entry points (controller / job / command / listener / Livewire) touched by the PR diff that still hold business orchestration, and return — as markdown only — the proposed Action extraction for each: the entry-point `Class::method`, the orchestration that should move out, the target `app/Actions/<Domain>/<ActionName>` and Data Validator, and the rule reference. The CR folds these into its **Refactoring (DRY / tech debt)** section (in-scope) or **Refactoring proposals** section (out-of-scope). Execution steps 3–11 below apply to `MODE=apply` only.
+
 ## Constraints
 - Apply `@rules/refactoring/general.mdc` — incremental migration only, never a big-bang rewrite.
 - Apply `@rules/php/core-standards.mdc`.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Preserve behavior, signatures, response contracts, and tenant/account scope.
 - Do not report review output to any third-party service.
-- After changes, run an internal architecture-first review and fix important findings immediately.
+- After changes (`MODE=apply` only), run an internal architecture-first review and fix important findings immediately. In `MODE=cr` there are no changes — emit the Action-extraction proposal and stop.
 
 ## Use when
 - A controller, job, command, listener, or Livewire component method contains business orchestration that should be moved into an Action.
@@ -44,6 +51,9 @@ Example input:
 - Add or update PHPDoc where needed for PHPStan clarity.
 
 ## Execution
+
+> **`MODE=cr`:** run steps 1–2 read-only, then emit the Action-extraction proposal described under Modes and stop — do not run steps 3–11 (they create files, run fixers, and chain reviews).
+
 1. Inspect the target entry point and identify orchestration responsibilities.
 2. Scan touched files for obvious pre-existing issues that would block or compromise the refactor. Fix only safe, relevant issues; keep unrelated cleanup out of scope.
 3. Create or reuse a dedicated Action in the correct domain folder.
@@ -65,6 +75,8 @@ Example input:
 - Do not introduce unrelated behavioral changes.
 
 ## Done when
+
+**`MODE=apply`:**
 - The target entry point is thin and delegates to a dedicated Action.
 - The Action follows project Action-pattern rules.
 - Validation is delegated to a dedicated Data Validator (using validation traits from `app/Concerns/`) when applicable.
@@ -72,3 +84,5 @@ Example input:
 - Tests cover the refactored flow and important edge/failure paths.
 - Fixers and checkers ran clean on all changed files.
 - Internal architecture-focused review was completed and important findings were fixed.
+
+**`MODE=cr`:** the Action-extraction proposal was emitted as markdown for every qualifying entry point in the diff (entry-point `Class::method`, orchestration to move out, target Action / Data Validator, rule reference) and **no files were created or modified**.

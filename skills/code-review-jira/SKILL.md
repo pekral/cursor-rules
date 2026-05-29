@@ -56,9 +56,10 @@ Before reviewing code, load and analyze the full JIRA issue:
   - run @skills/assignment-compliance-check/SKILL.md — non-technical business-logic vs assignment check. The skill **does not publish anywhere itself** — it returns the assembled `## Assignment Compliance` markdown block (the wrapper converts it to JIRA Wiki Markup before passing it to `pr-summary` for the JIRA target, and keeps GitHub Markdown for the linked-GitHub-issue mirror). When no linked tracker exists, the skill returns the status `no linked issue — assignment compliance skipped`. The CR wrapper passes the returned block as an embedded block to `@skills/pr-summary/SKILL.md` so each tracker (JIRA ticket, linked GitHub issue) receives **one consolidated comment** per CR run (per issue #498). **Do not embed** the block into the GitHub PR comment — surface only the consolidated-comment status in the PR comment summary line.
   - run @skills/code-review/SKILL.md
   - run @skills/security-review/SKILL.md
-  - run @skills/class-refactoring/SKILL.md — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes only on lines actually touched by the PR.
+  - run @skills/class-refactoring/SKILL.md **with `MODE=cr`** — read-only refactoring lens scoped to the PR diff. Surface DRY duplication and tech-debt-reducing changes only on lines actually touched by the PR. `MODE=cr` guarantees no code changes, commits, fixers, or review chaining.
 
 - Run conditionally:
+  - **Diff is a refactoring (behavior-preserving structural change per `@rules/refactoring/general.mdc`) → run the full refactoring skill set read-only.** When the PR restructures existing code without adding a feature or changing observable behavior, additionally invoke `@skills/refactor-entry-point-to-action/SKILL.md` **with `MODE=cr`** to surface the entry-point → Action proposals. **Both refactoring skills run read-only — no code changes, no commits, no fixers, no review chaining — `MODE=cr` enforces this.** Fold their output into the **Refactoring (DRY / Tech Debt Reduction)** section (in-scope) and **Refactoring Proposals** section (out-of-scope) of the GitHub PR comment. The JIRA non-technical comment never carries these technical sections.
   - **Database operations detected in the diff → `@skills/mysql-problem-solver/SKILL.md` is mandatory.** Trigger pattern list is owned by `@skills/code-review/SKILL.md` Specialized Reviews (raw SQL, Eloquent / query-builder calls, eager loads, model scopes, ModelManager / Repository methods, migrations, seeders, DynamoDB / NoSQL access). Capture its findings and surface them on the GitHub PR comment under the dedicated `## Database Analysis` section (see Output Rules) — never silently fold them into the Critical / Moderate / Minor buckets. The JIRA non-technical comment **does not** carry this section (it stays plain-language via `pr-summary`).
   - Shared state → @skills/race-condition-review/SKILL.md
   - Third-party API or service changes → ensure the **Third-Party API & Service Analysis** step from `@skills/code-review/SKILL.md` is executed for the diff
@@ -66,10 +67,11 @@ Before reviewing code, load and analyze the full JIRA issue:
 #### Refactoring & Tech Debt (DRY) Analysis (PR diff only)
 
 1. Restrict the analysis to lines added or modified in the PR — never review untouched code.
-2. For each changed block, apply `@skills/class-refactoring/SKILL.md` and look for:
+2. For each changed block, apply `@skills/class-refactoring/SKILL.md` (run with `MODE=cr` — read-only) and look for:
    - duplicated logic that already exists elsewhere (DRY) — verify the change reuses existing logic instead of introducing a parallel implementation, per `@rules/code-review/general.mdc` Reuse Existing Logic section
    - data shaping repeated across Actions/Services/controllers/jobs/listeners/Livewire/commands
    - oversized methods, deep nesting, mixed responsibilities introduced or amplified by the change
+   - when the PR is itself a refactoring (see the conditional trigger in **Run Reviews**), also fold in the entry-point → Action proposals from `@skills/refactor-entry-point-to-action/SKILL.md` run with `MODE=cr`
 3. Each finding must include the file path, the affected line range, and a concrete refactoring that *reduces* tech debt.
 4. In-scope refactorings go into the **Refactoring (DRY / Tech Debt Reduction)** section of the GitHub PR comment template. Out-of-scope structural problems still belong in **Refactoring Proposals**.
 

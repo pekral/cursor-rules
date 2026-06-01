@@ -2935,6 +2935,11 @@ test('code-testing rules add Test Organization clause for namespace mirroring an
 
     expect($content)->toContain('tests/InstallerPathTest.php');
     expect($content)->not->toContain('`tests/InstallerPath.php`');
+});
+
+test('code-testing rules register the Test Organization Review Hook pointing at the code-review skill (issue #528)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/code-testing/general.mdc');
 
     expect($content)->toContain('## Test Organization Review Hook');
     expect($content)->toContain('@skills/code-review/SKILL.md');

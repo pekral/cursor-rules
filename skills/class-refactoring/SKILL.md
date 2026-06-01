@@ -141,5 +141,5 @@ This skill runs in one of two modes, selected by the caller via `MODE` (default 
 
 > Skip this entire section in `MODE=cr` — the CR is the caller, so chaining back into it would recurse. Return the findings to the caller and stop.
 
-- **Delegate the review to a subagent.** Dispatch `@skills/code-review/SKILL.md` via the `Agent` tool (`subagent_type: "general-purpose"`) and pass the refactor commit range plus the instruction to return Critical / Moderate / Minor findings with their reproducer fields. Isolating the CR in a subagent keeps the multi-skill review output out of this skill's context. Fall back to in-line invocation only when subagent dispatch is unavailable.
-- Resolve findings via `@skills/process-code-review/SKILL.md` (also subagent-dispatched per its own contract).
+- **Run the review inline.** Invoke `@skills/code-review/SKILL.md` directly in this skill's context, passing the refactor commit range plus the instruction to return Critical / Moderate / Minor findings with their reproducer fields. Do not dispatch the review as a subagent — run it sequentially in the current context.
+- Resolve findings via `@skills/process-code-review/SKILL.md` (also invoked inline per its own contract).

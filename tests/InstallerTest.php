@@ -2915,3 +2915,76 @@ test('dependency-selection rule gates every new Composer package on activity and
         expect($body)->toContain('@rules/php/dependency-selection.mdc');
     }
 });
+
+test('code-testing rules add Test Organization clause for namespace mirroring and description match (issue #528)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/code-testing/general.mdc');
+
+    expect($content)->toContain('## Test Organization');
+    expect($content)->toContain('mirrors the namespace of the production class');
+    expect($content)->toContain('{ClassName}Test.php');
+    expect($content)->toContain('{ClassName}{Scenario}Test.php');
+    expect($content)->toContain('tests/Feature/<flow>');
+    expect($content)->toContain('tests/Contract/<vendor>');
+    expect($content)->toContain('tests/Integration/<area>');
+    expect($content)->toContain('matches what the body actually asserts');
+    expect($content)->toContain('test(\'test1\')');
+    expect($content)->toContain('it(\'it works\')');
+    expect($content)->toContain('test(\'happy path\')');
+
+    expect($content)->toContain('tests/InstallerPathTest.php');
+    expect($content)->not->toContain('`tests/InstallerPath.php`');
+
+    expect($content)->toContain('## Test Organization Review Hook');
+    expect($content)->toContain('@skills/code-review/SKILL.md');
+});
+
+test('code-review rule references Test Organization gate (issue #528)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($content)->toContain('## Test Organization');
+    expect($content)->toContain('mirrors the namespace of the production class');
+    expect($content)->toContain('{ClassName}Test.php');
+    expect($content)->toContain('matches what the body asserts');
+    expect($content)->toContain('@rules/code-testing/general.mdc');
+    expect($content)->toContain('@skills/code-review/SKILL.md');
+});
+
+test('code-review skill enforces Test Organization gate on every diff (issue #528)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('**Test organization (issue #528)**');
+    expect($content)->toContain('Placement mirrors the SUT namespace');
+    expect($content)->toContain('File name matches the SUT');
+    expect($content)->toContain('`it()` / `test()` description matches the asserted scenario');
+    expect($content)->toContain('Severity: **Moderate** by default');
+    expect($content)->toContain('Escalate to **Critical**');
+    expect($content)->toContain('@rules/code-testing/general.mdc');
+
+    // Suggested Fix templates must be concrete so process-code-review can extract them.
+    expect($content)->toContain('**Placement / file name fix**');
+    expect($content)->toContain('**Description fix**');
+    expect($content)->toContain('@skills/process-code-review/SKILL.md');
+    expect($content)->toContain('degrade to checking that the file sits under an intent-named directory');
+});
+
+test('create-test skill instructs creators to follow Test Organization conventions (issue #528)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/create-test/SKILL.md');
+
+    expect($content)->toContain('Place new test files per `@rules/code-testing/general.mdc` *Test Organization*');
+    expect($content)->toContain('{ClassName}Test.php');
+    expect($content)->toContain('Name every `it()` / `test()` block to match the scenario the body asserts');
+    expect($content)->toContain('test(\'test1\')');
+});
+
+test('create-missing-tests-in-pr skill instructs creators to follow Test Organization conventions (issue #528)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/create-missing-tests-in-pr/SKILL.md');
+
+    expect($content)->toContain('Place new test files per `@rules/code-testing/general.mdc` *Test Organization*');
+    expect($content)->toContain('{ClassName}Test.php');
+    expect($content)->toContain('Name every `it()` / `test()` block to match the scenario the body asserts');
+});

@@ -43,6 +43,16 @@ globs: []
 ## Consistency
 - Ensure new or modified tests follow existing project conventions.
 
+## Test Organization
+- Place every new test file under a directory path that mirrors the namespace of the production class it covers (e.g. `App\Service\Billing\InvoiceCalculator` → `tests/Service/Billing/InvoiceCalculatorTest.php`, `Pekral\CursorRules\InstallerPath` → `tests/InstallerPathTest.php`). A reviewer must be able to walk from a class to its tests by walking the parallel folder tree without searching.
+- One production class maps to one primary test file. The file name is `{ClassName}Test.php` (Pest functional test file using the same base name as the SUT plus the `Test` suffix). Helper / scenario test files extracted from a primary test file keep the same directory and a descriptive `{ClassName}{Scenario}Test.php` name so the relationship stays explicit.
+- Cross-cutting tests that do not target a single production class (full-stack feature flows, contract tests for an external API, install / boot scripts) go under an intent-named directory at the top of `tests/` (`tests/Feature/<flow>`, `tests/Contract/<vendor>`, `tests/Integration/<area>`). Do not park them next to an unrelated class just to satisfy a parallel path.
+- Group multiple `it()` / `test()` blocks for the same SUT in the same test file when they share setup and subject. Do not split one SUT across many files unless the per-file size genuinely hurts readability (then use the `{ClassName}{Scenario}Test.php` form above).
+- Each `it()` / `test()` description states the scenario in plain language and matches what the body actually asserts. Examples of *matching* descriptions: `it('returns zero for an empty cart')`, `test('throws InvalidArgumentException when the discount is negative')`. Examples of *non-matching* descriptions that violate this rule: generic placeholders (`it('it works')`, `test('test1')`, `test('happy path')`), descriptions that name the method instead of the scenario (`test('calculate')`, `it('handles getUser')`), or descriptions that contradict the assertions (`it('adds user')` over a body that asserts removal). When changing what a test asserts, rename the description in the same change.
+
+## Test Organization Review Hook
+- In code-review and pre-push contexts, every new or moved test file must satisfy the **Test Organization** rules above. Misplaced files, mismatched file names, and descriptions that do not match the asserted scenario are CR findings — see `@skills/code-review/SKILL.md` "Test organization" Core Analysis bullet for the severity matrix and Suggested Fix template.
+
 ## Scope
 - Focus tests on behavior, not implementation details.
 

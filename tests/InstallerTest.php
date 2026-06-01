@@ -1290,7 +1290,7 @@ test('refactoring requires pre-refactor 100% coverage and unchanged tests in the
 
     expect($classRefactoring)->toContain('### Test Coverage Gate (mandatory pre-flight — issue #493)');
     expect($classRefactoring)->toContain('**If coverage is below 100% on the target lines, stop and write the missing tests first.**');
-    expect($classRefactoring)->toContain('**Do not modify pre-existing tests inside the refactor commit.**');
+    expect($classRefactoring)->toContain('**Test assertion logic must not change during the refactor.**');
     expect($classRefactoring)->toContain('`@rules/refactoring/general.mdc` Test Coverage Contract');
 
     expect($codeReview)->toContain('**Refactoring test-coverage contract (issue #493)**');
@@ -1325,7 +1325,7 @@ test('CR run produces one consolidated linked-tracker comment per linked issue (
     expect($jiraTemplate)->toContain('@skills/assignment-compliance-check/SKILL.md');
 });
 
-test('CR skills publish through a single-comment upsert helper keyed by the current actor', function (): void {
+test('CR skills publish through the publish helper — GitHub always-new, JIRA single-comment upsert keyed by the current actor', function (): void {
     $packageDir = dirname(__DIR__);
 
     $githubScript = $packageDir . '/skills/code-review-github/scripts/upsert-comment.sh';
@@ -1352,11 +1352,14 @@ test('CR skills publish through a single-comment upsert helper keyed by the curr
     expect($githubScriptBody)->toContain('failed to resolve current GitHub actor after 3 attempts');
     expect($githubScriptBody)->toContain('(run: gh auth status)');
     expect($githubScriptBody)->not->toContain('gh api user --jq .login 2>/dev/null');
-    expect($githubScriptBody)->toContain('repos/${NWO}/issues/comments/${EXISTING_ID}');
-    expect($githubScriptBody)->toContain('-X PATCH');
-    expect($githubScriptBody)->toContain('action=updated');
+    // Always-new comment on GitHub: the PATCH branch was removed by user
+    // request — every CR run POSTs a fresh comment so the PR thread keeps a
+    // chronological audit trail. The marker stays for per-actor traceability.
+    expect($githubScriptBody)->not->toContain('-X PATCH');
+    expect($githubScriptBody)->not->toContain('action=updated');
+    expect($githubScriptBody)->not->toContain('repos/${NWO}/issues/comments/${EXISTING_ID}');
     expect($githubScriptBody)->toContain('action=created');
-    expect($githubScriptBody)->toContain('jq -s -r --arg marker');
+    expect($githubScriptBody)->toContain('repos/${NWO}/issues/${NUMBER}/comments');
     // Issue #519: `gh api -f body=@-` published a comment whose body was the
     // literal string `@-` because only the typed `-F/--field` flag expands
     // `@-` to stdin. The script now builds a JSON payload via jq and feeds
@@ -1390,8 +1393,9 @@ test('CR skills publish through a single-comment upsert helper keyed by the curr
     expect($prSummary)->toContain('{anchor:cr-comment-actor-<slug>}');
 
     foreach ([$github, $jira] as $skill) {
-        expect(stripos($skill, 'single-comment upsert'))->not->toBeFalse();
-        expect($skill)->toContain('edit the existing comment in place');
+        expect(stripos($skill, 'always-new comment'))->not->toBeFalse();
+        expect($skill)->toContain('POSTs a new comment');
+        expect($skill)->not->toContain('edit the existing comment in place');
         expect($skill)->not->toContain('Replying to code review from');
     }
 
@@ -1505,7 +1509,7 @@ test('code review skills delegate the non-technical issue-tracker summary to pr-
     expect($github)->toContain('@skills/pr-summary/SKILL.md');
     expect($github)->toContain('@skills/pr-summary/templates/pr-summary-github.md');
 
-    expect($jira)->toContain('#### Linked GitHub issues (consolidated mirror — single-comment upsert per linked issue per actor)');
+    expect($jira)->toContain('#### Linked GitHub issues (consolidated mirror — always-new comment per CR run)');
     expect($jira)->toContain('skills/code-review-github/scripts/upsert-comment.sh');
     expect($jira)->toContain('no linked GitHub issue — mirror skipped');
     expect($jira)->toContain('cross-repo issue, lacking write access');

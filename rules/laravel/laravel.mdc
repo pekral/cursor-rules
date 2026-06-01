@@ -68,6 +68,10 @@ globs:
 - Use chunking for large datasets.
 - Prefer the smallest fitting column types.
 - Use snake_case for table and column names.
+- When adding or changing Repository queries, verify indexes for every high-cardinality `where`, `join`, `orderBy`, and `groupBy` used by the query.
+- For non-trivial, high-traffic, or large-table queries, check `EXPLAIN` before shipping. Avoid full table scans, filesort, and temporary tables unless the dataset is intentionally small.
+- For composite indexes, match the query shape and left-most prefix. Put equality filters before range/order columns when that matches the actual query.
+- Do not add indexes blindly. Index columns that are actually used by read paths, and account for write overhead.
 
 ## Migrations
 - Write `up()` methods only if that is the project convention.
@@ -98,16 +102,27 @@ globs:
 - When using an SQS FIFO queue or an SQS deduplicator package, the job class itself must expose a `deduplicationId(): string` method that returns the deduplication key.
 - Do not configure the deduplication key outside the job (in dispatchers, middleware, service providers, or config callbacks) — the job is the source of truth for its own deduplication identity.
 - Compose the deduplication key from stable, business-meaningful inputs (e.g. payload identifiers) so retries of the same logical event resolve to the same key.
+- Do not dispatch full Eloquent models to queued jobs. Dispatch stable scalar identifiers or small explicit payload DTOs.
+- Fetch fresh models inside `handle()` through Repository / ModelManager boundaries as appropriate.
+- If dispatch-time state is required, serialize only the explicit fields needed by the job, never the whole model or loaded relationships.
+- Queue constructors must only accept lightweight scalar values, DTOs, enums, or value objects. Avoid hydrated models, collections, large arrays, files, and service instances.
 
 ## Middleware
 - Use middleware only for cross-cutting concerns.
 - Keep middleware focused on one concern.
 - Do not place business logic in middleware.
 - Middleware order must be intentional.
+- Apply middleware selectively. Health checks, public API endpoints, webhooks, and static-like endpoints must not run session, auth, CSRF, or heavy middleware unless required.
+- Put cheap fast-failing middleware before expensive middleware.
+- Do not perform database queries, service orchestration, or external API calls in middleware unless the middleware's single cross-cutting concern requires it.
 
 ## Dependency Injection
 - Always pass service dependencies via constructor, never as method parameters. This applies to Actions, Services, and all other classes.
 - Exception: Livewire components do not support constructor injection — use the `boot()` lifecycle hook instead.
+- Do not call `app()`, `resolve()`, or `$container->make()` inside loops or hot paths. Resolve dependencies once through constructor injection.
+- Bind stateless expensive services as singletons when they are safe to share across requests in the current runtime model.
+- Prefer lazy service resolution for optional or rarely used dependencies. Do not eagerly instantiate services that a request may not use.
+- Keep service constructors lightweight. Constructors must not run queries, call external APIs, read large files, or perform expensive computation.
 
 ## New Feature Implementation
 - Before implementing a new feature, check if an existing solution already covers the use case:
@@ -124,6 +139,27 @@ globs:
     - middleware, exceptions, routes in `bootstrap/app.php`
     - providers in `bootstrap/providers.php`
     - console configuration in `routes/console.php`
+
+## Stateless Runtime
+- Production application servers must be disposable. Do not rely on local mutable state that must survive a server restart or scale-out.
+- Use shared session and cache stores such as Redis or Memcached for multi-server production environments.
+- Store user uploads through Laravel Storage on shared/object storage disks, not hardcoded local paths.
+- Use `Storage` and configured disks instead of direct `storage_path()` / `public_path()` file writes for user-facing or cross-server files.
+- Scheduled tasks that may run on multiple servers must use `onOneServer()` or another explicit distributed mutex.
+
+## Caching
+- Use Redis or another shared cache for sessions, queues, cross-server locks, shared application cache, and data that must be visible across servers.
+- Use APCu only for local per-server cache where stale or server-specific values are acceptable.
+- Always set explicit TTLs for cached values unless the project has a documented invalidation strategy.
+- Cache expensive read models or computed values at Repository / Service boundaries, not inside controllers or Blade views.
+- Do not cache user-specific or permission-sensitive data without including the relevant identity and permission scope in the cache key.
+
+## Long-Running Runtime Safety
+- Write code that is safe for long-running PHP processes unless the project explicitly forbids Octane/RoadRunner/Swoole.
+- Do not store request-specific data in static properties, globals, or long-lived singletons.
+- Do not let singleton services accumulate per-request state.
+- Prefer request-scoped local variables and explicit DTOs for request data.
+- When using Octane, review memory growth, reset mutable services, and configure worker recycling.
 
 ## String Emptiness Checks
 - In conditions, prefer the Laravel `filled()` / `blank()` helpers over `!== ''` / `=== ''` comparisons. Write `filled($value)` instead of `$value !== ''` and `blank($value)` instead of `$value === ''`.

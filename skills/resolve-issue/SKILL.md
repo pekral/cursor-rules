@@ -107,7 +107,7 @@ Follow the workflow defined in `references/quality-gates.md`.
 
 After implementation and pre-push quality gates pass, and **before creating the pull request**, run the review loop on the local changes:
 
-1. Run `@skills/code-review/SKILL.md`
+1. **Delegate the review to a subagent.** Dispatch `@skills/code-review/SKILL.md` via the `Agent` tool (`subagent_type: "general-purpose"`) and pass the current branch / diff context plus the instruction "run `@skills/code-review/SKILL.md` on the local changes and return the Critical / Moderate / Minor findings with their reproducer fields (Faulty Example, Expected Behavior, Test Hint, Suggested Fix)". Isolating the CR in a subagent keeps the multi-skill review output (assignment compliance, security review, refactoring lens, mysql / race-condition specialists) out of this skill's context window so this loop can iterate on long diffs without exhausting context. Fall back to invoking the skill in-line only when subagent dispatch is unavailable.
 2. If **Critical** or **Moderate** findings exist:
    - Apply the **Suggested Fix** snippet from each finding directly to the working tree
    - Add or update a reproducer test for each finding using its **Faulty Example**, **Expected Behavior**, and **Test Hint**
@@ -121,7 +121,7 @@ PR-comment processing via `@skills/process-code-review/SKILL.md` remains the pat
 
 After the code review loop passes clean, and **still before creating the pull request**, validate the change:
 
-1. Run `@skills/security-review/SKILL.md`
+1. **Delegate the security review to a subagent.** Dispatch `@skills/security-review/SKILL.md` via the `Agent` tool and pass the current diff context plus the instruction "run `@skills/security-review/SKILL.md` on the local changes and return the Critical / Moderate / Minor findings". Same rationale as the code-review loop above — keep specialist review output out of this skill's context window. Fall back to in-line invocation when subagent dispatch is unavailable.
 
 Resolve any **Critical** or **Moderate** finding from the security review before continuing. If a finding requires code changes, re-run the **Code quality and review loop** to re-validate.
 

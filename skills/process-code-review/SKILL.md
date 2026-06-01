@@ -109,10 +109,10 @@ If a **CR-skill finding** lacks Faulty Example, Expected Behavior, or Test Hint,
 This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, or **Completion** until the loop converges. The final report (technical and non-technical) is published only **once**, after convergence.
 
 1. Initialise `iteration = 1` and `maxIterations = 5` (safety net to avoid runaway loops).
-2. Run the appropriate review skill:
+2. **Delegate the review to a subagent.** Dispatch the appropriate CR wrapper via the `Agent` tool (`subagent_type: "general-purpose"`) — this keeps the per-iteration CR fan-out (assignment compliance, security, refactoring lens, mysql / race-condition specialists) out of the loop's context window so the loop can run all 5 iterations on a long PR without exhausting context. Each iteration spawns a fresh subagent rather than re-using a previous one, so the subagent reloads the diff after the latest fix commit:
    - GitHub: `@skills/code-review-github/SKILL.md`
    - JIRA: `@skills/code-review-jira/SKILL.md`
-   The review run **must not** publish to the PR or to the issue tracker — capture findings in memory only. (See **Quiet review runs** below for how to suppress publishing.)
+   The subagent prompt **must** include the explicit quiet-mode instruction (see **Quiet review runs** below). The review run **must not** publish to the PR or to the issue tracker during loop iterations — capture findings in memory only. Fall back to in-line invocation only when subagent dispatch is unavailable.
 3. Count `criticalCount` and `moderateCount` in the latest review.
 4. If `criticalCount + moderateCount == 0` → **converged**, exit the loop.
 5. Otherwise, apply the **Suggested Fix** snippet from each Critical / Moderate finding using the **Reproducer extraction** workflow above, run pre-push quality gates on touched files, increment `iteration`, and go back to step 2.
@@ -148,11 +148,11 @@ This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, 
 
 **Precondition:** same as Finalization — convergence required.
 
-- Publish the resolved-items report through the **single-comment upsert helper** using the dedicated `cr-status` marker namespace, so the status comment lives in its own per-(PR, actor) slot — separate from the CR comment (`cr-comment` namespace) — and follow-up converge runs edit it in place instead of stacking on top of it. Concretely:
-  - GitHub PR: `skills/code-review-github/scripts/upsert-comment.sh <PR-NUMBER|URL> - cr-status` (body on stdin). The helper appends `<!-- cr-status:actor=<gh-login> -->` to the body, locates any prior `cr-status`-namespaced comment by the same actor, and either PATCHes it or POSTs a fresh one. Action (`created|updated`) is logged on stderr; include it in the in-conversation completion report.
-  - JIRA-originated reviews that also mirror to a JIRA ticket: `skills/code-review-jira/scripts/upsert-comment.sh <KEY|URL> - cr-status`. The helper appends `{anchor:cr-status-actor-<slug>}` and edits / adds the comment via `acli` (JIRA MCP fallback on exit code 4).
-- Do **not** quote / reply to the CR comment and do **not** open a new top-level PR comment outside the upsert flow — the upsert convention replaces the previous quoting-based visual thread entirely. The CR comment (`cr-comment` namespace) stays untouched by this skill; only the actor-owned `cr-status` comment is edited.
-- Mark resolved items (checkbox or inline) inside the upserted body in all cases.
+- Publish the resolved-items report through the publish helper using the dedicated `cr-status` marker namespace, so the status comment is identifiable as a status post (separate from the CR comment in the `cr-comment` namespace). Concretely:
+  - GitHub PR: `skills/code-review-github/scripts/upsert-comment.sh <PR-NUMBER|URL> - cr-status` (body on stdin). The helper appends `<!-- cr-status:actor=<gh-login> -->` to the body for traceability and **POSTs a new comment on every run** — it never PATCHes a prior status comment. Action (`created`) is logged on stderr; include it in the in-conversation completion report.
+  - JIRA-originated reviews that also mirror to a JIRA ticket: `skills/code-review-jira/scripts/upsert-comment.sh <KEY|URL> - cr-status`. The helper appends `{anchor:cr-status-actor-<slug>}` and edits / adds the comment via `acli` (JIRA MCP fallback on exit code 4) — JIRA-side upsert behavior is unchanged.
+- Do **not** quote / reply to a previous CR or status comment — the always-new-comment convention (GitHub) replaces the previous quoting / in-place edit flow entirely, and every converge run adds its own self-contained status comment so the chronological sequence is the audit trail. The CR comment (`cr-comment` namespace) stays untouched by this skill.
+- Mark resolved items (checkbox or inline) inside the freshly posted body in all cases.
 
 #### Resolve addressed reviewer threads (GitHub)
 
@@ -188,7 +188,7 @@ Rules:
 
 **Precondition:** Review loop has converged (`criticalCount + moderateCount == 0`).
 
-- Trigger the final review run **with publishing enabled** — this is the **only** review whose output reaches the PR / issue tracker:
+- **Delegate the final publishing run to a subagent.** Dispatch the appropriate CR wrapper via the `Agent` tool (`subagent_type: "general-purpose"`) with publishing enabled — this is the **only** review whose output reaches the PR / issue tracker. The subagent prompt must include the PR URL, the converged state (Critical + Moderate == 0), and the instruction to post the final PR comment + linked-issue / JIRA mirror per the CR wrapper's contract. Fall back to in-line invocation only when subagent dispatch is unavailable:
   - GitHub: `@skills/code-review-github/SKILL.md`
   - JIRA: `@skills/code-review-jira/SKILL.md`
 - Share a concise completion report (in-conversation, not on the tracker):

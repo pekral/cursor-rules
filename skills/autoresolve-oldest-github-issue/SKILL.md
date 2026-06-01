@@ -48,12 +48,13 @@ metadata:
 - When `resolve-issue` finishes, capture the resulting PR URL from its output. If no PR URL is produced, stop and report the failure — do **not** continue the chain.
 
 ### 4. Run code review on the PR
-- Invoke `@skills/code-review-github/SKILL.md` with the **PR URL** (not the issue URL). The CR skill's deterministic loader accepts a PR URL or number and posts findings as a single upserted PR comment plus a non-technical mirror on the linked issue.
+- **Delegate to a subagent.** Dispatch `@skills/code-review-github/SKILL.md` via the `Agent` tool (`subagent_type: "general-purpose"`) and pass the **PR URL** (not the issue URL) plus the instruction "run `@skills/code-review-github/SKILL.md` against this PR and return the published PR comment URL, the linked-issue comment URL(s), and the Critical / Moderate / Minor counts". Running the CR through a subagent isolates the CR's context (deterministic loader output, sub-review findings, posted comment markdown) from this orchestrator's window so the chain can drive long PRs without exhausting context. Fall back to invoking the skill in-line only when subagent dispatch is unavailable.
+- The CR skill's deterministic loader accepts a PR URL or number and posts findings as a fresh PR comment plus a non-technical mirror on the linked issue.
 
 ### 5. Process review feedback
-- Invoke `@skills/process-code-review/SKILL.md` with the **PR URL**.
+- **Delegate to a subagent.** Dispatch `@skills/process-code-review/SKILL.md` via the `Agent` tool and pass the **PR URL** plus the instruction "drive the review loop on this PR to convergence (Critical + Moderate == 0) and return the iteration count, residual finding counts, and the final status comment URL". Same rationale as step 4 — the convergence loop's per-iteration findings and fix diffs stay in the subagent's context.
 - This is the convergence loop: it resolves comments, applies Suggested Fix snippets, re-runs the review in quiet mode, and exits when `criticalCount + moderateCount == 0` (or after its `maxIterations` safety net).
-- If `process-code-review` exits with residual Critical or Moderate findings, **stop**. Report the residual findings and the PR URL; do not attempt the merge.
+- If the subagent reports residual Critical or Moderate findings, **stop**. Report the residual findings and the PR URL; do not attempt the merge.
 
 ### 6. Merge the PR
 - Invoke `@skills/merge-github-pr/SKILL.md` with the **PR URL**.

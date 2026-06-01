@@ -1154,6 +1154,64 @@ test('laravel rules prefer filled()/blank() helpers over strict empty-string com
     expect($content)->toContain('`=== \'\'`');
 });
 
+test('laravel rules extend Database and Eloquent with index and EXPLAIN guidance (issue #525)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('verify indexes for every high-cardinality');
+    expect($content)->toContain('check `EXPLAIN` before shipping');
+    expect($content)->toContain('left-most prefix');
+    expect($content)->toContain('Do not add indexes blindly');
+});
+
+test('laravel rules forbid dispatching full Eloquent models to queued jobs (issue #525)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('Do not dispatch full Eloquent models to queued jobs');
+    expect($content)->toContain('Fetch fresh models inside `handle()`');
+    expect($content)->toContain('serialize only the explicit fields needed by the job');
+    expect($content)->toContain('Queue constructors must only accept lightweight scalar values');
+});
+
+test('laravel rules tighten Dependency Injection with hot-path and lazy resolution guidance (issue #525)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('Do not call `app()`, `resolve()`, or `$container->make()` inside loops or hot paths');
+    expect($content)->toContain('Bind stateless expensive services as singletons');
+    expect($content)->toContain('Prefer lazy service resolution');
+    expect($content)->toContain('Keep service constructors lightweight');
+});
+
+test('laravel rules require selective and lightweight middleware (issue #525)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('Apply middleware selectively');
+    expect($content)->toContain('Put cheap fast-failing middleware before expensive middleware');
+    expect($content)->toContain('Do not perform database queries, service orchestration, or external API calls in middleware');
+});
+
+test('laravel rules add Stateless Runtime, Caching, and Long-Running Runtime Safety sections (issue #525)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('## Stateless Runtime');
+    expect($content)->toContain('Production application servers must be disposable');
+    expect($content)->toContain('`onOneServer()` or another explicit distributed mutex');
+
+    expect($content)->toContain('## Caching');
+    expect($content)->toContain('Use Redis or another shared cache for sessions, queues, cross-server locks');
+    expect($content)->toContain('Always set explicit TTLs for cached values');
+    expect($content)->toContain('Do not cache user-specific or permission-sensitive data without including the relevant identity');
+
+    expect($content)->toContain('## Long-Running Runtime Safety');
+    expect($content)->toContain('safe for long-running PHP processes');
+    expect($content)->toContain('Octane');
+    expect($content)->toContain('worker recycling');
+});
+
 test('architecture rules enumerate the seven allowed business logic layers including Eloquent models', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');

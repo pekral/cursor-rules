@@ -30,6 +30,8 @@ Create or update tests to cover current changes according to project conventions
 - Prefer updating existing tests
 - Create new tests only if necessary
 - Follow project conventions and helpers
+- **Place new test files per `@rules/code-testing/general.mdc` *Test Organization*** — the test file path mirrors the namespace of the SUT (e.g. `App\Service\Billing\InvoiceCalculator` → `tests/Service/Billing/InvoiceCalculatorTest.php`), the file name is `{ClassName}Test.php` (or `{ClassName}{Scenario}Test.php` for an extracted scenario file of the same SUT), and cross-cutting tests sit under an intent-named directory (`tests/Feature/<flow>`, `tests/Contract/<vendor>`, `tests/Integration/<area>`).
+- **Name every `it()` / `test()` block to match the scenario the body asserts** — plain-language descriptions such as `it('returns zero for an empty cart')` or `test('throws InvalidArgumentException when the discount is negative')`. Never use placeholders (`it('it works')`, `test('test1')`, `test('happy path')`), method names (`test('calculate')`, `it('handles getUser')`), or descriptions that contradict the assertions. When changing what a test asserts, rename the description in the same change so the code-review test-organization gate passes downstream.
 
 ### 3. Ensure Coverage
 - Cover all changed code paths

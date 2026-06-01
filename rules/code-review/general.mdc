@@ -28,5 +28,12 @@ globs: []
 - If equivalent logic already exists, flag the change and require reusing it instead of introducing a parallel implementation.
 - The goal is unified logic across the application; parallel implementations of the same behavior are a finding.
 
+## Test Organization
+- For every new or moved test file in the diff, verify it follows the **Test Organization** rules from `@rules/code-testing/general.mdc`:
+    - The test file sits under a directory path that mirrors the namespace of the production class it covers; cross-cutting tests sit under an intent-named directory (`tests/Feature/<flow>`, `tests/Contract/<vendor>`, `tests/Integration/<area>`).
+    - The file name is `{ClassName}Test.php` (or `{ClassName}{Scenario}Test.php` for an extracted scenario file of the same SUT).
+    - Every `it()` / `test()` description states the scenario in plain language and matches what the body asserts — generic placeholders (`it works`, `test1`, `happy path`), method-named descriptions (`calculate`, `handles getUser`), or descriptions that contradict the assertions are findings.
+- Misplaced files, mismatched file names, and mismatched descriptions are findings on every diff. Severity matrix and Suggested Fix template live in `@skills/code-review/SKILL.md` Core Analysis "Test organization" bullet.
+
 ## Safety
 - If context is incomplete, state assumptions instead of guessing.

@@ -1733,7 +1733,8 @@ test('code review output omits empty sections instead of rendering placeholders'
     foreach ($skills as $skillFile) {
         $content = (string) file_get_contents($skillFile);
         expect($content)->toContain('**Omit empty sections entirely.**');
-        expect($content)->toContain('the single source of "zero" signal');
+        // Counts line is the canonical "clean state" signal after the issue #528 follow-up — the Coverage line is no longer always rendered.
+        expect($content)->toContain('the Counts line is the clean signal');
     }
 
     $githubSkill = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
@@ -2987,4 +2988,87 @@ test('create-missing-tests-in-pr skill instructs creators to follow Test Organiz
     expect($content)->toContain('Place new test files per `@rules/code-testing/general.mdc` *Test Organization*');
     expect($content)->toContain('{ClassName}Test.php');
     expect($content)->toContain('Name every `it()` / `test()` block to match the scenario the body asserts');
+});
+
+test('code-testing rule short-circuits coverage reporting when changed files are at 100% (issue #528 follow-up)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/code-testing/general.mdc');
+
+    expect($content)->toContain('Coverage reporting is short by default');
+    expect($content)->toContain('uncovered changed lines');
+    expect($content)->toContain('coverage tooling unavailable');
+    expect($content)->toContain(
+        'omit the `## Coverage` section entirely, omit the `Coverage:` header line, and omit the `coverage …` slot from the final summary line',
+    );
+    expect($content)->toContain('The coverage check itself still runs unconditionally');
+    expect($content)->not->toContain('Always report the coverage result (tool used, command, % covered for changed lines).');
+});
+
+test('core-standards Testing bullet short-circuits coverage reporting when 100% (issue #528 follow-up)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
+
+    expect($content)->toContain('Report the coverage result short by default');
+    expect($content)->toContain('omit the `## Coverage` section, the `Coverage:` header line, and the `coverage …` slot from the summary line');
+    expect($content)->toContain('The check itself still runs unconditionally');
+    expect($content)->not->toContain('Always report the coverage result; never push or finalize a change without it.');
+});
+
+test('code-review skill short-circuits coverage section in Output Rules + Coverage gate (issue #528 follow-up)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    // Coverage gate text mandates short-by-default reporting.
+    expect($content)->toContain('**Coverage reporting is short by default.**');
+    expect($content)->toContain(
+        'omit the `## Coverage` section entirely, omit the `Coverage:` header line, and omit the `coverage …` slot from the final summary line',
+    );
+
+    // Output Rules opening clause no longer claims `## Coverage` is always rendered.
+    expect($content)->toContain(
+        'Only the header block (Status / Counts / Last updated / tracker-status line) and the final `Summary` line are always rendered.',
+    );
+    expect($content)->toContain('all conditional');
+    // The old "always render Coverage" sentence must be gone — verify by checking a distinctive fragment that only existed in the legacy sentence.
+    expect($content)->not->toContain('Counts / Coverage / Last updated / tracker-status line');
+});
+
+test('code-review-github skill + template short-circuit coverage section (issue #528 follow-up)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skill = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $template = (string) file_get_contents($packageDir . '/skills/code-review-github/templates/pr-comment-output.md');
+
+    expect($skill)->toContain('Only the header block (Status / Counts / Last updated / Issue tracker summary)');
+    expect($skill)->toContain('the final `Summary` line are always rendered in the PR comment.');
+    expect($skill)->toContain('all conditional');
+    expect($skill)->toContain('includes a `## Coverage` section before the summary line **only** when the coverage gate has something to report');
+    expect($skill)->not->toContain('Counts / Coverage / Issue tracker summary');
+
+    expect($template)->toContain('are conditional');
+    expect($template)->toContain('Render this section **only** when the coverage gate produced something to report');
+    expect($template)->toContain('omitted on a clean 100% pass');
+});
+
+test('code-review-jira skill + template short-circuit coverage section (issue #528 follow-up)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skill = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+    $template = (string) file_get_contents($packageDir . '/skills/code-review-jira/templates/github-output.md');
+
+    expect($skill)->toContain('Only the header block (Status / Counts / Last updated / Linked-tracker mirror)');
+    expect($skill)->toContain('the final `Summary` line are always rendered in the GitHub PR comment.');
+    expect($skill)->toContain('all conditional');
+    expect($skill)->toContain('includes a `## Coverage` section before the summary line **only** when the coverage gate has something to report');
+
+    expect($template)->toContain('are conditional');
+    expect($template)->toContain('Render this section **only** when the coverage gate produced something to report');
+    expect($template)->toContain('omitted on a clean 100% pass');
+});
+
+test('CR base review-output template short-circuits coverage section (issue #528 follow-up)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/templates/review-output.md');
+
+    expect($content)->toContain('are conditional');
+    expect($content)->toContain('Render this section **only** when the coverage gate produced something to report');
+    expect($content)->toContain('omitted on a clean 100% pass');
 });

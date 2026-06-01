@@ -68,7 +68,10 @@ globs: []
 - Every test change must be verified to be functional — run affected tests after each modification.
 - Require 100% code coverage for every changed or added code path — applies equally to code modifications and code review.
 - Before running coverage, discover the project's coverage command (prefer Phing target from `build.xml`/`phing.xml`; fall back to a Composer script in `composer.json` such as `test:coverage` or `coverage`). Do not assume a default command.
-- Always report the coverage result (tool used, command, % covered for changed lines). If no coverage tooling can be discovered, state that explicitly and treat it as a blocking finding — never silently skip the check or push a report without it.
+- **Coverage reporting is short by default (issue #528 follow-up).** Run the coverage check on every change, but report the result on the published CR / tracker comment **only** when there is something the reader must act on:
+    - **uncovered changed lines** — list every uncovered line as a Critical finding and render the `## Coverage` section with the tool, exact command, and the uncovered-line list;
+    - **coverage tooling unavailable** — raise the missing-tool case as a Critical finding and render the `## Coverage` section with the reason in place of a result.
+  When every changed line is at 100% coverage and the tool ran successfully, **omit the `## Coverage` section entirely, omit the `Coverage:` header line, and omit the `coverage …` slot from the final summary line.** The CR is "clean" on the Counts line and the omission is the signal that coverage is satisfied — never emit `100%` / `clean` / `n/a` placeholders for the section, the header line, or the summary slot. The coverage check itself still runs unconditionally on every CR; only the user-visible reporting is short-circuited.
 
 ## Code Style and Quality Gates
 - Discover available fixers and checkers: prefer Phing targets (`build.xml`/`phing.xml`) over Composer scripts (`composer.json`).

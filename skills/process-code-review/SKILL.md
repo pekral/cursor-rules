@@ -109,10 +109,10 @@ If a **CR-skill finding** lacks Faulty Example, Expected Behavior, or Test Hint,
 This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, or **Completion** until the loop converges. The final report (technical and non-technical) is published only **once**, after convergence.
 
 1. Initialise `iteration = 1` and `maxIterations = 5` (safety net to avoid runaway loops).
-2. **Delegate the review to a subagent.** Dispatch the appropriate CR wrapper via the `Agent` tool (`subagent_type: "general-purpose"`) — this keeps the per-iteration CR fan-out (assignment compliance, security, refactoring lens, mysql / race-condition specialists) out of the loop's context window so the loop can run all 5 iterations on a long PR without exhausting context. Each iteration spawns a fresh subagent rather than re-using a previous one, so the subagent reloads the diff after the latest fix commit:
+2. **Run the review inline.** Invoke the appropriate CR wrapper directly in this skill's context — do not dispatch as a subagent. Each iteration re-invokes the CR wrapper inline so it reloads the diff after the latest fix commit:
    - GitHub: `@skills/code-review-github/SKILL.md`
    - JIRA: `@skills/code-review-jira/SKILL.md`
-   The subagent prompt **must** include the explicit quiet-mode instruction (see **Quiet review runs** below). The review run **must not** publish to the PR or to the issue tracker during loop iterations — capture findings in memory only. Fall back to in-line invocation only when subagent dispatch is unavailable.
+   The invocation **must** include the explicit quiet-mode instruction (see **Quiet review runs** below). The review run **must not** publish to the PR or to the issue tracker during loop iterations — capture findings in memory only.
 3. Count `criticalCount` and `moderateCount` in the latest review.
 4. If `criticalCount + moderateCount == 0` → **converged**, exit the loop.
 5. Otherwise, apply the **Suggested Fix** snippet from each Critical / Moderate finding using the **Reproducer extraction** workflow above, run pre-push quality gates on touched files, increment `iteration`, and go back to step 2.
@@ -188,7 +188,7 @@ Rules:
 
 **Precondition:** Review loop has converged (`criticalCount + moderateCount == 0`).
 
-- **Delegate the final publishing run to a subagent.** Dispatch the appropriate CR wrapper via the `Agent` tool (`subagent_type: "general-purpose"`) with publishing enabled — this is the **only** review whose output reaches the PR / issue tracker. The subagent prompt must include the PR URL, the converged state (Critical + Moderate == 0), and the instruction to post the final PR comment + linked-issue / JIRA mirror per the CR wrapper's contract. Fall back to in-line invocation only when subagent dispatch is unavailable:
+- **Run the final publishing run inline.** Invoke the appropriate CR wrapper directly in this skill's context with publishing enabled — this is the **only** review whose output reaches the PR / issue tracker. The invocation must include the PR URL, the converged state (Critical + Moderate == 0), and the instruction to post the final PR comment + linked-issue / JIRA mirror per the CR wrapper's contract. Do not dispatch as a subagent — run it sequentially in the current context:
   - GitHub: `@skills/code-review-github/SKILL.md`
   - JIRA: `@skills/code-review-jira/SKILL.md`
 - Share a concise completion report (in-conversation, not on the tracker):

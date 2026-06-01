@@ -64,8 +64,8 @@ Example input:
 8. Update the entry point to delegate via `$action(...)` and keep its public contract unchanged.
 9. **Do not modify assertion logic of pre-existing tests inside the refactor commit.** The pre-refactor coverage commit fixed the behavior-preservation contract; the refactor commit changes structure only. Mechanical renames forced by the refactor itself (namespace move, constructor / argument shape forced by the extracted DTO) are the only allowed test edits and must be flagged in the commit body. If an assertion would have to change to make the refactor green, you are no longer refactoring — split the behavior change into its own commit. New tests covering newly introduced code paths (e.g. the Data Validator's failure modes that did not exist before) belong in a separate `test(scope): …` commit *after* the refactor.
 10. Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`). Run fixers first, then checkers/analyzers on all changed files. Resolve all reported issues.
-11. **Delegate the review to a subagent.** Dispatch `@skills/code-review/SKILL.md` via the `Agent` tool (`subagent_type: "general-purpose"`) and pass the refactor commit range plus the instruction to return Critical / Moderate / Minor findings with their reproducer fields. Fall back to in-line invocation only when subagent dispatch is unavailable.
-12. Run `@skills/process-code-review/SKILL.md` (subagent-dispatched per its own contract) and fix critical or medium findings before finishing.
+11. **Run the review inline.** Invoke `@skills/code-review/SKILL.md` directly in this skill's context, passing the refactor commit range plus the instruction to return Critical / Moderate / Minor findings with their reproducer fields. Do not dispatch the review as a subagent — run it sequentially in the current context.
+12. Run `@skills/process-code-review/SKILL.md` inline (per its own contract) and fix critical or medium findings before finishing.
 
 ## Do not
 - Do not leave business orchestration in the entry point.

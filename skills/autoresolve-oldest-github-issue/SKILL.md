@@ -48,13 +48,13 @@ metadata:
 - When `resolve-issue` finishes, capture the resulting PR URL from its output. If no PR URL is produced, stop and report the failure — do **not** continue the chain.
 
 ### 4. Run code review on the PR
-- **Delegate to a subagent.** Dispatch `@skills/code-review-github/SKILL.md` via the `Agent` tool (`subagent_type: "general-purpose"`) and pass the **PR URL** (not the issue URL) plus the instruction "run `@skills/code-review-github/SKILL.md` against this PR and return the published PR comment URL, the linked-issue comment URL(s), and the Critical / Moderate / Minor counts". Running the CR through a subagent isolates the CR's context (deterministic loader output, sub-review findings, posted comment markdown) from this orchestrator's window so the chain can drive long PRs without exhausting context. Fall back to invoking the skill in-line only when subagent dispatch is unavailable.
+- **Run inline.** Invoke `@skills/code-review-github/SKILL.md` directly in this skill's context, passing the **PR URL** (not the issue URL) plus the instruction "run `@skills/code-review-github/SKILL.md` against this PR and return the published PR comment URL, the linked-issue comment URL(s), and the Critical / Moderate / Minor counts". Do not dispatch the CR as a subagent — run it sequentially in the current context.
 - The CR skill's deterministic loader accepts a PR URL or number and posts findings as a fresh PR comment plus a non-technical mirror on the linked issue.
 
 ### 5. Process review feedback
-- **Delegate to a subagent.** Dispatch `@skills/process-code-review/SKILL.md` via the `Agent` tool and pass the **PR URL** plus the instruction "drive the review loop on this PR to convergence (Critical + Moderate == 0) and return the iteration count, residual finding counts, and the final status comment URL". Same rationale as step 4 — the convergence loop's per-iteration findings and fix diffs stay in the subagent's context.
+- **Run inline.** Invoke `@skills/process-code-review/SKILL.md` directly in this skill's context, passing the **PR URL** plus the instruction "drive the review loop on this PR to convergence (Critical + Moderate == 0) and return the iteration count, residual finding counts, and the final status comment URL". Do not dispatch as a subagent — run it sequentially in the current context.
 - This is the convergence loop: it resolves comments, applies Suggested Fix snippets, re-runs the review in quiet mode, and exits when `criticalCount + moderateCount == 0` (or after its `maxIterations` safety net).
-- If the subagent reports residual Critical or Moderate findings, **stop**. Report the residual findings and the PR URL; do not attempt the merge.
+- If the run reports residual Critical or Moderate findings, **stop**. Report the residual findings and the PR URL; do not attempt the merge.
 
 ### 6. Merge the PR
 - Invoke `@skills/merge-github-pr/SKILL.md` with the **PR URL**.

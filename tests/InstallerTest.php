@@ -1333,6 +1333,27 @@ test('assignment-compliance-check returns markdown to the caller without publish
     expect($jira)->not->toContain('**do not duplicate** its Critical gaps inside the JIRA non-technical summary');
 });
 
+test('assignment-compliance-check omits the block on clean assignments and removes "what is satisfied" / "open questions" lists', function (): void {
+    $packageDir = dirname(__DIR__);
+    $compliance = (string) file_get_contents($packageDir . '/skills/assignment-compliance-check/SKILL.md');
+    $canonical = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+
+    expect($compliance)->toContain('no critical gaps — assignment compliance block omitted');
+    expect($compliance)->toContain('**only when at least one Critical gap exists**');
+    expect($compliance)->not->toContain('No critical gaps identified — implementation satisfies every stated requirement');
+    expect($compliance)->not->toContain('### What is satisfied');
+    expect($compliance)->not->toContain('### Open questions for the reviewer');
+    expect($compliance)->not->toContain('one bullet per requirement the PR clearly meets');
+    expect($compliance)->not->toContain('No critical gaps>');
+
+    foreach ([$canonical, $github, $jira] as $wrapper) {
+        expect($wrapper)->toContain('no critical gaps — assignment compliance block omitted');
+        expect($wrapper)->toContain('**only when a block is returned**');
+    }
+});
+
 test('refactoring requires pre-refactor 100% coverage and unchanged tests in the refactor commit (issue #493)', function (): void {
     $packageDir = dirname(__DIR__);
     $rule = (string) file_get_contents($packageDir . '/rules/refactoring/general.mdc');
@@ -3092,32 +3113,33 @@ test('code-review skill mandates a standalone Laravel architecture walk on every
     expect($content)->toContain('arch-app-services examples (when installed)');
     expect($content)->toContain('https://github.com/pekral/arch-app-services/blob/master/README.md');
     expect($content)->toContain('When the package is **not** installed, ignore this README cross-check');
-    expect($content)->toContain('published CR comment **must** carry a dedicated `## Architecture` section on every Laravel project');
-    expect($content)->toContain('literal status line `walked, 0 findings`');
+    expect($content)->toContain('published CR comment carries a `## Architecture` section **only when the walk produces at least one finding**');
+    expect($content)->toContain('omit the `## Architecture` heading entirely — never render a "walked, 0 findings" status line');
     expect($content)->toContain(
-        'On **non-Laravel projects** (no `laravel/framework` in `composer.json` `require`), skip this walk entirely and omit the `## Architecture` section',
+        'On **non-Laravel projects** (no `laravel/framework` in `composer.json` `require`), skip the walk entirely and omit the `## Architecture` section',
     );
 });
 
-test('code-review Output Rules carry the Architecture section exemption (issue #530)', function (): void {
+test('code-review Output Rules carry the Architecture section conditional rendering rule (issue #530)', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
 
-    expect($content)->toContain('`## Architecture` section is the exception (issue #530)');
-    expect($content)->toContain('the `## Architecture` heading is rendered on every Laravel CR run regardless of finding count');
-    expect($content)->toContain('literal phrase `walked, 0 findings`');
+    expect($content)->toContain('`## Architecture` section (issue #530)');
+    expect($content)->toContain('the `## Architecture` heading is rendered **only when the walk produces at least one finding**');
+    expect($content)->toContain('omit the heading entirely — never render a `walked, 0 findings` status line');
     expect($content)->toContain('the `## Architecture` section is omitted entirely');
 });
 
-test('code-review canonical template renders the Laravel Architecture section (issue #530)', function (): void {
+test('code-review canonical template renders the Laravel Architecture section conditionally (issue #530)', function (): void {
     $packageDir = dirname(__DIR__);
     $template = (string) file_get_contents($packageDir . '/skills/code-review/templates/review-output.md');
 
     expect($template)->toContain('## Architecture');
-    expect($template)->toContain('**Laravel-only, mandatory on every CR run (issue #530)');
-    expect($template)->toContain('Status: walked, 0 findings');
-    expect($template)->toContain('omit the entire `## Architecture` section');
+    expect($template)->toContain('**Laravel-only, conditional on findings (issue #530)');
+    expect($template)->toContain('only when the walk produces at least one finding');
+    expect($template)->toContain('omit the entire `## Architecture` heading and body');
     expect($template)->toContain('Architecture conformance (Laravel) — mandatory standalone walk-through');
+    expect($template)->not->toContain('Status: walked, 0 findings');
 
     $architectureHeading = strpos($template, "\n## Architecture\n");
     $coverageHeading = strpos($template, "\n## Coverage\n");
@@ -3129,18 +3151,20 @@ test('code-review canonical template renders the Laravel Architecture section (i
     expect($architectureHeading)->toBeLessThan($coverageHeading);
 });
 
-test('code-review-github Output Rules and template carry the Architecture exemption (issue #530)', function (): void {
+test('code-review-github Output Rules and template carry the Architecture conditional rendering rule (issue #530)', function (): void {
     $packageDir = dirname(__DIR__);
     $skill = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
     $template = (string) file_get_contents($packageDir . '/skills/code-review-github/templates/pr-comment-output.md');
 
-    expect($skill)->toContain('`## Architecture` section is the second exception (issue #530)');
-    expect($skill)->toContain('`Status: walked, 0 findings`');
+    expect($skill)->toContain('`## Architecture` section (issue #530)');
+    expect($skill)->toContain('only when the walk produces at least one finding');
+    expect($skill)->toContain('never render a `walked, 0 findings` status line');
     expect($skill)->toContain('On non-Laravel projects, omit the `## Architecture` section entirely');
 
     expect($template)->toContain('## Architecture');
-    expect($template)->toContain('**Laravel-only, mandatory on every CR run (issue #530)');
-    expect($template)->toContain('Status: walked, 0 findings');
+    expect($template)->toContain('**Laravel-only, conditional on findings (issue #530)');
+    expect($template)->toContain('only when the walk produces at least one finding');
+    expect($template)->not->toContain('Status: walked, 0 findings');
 
     $architectureHeading = strpos($template, "\n## Architecture\n");
     $coverageHeading = strpos($template, "\n## Coverage\n");
@@ -3152,18 +3176,20 @@ test('code-review-github Output Rules and template carry the Architecture exempt
     expect($architectureHeading)->toBeLessThan($coverageHeading);
 });
 
-test('code-review-jira Output Rules and GitHub template carry the Architecture exemption (issue #530)', function (): void {
+test('code-review-jira Output Rules and GitHub template carry the Architecture conditional rendering rule (issue #530)', function (): void {
     $packageDir = dirname(__DIR__);
     $skill = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
     $template = (string) file_get_contents($packageDir . '/skills/code-review-jira/templates/github-output.md');
 
-    expect($skill)->toContain('`## Architecture` section is the second exception (issue #530)');
-    expect($skill)->toContain('`Status: walked, 0 findings`');
+    expect($skill)->toContain('`## Architecture` section (issue #530)');
+    expect($skill)->toContain('only when the walk produces at least one finding');
+    expect($skill)->toContain('never render a `walked, 0 findings` status line');
     expect($skill)->toContain('The JIRA non-technical comment (produced by `pr-summary`) never includes this section');
 
     expect($template)->toContain('## Architecture');
-    expect($template)->toContain('**Laravel-only, mandatory on every CR run (issue #530)');
-    expect($template)->toContain('Status: walked, 0 findings');
+    expect($template)->toContain('**Laravel-only, conditional on findings (issue #530)');
+    expect($template)->toContain('only when the walk produces at least one finding');
+    expect($template)->not->toContain('Status: walked, 0 findings');
 
     $architectureHeading = strpos($template, "\n## Architecture\n");
     $coverageHeading = strpos($template, "\n## Coverage\n");

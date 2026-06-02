@@ -3269,3 +3269,18 @@ test('code-review skill adds Shared Concerns (Traits) to the mandatory architect
     expect($content)->toContain('flag domain-specific code parked under `app/Concerns/`');
     expect($content)->toContain('reusable trait logic scattered outside `app/Concerns/`');
 });
+
+test('code-review skill verifies every Critical finding via analyze-problem before publishing (issue #537)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('### Critical Findings Verification (issue #537)');
+    expect($content)->toContain('Walk every **Critical** finding aggregated within this skill\'s run through `@skills/analyze-problem/SKILL.md`');
+    expect($content)->toContain('invoke `@skills/analyze-problem/SKILL.md` **inline in this skill\'s context** (do not dispatch as a subagent)');
+    expect($content)->toContain(
+        '**Confirmed** — Verified Facts and Probable Root Cause back the finding → keep the Critical finding verbatim in the report',
+    );
+    expect($content)->toContain('**Refuted** — Verified Facts contradict the finding');
+    expect($content)->toContain('**Never silently downgrade** a Critical to Moderate or Minor on the basis of this verification');
+    expect($content)->toContain('**Moderate and Minor findings are not subject to this verification**');
+});

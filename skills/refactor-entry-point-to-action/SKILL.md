@@ -74,6 +74,7 @@ Example input:
 - Do not place validation logic directly inside an Action.
 - Do not bypass repository/model-manager/service boundaries.
 - Do not introduce unrelated behavioral changes.
+- Do not add speculative flexibility, configurability, or error handling while extracting the Action. The extraction moves orchestration as-is into the Action and the Data Validator; new parameters, mode switches, strategy hooks, retry knobs, or guards for scenarios the original entry point did not handle belong to a separate `feat(scope): …` commit and a separate issue. Apply the **Simplicity First** rule from `@skills/class-refactoring/SKILL.md` Refactoring Guidelines and the YAGNI rules in `@rules/php/core-standards.mdc` Design Principles.
 
 ## Done when
 

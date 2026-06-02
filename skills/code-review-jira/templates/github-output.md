@@ -1,6 +1,6 @@
 # Code Review
 
-> **Section visibility — render only sections that have content.** Always render the header block (Status / Counts / Last updated / Linked-tracker mirror) and the final `Summary` line. The `Coverage:` header line, the `## Coverage` section, and the `coverage …` slot in the summary line are conditional — render them **only** when the coverage gate produced something to report (uncovered changed lines or unavailable / non-runnable tooling, both Critical findings per `@skills/code-review/SKILL.md` Coverage gate). When every changed line is at 100% coverage and the tool ran successfully, drop all three coverage surfaces; the Counts line is the clean signal. Every other section is conditional: omit its heading and body entirely when it has no items. Never emit `None.` / `Not applicable.` / `n/a` / `100%` placeholders for empty sections or omitted coverage surfaces — drop them entirely. The Counts line in the header is the single source of "zero" signal; the goal is a clean, scannable PR comment a human can read at a glance.
+> **Section visibility — render only sections that have content.** Always render the header block (Status / Counts / Last updated / Linked-tracker mirror) and the final `Summary` line. The `Coverage:` header line, the `## Coverage` section, and the `coverage …` slot in the summary line are conditional — render them **only** when the coverage gate produced something to report (uncovered changed lines or unavailable / non-runnable tooling, both Critical findings per `@skills/code-review/SKILL.md` Coverage gate). When every changed line is at 100% coverage and the tool ran successfully, drop all three coverage surfaces; the Counts line is the clean signal. The `## Architecture` section is the second exception (issue #530): on Laravel projects render the heading on every CR run — with the listed findings when any exist, or with the literal status line `Status: walked, 0 findings` when the walk is clean. On non-Laravel projects (`laravel/framework` not in `composer.json` `require`), omit the `## Architecture` section entirely. Every other section is conditional: omit its heading and body entirely when it has no items. Never emit `None.` / `Not applicable.` / `n/a` / `100%` placeholders for empty sections or omitted coverage surfaces — drop them entirely. The Counts line in the header is the single source of "zero" signal; the goal is a clean, scannable PR comment a human can read at a glance.
 >
 > **Always-new comment:** this template is rendered into a fresh comment on every CR run. The hidden marker `<!-- cr-comment:actor=<gh-login> -->` (auto-appended by `skills/code-review-github/scripts/upsert-comment.sh`) stays in the body for per-actor traceability but does not drive an in-place edit — each run POSTs a new comment, so the PR thread keeps a chronological audit trail of CR outputs. The `Last updated` line below carries this run's timestamp.
 
@@ -62,6 +62,30 @@
    **Scope:** affected file(s) or area
    **Reason:** rule violated + why it matters
    **Approach:** brief description
+
+---
+
+## Architecture
+
+> **Laravel-only, mandatory on every CR run (issue #530).** Render this section on every Laravel project (`laravel/framework` is in `composer.json` `require`) regardless of which files the diff touches — the architecture walk per `@skills/code-review/SKILL.md` Core Analysis "Architecture conformance (Laravel) — mandatory standalone walk-through" never skips on Laravel. On non-Laravel projects, omit the entire `## Architecture` section.
+>
+> Render findings under the standard severity sub-headings (Critical / Moderate / Minor) with the same six reproducer fields used in `## Findings`. When the walk is clean, replace the sub-headings with the literal status line below.
+
+Status: walked, 0 findings  *(use this literal line when the walk is clean; otherwise replace with the severity sub-headings and findings)*
+
+### 🔴 Critical 1. <short title>
+
+(same six fields as `## Findings` — Location / Rule / Impact / Faulty Example / Expected behavior / Test hint / Suggested fix)
+
+### 🟠 Moderate 1. <short title>
+
+(same six fields as Critical)
+
+### 🟡 Minor 1. <short title>
+
+- **Location:** `path/to/file.php:42`
+- **Rule:** `@rules/laravel/architecture.mdc#<subsection>`
+- **Note:** one sentence. Faulty Example / Expected behavior / Test hint / Suggested fix may be omitted when no behavior change is implied.
 
 ---
 

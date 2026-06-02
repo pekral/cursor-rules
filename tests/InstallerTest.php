@@ -3077,3 +3077,100 @@ test('CR base review-output template short-circuits coverage section (issue #528
     expect($content)->toContain('Render this section **only** when the coverage gate produced something to report');
     expect($content)->toContain('omitted on a clean 100% pass');
 });
+
+test('code-review skill mandates a standalone Laravel architecture walk on every CR run (issue #530)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('**Architecture conformance (Laravel)** — mandatory standalone walk-through (issue #530)');
+    expect($content)->toContain('independent of Strict rule compliance');
+    expect($content)->toContain('section-by-section deep-dive for `@rules/laravel/architecture.mdc`');
+    expect($content)->toContain('Walk every section of that file against the current diff **regardless of which files the diff touches**');
+    expect($content)->toContain('helpers, routes, configs, migrations, seeders, tests, or even a docs-only commit');
+    expect($content)->toContain('seven allowed homes including the Eloquent-model carve-out');
+    expect($content)->toContain('Actions / Model Services / Repositories / ModelManagers / Data Validators / Data Builders / Eloquent models');
+    expect($content)->toContain('arch-app-services examples (when installed)');
+    expect($content)->toContain('https://github.com/pekral/arch-app-services/blob/master/README.md');
+    expect($content)->toContain('When the package is **not** installed, ignore this README cross-check');
+    expect($content)->toContain('published CR comment **must** carry a dedicated `## Architecture` section on every Laravel project');
+    expect($content)->toContain('literal status line `walked, 0 findings`');
+    expect($content)->toContain(
+        'On **non-Laravel projects** (no `laravel/framework` in `composer.json` `require`), skip this walk entirely and omit the `## Architecture` section',
+    );
+});
+
+test('code-review Output Rules carry the Architecture section exemption (issue #530)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('`## Architecture` section is the exception (issue #530)');
+    expect($content)->toContain('the `## Architecture` heading is rendered on every Laravel CR run regardless of finding count');
+    expect($content)->toContain('literal phrase `walked, 0 findings`');
+    expect($content)->toContain('the `## Architecture` section is omitted entirely');
+});
+
+test('code-review canonical template renders the Laravel Architecture section (issue #530)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $template = (string) file_get_contents($packageDir . '/skills/code-review/templates/review-output.md');
+
+    expect($template)->toContain('## Architecture');
+    expect($template)->toContain('**Laravel-only, mandatory on every CR run (issue #530)');
+    expect($template)->toContain('Status: walked, 0 findings');
+    expect($template)->toContain('omit the entire `## Architecture` section');
+    expect($template)->toContain('Architecture conformance (Laravel) — mandatory standalone walk-through');
+
+    $architectureHeading = strpos($template, "\n## Architecture\n");
+    $coverageHeading = strpos($template, "\n## Coverage\n");
+
+    expect($architectureHeading)->not->toBeFalse();
+    expect($coverageHeading)->not->toBeFalse();
+    assert($architectureHeading !== false);
+    assert($coverageHeading !== false);
+    expect($architectureHeading)->toBeLessThan($coverageHeading);
+});
+
+test('code-review-github Output Rules and template carry the Architecture exemption (issue #530)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skill = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $template = (string) file_get_contents($packageDir . '/skills/code-review-github/templates/pr-comment-output.md');
+
+    expect($skill)->toContain('`## Architecture` section is the second exception (issue #530)');
+    expect($skill)->toContain('`Status: walked, 0 findings`');
+    expect($skill)->toContain('On non-Laravel projects, omit the `## Architecture` section entirely');
+
+    expect($template)->toContain('## Architecture');
+    expect($template)->toContain('**Laravel-only, mandatory on every CR run (issue #530)');
+    expect($template)->toContain('Status: walked, 0 findings');
+
+    $architectureHeading = strpos($template, "\n## Architecture\n");
+    $coverageHeading = strpos($template, "\n## Coverage\n");
+
+    expect($architectureHeading)->not->toBeFalse();
+    expect($coverageHeading)->not->toBeFalse();
+    assert($architectureHeading !== false);
+    assert($coverageHeading !== false);
+    expect($architectureHeading)->toBeLessThan($coverageHeading);
+});
+
+test('code-review-jira Output Rules and GitHub template carry the Architecture exemption (issue #530)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skill = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+    $template = (string) file_get_contents($packageDir . '/skills/code-review-jira/templates/github-output.md');
+
+    expect($skill)->toContain('`## Architecture` section is the second exception (issue #530)');
+    expect($skill)->toContain('`Status: walked, 0 findings`');
+    expect($skill)->toContain('The JIRA non-technical comment (produced by `pr-summary`) never includes this section');
+
+    expect($template)->toContain('## Architecture');
+    expect($template)->toContain('**Laravel-only, mandatory on every CR run (issue #530)');
+    expect($template)->toContain('Status: walked, 0 findings');
+
+    $architectureHeading = strpos($template, "\n## Architecture\n");
+    $coverageHeading = strpos($template, "\n## Coverage\n");
+
+    expect($architectureHeading)->not->toBeFalse();
+    expect($coverageHeading)->not->toBeFalse();
+    assert($architectureHeading !== false);
+    assert($coverageHeading !== false);
+    expect($architectureHeading)->toBeLessThan($coverageHeading);
+});

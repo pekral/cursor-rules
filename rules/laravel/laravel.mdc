@@ -24,6 +24,13 @@ globs:
 - ModelManagers: write-only persistence.
 - Data Builders: multi-method classes that map, hydrate, or normalize input into DTOs. Not Action pattern — no `__invoke()`. Never query the database.
 - Eloquent Models: framework boilerplate (relationships, scopes, casts, accessors) **plus** simple self-contained domain methods on own data — see the **Database and Eloquent** section for the boundary.
+- Shared Concerns (`app/Concerns/`): globally shared and reusable logic — typically traits — that is domain-agnostic and consumed across two or more unrelated domains. Never a home for domain-specific code. See the **Shared Concerns** section below.
+
+## Shared Concerns
+- `app/Concerns/` is the canonical home for all globally shared and reusable logic in the application — typically traits, but also small reusable helpers and value objects that exist purely to be consumed across unrelated domains.
+- Place a trait or helper in `app/Concerns/` only when it is **globally applicable** (consumed across two or more unrelated domains, layers, or entry points), **domain-agnostic** (no knowledge of a concrete model, aggregate, feature flow, or business rule), and **reusable as-is** (consumers use it without further specialization).
+- Never put domain-specific logic in `app/Concerns/` — anything tied to a concrete model, feature flow, or business rule must live in the relevant business-logic layer under `app/{Domain}/`.
+- Validation rule traits (see the **Validation** section below) are one specific worked example of this rule, not the only allowed category.
 
 ## Validation
 - Use FormRequest classes for controller input validation.

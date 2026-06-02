@@ -147,8 +147,20 @@ globs:
 - Use Data Builders when DTO construction involves non-trivial mapping, hydration, or normalization that does not belong in the DTO itself.
 - Actions may call Data Builders for complex DTO transformations instead of performing inline mapping.
 
+## Shared Concerns (Traits)
+- `app/Concerns/` is the **canonical home for all globally shared and reusable logic** in the application — typically PHP traits, but also small reusable helpers and value objects that exist purely to be consumed across unrelated domains.
+- Place a trait, class, or helper in `app/Concerns/` **only when all three conditions hold**:
+  - **Globally applicable** — consumed by two or more unrelated domains, layers, or entry points (e.g. validation rule trait reused across multiple FormRequests and Data Validators, formatting helper trait reused across multiple Services or controllers).
+  - **Domain-agnostic** — carries no knowledge of a specific business model, aggregate, feature flow, or domain rule. No hard-coded references to `User`, `Invoice`, `Order`, `Subscription`, or any other concrete domain concept.
+  - **Reusable as-is** — consumers use it without further specialization or per-domain branching inside the trait.
+- **Forbidden in `app/Concerns/`:**
+  - Domain-specific logic — anything tied to a concrete model, aggregate, feature flow, or business rule must live in the relevant business-logic layer under `app/{Domain}/` (Actions, Model Services, Repositories, ModelManagers, Data Validators, Data Builders, Eloquent models — see **Business Logic Layers**).
+  - Single-use traits or helpers consumed by exactly one class with no second consumer expected — inline the logic in that class instead. Keep `app/Concerns/` reserved for genuine reuse.
+  - Orchestration, persistence, query, or HTTP/queue dispatching logic — those still belong to the seven business-logic layers, regardless of how the trait is structured.
+- The **Validation Rules (Traits)** section below is one specific instance of this broader rule — validation rule traits are the canonical worked example of a Concern, not the only allowed category.
+
 ## Validation Rules (Traits)
-- Store all validation rules as reusable traits in `app/Concerns/` following the existing naming convention (e.g. `GitHubIssueNumbersValidationRules`, `JiraIssueKeysValidationRules`). Keep this approach consistent across the entire application.
+- Store all validation rules as reusable traits in `app/Concerns/` following the existing naming convention (e.g. `GitHubIssueNumbersValidationRules`, `JiraIssueKeysValidationRules`). Keep this approach consistent across the entire application. This is the canonical worked example of the **Shared Concerns (Traits)** rule above.
 - Use these validation traits in FormRequest classes and Data Validator classes — never duplicate rule arrays.
 - Use custom Rule classes in `app/Rules/` for complex or reusable validation logic that goes beyond simple rule arrays.
 
@@ -229,6 +241,8 @@ globs:
   - inline database queries (Eloquent or `DB::`) in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components — reads must go through Repositories, writes through ModelManagers
   - services tied to one model that do not extend `BaseModelService`
   - non-CRUD methods inside resource controllers
+  - domain-specific code placed under `app/Concerns/` — anything tied to a concrete model, aggregate, feature flow, or business rule must move into the relevant business-logic layer under `app/{Domain}/` per **Shared Concerns (Traits)**
+  - shared, reusable trait or helper logic placed outside `app/Concerns/` while being consumed by two or more unrelated domains, layers, or entry points — must be consolidated into `app/Concerns/` per **Shared Concerns (Traits)**
 - Mark as moderate:
   - feature-specific or use-case–specific query methods inside Repositories — Repositories must expose only basic, reusable queries; specialization belongs in Services or Actions composing those basic methods
   - calling Actions via `->__invoke()` instead of `$action(...)`
@@ -237,6 +251,7 @@ globs:
   - Data Builder class using Action pattern (`__invoke()`) instead of named public methods
   - non-trivial or reusable validation logic written inline instead of as a custom Rule class in `app/Rules/`
   - per-row DB queries inside loops (per-row `update()`, `create()`, `delete()`, or single-row read inside a `foreach`) — must be replaced by ModelManager batch methods, `whereIn(...)->delete()`, or a single bulk read keyed in memory (see `@rules/sql/optimalize.mdc` "Batch over per-row operations"); allowed only when an explicit comment or PR description justifies an unavoidable per-row side-effect dependency
+  - single-use trait parked in `app/Concerns/` (used by exactly one class, no second consumer expected) — inline the logic into the consuming class per **Shared Concerns (Traits)** *Reusable as-is* criterion
 
 ## Exceptions
 - No Action is required for:

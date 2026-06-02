@@ -165,6 +165,24 @@ Run this section over the PR diff only — never over untouched code.
   - **Coverage reporting is short by default.** Run the gate on every review, but render the `## Coverage` section on the published comment **only** when there is something the reader must act on — uncovered changed lines (Critical findings) or unavailable / non-runnable coverage tooling (Critical finding with the reason). When every changed line is at 100% coverage and the tool ran successfully, **omit the `## Coverage` section entirely, omit the `Coverage:` header line, and omit the `coverage …` slot from the final summary line.** The Counts line carries the clean signal; the omission is the report. Never emit `100%` / `clean` / `n/a` placeholders for the section, the header line, or the summary slot.
 - Identify missing test scenarios beyond raw coverage (edge cases, error paths, regressions).
 
+### Critical Findings Verification (issue #537)
+
+Run this step **after every preceding analysis step has produced its findings** (Core Analysis, Highest-Priority Fast Track, Named Arguments Review, Specialized Reviews, Refactoring & Tech Debt, Validation incl. the Coverage gate) and **before** the Output assembly. Walk every **Critical** finding aggregated within this skill's run through `@skills/analyze-problem/SKILL.md` to confirm the finding reflects a real problem in the diff before it blocks the PR.
+
+1. For each Critical finding, invoke `@skills/analyze-problem/SKILL.md` **inline in this skill's context** (do not dispatch as a subagent) and pass:
+   - the finding's `file:line`, **risk/impact** line, **Faulty Example**, **Expected Behavior**, **Test Hint**, and **Suggested Fix**
+   - the surrounding code context — at minimum the enclosing method / class, plus any helper / Service / Repository the **Suggested Fix** points at — so the analysis can separate facts from assumptions
+   - the issue context already loaded under **Issue Context Analysis** (requirements, acceptance criteria, test data, edge cases)
+2. Read the returned analysis (template at `@skills/analyze-problem/templates/analysis-report.md`):
+   - **Verified Facts** must support the finding's claim
+   - **Probable Root Cause** must align with the finding's risk / impact
+3. Outcome — binary, no middle ground:
+   - **Confirmed** — Verified Facts and Probable Root Cause back the finding → keep the Critical finding verbatim in the report (reproducer fields, severity, and Suggested Fix unchanged)
+   - **Refuted** — Verified Facts contradict the finding, or Probable Root Cause names a different cause whose mitigation already exists in the diff → drop the finding from the report entirely
+4. **Never silently downgrade** a Critical to Moderate or Minor on the basis of this verification — the gate is binary (kept or dropped). A finding that survives stays Critical; a finding that is refuted is removed. Use the regular Strict-rule-compliance stratification (not this verification) for any genuine severity reassessment.
+5. **Moderate and Minor findings are not subject to this verification** — they pass through to Output assembly unchanged. The verification exists to eliminate false-positive Critical blockers, not to second-guess lower-severity items.
+6. The verification runs on every CR run; the published comment carries only **verified** Critical findings, so reviewers never spend time on a Critical that the analysis itself could not stand up.
+
 ---
 
 ## Output Rules

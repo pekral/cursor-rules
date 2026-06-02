@@ -3174,3 +3174,72 @@ test('code-review-jira Output Rules and GitHub template carry the Architecture e
     assert($coverageHeading !== false);
     expect($architectureHeading)->toBeLessThan($coverageHeading);
 });
+
+test('architecture rules carry the Shared Concerns (Traits) section scoped to globally reusable, domain-agnostic logic (issue #531)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($content)->toContain('## Shared Concerns (Traits)');
+    expect($content)->toContain('`app/Concerns/` is the **canonical home for all globally shared and reusable logic**');
+    expect($content)->toContain('**Globally applicable**');
+    expect($content)->toContain('**Domain-agnostic**');
+    expect($content)->toContain('**Reusable as-is**');
+    expect($content)->toContain('**Forbidden in `app/Concerns/`:**');
+    expect($content)->toContain('Domain-specific logic');
+    expect($content)->toContain('Single-use traits or helpers consumed by exactly one class');
+    expect($content)->toContain('Orchestration, persistence, query, or HTTP/queue dispatching logic');
+    expect($content)->toContain('The **Validation Rules (Traits)** section below is one specific instance of this broader rule');
+    expect($content)->toContain('This is the canonical worked example of the **Shared Concerns (Traits)** rule above.');
+});
+
+test('architecture Shared Concerns (Traits) section sits immediately before Validation Rules (Traits) (issue #531)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    $sharedConcernsHeading = strpos($content, "\n## Shared Concerns (Traits)\n");
+    $validationRulesHeading = strpos($content, "\n## Validation Rules (Traits)\n");
+    $dataValidatorsHeading = strpos($content, "\n## Data Validators\n");
+
+    expect($sharedConcernsHeading)->not->toBeFalse();
+    expect($validationRulesHeading)->not->toBeFalse();
+    expect($dataValidatorsHeading)->not->toBeFalse();
+    assert($sharedConcernsHeading !== false);
+    assert($validationRulesHeading !== false);
+    assert($dataValidatorsHeading !== false);
+
+    expect($sharedConcernsHeading)->toBeLessThan($validationRulesHeading);
+    expect($validationRulesHeading)->toBeLessThan($dataValidatorsHeading);
+});
+
+test('architecture CR Severity Rules cover app/Concerns misuse in both directions (issue #531)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($content)->toContain('domain-specific code placed under `app/Concerns/`');
+    expect($content)->toContain('shared, reusable trait or helper logic placed outside `app/Concerns/`');
+    expect($content)->toContain('single-use trait parked in `app/Concerns/`');
+    expect($content)->toContain('per **Shared Concerns (Traits)**');
+});
+
+test('laravel rules carry the parallel Shared Concerns section and Layer Responsibilities bullet (issue #531)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('## Shared Concerns');
+    expect($content)->toContain('Shared Concerns (`app/Concerns/`): globally shared and reusable logic');
+    expect($content)->toContain('canonical home for all globally shared and reusable logic in the application');
+    expect($content)->toContain('**globally applicable**');
+    expect($content)->toContain('**domain-agnostic**');
+    expect($content)->toContain('**reusable as-is**');
+    expect($content)->toContain('Never put domain-specific logic in `app/Concerns/`');
+    expect($content)->toContain('Validation rule traits (see the **Validation** section below) are one specific worked example');
+});
+
+test('code-review skill adds Shared Concerns (Traits) to the mandatory architecture walk (issue #531)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('**Shared Concerns (Traits)** (globally shared, domain-agnostic, reusable-as-is logic only');
+    expect($content)->toContain('flag domain-specific code parked under `app/Concerns/`');
+    expect($content)->toContain('reusable trait logic scattered outside `app/Concerns/`');
+});

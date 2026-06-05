@@ -93,7 +93,7 @@ Before writing any code, decide how the in-scope work will be split into commits
 
 ### Continue
 11. Implement the solution for all **in-scope** items identified in step 7.
-12. Ensure no sensitive data is exposed in error/validation messages.
+12. Ensure no sensitive data is exposed in error/validation messages. Apply `@rules/security/backend.md` *Safe Validation & Error Messages* (and `@rules/security/frontend.md` / `@rules/security/mobile.md` for the equivalent client surfaces) to every user-facing string the change touches, **including every locale shipped by the project** — auth, password-reset, sign-up, and account-lookup flows must return one generic message with one response shape so the wording cannot be used for identity enumeration, authorization-denied responses must not confirm the resource exists, and no stack traces / file paths / framework versions / DB or queue / cache identifiers / verbatim attacker input reach the response body.
 13. If the implementation introduced new database migrations, run them (`php artisan migrate` for Laravel projects, or the project-specific equivalent) before executing the affected tests or creating the pull request.
 14. Run tests for affected areas and confirm correctness.
 15. Add or update tests to cover the new or fixed behavior.

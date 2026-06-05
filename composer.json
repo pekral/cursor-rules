@@ -34,7 +34,7 @@
     "composer-plugin-api": "^2.0"
   },
   "require-dev": {
-    "composer/composer": "^2.10.0",
+    "composer/composer": "^2.10.1",
     "ergebnis/composer-normalize": "^2.52.0",
     "laravel/pint": "^1.29.1",
     "pekral/phpcs-rules": "^0.4.8",
@@ -44,7 +44,7 @@
     "pestphp/pest-plugin": "^4.0",
     "pestphp/pest-plugin-type-coverage": "^4.0.4",
     "phpstan/extension-installer": "^1.4.3",
-    "phpstan/phpstan": "^2.2.1",
+    "phpstan/phpstan": "^2.2.2",
     "phpstan/phpstan-deprecation-rules": "^2.0.4",
     "phpstan/phpstan-mockery": "^2.0",
     "phpstan/phpstan-phpunit": "^2.0.16",

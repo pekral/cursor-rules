@@ -3360,3 +3360,24 @@ test('resolve-issue skill references Safe Validation & Error Messages rule (issu
     expect($content)->toContain('Safe Validation & Error Messages');
     expect($content)->toContain('including every locale shipped by the project');
 });
+
+test('analyze-problem skill carries the UI Redesign Lens with one-click default and wizard fallback', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');
+
+    expect($content)->toContain('## UI Redesign Lens');
+    expect($content)->toContain('only when the analyzed problem is a UI / UX redesign or a new user-facing flow');
+    expect($content)->toContain('**Simple**');
+    expect($content)->toContain('**Intuitive**');
+    expect($content)->toContain('**Readable for humans**');
+    expect($content)->toContain('**Modern**');
+    expect($content)->toContain('**One-click default**');
+    expect($content)->toContain('**Wizard fallback when multi-step is unavoidable**');
+    expect($content)->toContain('A confirmation step is allowed only when the action is destructive');
+    expect($content)->toContain('irreversible, financially material, legally significant, or affects a third party');
+    expect($content)->toContain('every step states its purpose and its position in the flow');
+    expect($content)->toContain('the user can move back without losing entered data');
+    expect($content)->toContain('the user can save and resume later when the flow exceeds three steps');
+    expect($content)->toContain('the final step shows a summary of every choice before commit');
+    expect($content)->toContain('*One-click vs wizard decision*');
+});

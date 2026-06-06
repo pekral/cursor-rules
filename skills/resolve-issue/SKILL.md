@@ -67,8 +67,10 @@ Run `@skills/prepare-issue-context/SKILL.md` with `MODE=resolve-issue` and the s
 
 ### Problem analysis
 
-6. Run `@skills/analyze-problem/SKILL.md` using the issue description, the scenario table from the context-preparation pre-flight, the current requirements from comment analysis, and any available context as input.
-7. Review the analysis output and split the identified items into two groups:
+6. **Gate — assignment specificity.** The pre-flight in step 5 already guarantees every scenario is mapped to a concrete code path; this gate only decides how clear the *requirements* are. Pick **specific** or **general** based on the scenario table and the current requirements from comment analysis:
+   - **Specific** — expected behavior is unambiguous for every scenario, and the root cause (for bugs) or target behavior (for features) is explicitly stated in the assignment or current requirements. **Skip** `@skills/analyze-problem/SKILL.md` and use the scenario table together with the current requirements as the input for step 7.
+   - **General** — requirements are vague, acceptance criteria are missing or open-ended, or the root cause is not identified. When in doubt, treat the assignment as general. **Run** `@skills/analyze-problem/SKILL.md` using the issue description, the scenario table, current requirements, and any available context, and use its output as the input for step 7.
+7. Review the input from step 6 and split the identified items into two groups:
    - **In scope** — items that directly match the issue requirements. These will be implemented.
    - **Out of scope** — items that are valid findings but fall outside the current issue. These will be added to the PR summary as a TODO list for future tasks.
 

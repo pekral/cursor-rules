@@ -23,7 +23,9 @@ metadata:
 -   Only add or modify tests when needed.
 -   Production code may only be changed if it is strictly required by
     the existing create-test skill or test infrastructure, otherwise do
-    not modify it.
+    not modify it — the only exception is the **Pre-existing issue
+    handling** workflow below, which lands its production-code fixes in
+    their own separate commits.
 -   Use @skills/create-test/SKILL.md for all test-writing work.
 
 **Steps:**
@@ -69,7 +71,29 @@ Provide a brief markdown summary including:
 -   which recommendations were already covered
 -   which tests were added or updated
 -   whether 100% coverage for current changes was achieved
+-   list of pre-existing fix commits (if any), each with a one-line rationale, plus any pre-existing issue deferred as a follow-up with the reason
 -   any blocker preventing full completion
+
+**Pre-existing issue handling**
+
+While writing the missing tests, you may uncover problems that are **unrelated to the current PR scope** but were already present in the code you had to read or exercise. The following categories qualify:
+
+-   **Bugs** — incorrect logic, broken edge cases, or runtime errors revealed by exploratory test runs, but already present before this task.
+-   **Project-rule violations** — code that contradicts any rule listed in this skill's *Constraint* block or any other rule under `.claude/rules/`.
+-   **Security vulnerabilities** — anything `@rules/security/backend.md`, `@rules/security/frontend.md`, or `@rules/security/mobile.md` would flag.
+
+Rules:
+
+1.  **Do not silently ignore** a pre-existing issue you encountered in code you had to read or exercise while writing the missing tests.
+2.  **Do not expand scope** by actively scanning unrelated files for additional pre-existing issues. Limit attention to files already touched or exercised by the current PR's changes.
+3.  Land each pre-existing fix (and its regression test) in its **own separate commit** inside the same PR, distinct from the missing-tests commit:
+    -   Use a Conventional Commits subject per `@rules/git/general.mdc`: `fix(<scope>): pre-existing — <description>` for bugs and security, `refactor(<scope>): pre-existing — <description>` for rule violations without behavior change.
+    -   The `pre-existing — ` prefix is mandatory so reviewers can identify these commits at a glance.
+    -   **Test coverage workflow depends on the commit type:**
+        -   `fix(<scope>): pre-existing — …` (bug, security) — add the regression test in the **same commit** as the fix; the test must fail before the fix lands and pass after.
+        -   `refactor(<scope>): pre-existing — …` (project-rule violation, behavior-preserving) — apply `@rules/refactoring/general.mdc` *Test Coverage Contract*: when the target lines are below 100% coverage, author a dedicated `test(<scope>): cover <area> before pre-existing refactor` commit **before** the refactor commit, and do **not** modify pre-existing tests inside the refactor commit (mechanical renames forced by the refactor itself stay exempt and must be flagged in the commit body).
+4.  The "Production code may only be changed if it is strictly required" constraint above is **overridden** for these fixes — the production-code change is the fix itself, and it lives in its own commit.
+5.  If a pre-existing issue is **non-trivial** (would significantly expand the PR or requires architectural discussion), do **not** fix it. Surface it in the delivered markdown summary as a deferred follow-up with the reason.
 
 **After completing the tasks**
 
@@ -83,7 +107,7 @@ Provide a brief markdown summary including:
 -   Confirm whether current changes now meet the required test coverage (must be 100%).
 -   If something is still missing, clearly describe the blocker or
     uncovered scenario.
-- Create a new commit with the missing tests
+- Create a new commit with the missing tests, separate from any pre-existing fix commits produced by *Pre-existing issue handling* above
 - If according to @skills/test-like-human/SKILL.md the changes can be tested, do it!
 
 ## Principles

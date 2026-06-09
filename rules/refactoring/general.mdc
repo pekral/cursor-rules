@@ -40,6 +40,7 @@ globs: []
     - inline validation → Data Validators / FormRequests
 6. **Remove duplication** — apply DRY pragmatically, not dogmatically.
 7. **Address concurrency** — DB transactions, `lockForUpdate`, atomic operations instead of read-modify-write on shared state.
+8. **Split oversized HTML / Blade layouts** — when the refactor touches a Livewire / Blade view, analyze its HTML as a tree of UI concerns and split it into the smallest set of reusable Livewire and Blade components per `@rules/laravel/livewire.mdc` *HTML / Blade Layout Splitting*. Treat the layout split as a structural refactor: the **Test Coverage Contract** below applies in spirit — every rendered branch of the touched view must be exercised by a Livewire / Blade feature test that stays green through the refactor commit unchanged, since PHP `--coverage-clover` does not measure `.blade.php` line-by-line. See the rule's *Process for splitting an existing view* step 6 for the binding wording.
 
 ## When to Refactor
 - Changes are slow and painful.

@@ -32,3 +32,61 @@ globs:
 - Prefer Livewire events/listeners over tight component coupling.
 - Use `wire:model` for form bindings unless there is a clear reason not to.
 - Keep UI strings in the language expected by the repository.
+
+## HTML / Blade Layout Splitting
+
+Every Livewire/Blade view must be analyzed as a tree of UI concerns and split into the smallest set of reusable components that still makes the view readable. The goal is reusability and single-responsibility per view file — not maximum component count.
+
+### Component-type decision (Livewire vs Blade)
+Before extracting anything, pick the right component type. Picking wrong is a code-review finding on its own:
+- **Livewire component (`app/Livewire/...` + `resources/views/livewire/...`)** — extract only when the piece of UI has **its own state, lifecycle, or server interaction**: holds `wire:model` form state independent of the parent, owns `mount()` data loading, exposes `wire:click` / `wire:submit` handlers that must hit the server, emits or listens to Livewire events, or carries `#[Computed]` / `updated*` lifecycle behavior.
+- **Blade component (`resources/views/components/...` or `x-...` anonymous)** — extract whenever the piece is **stateless presentation** (data in via attributes / slots, no server round-trip, no Livewire lifecycle). Buttons, cards, badges, headings, layout shells, empty-state messages, icon wrappers, and dumb table rows belong here.
+- **Never wrap a stateless presentational block in a Livewire component just to enable reuse** — the Livewire wrapper adds a payload, a roundtrip, and a lifecycle the block does not need. Use a Blade component instead. The "split into Livewire components" mandate in this section means *split into the correct component type*; Livewire components are reserved for the stateful subset above.
+
+### Triggers — when an HTML block must be extracted
+Extract a piece of HTML as its own component (Livewire or Blade per the decision above) the moment **any** of these triggers fires on the view being read or modified:
+1. **Repeated markup block** — the same structural HTML pattern (same wrapper element + same inner skeleton, ignoring text content and per-item data) appears 2+ times in the same view, or once in 2+ different views. Copy-paste of a card / row / chip / modal is the canonical trigger.
+2. **View exceeds 150 lines of Blade** — a single Blade file over 150 lines of actual markup (comments and blank lines excluded) is presumed to mix concerns. Split until each child component fits comfortably under the threshold, or document in the file header why the view legitimately cannot be split (rare — e.g. a hand-rolled SVG).
+3. **Self-contained interaction group** — a related cluster of `wire:model` / `wire:click` / `wire:submit` / `wire:loading` directives drives one UI concern (filter panel, search box, item form, modal dialog, inline editor). The cluster's state belongs to a dedicated Livewire child, not to the parent component.
+4. **Self-contained UI state / data shape** — markup is driven by its own data object (an item, a row, a card, a tab, a field). Whenever the parent loops `@foreach ($items as $item) ... @endforeach` over more than ~10 lines of markup per iteration, the iterated body is a child component receiving `$item` as a typed parameter.
+5. **Cross-page reuse** — the same UI element appears on 2+ parent views or routes. Extract on first duplication; do not wait for the third occurrence.
+6. **Independent loading / empty / error state** — a region renders its own `wire:loading`, `@empty`, or error banner independent of the surrounding view. The region owns a lifecycle, so it owns a component.
+7. **Distinct UI concern by name** — the block has a name a designer would use ("invoice header", "user avatar menu", "campaign filter bar"). If you can name it cleanly in one noun phrase, it is a component.
+
+A view that triggers none of these may stay inline. A view that triggers any of these and remains inline is a refactoring finding.
+
+### Reusability contract for the extracted component
+Every extracted component must satisfy all of the following — otherwise it is not actually reusable and the extraction failed:
+- **Typed input only.** Public properties / `mount(...)` parameters are typed (DTO, Eloquent model, enum, scalar). No reaching into globals, no `auth()->user()` deep in the child unless the child *is* the auth-aware concern (badge, menu).
+- **One UI concern per component.** The component renders one named thing. Mixing two concerns into one component re-creates the original problem one level deeper.
+- **No business logic in the component class.** Livewire children stay entry-points per the **Responsibilities** section above; presentation children are Blade components and have no PHP class at all (anonymous) or a class that only forwards constructor params to props.
+- **Communication via Livewire events, not parent reach-through.** Children emit events (`$this->dispatch('item.saved', id: $id)`); parents listen via `#[On(...)]`. Never call a parent method from a child by passing the parent component instance, a route-bound global helper, or session state as a child property to reach back into the parent.
+- **Independently renderable.** The component can be rendered in a Pest / PHPUnit Livewire test (or Blade component test) with synthetic input — no hidden dependency on the parent's state.
+- **Located under the right tree.** Livewire children live under `app/Livewire/<Domain>/` + `resources/views/livewire/<domain>/`; Blade components live under `resources/views/components/<domain>/` (or `app/View/Components/<Domain>/` when they have a class). The domain folder matches the business domain of the parent, not the page name.
+
+### Process for splitting an existing view
+1. Read the view top-to-bottom and label every block with its UI concern in one noun phrase. Repeated labels → duplication → extract.
+2. For each labelled block, run the **Component-type decision** check above (Livewire iff it has state / lifecycle / server interaction; Blade otherwise).
+3. Extract bottom-up: start with the smallest leaves (badge, avatar, chip), confirm they compile and render, then move one level up (card, row, item form), then the page-level concerns (filter bar, list, header).
+4. Replace each in-place block with the component invocation (`<livewire:domain.foo :item="$item" />` or `<x-domain.foo :item="$item" />`).
+5. After extraction, the parent view must read as an outline of named children with minimal glue markup. If the parent still mixes glue with concern-specific markup, the split is incomplete.
+6. Behavior must be preserved — apply `@rules/refactoring/general.mdc` *Test Coverage Contract* in spirit: every rendered branch of the touched view (initial render, `wire:loading` state, `@empty` path, error banner, each `@if` / `@foreach` arm) must be exercised by a Livewire / Blade feature test that renders the parent with the inputs driving that branch, committed in a dedicated `test(scope): cover <area> before refactor` commit before the layout refactor commit. The same feature tests must stay green through the refactor commit unchanged — they are the behavior-preservation proof. PHP `--coverage-clover` does not measure `.blade.php` files line-by-line, so the binding gate is "every rendered branch has a feature test that asserts the rendered output before the split, and the same assertion passes after", not a numeric coverage percentage on the view file. New tests for newly introduced child components belong in a separate commit after the refactor.
+
+### Anti-patterns
+- One giant "page" Livewire component holding 400 lines of Blade — split it.
+- A Livewire child whose only job is to render static markup with no `wire:*` — should have been a Blade component.
+- A child that takes the parent component instance, a route-bound global helper, or session state as a property to read foreign state — replace with explicit typed input or Livewire events.
+- Extraction that produces a child used in exactly one place **and matches none of Triggers 3–7 above** — collapse it back; reusability is the goal, not file count. The "two consumers" threshold from `@rules/laravel/architecture.mdc` *Shared Concerns (Traits)* applies in spirit (single-use abstraction with no UI-concern justification = inline). Trigger-driven single-site extractions (self-contained interaction cluster, iterated body, cross-page reuse, independent loading / empty / error state, distinct named UI concern) are exempt — their value is readability and single-responsibility, not literal reuse on day one.
+- Naming a component after the page it lives on (`Dashboard\\DashboardFilterBar`) instead of after the concern (`Campaign\\FilterBar`). Concern-based naming is what makes the component reusable on the next page.
+
+### Code Review Severity Rules (HTML Layout Splitting)
+- **Critical:**
+  - A Livewire wrapper introduced around a stateless presentational block (no `wire:*`, no server interaction, no lifecycle) — must collapse to a Blade component.
+  - A child component that reads parent state via a passed parent reference, a route-bound global helper, or session state instead of typed input + Livewire events.
+- **Moderate:**
+  - A view file over 150 lines of Blade with no splitting attempt and no documented exemption.
+  - A repeated HTML block (2+ identical structural copies in the same view, or once in 2+ views) left inline instead of extracted.
+  - A self-contained interaction cluster (filter panel, modal, item form) left inline in the parent Livewire component.
+  - Extracted component placed outside the correct tree (`app/Livewire` vs `resources/views/components`) or named after the page rather than the concern.
+- **Minor:**
+  - Single-use child component **that matches none of Triggers 3–7** (extraction driven purely by syntactic length, no UI-concern justification, no second consumer planned in the same PR) — collapse back per the YAGNI bullet above. Trigger-driven single-site extractions are exempt.

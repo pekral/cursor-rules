@@ -70,9 +70,10 @@ Run `@skills/prepare-issue-context/SKILL.md` with `MODE=resolve-issue` and the s
 6. **Gate — assignment specificity.** The pre-flight in step 5 already guarantees every scenario is mapped to a concrete code path; this gate only decides how clear the *requirements* are. Pick **specific** or **general** based on the scenario table and the current requirements from comment analysis:
    - **Specific** — expected behavior is unambiguous for every scenario, and the root cause (for bugs) or target behavior (for features) is explicitly stated in the assignment or current requirements. **Skip** `@skills/analyze-problem/SKILL.md` and use the scenario table together with the current requirements as the input for step 7.
    - **General** — requirements are vague, acceptance criteria are missing or open-ended, or the root cause is not identified. When in doubt, treat the assignment as general. **Run** `@skills/analyze-problem/SKILL.md` using the issue description, the scenario table, current requirements, and any available context, and use its output as the input for step 7.
-7. Review the input from step 6 and split the identified items into two groups:
+7. Review the input from step 6 and split the identified items into three groups:
    - **In scope** — items that directly match the issue requirements. These will be implemented.
-   - **Out of scope** — items that are valid findings but fall outside the current issue. These will be added to the PR summary as a TODO list for future tasks.
+   - **Pre-existing issues** — bugs, project-rule violations, or security vulnerabilities already present in the affected files before this task (see *Pre-existing issue handling* below). These will be fixed in **separate commits** inside the same PR.
+   - **Out of scope (deferred)** — valid findings that fall outside the current issue **and** do not qualify as pre-existing issues to fix now (e.g. enhancements, refactors, future features). These will be added to the PR summary as a `## TODO` list for future tasks.
 
 ### Phase planning (commit plan)
 
@@ -84,6 +85,28 @@ Before writing any code, decide how the in-scope work will be split into commits
 4. **If the assignment is small and atomic:** keep it as a single commit. Do not invent artificial phases.
 5. Record the planned phases as a numbered list (one line per commit, with the intended commit message in `type(scope): description` form per `@rules/git/general.mdc`) **before** starting implementation. This list is the commit plan for step 11.
 6. During implementation, commit at the end of each phase. Run pre-push fixers and tests on the changes belonging to that phase before moving on.
+
+### Pre-existing issue handling
+
+While reading and modifying the files required for the in-scope work, you may encounter problems that are **unrelated to the current assignment** but were already present in those files. The following categories qualify as pre-existing issues that must be fixed in this PR:
+
+- **Bugs** — incorrect logic, broken edge cases, null-dereference risks, race conditions, or runtime errors that exist before this task.
+- **Project-rule violations** — code that contradicts any rule listed in this skill's *Constraints* block (`@rules/php/core-standards.mdc`, `@rules/laravel/*`, `@rules/sql/optimalize.mdc`, etc.) or any other rule under `.claude/rules/`.
+- **Security vulnerabilities** — anything `@rules/security/backend.md`, `@rules/security/frontend.md`, or `@rules/security/mobile.md` would flag (injection, missing authn/authz, unsafe deserialization, sensitive-data exposure, …).
+
+Rules:
+
+1. **Do not silently ignore** a pre-existing issue you encountered in a file you had to read for the in-scope work — fix it in this PR.
+2. **Do not expand scope** by actively scanning unrelated files for additional pre-existing issues. Limit attention to files already touched by the in-scope changes (or their direct dependencies you must read to understand the change).
+3. Land each pre-existing fix in its **own separate commit** inside the same PR:
+   - Use a Conventional Commits subject per `@rules/git/general.mdc`: `fix(<scope>): pre-existing — <description>` for bugs and security, `refactor(<scope>): pre-existing — <description>` for rule violations without behavior change.
+   - The `pre-existing — ` prefix is mandatory so reviewers can identify these commits at a glance (e.g. `fix(user): pre-existing — null check before dispatching welcome mail`).
+   - **Test coverage workflow depends on the commit type:**
+     - `fix(<scope>): pre-existing — …` (bug, security) — add the regression test in the **same commit** as the fix; the test must fail before the fix lands and pass after.
+     - `refactor(<scope>): pre-existing — …` (project-rule violation, behavior-preserving) — apply `@rules/refactoring/general.mdc` *Test Coverage Contract*: when the target lines are below 100% coverage, author a dedicated `test(<scope>): cover <area> before pre-existing refactor` commit **before** the refactor commit, and do **not** modify pre-existing tests inside the refactor commit (mechanical renames forced by the refactor itself stay exempt and must be flagged in the commit body).
+   - Either way, pre-existing fixes follow the same 100% coverage rule on changed lines as in-scope changes (step 16).
+4. Order pre-existing fix commits **before** the in-scope commits in the commit plan from the previous section, so they form an independently revertable base. Update the recorded commit plan to include them before starting implementation.
+5. If a pre-existing issue is **non-trivial** (would significantly expand the PR, requires architectural decisions, or affects shared infrastructure beyond the touched files), do **not** fix it inline. Move it to the *Out of scope (deferred)* group from step 7 and surface it under the PR's `## TODO` section with a one-line reason for deferral.
 
 ### If bug
 8. Reproduce the issue if possible.
@@ -139,7 +162,8 @@ Once review and testing are clean:
   - reference to the original issue
   - testing instructions
   - **Summary** — concise overview of what changed and why
-  - **TODO list** — if any **out-of-scope** items were identified in step 7, include them in the PR summary under a `## TODO` section as a checklist of potential follow-up tasks
+  - **Pre-existing fixes** — if any pre-existing issues were fixed per *Pre-existing issue handling*, list each fix commit under a `## Pre-existing fixes` section with a one-line rationale so reviewers can review them independently of the assignment
+  - **TODO list** — if any **out-of-scope (deferred)** items were identified in step 7 (or non-trivial pre-existing issues were deferred), include them under a `## TODO` section as a checklist of potential follow-up tasks
 
 ## Final report
 
@@ -165,6 +189,7 @@ The non-technical report must be understandable by non-technical testers and pro
 - **What changed:** a brief, plain-language summary of the fix or feature
 - **How to test:** step-by-step instructions a tester can follow to verify the change works correctly
 - **Risk areas and edge cases:** specific scenarios the tester should focus on to catch potential regressions or unexpected behavior
+- **Pre-existing fixes also covered by this PR (when any):** plain-language one-line summary per pre-existing fix commit produced by *Pre-existing issue handling*, plus a one-line "what to re-verify" hint per fix so the tester knows the additional regression surface to validate. Omit the bullet entirely when no pre-existing fix landed.
 
 ### GitHub-specific follow-up
 - If the original repository uses a `ready for review` (or equivalent) label, apply it to the source issue once the PR is open to signal it is ready for reviewers. Skip this step when the project does not use such labels.

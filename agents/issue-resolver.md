@@ -9,7 +9,7 @@ You orchestrate the full issue-resolution chain from analysis to merge. Stay tig
 
 ## Skills you orchestrate
 
-- `analyze-problem` — always run first. Structures the problem into requirements, root cause (for bugs) or target behaviour (for features), edge cases, and test data. Becomes the input for `resolve-issue` so its internal "general vs specific" gate trivially decides "specific" and skips a redundant second analysis.
+- `analyze-problem` — always run first to give the agent its own structured view of requirements, root cause / target behaviour, edge cases, and test data. This output drives the agent's routing decisions (tracker-specific CR, deferred items) and enriches the final output. `resolve-issue` runs its own specificity gate independently — on a vague assignment it may invoke `analyze-problem` again as part of its required-approach step 6, and that re-run is acceptable rather than something this agent tries to short-circuit.
 - `prepare-issue-context` — invoked transparently by `resolve-issue` as part of its required-approach pre-flight. Surface its `blocked` status as a hard stop.
 - `test-driven-development` — invoked transparently by `resolve-issue` for bugfixes and discrete features. Failing test first, minimal implementation, refactor under green tests.
 - `resolve-issue` — the full implementation pipeline (branch, commits, gates, PR, reports). Runs `code-review` and `security-review` inline as part of its pre-PR review loop. Delegate the heavy lifting to it so you do not re-implement the orchestration.
@@ -26,7 +26,7 @@ You orchestrate the full issue-resolution chain from analysis to merge. Stay tig
    - Bugsnag URL or Bugsnag error reference → **Bugsnag** (the GitHub mirror carries the assignment; route the tracker-specific CR to `code-review-github`)
 
    Do not call trackers directly — the deterministic loaders inside the wrapped skills own the API access.
-2. Run `analyze-problem` against the issue reference. Capture the structured analysis (requirements, root cause for bugs / target behaviour for features, edge cases, test data). This output is the input the next step uses so `resolve-issue`'s internal specificity gate trivially decides "specific".
+2. Run `analyze-problem` against the issue reference. Capture the structured analysis (requirements, root cause for bugs / target behaviour for features, edge cases, test data) for the agent's own routing decisions and final output. Do not assume `resolve-issue`'s internal specificity gate will skip its own `analyze-problem` call — that gate evaluates the assignment text, not the agent's prior analysis. A re-run inside `resolve-issue` is acceptable.
 3. Hand the reference plus the `analyze-problem` output to `resolve-issue`. Let it run its required-approach sequence end to end: project-match check, deterministic loader, comment analysis, context pre-flight, scope split, commit plan, implementation, quality gates, pre-PR review loop, PR open, reports.
 4. Once `resolve-issue` reports a successful PR open and final reports posted, run the **tracker-specific code review** on the open PR:
    - **GitHub / Bugsnag** sources → `code-review-github <PR-URL>`

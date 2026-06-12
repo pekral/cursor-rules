@@ -161,6 +161,81 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 
 ---
 
+## Claude Code Subagents
+
+The package ships Claude Code subagents for common PHP and Laravel workflows. Agents are a thin orchestration layer over the existing skills — they do not replace them and they do not duplicate their prompts.
+
+```text
+Rules  = long-lived project standards
+Skills = reusable workflows
+Agents = specialised orchestration roles over multiple skills
+```
+
+Install for Claude Code or for every supported editor:
+
+```bash
+composer require pekral/cursor-rules --dev
+vendor/bin/cursor-rules install --editor=claude
+# or
+vendor/bin/cursor-rules install --editor=all
+```
+
+Agents are installed to:
+
+```text
+.claude/agents/
+```
+
+They are **not** installed for `--editor=cursor` or `--editor=codex`.
+
+### Available subagents
+
+| Agent | Role | Orchestrated skills |
+|---|---|---|
+| `php-code-reviewer` | Senior PHP/Laravel review of the current diff. Read-only by default. | `code-review`, `security-review`, `create-missing-tests-in-pr` |
+| `issue-resolver` | End-to-end issue resolution from GitHub, JIRA, or Bugsnag. | `prepare-issue-context`, `analyze-problem`, `test-driven-development`, `resolve-issue`, `code-review` |
+| `test-engineer` | Author, repair, and complete Pest / feature tests, including missing-coverage fills on open PRs. | `create-test`, `create-missing-tests-in-pr`, `test-driven-development`, `rewrite-tests-pest` |
+| `security-reviewer` | OWASP-focused review of the current diff or a referenced advisory. Read-only by default. | `security-review`, `security-threat-analysis` |
+| `laravel-architect` | Design and restructuring of Laravel architecture (Actions, services, jobs, Livewire, domain boundaries). | `analyze-problem`, `refactor-entry-point-to-action`, `understand-propose-implement-verify` |
+| `mysql-performance-reviewer` | MySQL and Eloquent performance analysis; every index recommendation justified by a query pattern. | `mysql-problem-solver`, `laravel-telescope` |
+| `refactoring-specialist` | Behaviour-preserving PHP/Laravel refactors in small, test-backed steps. | `class-refactoring`, `refactor-entry-point-to-action`, `understand-propose-implement-verify`, `create-test` |
+
+### Example invocations in Claude Code
+
+```text
+@agent-php-code-reviewer review the current diff
+@agent-issue-resolver resolve GitHub issue #123
+@agent-test-engineer add missing tests for this PR
+@agent-security-reviewer review the authentication changes
+@agent-mysql-performance-reviewer analyze this slow query
+@agent-refactoring-specialist refactor this service without changing behavior
+@agent-laravel-architect propose a cleaner architecture for this feature
+```
+
+### Workflow continuity — agents do not change the slash-command pipeline
+
+The skill-based pipeline still works exactly as before:
+
+```text
+/resolve-issue <link>
+/code-review-github <link>
+/process-code-review <link>
+/merge-github-pr <link>
+```
+
+Agents are entry-points to the **same** skills, so quality and output stay identical. Pick whichever entry feels natural for the task:
+
+| Slash command (skill) | Equivalent subagent entry-point |
+|---|---|
+| `/resolve-issue <link>` | `@agent-issue-resolver resolve <link>` |
+| `/code-review-github <link>` | `@agent-php-code-reviewer review <link>` |
+| `/security-review` | `@agent-security-reviewer review the current diff` |
+| `/create-test` / `/create-missing-tests-in-pr` | `@agent-test-engineer add missing tests for <link>` |
+
+When in doubt, prefer the slash command — it invokes the underlying skill directly, with no extra layer. Use the agent when you want Claude Code to select the right skill for you, or when you want to chain several skills under a single specialist role.
+
+---
+
 ## Rules Overview
 
 Rules included in this package:

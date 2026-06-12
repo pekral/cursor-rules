@@ -88,39 +88,61 @@ final class Installer
     private static function install(bool $force, bool $symlink, bool $prune, string $editor, bool $allowBundledScripts): int
     {
         $root = InstallerPath::resolveProjectRoot();
-
-        $rulesSource = InstallerPath::resolveRulesSource($root);
-        [$rulesCopied, $rulesPruned] = self::syncDirectories(
-            $rulesSource,
-            InstallerPath::resolveRulesTargetDirectories($root, $editor),
-            $force,
-            $symlink,
-            $prune,
-        );
-
-        $skillsSource = InstallerPath::resolveSkillsSource();
-        [$skillsCopied, $skillsPruned] = $skillsSource !== null
-            ? self::syncDirectories(
-                $skillsSource,
-                InstallerPath::resolveSkillsTargetDirectories($root, $editor),
-                $force,
-                $symlink,
-                $prune,
-            )
-            : [0, 0];
+        [$copied, $pruned] = self::runAllSyncs(self::collectSyncPayloads($root, $editor), $force, $symlink, $prune);
 
         $claudeMdSource = InstallerPath::isClaudeMdEditor($editor) ? InstallerPath::resolveClaudeMdSource() : null;
-        $claudeMdCopied = self::installSingleFile($claudeMdSource, InstallerPath::resolveClaudeMdTarget($root));
+        $copied += self::installSingleFile($claudeMdSource, InstallerPath::resolveClaudeMdTarget($root));
         $permissionsAdded = InstallerClaudeSettings::applyIfRequested($allowBundledScripts, $editor);
-        $total = $rulesCopied + $skillsCopied + $claudeMdCopied;
 
-        echo sprintf('Cursor rules installed (%d files, %d pruned).%s', $total, $rulesPruned + $skillsPruned, PHP_EOL);
+        self::reportInstallSummary($copied, $pruned, $permissionsAdded);
+
+        return 0;
+    }
+
+    /**
+     * @return array<int, array{0: ?string, 1: array<int, string>}>
+     */
+    private static function collectSyncPayloads(string $root, string $editor): array
+    {
+        return [
+            [InstallerPath::resolveRulesSource($root), InstallerPath::resolveRulesTargetDirectories($root, $editor)],
+            [InstallerPath::resolveSkillsSource(), InstallerPath::resolveSkillsTargetDirectories($root, $editor)],
+            [
+                InstallerPath::isAgentsEditor($editor) ? InstallerPath::resolveAgentsSource() : null,
+                InstallerPath::resolveAgentsTargetDirectories($root, $editor),
+            ],
+        ];
+    }
+
+    /**
+     * @param array<int, array{0: ?string, 1: array<int, string>}> $payloads
+     * @return array{int, int}
+     */
+    private static function runAllSyncs(array $payloads, bool $force, bool $symlink, bool $prune): array
+    {
+        $totalCopied = 0;
+        $totalPruned = 0;
+
+        foreach ($payloads as [$source, $targets]) {
+            if ($source === null || $targets === []) {
+                continue;
+            }
+
+            [$copied, $prunedCount] = self::syncDirectories($source, $targets, $force, $symlink, $prune);
+            $totalCopied += $copied;
+            $totalPruned += $prunedCount;
+        }
+
+        return [$totalCopied, $totalPruned];
+    }
+
+    private static function reportInstallSummary(int $copied, int $pruned, int $permissionsAdded): void
+    {
+        echo sprintf('Cursor rules installed (%d files, %d pruned).%s', $copied, $pruned, PHP_EOL);
 
         if ($permissionsAdded > 0) {
             echo sprintf('Allowed %d bundled-script permission(s) in ~/.claude/settings.json.%s', $permissionsAdded, PHP_EOL);
         }
-
-        return 0;
     }
 
     /**

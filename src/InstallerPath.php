@@ -110,6 +110,44 @@ final class InstallerPath
         return is_file($source) ? $source : null;
     }
 
+    public static function resolveAgentsSource(): ?string
+    {
+        $packageSource = self::getPackageDirectory() . '/agents';
+
+        if (is_dir($packageSource)) {
+            return $packageSource;
+        }
+
+        // @codeCoverageIgnoreStart
+        return null;
+        // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * Agent target directories for the given editor.
+     * Claude Code subagents only install for editor=claude or editor=all.
+     *
+     * @return array<int, string>
+     */
+    public static function resolveAgentsTargetDirectories(string $root, string $editor): array
+    {
+        if (!self::isAgentsEditor($editor)) {
+            return [];
+        }
+
+        return [$root . '/.claude/agents'];
+    }
+
+    /**
+     * Whether Claude Code subagents should be installed for the given editor.
+     */
+    public static function isAgentsEditor(string $editor): bool
+    {
+        $editor = strtolower($editor);
+
+        return $editor === self::EDITOR_CLAUDE || $editor === self::EDITOR_ALL;
+    }
+
     /**
      * Target path for CLAUDE.md in the project root.
      */

@@ -3604,3 +3604,13 @@ test('README documents the Claude Code subagents section with usage examples', f
     expect($readme)->toContain('@agent-mysql-performance-reviewer');
     expect($readme)->toContain('@agent-refactoring-specialist');
 });
+
+test('issue-resolver agent does not claim to bypass resolve-issue specificity gate via upfront analyze-problem', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/agents/issue-resolver.md');
+
+    expect($content)->not->toContain('trivially decides "specific"');
+    expect($content)->not->toContain('skips a redundant second analysis');
+    expect($content)->toContain('resolve-issue');
+    expect($content)->toContain('analyze-problem');
+});

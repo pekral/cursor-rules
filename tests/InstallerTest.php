@@ -871,7 +871,6 @@ test('install from package root installs rules and skills into .cursor', functio
 test('isFilesystemRoot returns true for root paths', function (): void {
     $reflection = new ReflectionClass(InstallerPath::class);
     $method = $reflection->getMethod('isFilesystemRoot');
-    $method->setAccessible(true);
 
     expect($method->invoke(null, ''))->toBeTrue();
     expect($method->invoke(null, DIRECTORY_SEPARATOR))->toBeTrue();
@@ -892,7 +891,6 @@ test('findProjectRoot traverses directories up', function (): void {
 
         $reflection = new ReflectionClass(InstallerPath::class);
         $method = $reflection->getMethod('findProjectRoot');
-        $method->setAccessible(true);
 
         $result = $method->invoke(null);
         $expectedRoot = realpath($root);

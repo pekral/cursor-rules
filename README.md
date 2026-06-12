@@ -227,7 +227,7 @@ Agents are entry-points to the **same** skills, so quality and output stay ident
 
 | Slash command (skill) | Equivalent subagent entry-point |
 |---|---|
-| `/resolve-issue <link>` | `@agent-issue-resolver resolve <link>` |
+| `/resolve-issue <link>` then `/process-code-review <link>` | `@agent-issue-resolver resolve <link>` (chains both — opens the PR and then converges the post-PR review loop) |
 | `/code-review-github <link>` | `@agent-php-code-reviewer review <link>` |
 | `/security-review` | `@agent-security-reviewer review the current diff` |
 | `/create-test` / `/create-missing-tests-in-pr` | `@agent-test-engineer add missing tests for <link>` |

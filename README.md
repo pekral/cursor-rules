@@ -227,7 +227,7 @@ Agents are entry-points to the **same** skills, so quality and output stay ident
 
 | Slash command (skill) | Equivalent subagent entry-point |
 |---|---|
-| `/resolve-issue <link>` then `/process-code-review <link>` | `@agent-issue-resolver resolve <link>` (chains both — opens the PR and then converges the post-PR review loop) |
+| `/analyze-problem <link>` → `/resolve-issue <link>` → `/code-review-github` *or* `/code-review-jira <link>` → `/process-code-review <link>` → (on explicit request) `/merge-github-pr <link>` | `@agent-issue-resolver resolve <link>` (chains every step — picks `code-review-github` for GitHub / Bugsnag sources and `code-review-jira` for JIRA, converges the post-PR loop, and only merges when you say so) |
 | `/code-review-github <link>` | `@agent-php-code-reviewer review <link>` |
 | `/security-review` | `@agent-security-reviewer review the current diff` |
 | `/create-test` / `/create-missing-tests-in-pr` | `@agent-test-engineer add missing tests for <link>` |

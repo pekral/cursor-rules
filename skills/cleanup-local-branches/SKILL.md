@@ -23,9 +23,10 @@ Two deletion categories:
 - This skill deletes **local** refs only — it never deletes, force-pushes, or modifies any branch on origin
 - Never delete the currently checked-out branch
 - Never delete protected branches: `main`, `master`, `develop`, `development`, `production`, `staging`, or any branch matching `release/*` or `hotfix/*`
-- Always print the full deletion preview (branch, category, last commit date, merge status, planned action) **before** deleting anything
+- Always print the full deletion preview (branch, category, last commit date, integration status, planned action) **before** deleting anything
 - Never rewrite history, force-push, or run `git gc` / `git reflog expire`
-- Do not delete an unmerged branch automatically — keep it and report it unless the user explicitly authorizes force deletion
+- Determine integration status by patch identity against the default branch (`git cherry`), so squash- and rebase-merged branches are recognized as integrated
+- Never delete a `stale` branch that is not integrated into the default branch automatically — keep it and report it unless the user explicitly authorizes force deletion (its commits never reached origin and are unrecoverable)
 
 ---
 
@@ -47,9 +48,15 @@ git fetch --prune origin
 
 If the repository has no `origin` remote, stop and report that the skill needs an `origin` remote to decide which branches are alive.
 
-### 2. Record protected refs
+### 2. Record protected refs and the default branch
 - Current branch: `git rev-parse --abbrev-ref HEAD`
 - Protected set: `main`, `master`, `develop`, `development`, `production`, `staging`, plus any branch matching `release/*` or `hotfix/*`
+- Default branch (the integration target used for merge detection in step 5):
+
+```bash
+git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@' \
+  || git remote show origin | sed -n 's/.*HEAD branch: //p'
+```
 
 Exclude the current branch and every protected branch from **both** candidate groups below.
 
@@ -82,25 +89,34 @@ A branch is a **stale** candidate when **all** of the following hold:
 A branch already captured in group A is not re-listed in group B.
 
 ### 5. Determine merge status
-For every candidate, classify whether it is safe to delete fast:
+Classify each candidate by whether its work is already integrated into the default branch. Use **content-based** detection, not ref ancestry — `git branch --merged` / `git branch -d` only recognize fast-forward / merge-commit history and would report a **squash-merged or rebase-merged** branch as unmerged even though its changes already landed (the common case for a `gone` branch whose PR was squashed or rebased).
+
+Detect integration by patch identity. Plain `git cherry` compares individual commits, which catches rebase / cherry-pick but **not** squash merges (a squash collapses many commits into one with a different patch id). To cover squash as well, synthesize a single commit holding the branch's net diff on top of the merge base and ask whether that patch already exists on the default branch:
 
 ```bash
-git branch --merged | tr -d ' *'   # branches fully merged into the current HEAD
+default="origin/<default-branch>"   # the freshly-fetched remote ref, never the possibly-stale local branch
+base=$(git merge-base "$default" "<branch>")
+probe=$(git commit-tree "$(git rev-parse '<branch>^{tree}')" -p "$base" -m probe)
+git cherry "$default" "$probe"   # one line: '- <sha>' ⇒ integrated, '+ <sha>' ⇒ not integrated
 ```
 
-- **Merged** — appears in the merged list → safe delete with `git branch -d <branch>`.
-- **Unmerged** — does not appear → would need `git branch -D <branch>` (force) and may discard unpushed commits.
+- **Integrated** — the probe line starts with `-`: the branch's net change is already present on the default branch (via fast-forward, merge, squash, or rebase) → safe to remove.
+- **Not integrated** — the probe line starts with `+`: the branch carries changes absent from the default branch → it may hold unpushed local-only work.
+
+`git branch -d` still refuses squash/rebase-integrated branches (it uses ref ancestry), so deletion of an integrated branch uses `git branch -D`. This is safe precisely because step 5 already proved the work is on the default branch.
 
 ### 6. Preview before deleting
-Print one row per candidate with: branch name, category (`gone` / `stale`), last commit date, merge status, and the planned action. Group rows by category. Do not delete anything before this preview is shown.
+Print one row per candidate with: branch name, category (`gone` / `stale`), last commit date, integration status (`integrated` / `not integrated`), and the planned action. Group rows by category. Do not delete anything before this preview is shown.
 
-- **Interactive run:** show the preview and ask the user to confirm before deleting; if the user authorizes force deletion of unmerged branches, include them, otherwise keep them.
-- **Autonomous run** (e.g. invoked by another skill or a scheduled task): delete **merged** candidates automatically and **keep** every unmerged candidate, listing the kept ones in the report with the `git branch -D` command the user can run manually.
+- **Interactive run:** show the preview and ask the user to confirm before deleting; for *not integrated* branches, include them only when the user authorizes discarding the unmerged commits.
+- **Autonomous run** (e.g. invoked by another skill or a scheduled task):
+  - **`gone` category** — delete every branch. A gone upstream means the PR lifecycle ended on origin; *integrated* branches delete cleanly, and *not integrated* ones are also removed because the branch is already gone from origin and the local ref is the lifecycle remnant. List each deletion with its integration status in the report.
+  - **`stale` category** — delete only *integrated* branches; **keep** every *not integrated* branch (it never existed on origin, so its commits are local-only and unrecoverable once deleted). List the kept ones in the report with the `git branch -D <branch>` command the user can run manually.
 
 ### 7. Delete
-- Merged candidates: `git branch -d <branch>`
-- Unmerged candidates: only `git branch -D <branch>` and only when force deletion was explicitly authorized in step 6
-- Delete one branch per command so a single failure does not abort the rest; capture and report any failure
+- Use `git branch -D <branch>` for every branch cleared for deletion in step 6 — `-D` is required because `git branch -d` rejects squash/rebase-integrated branches even after step 5 proved their work is on the default branch.
+- A *not integrated* branch is deleted **only** when step 6 cleared it (every `gone` branch; a `stale` branch only on explicit interactive authorization).
+- Delete one branch per command so a single failure does not abort the rest; capture and report any failure.
 
 ### 8. Verify and report
 Confirm the deletions with `git branch -vv` and produce the report described below.
@@ -109,10 +125,10 @@ Confirm the deletions with `git branch -vv` and produce the report described bel
 
 ## Output
 
-- **Preview** (before deletion): candidates grouped by category with branch, last commit date, merge status, and planned action.
+- **Preview** (before deletion): candidates grouped by category with branch, last commit date, integration status (`integrated` / `not integrated`), and planned action.
 - **Result** (after deletion):
-  - Deleted branches grouped by category (`gone`, `stale`)
-  - Kept branches with the reason (`protected`, `current`, `unmerged — needs force`, `still on origin`, `active within six months`)
+  - Deleted branches grouped by category (`gone`, `stale`), each with its integration status
+  - Kept branches with the reason (`protected`, `current`, `stale + not integrated — needs force`, `still on origin`, `active within six months`)
   - Any deletion that failed, with the error
 
 Keep the report concise and in English.
@@ -123,5 +139,6 @@ Keep the report concise and in English.
 - Remote state was refreshed with `git fetch --prune origin`
 - Both candidate groups were computed with the protected set and the current branch excluded
 - The deletion preview was shown before any branch was deleted
-- Eligible branches were deleted (merged automatically; unmerged only on explicit authorization)
+- Integration status was computed by patch identity (`git cherry`) against the default branch
+- Eligible branches were deleted (every `gone` branch; `stale` branches only when integrated, or not-integrated on explicit authorization)
 - The final report lists deleted and kept branches with reasons, plus any failures

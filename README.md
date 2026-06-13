@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **30 comprehensive Agent skills** for automated workflows (v0.8.3)
+- **31 comprehensive Agent skills** for automated workflows (v0.8.3)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -104,7 +104,7 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 
 # 🎯 Skills Overview — **v0.8.3**
 
-> Current release includes 30 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
+> Current release includes 31 skills for issue resolution, code review, refactoring, testing, security, SQL performance, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -122,6 +122,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `create-issues-from-text` | Batch-create issues from provided text with automatic structure detection. |
 | `pr-summary` | Summarize current PR changes for development and product teams as a short two-section comment (Summary of changes + How to test), rendered as GitHub Markdown for PR comments or JIRA Wiki Markup for JIRA issue comments. |
 | `skill-creator` | Scaffold a new Agent skill that follows project conventions and passes `skill-check` validation. |
+| `cleanup-local-branches` | Prune dead local Git branches — those whose upstream was deleted on origin (gone) and those with no origin counterpart inactive for more than six months — while protecting the current and default branches and previewing every deletion. |
 
 ## Code Review, Security & Architecture
 

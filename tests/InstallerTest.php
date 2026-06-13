@@ -3660,4 +3660,8 @@ test('cleanup-local-branches skill prunes gone and stale local branches safely (
     expect($content)->toContain('[gone]');
     expect($content)->toContain('six months');
     expect($content)->toContain('Never delete the currently checked-out branch');
+    // Merge detection must be content-based (git cherry) so squash/rebase-merged gone branches are recognized as integrated.
+    expect($content)->toContain('git cherry');
+    expect($content)->toContain('squash');
+    expect($content)->toContain('rebase');
 });

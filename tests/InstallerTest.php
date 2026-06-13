@@ -3370,6 +3370,72 @@ test('resolve-issue skill references Safe Validation & Error Messages rule (issu
     expect($content)->toContain('including every locale shipped by the project');
 });
 
+test('security/backend.md carries the Malicious Code & Supply-Chain Indicators section (issue #549)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/security/backend.md');
+
+    expect($content)->toContain('## Malicious Code & Supply-Chain Indicators (issue #549)');
+    expect($content)->toContain('**Silent remote fetch ("tichý curl").**');
+    expect($content)->toContain('**Disabled TLS validation ("ignorování TLS validace").**');
+    expect($content)->toContain('**Suppressed error output ("potlačení chybového výstupu").**');
+    expect($content)->toContain('**Hidden file + detached background process ("skrytý soubor v /tmp a spuštění procesu na pozadí").**');
+    expect($content)->toContain('CURLOPT_SSL_VERIFYPEER => false');
+});
+
+test('security/frontend.md carries the Malicious Code & Supply-Chain Indicators section (issue #549)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/security/frontend.md');
+
+    expect($content)->toContain('## Malicious Code & Supply-Chain Indicators (issue #549)');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('NODE_TLS_REJECT_UNAUTHORIZED=0');
+    expect($content)->toContain('**Silent remote fetch piped to execution.**');
+    expect($content)->toContain('**Swallowed errors hiding network calls.**');
+});
+
+test('security/mobile.md carries the Malicious Code & Supply-Chain Indicators section (issue #549)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/security/mobile.md');
+
+    expect($content)->toContain('## Malicious Code & Supply-Chain Indicators (issue #549)');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('**Disabled TLS / certificate validation.**');
+    expect($content)->toContain('**Silent download + background execution.**');
+    expect($content)->toContain('**Suppressed errors on security operations.**');
+});
+
+test('security-review skill audits malicious code & supply-chain indicators (issue #549)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/security-review/SKILL.md');
+
+    expect($content)->toContain('### Malicious Code & Supply-Chain Indicators (issue #549)');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('**Silent remote fetch**');
+    expect($content)->toContain('**Disabled TLS validation**');
+    expect($content)->toContain('**Suppressed error output**');
+    expect($content)->toContain('**Hidden file + detached background process**');
+});
+
+test('code-review skill flags malicious code & supply-chain indicators on every diff (issue #549)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('**Malicious code & supply-chain indicators (issue #549):**');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('**Silent remote fetch**');
+    expect($content)->toContain('**Disabled TLS validation**');
+    expect($content)->toContain('**Suppressed error output**');
+    expect($content)->toContain('**Hidden file + detached background process**');
+});
+
+test('resolve-issue skill references Malicious Code & Supply-Chain Indicators rule (issue #549)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    expect($content)->toContain('*Malicious Code & Supply-Chain Indicators* (issue #549)');
+    expect($content)->toContain('NODE_TLS_REJECT_UNAUTHORIZED=0');
+});
+
 test('analyze-problem skill carries the UI Redesign Lens with one-click default and wizard fallback', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');

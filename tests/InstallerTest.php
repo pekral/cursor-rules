@@ -3648,3 +3648,16 @@ test('code-review wires the API rule and api-review skill into every CR run (iss
     expect($content)->toContain('@skills/api-review/SKILL.md');
     expect($content)->toContain('`@rules/php/core-standards.mdc`, `@rules/api/general.mdc`, `@rules/code-review/general.mdc`');
 });
+
+test('cleanup-local-branches skill prunes gone and stale local branches safely (issue #550)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/cleanup-local-branches/SKILL.md');
+
+    expect($content)->toContain('name: cleanup-local-branches');
+    expect($content)->toContain('@rules/git/general.mdc');
+    expect($content)->toContain('git fetch --prune origin');
+    expect($content)->toContain('%(upstream:track)');
+    expect($content)->toContain('[gone]');
+    expect($content)->toContain('six months');
+    expect($content)->toContain('Never delete the currently checked-out branch');
+});

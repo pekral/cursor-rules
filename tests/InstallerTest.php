@@ -1221,6 +1221,20 @@ test('laravel rules add Stateless Runtime, Caching, and Long-Running Runtime Saf
     expect($content)->toContain('worker recycling');
 });
 
+test('laravel rules document Laravel 13 Bus::bulk, scheduler metadata, and Schema::hasForeignKey (issue #551)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('Use `Bus::bulk()` to dispatch many jobs onto the queue in a single call');
+    expect($content)->toContain('Reserve `Bus::batch()` for cases that genuinely need progress tracking');
+
+    expect($content)->toContain('## Scheduling');
+    expect($content)->toContain('Attach structured metadata to scheduled commands with `withAttributes()`');
+    expect($content)->toContain('monitoring, logging, and alerting');
+
+    expect($content)->toContain('Use `Schema::hasForeignKey()` to verify a foreign key exists before creating or dropping it');
+});
+
 test('architecture rules enumerate the seven allowed business logic layers including Eloquent models', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');

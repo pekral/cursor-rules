@@ -3614,3 +3614,37 @@ test('issue-resolver agent does not claim to bypass resolve-issue specificity ga
     expect($content)->toContain('resolve-issue');
     expect($content)->toContain('analyze-problem');
 });
+
+test('api rule codifies the API-as-contract design standard (issue #552)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/api/general.mdc');
+
+    expect($content)->toContain('## API as a Contract');
+    expect($content)->toContain('## Resource-Oriented REST');
+    expect($content)->toContain('`/getUser`');
+    expect($content)->toContain('## Correct HTTP Methods & Idempotence');
+    expect($content)->toContain('## Idempotency Keys for Critical Operations');
+    expect($content)->toContain('`Idempotency-Key`');
+    expect($content)->toContain('## Precise HTTP Status Codes');
+    expect($content)->toContain('## Validation at the Trust Boundary');
+    expect($content)->toContain('## CR Severity Rules');
+});
+
+test('api-review skill is the read-only contract lens for the API rule (issue #552)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/api-review/SKILL.md');
+
+    expect($content)->toContain('name: api-review');
+    expect($content)->toContain('@rules/api/general.mdc');
+    expect($content)->toContain('**Read-only skill**');
+    expect($content)->toContain('templates/review-output.md');
+});
+
+test('code-review wires the API rule and api-review skill into every CR run (issue #552)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('- Apply @rules/api/general.mdc');
+    expect($content)->toContain('@skills/api-review/SKILL.md');
+    expect($content)->toContain('`@rules/php/core-standards.mdc`, `@rules/api/general.mdc`, `@rules/code-review/general.mdc`');
+});

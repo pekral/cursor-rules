@@ -25,7 +25,7 @@ A flaky test fails inconsistently, is hard to reproduce, and is often "fixed" by
 - **Make factory data deterministic.** Do not let random factory values decide the outcome. Explicitly set every attribute the assertion depends on (for example the user's role) instead of trusting factory defaults or random states.
 - **Test queues and async jobs deterministically.** Never wait for an asynchronous job to finish before asserting. Either assert the dispatch with `Bus::fake()` / `Queue::fake()`, or force `QUEUE_CONNECTION=sync` in the test environment so jobs run inline.
 - **Keep shared resources parallel-safe.** Parallel runs do not create flakiness — they expose existing shared state: Redis keys, files, temp directories, config cache, static properties, and singletons. Isolate per test with `Storage::fake()`, unique keys / file names, and by avoiding mutable static or singleton state.
-- **Never call external services directly.** Real HTTP requests fail on network issues, rate limits, latency, or sandbox outages. Fake every outbound call with `Http::fake()` (and the relevant SDK fakes); tests must not hit the network or perform DNS lookups.
+- **Never call external services directly.** Real HTTP requests fail on network issues, rate limits, latency, or sandbox outages — fake every outbound call with `Http::fake()` (and the relevant SDK fakes). See the *External Calls* section below for the full no-network / no-DNS contract.
 - **Guarantee order independence.** A test must pass on its own, repeatedly, and in any order. If a test passes only because another test ran before it, fix the hidden dependency — do not rely on suite ordering.
 
 ## Data Handling

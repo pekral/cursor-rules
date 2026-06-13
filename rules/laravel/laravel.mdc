@@ -85,6 +85,7 @@ globs:
 - Prefer database-level defaults as the source of truth.
 - When adding columns, update `$fillable` only if the project still relies on `$fillable`.
 - Never chain multiple migration-generating commands in one shell line because of timestamp collisions.
+- Use `Schema::hasForeignKey()` to verify a foreign key exists before creating or dropping it, so migrations stay readable and safe to re-run. Prefer it over manual `information_schema` lookups or wrapping constraint changes in a `try`/`catch`.
 
 ## Blade and Views
 - Analyze the existing UI before creating or changing views.
@@ -113,6 +114,13 @@ globs:
 - Fetch fresh models inside `handle()` through Repository / ModelManager boundaries as appropriate.
 - If dispatch-time state is required, serialize only the explicit fields needed by the job, never the whole model or loaded relationships.
 - Queue constructors must only accept lightweight scalar values, DTOs, enums, or value objects. Avoid hydrated models, collections, large arrays, files, and service instances.
+- Use `Bus::bulk()` to dispatch many jobs onto the queue in a single call when you do **not** need batch tracking — bulk notifications, imports, email campaigns, and mass background tasks. It enqueues the jobs without the overhead of a tracked batch.
+- Reserve `Bus::batch()` for cases that genuinely need progress tracking, completion/failure callbacks, or cancellation. When none of those are required, prefer `Bus::bulk()` as the lighter option, and never loop over `dispatch()` per job when a single bulk call covers the same work.
+
+## Scheduling
+- Attach structured metadata to scheduled commands with `withAttributes()` (e.g. a tag or a priority) so monitoring, logging, and alerting can group, filter, and prioritize scheduled runs.
+- Keep scheduling metadata declarative at the schedule definition site; do not encode the same tags or priorities ad hoc inside the command's own logic.
+- Multi-server scheduled tasks must still guard against duplicate runs — see the `onOneServer()` requirement in the **Stateless Runtime** section.
 
 ## Middleware
 - Use middleware only for cross-cutting concerns.

@@ -56,6 +56,15 @@ Avoid generic best-practice noise.
 - missing rate limiting or abuse protection
 - third-party API contract — when the diff integrates with a third-party API or service, verify the security-critical aspects of the implementation against the public API documentation: authentication and scope handling, signature/webhook verification, idempotency and retry semantics, error envelopes, and rate-limit handling. Functional alignment with the issue assignment is owned by `@skills/code-review/SKILL.md` — do not duplicate it here.
 
+### Malicious Code & Supply-Chain Indicators (issue #549)
+Walk every line the diff adds or modifies in application code, shell / deploy / CI scripts, `composer.json` / `package.json` script hooks, and installer hooks against `@rules/security/backend.md` *Malicious Code & Supply-Chain Indicators* (and the frontend / mobile mirrors for client surfaces). Raise a finding on each indicator:
+- **Silent remote fetch** — `curl -s` / `wget -q` fetching a payload, especially piped to an interpreter (`| sh`, `| bash`, `| php`).
+- **Disabled TLS validation** — `curl -k` / `--insecure`, `CURLOPT_SSL_VERIFYPEER => false`, Guzzle `'verify' => false`, `NODE_TLS_REJECT_UNAUTHORIZED=0`, trust-all certificate managers.
+- **Suppressed error output** — `2>/dev/null` / `&>/dev/null` on a security-relevant command, `@`-suppressed calls, `error_reporting(0)`, empty `catch {}`.
+- **Hidden file + detached background process** — writes to `/tmp` / hidden dot-files combined with `&` / `nohup` / `setsid` / `disown` / detached `proc_open`.
+
+Severity: **Critical** when the indicator maps to active RCE / MITM / persistence (silent fetch piped to a shell, TLS off on a credential request, both halves of the dropper pattern); **High** otherwise. Provide the four reproducer fields per the Critical / High requirement.
+
 ### File Handling
 - unsafe uploads (extension, MIME, signature)
 - path traversal

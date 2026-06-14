@@ -3689,3 +3689,33 @@ test('bundled Claude Code subagents feature is fully removed from package and in
     expect($readme)->not->toContain('## Claude Code Subagents');
     expect($readme)->not->toContain('@agent-');
 });
+
+test('code-generation skills enforce a Read, Map & Verify pre-flight before implementing', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    $skills = [
+        'resolve-issue',
+        'test-driven-development',
+        'create-test',
+        'create-missing-tests-in-pr',
+        'class-refactoring',
+        'refactor-entry-point-to-action',
+        'rewrite-tests-pest',
+    ];
+
+    foreach ($skills as $skill) {
+        $content = (string) file_get_contents($packageDir . '/skills/' . $skill . '/SKILL.md');
+
+        // The shared blocking pre-flight heading: "Read, Map & Verify before <something>".
+        expect($content)->toContain('Read, Map & Verify before');
+
+        // All three ordered steps must be present and bolded.
+        expect($content)->toContain('**Read**');
+        expect($content)->toContain('**Map**');
+        expect($content)->toContain('**Verify**');
+
+        // The pre-flight must be blocking and defer implementation until it passes.
+        expect($content)->toContain('**blocking**');
+        expect($content)->toContain('Only after Read, Map, and Verify are complete');
+    }
+});

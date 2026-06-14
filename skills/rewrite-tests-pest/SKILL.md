@@ -24,6 +24,16 @@ metadata:
 - Avoid reflection; prefer mocks or partial mocks when readable and effective
 - Avoid branching in tests; prefer separate test cases or datasets instead
 
+## Read, Map & Verify before rewriting (mandatory pre-flight)
+
+Reading, mapping, and verifying come first; rewriting comes last. This pre-flight is **blocking** — do not rewrite a single line until all three steps pass, and never act on an assumption you have not confirmed by reading the code.
+
+1. **Read** — open and read the actual tests being rewritten and the code they exercise (the system under test, shared setup, helpers, datasets). Confirm what each test asserts by reading it, not by guessing from its name.
+2. **Map** — map the change's blast radius: every assertion and covered code path that must survive the rewrite, the shared setup/helpers to reuse, and the project's existing Pest conventions.
+3. **Verify** — run the existing tests first and confirm they pass, so you rewrite from a known-green baseline. If the original behavior or coverage is unclear, stop and clarify instead of rewriting on a wrong premise.
+
+Only after Read, Map, and Verify are complete may the rewrite begin.
+
 ## Execution
 1. Identify existing tests that should be rewritten to Pest syntax.
 2. Analyze repeated setup and assertions before rewriting.

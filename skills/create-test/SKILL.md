@@ -20,6 +20,18 @@ Create or update tests to cover current changes according to project conventions
 
 ---
 
+## Read, Map & Verify before writing tests (mandatory pre-flight)
+
+Reading, mapping, and verifying come first; writing tests comes last. This pre-flight is **blocking** — do not add or modify a single line until all three steps pass, and never act on an assumption you have not confirmed by reading the code.
+
+1. **Read** — open and read the actual code under test and the code it depends on (callers, called methods, related existing tests, configuration). Confirm what the code does by reading it, not by guessing from names or the change description.
+2. **Map** — map the change's blast radius: every changed code path, its call sites, the data-flow branches a test must exercise, and the existing test conventions, helpers, and fixtures to reuse instead of reinventing.
+3. **Verify** — check your assumptions against the real code and its observed behavior (run the code path or an exploratory assertion where applicable). If what you read contradicts the change description, stop and surface the discrepancy instead of writing tests on a wrong premise.
+
+Only after Read, Map, and Verify are complete may test-writing begin.
+
+---
+
 ## Execution
 
 ### 1. Analyze Context

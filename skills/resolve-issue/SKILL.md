@@ -75,6 +75,16 @@ Run `@skills/prepare-issue-context/SKILL.md` with `MODE=resolve-issue` and the s
    - **Pre-existing issues** — bugs, project-rule violations, or security vulnerabilities already present in the affected files before this task (see *Pre-existing issue handling* below). These will be fixed in **separate commits** inside the same PR.
    - **Out of scope (deferred)** — valid findings that fall outside the current issue **and** do not qualify as pre-existing issues to fix now (e.g. enhancements, refactors, future features). These will be added to the PR summary as a `## TODO` list for future tasks.
 
+### Read, Map & Verify before implementing (mandatory pre-flight)
+
+Reading, mapping, and verifying come first; implementing comes last. This pre-flight is **blocking** — do not add or modify a single line of production code until all three steps pass, and never act on an assumption you have not confirmed by reading the code. (The context preparation above maps scenarios to code paths; this gate grounds the actual implementation in the real files you are about to change.)
+
+1. **Read** — open and read the actual files you will change and the code they depend on (callers, called methods, related tests, configuration, migrations). Confirm what the code does by reading it, not by guessing from names or the issue description.
+2. **Map** — map the change's blast radius: every call site, caller, data-flow path, and existing test that the in-scope change touches, plus the conventions, helpers, Services, and Actions already in the codebase to reuse instead of reinventing.
+3. **Verify** — check your assumptions against the real code and its observed behavior (for bugs, reproduce the failure; for features, confirm the integration points exist as assumed). If reading and mapping contradict the issue framing or the scenario table, stop and surface the discrepancy instead of implementing on a wrong premise.
+
+Only after Read, Map, and Verify are complete may phase planning and implementation begin.
+
 ### Phase planning (commit plan)
 
 Before writing any code, decide how the in-scope work will be split into commits within the PR.

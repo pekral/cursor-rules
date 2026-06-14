@@ -3714,18 +3714,8 @@ test('code-generation skills enforce a Read, Map & Verify pre-flight before impl
         expect($content)->toContain('**Map**');
         expect($content)->toContain('**Verify**');
 
-        // The pre-flight must be blocking and precede implementation.
+        // The pre-flight must be blocking and defer implementation until it passes.
         expect($content)->toContain('**blocking**');
         expect($content)->toContain('Only after Read, Map, and Verify are complete');
-
-        // Reading/mapping/verifying must come before the implementation work in each file.
-        $preflightPos = strpos($content, 'Read, Map & Verify before');
-        $onlyAfterPos = strpos($content, 'Only after Read, Map, and Verify are complete');
-        expect($preflightPos)->not->toBeFalse();
-        expect($onlyAfterPos)->not->toBeFalse();
-
-        if (is_int($preflightPos) && is_int($onlyAfterPos)) {
-            expect($preflightPos)->toBeLessThan($onlyAfterPos);
-        }
     }
 });

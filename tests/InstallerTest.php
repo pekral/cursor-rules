@@ -3579,3 +3579,113 @@ test('refresh-claude-md skill regenerates CLAUDE.md only when stale or missing',
     // Build validation must use the detected command, not a hard-coded PHP toolchain.
     expect($content)->toContain('detected build / quality command');
 });
+
+test('every ECC-ported skill ships with valid frontmatter conventions', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    $slugs = [
+        'design-system', 'docker-patterns', 'e2e-testing', 'frontend-a11y',
+        'frontend-design-direction', 'frontend-patterns', 'frontend-slides',
+        'git-workflow', 'laravel-security', 'latency-critical-systems',
+        'mysql-patterns', 'redis-patterns', 'security-bounty-hunter', 'seo',
+        'vite-patterns',
+    ];
+
+    foreach ($slugs as $slug) {
+        $content = (string) file_get_contents($packageDir . '/skills/' . $slug . '/SKILL.md');
+
+        expect($content)->toContain('name: ' . $slug);
+        expect($content)->toContain('license: MIT');
+        expect($content)->toContain('author: "Petr Král (pekral.cz)"');
+        expect($content)->toContain('description: "Use when');
+    }
+});
+
+test('mysql-patterns and git-workflow defer to existing rules and skills instead of duplicating them', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    $mysql = (string) file_get_contents($packageDir . '/skills/mysql-patterns/SKILL.md');
+    // Complementary-only: query tuning stays in the SQL rule, slow-query diagnosis in mysql-problem-solver.
+    expect($mysql)->toContain('@rules/sql/optimalize.mdc');
+    expect($mysql)->toContain('@skills/mysql-problem-solver/SKILL.md');
+
+    $git = (string) file_get_contents($packageDir . '/skills/git-workflow/SKILL.md');
+    // Conventions live in the git rule; branch cleanup and PR merging stay in their own skills.
+    expect($git)->toContain('@rules/git/general.mdc');
+    expect($git)->toContain('@skills/cleanup-local-branches/SKILL.md');
+    expect($git)->toContain('@skills/merge-github-pr/SKILL.md');
+    expect($git)->toContain('Defer to');
+});
+
+test('e2e-testing skill is gated on Playwright already being present', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/e2e-testing/SKILL.md');
+
+    expect($content)->toContain('Preconditions');
+    expect($content)->toContain('playwright.config');
+    expect($content)->toContain('@playwright/test');
+    // When Playwright is absent the skill must not install it; it defers to manual / Pest-Dusk testing.
+    expect($content)->toContain('Do not install Playwright');
+    expect($content)->toContain('@skills/test-like-human/SKILL.md');
+});
+
+test('security-bounty-hunter keeps tooling optional and stays distinct from the review skills', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/security-bounty-hunter/SKILL.md');
+
+    expect($content)->toContain('hunts unknown exploitable bugs');
+    expect($content)->toContain('@skills/security-review/SKILL.md');
+    expect($content)->toContain('@skills/security-threat-analysis/SKILL.md');
+    // Static tooling is triage input only, never a hard dependency the package would have to bundle.
+    expect($content)->toContain('optional');
+});
+
+test('frontend and vite skills target the Blade/Livewire/Alpine/Vite stack, not React', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    $vite = (string) file_get_contents($packageDir . '/skills/vite-patterns/SKILL.md');
+    expect($vite)->toContain('laravel-vite-plugin');
+    expect($vite)->toContain('@vite');
+
+    $patterns = (string) file_get_contents($packageDir . '/skills/frontend-patterns/SKILL.md');
+    expect($patterns)->toContain('@rules/laravel/livewire.mdc');
+
+    $a11y = (string) file_get_contents($packageDir . '/skills/frontend-a11y/SKILL.md');
+    expect($a11y)->toContain('wire:loading');
+    expect($a11y)->toContain('aria-live');
+});
+
+test('laravel-security skill carries the secure-defaults reference and checklist', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/laravel-security/SKILL.md');
+
+    expect($content)->toContain('Quick Security Checklist');
+    expect($content)->toContain('Mass assignment');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('@skills/security-review/SKILL.md');
+});
+
+test('duplicate and unsupported ECC skills were intentionally not ported', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    // tdd-workflow duplicates test-driven-development; security-scan depends on an external tool the package does not bundle.
+    expect(is_dir($packageDir . '/skills/tdd-workflow'))->toBeFalse();
+    expect(is_dir($packageDir . '/skills/security-scan'))->toBeFalse();
+    // The retained equivalent still ships.
+    expect(is_dir($packageDir . '/skills/test-driven-development'))->toBeTrue();
+});
+
+test('bundled Claude Code subagents feature is fully removed from package and installer', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    expect(is_dir($packageDir . '/agents'))->toBeFalse();
+
+    $installerPath = (string) file_get_contents($packageDir . '/src/InstallerPath.php');
+    expect($installerPath)->not->toContain('resolveAgentsSource');
+    expect($installerPath)->not->toContain('resolveAgentsTargetDirectories');
+    expect($installerPath)->not->toContain('isAgentsEditor');
+
+    $readme = (string) file_get_contents($packageDir . '/README.md');
+    expect($readme)->not->toContain('## Claude Code Subagents');
+    expect($readme)->not->toContain('@agent-');
+});

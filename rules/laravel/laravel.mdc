@@ -93,9 +93,20 @@ globs:
 - Blade views are for presentation only.
 - Never execute queries in Blade templates.
 
+## Localization and Translatable Strings
+- **Every string a user can see must go through Laravel's translation layer** (`__()`, `trans()`, `@lang`, `trans_choice()`), never a hard-coded literal. This covers all three surfaces:
+    - **UI** — Blade / Livewire / Filament / Vue / React labels, button text, placeholders, flash and toast messages, validation messages, Notification subject and body, Mailable and Markdown mail views, enum `getLabel()`, and Filament resource / form / table labels.
+    - **Console** — human-readable output of Artisan commands: `$this->info()`, `$this->error()`, `$this->warn()`, `$this->line()`, `$this->comment()`, prompts (`ask()`, `confirm()`, `choice()`), and table headers. Purely technical / debug-only commands meant solely for developers or CI may keep literal strings when that is the project convention.
+    - **API** — any human-readable text returned to a client: JSON `message` fields, `abort()` / `abort_if()` descriptions, exception messages surfaced to users, and human-readable strings in API Resources. Machine-readable error codes, enum keys, and technical identifiers stay as literals.
+- Store keys in `lang/{locale}/*.php` or `lang/{locale}.json`, and add every new key to **all** shipped locales, not only the default one.
+- Use translation placeholders (`:name`) instead of string concatenation so word order stays translatable; never build a sentence by concatenating translated fragments.
+- Use `trans_choice()` for pluralization instead of manual singular/plural `if` branching.
+- Exempt from this rule: internal log messages not shown to end users, developer-only exception messages, technical identifiers / machine codes, and debug output.
+
 ## Testing
 - Prefer `Http::fake()` over mocking HTTP integrations manually.
-- Never allow real external HTTP calls in tests.
+- **Never allow real external HTTP calls in tests.** Every test that exercises an outbound HTTP integration must register `Http::fake()` (or an equivalent fake / mock client). A test that can reach a real network endpoint is a defect, even when the endpoint happens to be available.
+- **Never let tests run real system processes outside the application.** Tests must not shell out to or spawn real OS processes via `Process::run()` / `Process::start()` (Laravel), `Symfony\Component\Process`, `exec()`, `shell_exec()`, `system()`, `passthru()`, `proc_open()`, or backticks. **Tests must never invoke an external binary or script directly on the system** (`git`, `node`, `npm`, `composer`, `ffmpeg`, `docker`, a `.sh` / `.py` script, or any other host executable) — the process layer must be mocked. Fake them with `Process::fake()` (Laravel 10+) or inject a test double, so the test asserts the intended command without executing it on the host. The only exception is a process the test itself owns end-to-end (e.g. the project's own Artisan command run through `Artisan::call()`), never an external binary or system command.
 - Use factories for Eloquent persistence in tests.
 - Prefer storing real data in the database and using it in tests over mocking ModelManager or Repository classes. Only mock external services that cannot run in test environment.
 - Add or update tests for every meaningful behavior change.

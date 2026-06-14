@@ -197,6 +197,7 @@ Rules included in this package:
 | File                          | Description                                                | Scope    |
 |-------------------------------|------------------------------------------------------------|----------|
 | `php/core-standards.mdc`      | Project context, AI behavior, and unified PHP/Laravel coding standards | Always   |
+| `compound-engineering/general.mdc` | Compound engineering — make future work easier and build durable per-project compound memory | Always   |
 | `git/general.mdc`             | Unified git workflow, commits, and pull request rules       | Always   |
 | `code-review/general.mdc`     | Code review conventions and output rules                   | Always   |
 | `code-testing/general.mdc`    | Testing conventions and quality standards                  | Always   |

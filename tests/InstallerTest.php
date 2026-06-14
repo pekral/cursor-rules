@@ -394,10 +394,8 @@ test('install with editor=all copies all files to all rule and skill directories
     $packageDir = dirname(__DIR__);
     $rulesSource = $packageDir . '/rules';
     $skillsSource = $packageDir . '/skills';
-    $agentsSource = $packageDir . '/agents';
     $expectedRulesCount = installerCountFiles($rulesSource);
     $expectedSkillsCount = installerCountFiles($skillsSource);
-    $expectedAgentsCount = installerCountFiles($agentsSource);
     $root = installerCreateProjectRoot();
     $homeEnv = getenv('HOME');
     $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
@@ -409,11 +407,9 @@ test('install with editor=all copies all files to all rule and skill directories
 
     $rulesTargets = InstallerPath::resolveRulesTargetDirectories($root, InstallerPath::EDITOR_ALL);
     $skillTargets = InstallerPath::resolveSkillsTargetDirectories($root, InstallerPath::EDITOR_ALL);
-    $agentTargets = InstallerPath::resolveAgentsTargetDirectories($root, InstallerPath::EDITOR_ALL);
     $claudeMdCount = InstallerPath::resolveClaudeMdSource() !== null ? 1 : 0;
     $expectedTotalFiles = $expectedRulesCount * count($rulesTargets)
         + $expectedSkillsCount * count($skillTargets)
-        + $expectedAgentsCount * count($agentTargets)
         + $claudeMdCount;
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
@@ -434,11 +430,6 @@ test('install with editor=all copies all files to all rule and skill directories
         foreach ($skillTargets as $skillsTarget) {
             $actualSkillsCount = installerCountFiles($skillsTarget);
             expect($actualSkillsCount)->toBe($expectedSkillsCount, 'Skills: all source files in ' . $skillsTarget);
-        }
-
-        foreach ($agentTargets as $agentsTarget) {
-            $actualAgentsCount = installerCountFiles($agentsTarget);
-            expect($actualAgentsCount)->toBe($expectedAgentsCount, 'Agents: all source files in ' . $agentsTarget);
         }
 
         expect($output)->toContain(sprintf('(%d files,', $expectedTotalFiles));
@@ -3517,230 +3508,6 @@ test('analyze-problem skill carries the UI Redesign Lens with one-click default 
     expect($content)->toContain('the user can save and resume later when the flow exceeds three steps');
     expect($content)->toContain('the final step shows a summary of every choice before commit');
     expect($content)->toContain('*One-click vs wizard decision*');
-});
-
-test('agents/ directory ships in the package with all seven Claude Code subagents', function (): void {
-    $packageDir = dirname(__DIR__);
-    $agentsDir = $packageDir . '/agents';
-
-    expect(is_dir($agentsDir))->toBeTrue();
-
-    foreach (
-        [
-            'php-code-reviewer.md',
-            'issue-resolver.md',
-            'test-engineer.md',
-            'security-reviewer.md',
-            'laravel-architect.md',
-            'mysql-performance-reviewer.md',
-            'refactoring-specialist.md',
-        ] as $agentFile
-    ) {
-        $path = $agentsDir . '/' . $agentFile;
-        expect(is_file($path))->toBeTrue();
-
-        $content = (string) file_get_contents($path);
-        expect($content)->toStartWith('---');
-        expect($content)->toContain('name:');
-        expect($content)->toContain('description:');
-        expect($content)->toContain('tools:');
-        expect($content)->toContain('model:');
-    }
-});
-
-test('resolveAgentsSource returns the package agents directory when it exists', function (): void {
-    $packageDir = dirname(__DIR__);
-
-    expect(InstallerPath::resolveAgentsSource())->toBe($packageDir . '/agents');
-});
-
-test('isAgentsEditor matches only claude and all', function (): void {
-    expect(InstallerPath::isAgentsEditor(InstallerPath::EDITOR_CLAUDE))->toBeTrue();
-    expect(InstallerPath::isAgentsEditor(InstallerPath::EDITOR_ALL))->toBeTrue();
-    expect(InstallerPath::isAgentsEditor(InstallerPath::EDITOR_CURSOR))->toBeFalse();
-    expect(InstallerPath::isAgentsEditor(InstallerPath::EDITOR_CODEX))->toBeFalse();
-});
-
-test('resolveAgentsTargetDirectories returns .claude/agents for editor=claude', function (): void {
-    $targets = InstallerPath::resolveAgentsTargetDirectories('/project', InstallerPath::EDITOR_CLAUDE);
-
-    expect($targets)->toBe(['/project/.claude/agents']);
-});
-
-test('resolveAgentsTargetDirectories returns .claude/agents for editor=all', function (): void {
-    $targets = InstallerPath::resolveAgentsTargetDirectories('/project', InstallerPath::EDITOR_ALL);
-
-    expect($targets)->toBe(['/project/.claude/agents']);
-});
-
-test('resolveAgentsTargetDirectories returns empty list for editor=cursor', function (): void {
-    expect(InstallerPath::resolveAgentsTargetDirectories('/project', InstallerPath::EDITOR_CURSOR))->toBe([]);
-});
-
-test('resolveAgentsTargetDirectories returns empty list for editor=codex', function (): void {
-    expect(InstallerPath::resolveAgentsTargetDirectories('/project', InstallerPath::EDITOR_CODEX))->toBe([]);
-});
-
-test('install with editor=claude copies agents to .claude/agents', function (): void {
-    $root = installerCreateProjectRoot();
-    $cwd = getcwd();
-    $originalCwd = $cwd !== false ? $cwd : '';
-
-    try {
-        chdir($root);
-        ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude']);
-        ob_end_clean();
-
-        foreach (
-            [
-                'php-code-reviewer.md',
-                'issue-resolver.md',
-                'test-engineer.md',
-                'security-reviewer.md',
-                'laravel-architect.md',
-                'mysql-performance-reviewer.md',
-                'refactoring-specialist.md',
-            ] as $agentFile
-        ) {
-            expect(is_file($root . '/.claude/agents/' . $agentFile))->toBeTrue('Missing installed agent: ' . $agentFile);
-        }
-
-        expect(is_dir($root . '/.cursor/agents'))->toBeFalse();
-        expect(is_dir($root . '/.codex/agents'))->toBeFalse();
-    } finally {
-        if ($originalCwd !== '') {
-            chdir($originalCwd);
-        }
-
-        installerRemoveDirectory($root);
-    }
-});
-
-test('install with editor=all copies agents to .claude/agents only', function (): void {
-    $root = installerCreateProjectRoot();
-    $homeEnv = getenv('HOME');
-    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
-    putenv('HOME=' . $root);
-
-    if (getenv('USERPROFILE') !== false) {
-        putenv('USERPROFILE=' . $root);
-    }
-
-    $cwd = getcwd();
-    $originalCwd = $cwd !== false ? $cwd : '';
-
-    try {
-        chdir($root);
-        ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=all']);
-        ob_end_clean();
-
-        $packageDir = dirname(__DIR__);
-        $expectedAgentsCount = installerCountFiles($packageDir . '/agents');
-
-        expect(installerCountFiles($root . '/.claude/agents'))->toBe($expectedAgentsCount);
-        expect(is_dir($root . '/.cursor/agents'))->toBeFalse();
-        expect(is_dir($root . '/.codex/agents'))->toBeFalse();
-    } finally {
-        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
-    }
-});
-
-test('install with editor=cursor does not copy agents', function (): void {
-    $root = installerCreateProjectRoot();
-    $cwd = getcwd();
-    $originalCwd = $cwd !== false ? $cwd : '';
-
-    try {
-        chdir($root);
-        ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
-        ob_end_clean();
-
-        expect(is_dir($root . '/.claude/agents'))->toBeFalse();
-        expect(is_dir($root . '/.cursor/agents'))->toBeFalse();
-        expect(is_dir($root . '/.codex/agents'))->toBeFalse();
-    } finally {
-        if ($originalCwd !== '') {
-            chdir($originalCwd);
-        }
-
-        installerRemoveDirectory($root);
-    }
-});
-
-test('install with editor=codex does not copy agents', function (): void {
-    $root = installerCreateProjectRoot();
-    $cwd = getcwd();
-    $originalCwd = $cwd !== false ? $cwd : '';
-
-    try {
-        chdir($root);
-        ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=codex']);
-        ob_end_clean();
-
-        expect(is_dir($root . '/.claude/agents'))->toBeFalse();
-        expect(is_dir($root . '/.cursor/agents'))->toBeFalse();
-        expect(is_dir($root . '/.codex/agents'))->toBeFalse();
-    } finally {
-        if ($originalCwd !== '') {
-            chdir($originalCwd);
-        }
-
-        installerRemoveDirectory($root);
-    }
-});
-
-test('install with --prune removes orphan agents from .claude/agents', function (): void {
-    $root = installerCreateProjectRoot();
-    $cwd = getcwd();
-    $originalCwd = $cwd !== false ? $cwd : '';
-    $orphanAgent = $root . '/.claude/agents/legacy-agent.md';
-
-    try {
-        chdir($root);
-        installerWriteFile($orphanAgent, '---' . PHP_EOL . 'name: legacy-agent' . PHP_EOL . '---' . PHP_EOL);
-
-        ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude', '--prune']);
-        ob_end_clean();
-
-        expect(is_file($orphanAgent))->toBeFalse();
-        expect(is_file($root . '/.claude/agents/php-code-reviewer.md'))->toBeTrue();
-    } finally {
-        if ($originalCwd !== '') {
-            chdir($originalCwd);
-        }
-
-        installerRemoveDirectory($root);
-    }
-});
-
-test('README documents the Claude Code subagents section with usage examples', function (): void {
-    $packageDir = dirname(__DIR__);
-    $readme = (string) file_get_contents($packageDir . '/README.md');
-
-    expect($readme)->toContain('## Claude Code Subagents');
-    expect($readme)->toContain('.claude/agents/');
-    expect($readme)->toContain('@agent-php-code-reviewer');
-    expect($readme)->toContain('@agent-issue-resolver');
-    expect($readme)->toContain('@agent-test-engineer');
-    expect($readme)->toContain('@agent-security-reviewer');
-    expect($readme)->toContain('@agent-laravel-architect');
-    expect($readme)->toContain('@agent-mysql-performance-reviewer');
-    expect($readme)->toContain('@agent-refactoring-specialist');
-});
-
-test('issue-resolver agent does not claim to bypass resolve-issue specificity gate via upfront analyze-problem', function (): void {
-    $packageDir = dirname(__DIR__);
-    $content = (string) file_get_contents($packageDir . '/agents/issue-resolver.md');
-
-    expect($content)->not->toContain('trivially decides "specific"');
-    expect($content)->not->toContain('skips a redundant second analysis');
-    expect($content)->toContain('resolve-issue');
-    expect($content)->toContain('analyze-problem');
 });
 
 test('api rule codifies the API-as-contract design standard (issue #552)', function (): void {

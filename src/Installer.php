@@ -100,22 +100,25 @@ final class Installer
     }
 
     /**
-     * @return array<int, array{0: ?string, 1: array<int, string>}>
+     * @return array<int, array{0: string, 1: array<int, string>}>
      */
     private static function collectSyncPayloads(string $root, string $editor): array
     {
-        return [
+        $payloads = [
             [InstallerPath::resolveRulesSource($root), InstallerPath::resolveRulesTargetDirectories($root, $editor)],
-            [InstallerPath::resolveSkillsSource(), InstallerPath::resolveSkillsTargetDirectories($root, $editor)],
-            [
-                InstallerPath::isAgentsEditor($editor) ? InstallerPath::resolveAgentsSource() : null,
-                InstallerPath::resolveAgentsTargetDirectories($root, $editor),
-            ],
         ];
+
+        $skillsSource = InstallerPath::resolveSkillsSource();
+
+        if ($skillsSource !== null) {
+            $payloads[] = [$skillsSource, InstallerPath::resolveSkillsTargetDirectories($root, $editor)];
+        }
+
+        return $payloads;
     }
 
     /**
-     * @param array<int, array{0: ?string, 1: array<int, string>}> $payloads
+     * @param array<int, array{0: string, 1: array<int, string>}> $payloads
      * @return array{int, int}
      */
     private static function runAllSyncs(array $payloads, bool $force, bool $symlink, bool $prune): array
@@ -124,10 +127,6 @@ final class Installer
         $totalPruned = 0;
 
         foreach ($payloads as [$source, $targets]) {
-            if ($source === null || $targets === []) {
-                continue;
-            }
-
             [$copied, $prunedCount] = self::syncDirectories($source, $targets, $force, $symlink, $prune);
             $totalCopied += $copied;
             $totalPruned += $prunedCount;

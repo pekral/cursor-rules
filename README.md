@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **33 comprehensive Agent skills** for automated workflows (v0.8.3)
+- **48 comprehensive Agent skills** for automated workflows (v0.8.3)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -104,7 +104,7 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 
 # 🎯 Skills Overview — **v0.8.3**
 
-> Current release includes 33 skills for issue resolution, code review, refactoring, testing, security, SQL performance, content writing, and delivery workflows.
+> Current release includes 48 skills for issue resolution, code review, refactoring, testing, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -124,6 +124,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `skill-creator` | Scaffold a new Agent skill that follows project conventions and passes `skill-check` validation. |
 | `refresh-claude-md` | Regenerate or create the project `CLAUDE.md` from the current codebase — re-detect tech stack, verified build/test commands, directory structure, and conventions while preserving every human-authored section. Adapted from the ECC `codebase-onboarding` skill; runs only when `CLAUDE.md` is stale or missing. |
 | `cleanup-local-branches` | Prune dead local Git branches — those whose upstream was deleted on origin (gone) and those with no origin counterpart inactive for more than six months — while protecting the current and default branches and previewing every deletion. |
+| `git-workflow` | Choose a Git branching strategy and handle merge vs rebase, conflicts, stashing, undoing mistakes, and release tagging — complements the commit/PR conventions in `@rules/git/general.mdc`, `cleanup-local-branches`, and `merge-github-pr`. |
 
 ## Code Review, Security & Architecture
 
@@ -138,6 +139,8 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `security-review` | OWASP-focused security review (injection, auth, SSRF, exposure, misconfigurations) — read-only. |
 | `api-review` | API design contract review (`@rules/api/general.mdc`) — resource-oriented REST, HTTP method/idempotence, idempotency keys, precise status codes, validation at the trust boundary. Self-scopes to API-surface diffs and runs on every CR — read-only. |
 | `security-threat-analysis` | Analyze a specific security threat from a referenced source (CVE, GHSA, advisory, blog post). Produces a human-readable remediation report with ordered, agent-actionable steps and a verification check. |
+| `laravel-security` | Condensed Laravel 11 / PHP 8.3 secure-defaults reference — authentication, authorization, Eloquent safety, CSRF/XSS, API security, file uploads, secrets, and production hardening. |
+| `security-bounty-hunter` | Hunt for exploitable, remotely reachable vulnerabilities in a PHP/Laravel codebase for responsible disclosure — biases toward user-controlled attack paths and discards low-signal noise. |
 | `class-refactoring` | Refactor PHP classes using SOLID and Laravel best practices with testability focus. |
 | `refactor-entry-point-to-action` | Refactor controller/job/command/listener entry-point logic into Action classes. |
 | `smartest-project-addition` | Propose one high-impact, low-risk project improvement. |
@@ -153,6 +156,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `test-like-human` | Validate PR behavior from user perspective using scenario-driven testing. |
 | `test-driven-development` | Enforce strict red-green-refactor flow for bugfixes and features. |
 | `tester-cookbook` | Turn a JIRA task and its linked PRs into a concise QA report for a non-technical tester — focused on what to report back to the dev team, optionally with brief steps to reach the result — delivered as a JIRA Wiki Markup comment. |
+| `e2e-testing` | Write or stabilize Playwright end-to-end browser tests against a Laravel app — gated on Playwright already being present, otherwise defers to manual testing or Pest/Dusk. |
 
 ## Platform & Data
 
@@ -161,87 +165,28 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `composer-update` | Analyze composer updates, conflicts, and changelog impact. |
 | `mysql-problem-solver` | Diagnose and optimize MySQL queries, indexes, and execution plans. |
 | `laravel-telescope` | Analyze Laravel Telescope request data from URL, match entries in DB, and propose concrete optimizations. |
+| `mysql-patterns` | Advanced MySQL patterns in Laravel — upserts, JSON columns, full-text search, partitioning, replication/read-write splitting, and deadlock handling — beyond the query tuning in `@rules/sql/optimalize.mdc`. |
+| `redis-patterns` | Redis in Laravel — caching strategies, atomic/distributed locks, rate limiting, stampede protection, pub/sub, pipelines, and key/TTL design. |
+| `docker-patterns` | Docker and docker-compose for a Laravel app — multi-stage PHP-FPM images, services (nginx, MySQL, Redis, queue worker, scheduler, Vite build), healthchecks, secrets, and image hardening. |
+| `latency-critical-systems` | Latency-sensitive Laravel paths — realtime dashboards, streaming, queues, and caches — where p95 latency and data freshness matter (Octane, Horizon, Redis, read replicas). |
+
+## Frontend & UI
+
+| Skill | Description |
+|---|---|
+| `frontend-design-direction` | Choose a deliberate, polished design direction for a Laravel/Blade/Livewire/Filament interface instead of generic, templated UI. |
+| `design-system` | Generate, audit, or review the visual design system of a Laravel app — Tailwind tokens, Filament theming, Blade/Livewire component consistency, and visual-polish audits. |
+| `frontend-patterns` | Livewire/Blade/Alpine UI patterns — component composition, state placement, performance, forms, and loading/empty/error states. |
+| `frontend-a11y` | Accessible UI in a Laravel app — semantic Blade markup, accessible forms, keyboard navigation with Alpine, focus and live-region management for Livewire, contrast, and Filament a11y. |
+| `vite-patterns` | Configure or optimize Vite (laravel-vite-plugin) asset bundling — entrypoints, the `@vite` Blade directive, HMR, env vars, aliases, manifests, code splitting, and production builds. |
+| `seo` | Audit, plan, or implement SEO in a Laravel app — crawlability, indexability, JSON-LD structured data in Blade, Core Web Vitals, on-page tags, and keyword mapping. |
+| `frontend-slides` | Build standalone HTML/CSS/JS presentation decks — self-contained single-file decks with viewport-fit layout, keyboard navigation, and browser Print-to-PDF export. |
 
 ## Content & Writing
 
 | Skill | Description |
 |---|---|
 | `article-writing` | Write long-form content (blog posts, guides, tutorials, essays, newsletters) in a distinctive voice derived from supplied examples or a default operator voice. Leads with concrete proof, bans hollow AI phrasing, and tailors structure to the medium. |
-
----
-
-## Claude Code Subagents
-
-The package ships Claude Code subagents for common PHP and Laravel workflows. Agents are a thin orchestration layer over the existing skills — they do not replace them and they do not duplicate their prompts.
-
-```text
-Rules  = long-lived project standards
-Skills = reusable workflows
-Agents = specialised orchestration roles over multiple skills
-```
-
-Install for Claude Code or for every supported editor:
-
-```bash
-composer require pekral/cursor-rules --dev
-vendor/bin/cursor-rules install --editor=claude
-# or
-vendor/bin/cursor-rules install --editor=all
-```
-
-Agents are installed to:
-
-```text
-.claude/agents/
-```
-
-They are **not** installed for `--editor=cursor` or `--editor=codex`.
-
-### Available subagents
-
-| Agent | Role | Orchestrated skills |
-|---|---|---|
-| `php-code-reviewer` | Senior PHP/Laravel review of the current diff. Read-only by default. | `code-review`, `security-review`, `create-missing-tests-in-pr` |
-| `issue-resolver` | End-to-end issue resolution from GitHub, JIRA, or Bugsnag. | `prepare-issue-context`, `analyze-problem`, `test-driven-development`, `resolve-issue`, `code-review` |
-| `test-engineer` | Author, repair, and complete Pest / feature tests, including missing-coverage fills on open PRs. | `create-test`, `create-missing-tests-in-pr`, `test-driven-development`, `rewrite-tests-pest` |
-| `security-reviewer` | OWASP-focused review of the current diff or a referenced advisory. Read-only by default. | `security-review`, `security-threat-analysis` |
-| `laravel-architect` | Design and restructuring of Laravel architecture (Actions, services, jobs, Livewire, domain boundaries). | `analyze-problem`, `refactor-entry-point-to-action`, `understand-propose-implement-verify` |
-| `mysql-performance-reviewer` | MySQL and Eloquent performance analysis; every index recommendation justified by a query pattern. | `mysql-problem-solver`, `laravel-telescope` |
-| `refactoring-specialist` | Behaviour-preserving PHP/Laravel refactors in small, test-backed steps. | `class-refactoring`, `refactor-entry-point-to-action`, `understand-propose-implement-verify`, `create-test` |
-
-### Example invocations in Claude Code
-
-```text
-@agent-php-code-reviewer review the current diff
-@agent-issue-resolver resolve GitHub issue #123
-@agent-test-engineer add missing tests for this PR
-@agent-security-reviewer review the authentication changes
-@agent-mysql-performance-reviewer analyze this slow query
-@agent-refactoring-specialist refactor this service without changing behavior
-@agent-laravel-architect propose a cleaner architecture for this feature
-```
-
-### Workflow continuity — agents do not change the slash-command pipeline
-
-The skill-based pipeline still works exactly as before:
-
-```text
-/resolve-issue <link>
-/code-review-github <link>
-/process-code-review <link>
-/merge-github-pr <link>
-```
-
-Agents are entry-points to the **same** skills, so quality and output stay identical. Pick whichever entry feels natural for the task:
-
-| Slash command (skill) | Equivalent subagent entry-point |
-|---|---|
-| `/analyze-problem <link>` → `/resolve-issue <link>` → `/code-review-github` *or* `/code-review-jira <link>` → `/process-code-review <link>` → (on explicit request) `/merge-github-pr <link>` | `@agent-issue-resolver resolve <link>` (chains every step — picks `code-review-github` for GitHub / Bugsnag sources and `code-review-jira` for JIRA, converges the post-PR loop, and only merges when you say so) |
-| `/code-review-github <link>` | `@agent-php-code-reviewer review <link>` |
-| `/security-review` | `@agent-security-reviewer review the current diff` |
-| `/create-test` / `/create-missing-tests-in-pr` | `@agent-test-engineer add missing tests for <link>` |
-
-When in doubt, prefer the slash command — it invokes the underlying skill directly, with no extra layer. Use the agent when you want Claude Code to select the right skill for you, or when you want to chain several skills under a single specialist role.
 
 ---
 

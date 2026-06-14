@@ -3745,3 +3745,27 @@ test('compound-engineering rule codifies easier-future-work and per-project comp
     $readme = (string) file_get_contents($packageDir . '/README.md');
     expect($readme)->toContain('`compound-engineering/general.mdc`');
 });
+
+test('analyze-problem skill requires pre-implementation research and a plan artifact (issue #564)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');
+
+    expect($content)->toContain('@rules/compound-engineering/general.mdc');
+    expect($content)->toContain('## Pre-Implementation Research & Plan');
+
+    // The three research inputs.
+    expect($content)->toContain('**Codebase**');
+    expect($content)->toContain('**Commit history**');
+    expect($content)->toContain('**Internet best practices');
+
+    // The plan artifact is a text file or a GitHub issue.
+    expect($content)->toContain('text file in the repo');
+    expect($content)->toContain('GitHub issue');
+
+    // The five mandatory parts of the plan.
+    expect($content)->toContain('**Goal**');
+    expect($content)->toContain('**Architecture**');
+    expect($content)->toContain('**Implementation steps**');
+    expect($content)->toContain('**Sources**');
+    expect($content)->toContain('**Success criteria**');
+});

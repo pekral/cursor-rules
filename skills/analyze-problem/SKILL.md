@@ -22,6 +22,7 @@ Focus on:
 
 ## Constraints
 - Apply @rules/php/core-standards.mdc
+- Apply @rules/compound-engineering/general.mdc — the pre-implementation research and the plan artifact below exist so the analysis compounds: it grounds the work in what already exists and leaves a reusable plan behind.
 - Never modify code
 - Output Markdown only
 - Use one language only
@@ -57,6 +58,30 @@ Apply these 10 steps in order. Each step feeds the next — never jump ahead to 
 8. **Alternatives rejected** — competing solutions considered and why they were not chosen.
 9. **Verification plan** — manual checks, automated tests, edge cases, and regression checks.
 10. **Non-technical summary** — plain-language explanation for PM, support, or business stakeholders.
+
+---
+
+## Pre-Implementation Research & Plan
+
+Before proposing or implementing anything, do the research that grounds the analysis in what already exists — then leave a reusable plan behind. This runs after the Analysis Framework settles the root cause and feeds the **Recommended Solution** (step 7) and **Implementation Outline** (step 8).
+
+### Research (do all three before planning)
+
+1. **Codebase** — read the actual files, layers, and conventions the change will touch. Find the existing part of the system the work belongs to; per `@rules/compound-engineering/general.mdc`, reach for an existing home before inventing a new abstraction.
+2. **Commit history** — walk `git log` / `git blame` for the affected area to learn how it evolved, which past changes touched it, and which approaches were already tried or reverted. Past decisions are context you must not re-derive blindly.
+3. **Internet best practices (when relevant)** — for an unfamiliar pattern, library, protocol, or security-sensitive surface, consult current authoritative references. Cite every source you rely on; skip this step for routine, well-understood changes.
+
+### Plan artifact (the deliverable)
+
+Capture the result as a **written plan** — a text file in the repo (e.g. under `docs/plans/` or alongside the issue) **or** a GitHub issue — not only inline prose. The plan must contain exactly these five parts:
+
+- **Goal** — the outcome in one or two sentences: what will be true when this is done.
+- **Architecture** — where the change lives in the existing system (files, layers, the existing part it extends), and why that home over a new abstraction.
+- **Implementation steps** — concrete, ordered, independently reviewable steps a following agent can execute without re-deriving the analysis.
+- **Sources** — links to the codebase locations, commits, and any external references the plan relies on.
+- **Success criteria** — observable, verifiable conditions (tests, behavior, metrics) that prove the work is complete and correct.
+
+State where the plan artifact was written (file path or issue URL) in the analysis output so the next agent can pick it up. A durable plan that the next agent reuses is the compounding payoff — see `@rules/compound-engineering/general.mdc`.
 
 ---
 

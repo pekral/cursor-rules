@@ -51,6 +51,18 @@ Example input:
 - Add or update PHPDoc where needed for PHPStan clarity.
 - **Livewire entry points — Blade view co-refactor.** When the entry point being refactored is a Livewire component, also inspect its Blade view (`resources/views/livewire/<...>.blade.php`). Walk it against the triggers in `@rules/laravel/livewire.mdc` *HTML / Blade Layout Splitting* (repeated markup, >150 Blade lines, self-contained `wire:*` cluster, self-contained data shape, cross-page reuse, independent loading / empty / error state, distinct named UI concern). For every match, propose the extraction in the refactor plan: name the extracted concern, pick the correct component type per the rule's **Component-type decision** (Livewire only for stateful / lifecycle / server-interactive blocks; Blade for stateless presentation — never a Livewire wrapper around a pure presentational block), and place the new component under the concern's domain folder (`app/Livewire/<Domain>/` or `resources/views/components/<domain>/`). The extracted children must satisfy the **Reusability contract** in the rule (typed input, one concern, no business logic, events not parent reach-through, independently renderable, concern-based name). **Apply-mode requirement:** the extractions must land in a dedicated `refactor(scope): split <view> into reusable components` commit that follows the Action-extraction commit and respects the **Test Coverage Contract** in `@rules/refactoring/general.mdc` in spirit — every rendered branch of the touched view is covered by a Livewire / Blade feature test committed before the layout refactor, and those feature tests stay green through the refactor commit unchanged. PHP `--coverage-clover` does not measure `.blade.php` line-by-line, so the binding gate is feature-test parity, not a numeric coverage percentage on the view file. **CR-mode requirement:** the proposals must be emitted as markdown findings (`file:line`, concern name, Livewire-vs-Blade choice, target folder, rule reference) and the skill stops without modifying code.
 
+## Read, Map & Verify before refactoring (mandatory pre-flight)
+
+> **`MODE=cr`:** perform Read and Map read-only to ground the extraction proposal in the real code; Verify is the read-only audit. Do not modify code.
+
+Reading, mapping, and verifying come first; refactoring comes last. This pre-flight is **blocking** — do not edit a single line of production code until all three steps pass, and never act on an assumption you have not confirmed by reading the code.
+
+1. **Read** — open and read the actual entry point and the code it orchestrates (called Services / Repositories / ModelManagers, the Blade view for Livewire components, related tests, configuration). Confirm what the orchestration does by reading it, not by guessing from names.
+2. **Map** — map the change's blast radius: the entry point's response contract and signature, its callers and routes, the orchestration that must move into the Action, and the existing Actions / Data Validators / `app/Concerns/` traits to reuse instead of reinventing.
+3. **Verify** — check your assumptions against the real code and its observed behavior so the extraction preserves behavior, signatures, and tenant/account scope. If reading and mapping contradict the task framing, stop and surface the discrepancy instead of refactoring on a wrong premise.
+
+Only after Read, Map, and Verify are complete may the Test Coverage Gate and the extraction proceed.
+
 ## Execution
 
 > **`MODE=cr`:** run steps 1–2 read-only, then emit the Action-extraction proposal described under Modes and stop — do not run steps 3–12 (they author tests, create files, run fixers, and chain reviews).

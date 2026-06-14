@@ -24,6 +24,16 @@ If you did not watch the test fail, you do not know whether it tests the right t
 - Changing behavior
 - Refactoring code that should remain behaviorally stable
 
+## Read, Map & Verify before the first RED (mandatory pre-flight)
+
+Reading, mapping, and verifying come first; implementing comes last. This pre-flight is **blocking** — do not add or modify a single line of production code until all three steps pass, and never act on an assumption you have not confirmed by reading the code.
+
+1. **Read** — open and read the actual target files and the code they depend on (callers, called methods, related tests, configuration). Confirm what the code does by reading it, not by guessing from names or the assignment description.
+2. **Map** — map the change's blast radius: every call site, caller, data-flow path, and existing test that the behavior touches, plus the conventions and helpers already in the codebase to reuse instead of reinventing.
+3. **Verify** — check your assumptions against the real code and its observed behavior (reproduce the current behavior so the first RED test asserts the real gap). If what you read contradicts the assignment framing, stop and surface the discrepancy instead of writing a test on a wrong premise.
+
+Only after Read, Map, and Verify are complete may the first RED test be written.
+
 ## Pre-flight (mandatory before the first RED)
 
 Before writing the first failing test, run `@skills/prepare-issue-context/SKILL.md` with `MODE=tdd` and the assignment reference, scoped to the scenario(s) the upcoming RED step will cover. The skill seeds the development database with the records the failing test will depend on and captures a reproduction record (entry point + inputs + observed output) that becomes the *arrange* block of the first test. If the skill returns `blocked: <count> open gap(s)`, stop and surface the gaps — writing a RED test against missing or guessed fixtures is the most common cause of stub-grade tests that drift from real behavior.

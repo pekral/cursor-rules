@@ -53,7 +53,7 @@ Gather signals without reading every file:
 
 ### 5. Validate
 - Run every command written into the **Build & Run** / **Testing** sections to confirm it exists and is correct.
-- Run `composer build` and fix any errors before declaring done.
+- Run the project's detected build / quality command — the same one written into the **Build & Run** section — and fix any errors before declaring done. On a Composer/PHP project that command is typically `composer build`; on a Node project `npm run build`, on a Go project `go build ./...`, and so on. Never hard-assume a PHP toolchain on a project the reconnaissance fingerprinted as another stack.
 
 ## Output
 - Updated (or newly created) `CLAUDE.md` at the project root.
@@ -63,5 +63,5 @@ Gather signals without reading every file:
 - `CLAUDE.md` reflects the current tech stack, verified commands, structure, and conventions
 - Every pre-existing human-authored section is preserved verbatim
 - All documented commands have been run and confirmed to work
-- `composer build` finishes without errors
+- The project's detected build / quality command finishes without errors (`composer build` on this Composer/PHP package)
 - The summary lists updated vs preserved sections and any unresolved unknowns

@@ -1,0 +1,33 @@
+---
+description: Compound engineering — every change must make future work easier, and every mistake, insight, or decision becomes durable per-project memory the next agent can reuse.
+alwaysApply: true
+globs: ["*"]
+---
+
+## Compound Engineering
+
+Compound engineering is **not** "let the AI write the code". It is a system where AI agents plan, implement, and review the work, while the human directs the direction, decides on quality, and curates what was learned so the next task is easier. Every loop is supposed to compound: each feature, fix, and review should lower the cost of the next change, never raise it.
+
+- **Every change must make future work easier, not harder.** A change that adds hidden coupling, ships an undocumented decision, or introduces a new abstraction where an existing part of the system already fit is a defect to correct — not something to ship and move on from.
+- **Every mistake, insight, or decision worth more than this one task gets written down** where the next agent *and* the next human will find it. Knowledge that lives only in someone's head, a chat thread, or a closed PR does not compound.
+- The human stays in the loop on direction and quality; the agents do the planning, implementing, and reviewing against that direction.
+
+## Compound Memory (per project)
+
+Turn one-off lessons into reusable rules by maintaining a **per-project memory**. This memory is project-specific by definition — it lives **in the project being worked on, never in this shared rules package**. A lesson learned on one project does not become a global rule shipped to every project; it stays in that project's own memory.
+
+- **Where to store it (use what the project already has, in this order):** the project's `CLAUDE.md`, `.cursor/rules/project.mdc`, or a dedicated learnings / decision-log file (e.g. `docs/decisions/`). The installer never overwrites `CLAUDE.md` or `.cursor/rules/project.mdc`, so they are safe, durable homes for accumulated memory.
+- **When to record an entry:** whenever a review comment, a bug, or a design decision reveals a lesson that will recur. The canonical trigger: it is discovered that a certain *kind* of change belongs in an **existing part of the system rather than in a new abstraction** — capture that as a rule or a worked example so the next agent reaches for the existing part first instead of re-deriving (or re-mistaking) it.
+- **What each entry contains:** the situation that triggered it, the rule or decision, and a short concrete example. Keep entries short and greppable — prefer one rule per lesson over a long essay.
+- **Review comments and post-mortems are inputs to this memory, not throwaway chat.** When a code-review finding or a human correction generalizes beyond the current PR, promote it into the per-project memory so it stops recurring. That is how mistakes and review comments become the team's collective memory.
+
+## What Not To Do
+
+- Do not let a durable lesson live only in a commit message or a closed PR thread — promote the reusable part into the project's memory file.
+- Do not write a project-specific lesson into this shared rules package as a new global rule. Per-project lessons stay in the project's own memory; only genuinely universal standards belong here.
+- Do not record secrets, credentials, or PII in the memory file.
+
+## Code Review Application
+
+- Treat a change that makes future work harder — new abstraction where an existing part fit, undocumented non-obvious decision, hidden coupling — as a finding, with the concrete existing part it should have used.
+- When the same code-review finding recurs across PRs, require it to be promoted into the project's compound memory so the next agent does not repeat it.

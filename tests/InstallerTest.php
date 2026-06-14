@@ -3793,3 +3793,22 @@ test('cleanup-local-branches skill prunes gone and stale local branches safely (
     expect($content)->toContain('squash');
     expect($content)->toContain('rebase');
 });
+
+test('refresh-claude-md skill regenerates CLAUDE.md only when stale or missing', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/refresh-claude-md/SKILL.md');
+
+    expect($content)->toContain('name: refresh-claude-md');
+    expect($content)->toContain('@rules/php/core-standards.mdc');
+    expect($content)->toContain('@rules/git/general.mdc');
+    // Narrow trigger: the skill runs only to keep CLAUDE.md correct, never as a general onboarding task.
+    expect($content)->toContain('Trigger only to update or create `CLAUDE.md`');
+    expect($content)->toContain('no refresh needed');
+    // Four-phase ECC shape with selective reconnaissance.
+    expect($content)->toContain('Reconnaissance');
+    expect($content)->toContain('Glob and Grep');
+    // Human-authored content must be preserved, never blindly replaced.
+    expect($content)->toContain('preserve all human-authored sections');
+    // Build validation must use the detected command, not a hard-coded PHP toolchain.
+    expect($content)->toContain('detected build / quality command');
+});

@@ -1235,6 +1235,54 @@ test('laravel rules document Laravel 13 Bus::bulk, scheduler metadata, and Schem
     expect($content)->toContain('Use `Schema::hasForeignKey()` to verify a foreign key exists before creating or dropping it');
 });
 
+test('laravel rules require user-facing UI, console, and API strings to be translatable (issue #553)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('## Localization and Translatable Strings');
+    expect($content)->toContain('Every string a user can see must go through Laravel\'s translation layer');
+    expect($content)->toContain('**UI**');
+    expect($content)->toContain('**Console**');
+    expect($content)->toContain('**API**');
+    expect($content)->toContain('$this->info()');
+    expect($content)->toContain('JSON `message` fields');
+    expect($content)->toContain('add every new key to **all** shipped locales');
+});
+
+test('code review enforces translatable UI, console, and API strings (issue #553)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('Translation completeness (mandatory when the project ships translations)');
+    expect($content)->toContain('@rules/laravel/laravel.mdc` **Localization and Translatable Strings**');
+    expect($content)->toContain('**Console** (human-readable Artisan command output');
+    expect($content)->toContain('**API** (JSON `message` fields');
+});
+
+test('laravel rules forbid real HTTP and real system processes in tests (issue #553)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    expect($content)->toContain('Never allow real external HTTP calls in tests.');
+    expect($content)->toContain('Never let tests run real system processes outside the application.');
+    expect($content)->toContain('Tests must never invoke an external binary or script directly on the system');
+    expect($content)->toContain('`Process::fake()`');
+    expect($content)->toContain('shell_exec()');
+    expect($content)->toContain('proc_open()');
+});
+
+test('code review enforces test isolation against real HTTP and system processes (issue #553)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('Test isolation — no real HTTP, no real system processes');
+    expect($content)->toContain('**Real outbound HTTP**');
+    expect($content)->toContain('**Real system process / external binary or script**');
+    expect($content)->toContain('A test must never invoke an external binary or script directly on the system');
+    expect($content)->toContain('Http::fake()');
+    expect($content)->toContain('Process::fake()');
+});
+
 test('architecture rules enumerate the seven allowed business logic layers including Eloquent models', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');

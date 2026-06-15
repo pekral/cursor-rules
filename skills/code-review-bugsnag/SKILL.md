@@ -64,7 +64,7 @@ Before reviewing code, treat the Bugsnag error as the assignment:
 
 #### GitHub (technical findings only — always-new comment per CR run)
 - Publish via `skills/code-review-github/scripts/upsert-comment.sh <PR-NUMBER|URL> -` (body on stdin) on the linked PR. Every CR run posts a **fresh PR comment**; the helper appends the marker `<!-- cr-comment:actor=<gh-login> -->` for traceability and never edits a prior comment in place. On exit code 2/3, fall back to the GitHub MCP server's `addIssueComment` as a fresh post.
-- Format inside the comment body: Critical → Moderate → Minor → Refactoring (DRY / Tech Debt Reduction), each with `file:line` and an actionable fix. Use the template defined in `skills/code-review-jira/templates/github-output.md`. Omit empty sections entirely per `@skills/code-review/SKILL.md` Output Rules.
+- Format inside the comment body: Critical → Moderate → Minor → Refactoring (DRY / Tech Debt Reduction), each with `file:line` and an actionable fix. Use the template defined in `templates/github-output.md`. Omit empty sections entirely per `@skills/code-review/SKILL.md` Output Rules.
 - This is the only place where technical details appear.
 
 #### Bugsnag (consolidated non-technical comment)

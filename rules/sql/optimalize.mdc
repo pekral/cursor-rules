@@ -24,6 +24,18 @@ globs: ["*"]
 - Check slow query log — prioritize frequent or longest-running queries.
 - Apply one optimization at a time; measure before and after.
 
+## Performance Non-Regression on Query Changes
+Whenever a query is **refactored or changed** (Eloquent / query-builder rewrite, raw-SQL edit, added / removed `JOIN` / `WHERE` / `ORDER BY` / `GROUP BY` / subquery / eager load, pagination change, index-driven rewrite, or a refactor that moves the query into another layer), the changed query **must be at least as fast as the original — ideally faster**. Never ship a query change that is slower without a documented justification.
+
+- **Capture the baseline first.** Before changing the query, record the original query's plan and cost: `EXPLAIN` (and `EXPLAIN ANALYZE` when DB access is available) — note `type`, `key`, `rows`, `filtered`, `Extra`, and the actual execution time / rows examined. This is the number the new query is held against.
+- **Compare after the change.** Run the same `EXPLAIN` / `EXPLAIN ANALYZE` on the new query and compare against the captured baseline. The new query passes only when it is **equal or better** on the decisive signals: rows examined, access `type`, index usage, `filesort` / `temporary` avoidance, and measured latency. Equal-or-fewer rows examined and equal-or-lower latency is the gate.
+- **When the change is slower, it does not ship silently.** If the changed query is measurably slower than the original, you must document, in the PR description / commit body / analysis report:
+  1. **Why it is slower** — the concrete cause (e.g. an added `JOIN` widens the row set, a correctness fix removes an index-only path, a denormalization was undone).
+  2. **What further optimization options remain** — concrete, actionable next steps (index addition / reorder, covering projection, SARGable rewrite, batching, caching, denormalization, splitting the query), **or** an explicit statement that no further optimization is possible and why (e.g. the slowdown is the unavoidable cost of a required correctness fix).
+  3. **Why the slower query is still acceptable** — the trade-off that justifies shipping it (correctness, removed N+1 elsewhere, net round-trip reduction across the request).
+- **A slowdown with no documented reason and no listed optimization options is a defect**, not an acceptable change — treat it as a blocking finding in review and as a stop condition in refactoring.
+- **When DB access is unavailable**, compare statically from the `EXPLAIN` plan shape and index reasoning, hold the same equal-or-better bar against the reconstructed baseline, and state the limitation explicitly — never claim a measured improvement you did not measure.
+
 ## Query Optimization
 - SARGable WHERE clauses only — no functions on indexed columns (`DATE(col)`, `LOWER(col)`, `col + 1`).
 - Prefer ranges: `col BETWEEN ? AND ?` instead of `DATE(col) = ?`.

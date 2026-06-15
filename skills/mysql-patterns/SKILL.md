@@ -9,7 +9,7 @@ metadata:
 # MySQL Patterns
 
 ## Constraints
-- Apply `@rules/sql/optimalize.mdc` — it already owns indexing, SARGable WHERE, seek/keyset pagination, EXPLAIN, transactions/locking basics, batch-over-per-row, CTE/window/recursive queries, schema basics, and DB-level caching. Do not re-explain those here; defer to it.
+- Apply `@rules/sql/optimalize.mdc` — it already owns indexing, SARGable WHERE, seek/keyset pagination, EXPLAIN, transactions/locking basics, batch-over-per-row, CTE/window/recursive queries, schema basics, DB-level caching, and the **Performance Non-Regression on Query Changes** gate. Do not re-explain those here; defer to it. When a pattern in this skill *changes an existing query* (e.g. swapping `LIKE` for a FULLTEXT match, moving a filter onto a generated column, introducing partition pruning), capture the original query's baseline and confirm the new shape is equal or faster — if it is slower, document the reason and the remaining optimization options per that gate.
 - For diagnosing an existing slow query, use `@skills/mysql-problem-solver/SKILL.md`. This skill is for *designing* features, not investigating regressions.
 - If the project uses Laravel, also apply `@rules/laravel/laravel.mdc` and `@rules/laravel/architecture.mdc`.
 - Apply `@rules/security/backend.md` — parameterized queries / ORM only, least-privilege DB users, never hardcode credentials.
@@ -188,6 +188,7 @@ SELECT table_name, data_length, index_length
 
 ## Done when
 - The chosen feature is verified against the actual engine/version.
+- Any pattern that changed an existing query was benchmarked against its baseline and is equal or faster; a slower result carries the documented reason and remaining optimization options (`@rules/sql/optimalize.mdc` "Performance Non-Regression on Query Changes").
 - Upserts run as single statements with a backing unique index; concurrent ones are deadlock-retried.
 - JSON / FULLTEXT / partition queries are confirmed to hit the intended index (EXPLAIN — see `@rules/sql/optimalize.mdc`).
 - Read/write splitting keeps `sticky` on for read-after-write paths.

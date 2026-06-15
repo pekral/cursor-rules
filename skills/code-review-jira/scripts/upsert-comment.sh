@@ -21,9 +21,8 @@
 #               runs instead of stacking on top of the CR comment.
 #
 # Behavior:
-#   1. Detect the actor identity via `acli jira me --json` (account id),
-#      falling back to a slug of the display name when the account id is not
-#      available.
+#   1. Detect the actor identity from `acli jira auth status` (the
+#      authenticated account email), normalised to a slug.
 #   2. Append a hidden marker `{anchor:<MARKER_KEY>-actor-<slug>}` to the body
 #      (only when the body does not already carry the marker). The marker is
 #      placed at the **bottom** of the body so the JIRA UI keeps the comment's
@@ -33,10 +32,10 @@
 #      grep-able in the raw body returned by the REST API.
 #   3. List the issue comments and find the most recent one carrying the same
 #      marker — that is the actor's prior comment in this namespace.
-#   4. If found, edit it (`acli jira workitem comment edit`). Otherwise add a
-#      fresh one (`acli jira workitem comment add`).
+#   4. If found, edit it (`acli jira workitem comment update`). Otherwise add a
+#      fresh one (`acli jira workitem comment create`).
 #
-# When acli is unavailable or the comment-edit command is missing in the
+# When acli is unavailable or the `comment update` command is missing in the
 # installed acli build, the script exits with code 4 so the calling skill can
 # fall back to the JIRA MCP server (`editJiraIssue` / `addCommentToJiraIssue`).
 #
@@ -114,15 +113,18 @@ if [[ -z "$BODY" ]]; then
   exit 1
 fi
 
-ACTOR_JSON="$(acli jira me --json 2>/dev/null || true)"
-ACTOR_ID=""
-if [[ -n "$ACTOR_JSON" ]]; then
-  ACTOR_ID="$(printf '%s' "$ACTOR_JSON" | jq -r '.accountId // .emailAddress // .name // .displayName // empty' 2>/dev/null || true)"
-fi
+# Resolve the actor identity and site from `acli jira auth status`. The
+# installed acli build prints them as human-readable lines:
+#   ✓ Authenticated
+#     Site: your-org.atlassian.net
+#     Email: someone@example.com
+AUTH_STATUS="$(acli jira auth status 2>/dev/null || true)"
+ACTOR_ID="$(printf '%s' "$AUTH_STATUS" | awk -F': *' 'tolower($0) ~ /email:/ { gsub(/[[:space:]]+$/, "", $2); print $2; exit }')"
 if [[ -z "$ACTOR_ID" ]]; then
-  echo "upsert-comment.sh: failed to resolve current JIRA actor — is acli authenticated?" >&2
+  echo "upsert-comment.sh: failed to resolve current JIRA actor — is acli authenticated? (run: acli jira auth status)" >&2
   exit 3
 fi
+SITE="$(printf '%s' "$AUTH_STATUS" | awk -F': *' 'tolower($0) ~ /site:/ { gsub(/[[:space:]]+$/, "", $2); print $2; exit }')"
 
 # Normalise to an anchor-safe slug (lowercase alnum + dashes).
 ACTOR_SLUG="$(printf '%s' "$ACTOR_ID" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9' '-' | sed -E 's#-+#-#g; s#^-|-$##g')"
@@ -138,38 +140,58 @@ if ! grep -Fq "$MARKER" <<<"$BODY"; then
 ${MARKER}"
 fi
 
-COMMENTS_JSON="$(acli jira workitem view "$KEY" --fields comment --json 2>/dev/null || true)"
+# `comment list --json --paginate` emits one JSON object per page, each with a
+# `.comments` array; `jq -s` slurps the pages into a single list. Comment
+# bodies come back as Atlassian Document Format (ADF) objects, so the marker is
+# matched against the stringified body rather than a raw string.
+list_comments() {
+  acli jira workitem comment list --key "$KEY" --json --paginate 2>/dev/null \
+    | jq -s '{ comments: ([ .[].comments // [] ] | add // []) }' 2>/dev/null || true
+}
+
+find_marked_id() {
+  printf '%s' "$1" \
+    | jq -r --arg marker "$MARKER" '
+        (.comments // [])
+        | map(select((.body | tostring) | contains($marker)))
+        | sort_by(.updated // .created)
+        | last
+        | (.id // empty)
+      ' 2>/dev/null || true
+}
+
+COMMENTS_JSON="$(list_comments)"
 if [[ -z "$COMMENTS_JSON" ]]; then
   echo "upsert-comment.sh: failed to list comments on $KEY" >&2
   exit 3
 fi
 
-EXISTING_ID="$(printf '%s' "$COMMENTS_JSON" \
-  | jq -r --arg marker "$MARKER" '
-      ((.fields.comment.comments // .comments // []) // [])
-      | map(select((.body // "") | contains($marker)))
-      | sort_by(.updated // .created)
-      | last
-      | (.id // empty)
-    ' 2>/dev/null || true)"
+EXISTING_ID="$(find_marked_id "$COMMENTS_JSON")"
+
+# acli reads the comment body from a file (no stdin flag in the current build).
+BODY_FILE_TMP="$(mktemp)"
+trap 'rm -f "$BODY_FILE_TMP"' EXIT
+printf '%s' "$BODY" > "$BODY_FILE_TMP"
 
 if [[ -n "$EXISTING_ID" ]]; then
-  if ! acli jira workitem comment edit --help 2>/dev/null | grep -qiE 'edit|update'; then
-    echo "upsert-comment.sh: installed acli build does not support comment edit — fall back to MCP" >&2
+  if ! acli jira workitem comment update --help >/dev/null 2>&1; then
+    echo "upsert-comment.sh: installed acli build does not support 'comment update' — fall back to MCP" >&2
     exit 4
   fi
-  if ! printf '%s' "$BODY" | acli jira workitem comment edit "$KEY" --id "$EXISTING_ID" --body-stdin >/dev/null 2>&1; then
-    echo "upsert-comment.sh: acli edit failed for comment $EXISTING_ID on $KEY" >&2
+  if ! acli jira workitem comment update --key "$KEY" --id "$EXISTING_ID" --body-file "$BODY_FILE_TMP" >/dev/null 2>&1; then
+    echo "upsert-comment.sh: acli comment update failed for comment $EXISTING_ID on $KEY" >&2
     exit 3
   fi
-  echo "https://$(acli jira config get --json 2>/dev/null | jq -r '.site // .baseUrl // empty')/browse/${KEY}?focusedCommentId=${EXISTING_ID}"
+  echo "https://${SITE}/browse/${KEY}?focusedCommentId=${EXISTING_ID}"
   echo "action=updated id=${EXISTING_ID}" >&2
 else
-  if ! NEW_RESPONSE="$(printf '%s' "$BODY" | acli jira workitem comment add "$KEY" --body-stdin --json 2>/dev/null)"; then
-    echo "upsert-comment.sh: acli add failed on $KEY" >&2
+  if ! acli jira workitem comment create --key "$KEY" --body-file "$BODY_FILE_TMP" --json >/dev/null 2>&1; then
+    echo "upsert-comment.sh: acli comment create failed on $KEY" >&2
     exit 3
   fi
-  NEW_ID="$(printf '%s' "$NEW_RESPONSE" | jq -r '.id // empty')"
-  echo "https://$(acli jira config get --json 2>/dev/null | jq -r '.site // .baseUrl // empty')/browse/${KEY}?focusedCommentId=${NEW_ID}"
+  # The `create --json` shape varies across acli builds, so re-list and match
+  # the just-written marker to resolve the new comment id deterministically.
+  NEW_ID="$(find_marked_id "$(list_comments)")"
+  echo "https://${SITE}/browse/${KEY}?focusedCommentId=${NEW_ID}"
   echo "action=created id=${NEW_ID}" >&2
 fi

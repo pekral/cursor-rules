@@ -38,6 +38,9 @@ globs:
 - **Invokeable call convention:** When calling Action classes, always use direct invocation `$action($params)` — never `$action->__invoke($params)`.
 - **Action pattern (only when `vendor/pekral/arch-app-services` exists):** Apply @skills/refactor-entry-point-to-action/SKILL.md rules when the class is a controller, job, command, listener, or **Livewire component** that contains orchestration logic. If a new or changed entry point contains orchestration logic without an Action class, flag it as **Critical**.
 - **Single-use Service/Facade method rule (Action pattern):** If an Action calls a Service or Facade method that is used only once in the entire codebase, move the business logic from that Service/Facade method directly into the Action and remove the original Service/Facade method.
+- **Pass-through Action rule (Action pattern):** An Action whose entire `__invoke()` body is a single delegating call to one Service / Facade / Model Service method — adding no orchestration of its own (no validation delegation, no DTO / data transformation, no coordination of multiple collaborators, no additional business step, no return-value reshaping) — is a redundant indirection layer. Since the Action pattern exists so that **business logic lives in the Action**, an Action that only forwards one call holds no logic and earns its keep. Resolve it one of two ways:
+  - If that Service / Facade method is used **only once** in the codebase, move its business logic into the Action and delete the method (this is the **Single-use Service/Facade method rule** above), so the Action does real work instead of forwarding.
+  - If that Service / Facade method is **reused** elsewhere (so it cannot be inlined), **remove the Action entirely** and have the entry point call the Service / Facade method directly — collapse `$action($payload)` to `$service->method($payload)`. Do not keep an Action that wraps a single shared service call.
 - **Invokeable controller rule:** Any controller method that is not a standard CRUD method (`index`, `create`, `store`, `show`, `edit`, `update`, `destroy`) must be extracted into a dedicated single-action invokeable controller with only `__invoke()`. Resource controllers must only contain CRUD methods.
 - **BaseModelService pattern (only when `vendor/pekral/arch-app-services` exists):** All services that primarily work with a specific Eloquent Model must extend `BaseModelService` and implement `getModelManager()`, `getRepository()`, and `getModelClass()` (see `vendor/pekral/arch-app-services/examples/Services/User/UserModelService.php`). Services that do not primarily serve a single model must be refactored into Action pattern classes.
 - **Data Validator extraction (only when `vendor/pekral/arch-app-services` exists):** If an Action class contains inline validation logic (throwing `ValidationException` directly, calling `Validator::make()`, or imperative guard clauses that check input and throw exceptions like `InvalidArgumentException`), extract it into a dedicated Data Validator class. Data Validators must use validation rules defined as reusable traits in `app/Concerns/`. Default location is `app/DataValidators/{Domain}/`, but follow the project's existing convention if different.
@@ -254,6 +257,7 @@ globs:
   - calling Actions via `->__invoke()` instead of `$action(...)`
   - DTOs overriding `from()` only for key renaming instead of using mapping attributes
   - plain service classes used where an Action is the better fit
+  - pass-through Action whose `__invoke()` only forwards a single Service / Facade / Model Service call with no orchestration of its own — inline the single-use method into the Action, or remove the Action and call the reused service method directly (see the **Pass-through Action rule**)
   - Data Builder class using Action pattern (`__invoke()`) instead of named public methods
   - non-trivial or reusable validation logic written inline instead of as a custom Rule class in `app/Rules/`
   - per-row DB queries inside loops (per-row `update()`, `create()`, `delete()`, or single-row read inside a `foreach`) — must be replaced by ModelManager batch methods, `whereIn(...)->delete()`, or a single bulk read keyed in memory (see `@rules/sql/optimalize.mdc` "Batch over per-row operations"); allowed only when an explicit comment or PR description justifies an unavoidable per-row side-effect dependency
@@ -262,6 +266,7 @@ globs:
 ## Exceptions
 - No Action is required for:
   - trivial pass-through code
+  - a pure single-method delegation to a reused Service / Facade method with no orchestration — call the Service / Facade method directly from the entry point instead of wrapping it in a pass-through Action (see the **Pass-through Action rule**)
   - pure DTO mapping with no business rules
   - config-only changes
   - frontend-only changes with no new PHP orchestration

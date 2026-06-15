@@ -104,6 +104,7 @@ Only after Read, Map, and Verify are complete may the Test Coverage Gate and the
 ## Laravel Context (if applicable)
 
 - Delegate business logic to Actions and Services.
+- **Pass-through Actions (Action pattern).** Per `@rules/laravel/architecture.mdc` *Pass-through Action rule*, an Action whose entire `__invoke()` body is a single delegating call to one Service / Facade / Model Service method — with no orchestration of its own (no validation delegation, no DTO / data transformation, no coordination of multiple collaborators, no extra business step, no return-value reshaping) — is a redundant indirection layer and must be collapsed during the refactor. Detect every such pass-through Action touched by the refactor and resolve it one of two ways: (1) if the wrapped Service / Facade method is used **only once** in the codebase, move its logic into the Action and delete the method (the **Single-use Service/Facade method rule**), so the Action does real work; (2) if the method is **reused** elsewhere, remove the Action entirely and rewrite the entry point to call the Service / Facade method directly (`$action($payload)` → `$service->method($payload)`), updating every call site. In `MODE=cr`, emit each pass-through Action as a written refactoring proposal (target resolution + every call site that must change) rather than applying the change.
 - Do not place business logic in controllers or Livewire components.
 - Use existing query scopes instead of duplicating conditions.
 - Prefer DTOs over raw arrays when the project uses them.

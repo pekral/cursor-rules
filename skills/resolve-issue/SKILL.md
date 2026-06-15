@@ -44,16 +44,18 @@ Before starting the resolution flow:
 1. Verify the issue belongs to the current project before proceeding:
    - **GitHub:** the issue repository must match the current Git remote origin.
    - **JIRA:** the issue project key must match the configured JIRA project for this repository.
+   - **Bugsnag:** the error's linked GitHub issue/PR repository (`linkedIssues[]` in the loaded JSON) must match the current Git remote origin. When the error has no linked GitHub issue, confirm the Bugsnag project corresponds to this repository before proceeding.
    - If the issue does not belong to the current project, refuse to process it and inform the user.
 2. Fetch and analyze the issue from the detected source by running the deterministic loader for that tracker — never call `gh`, `acli`, or REST endpoints directly. Read all required fields off the resulting JSON document.
    - **GitHub:** `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>`. If the script is unavailable (missing tool, exit code 2/3), fall back to the GitHub MCP server.
    - **JIRA:** `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>`. If the script is unavailable (missing tool, exit code 2/3), fall back to the JIRA MCP server.
+   - **Bugsnag:** `skills/code-review-bugsnag/scripts/load-issue.sh <URL|TRIPLE>` (requires `BUGSNAG_TOKEN`). The JSON carries the error class, message, status, `context`, the in-project `latestEvent.stacktrace` frames (the entry point for the TDD reproduction), `comments[]`, and `linkedIssues[]` (the mirrored GitHub issue/PR). If the script is unavailable (missing tool/token, exit code 2/3), fall back to a Bugsnag MCP server.
 3. Define exact requirements and expected behavior.
 4. Classify the task (bug or feature).
 
 ### Comment analysis
 
-5. Before analyzing the problem, fetch and read **all comments and replies** from the issue tracker (GitHub, JIRA, or Bugsnag). For GitHub and JIRA issues, read `comments[]` directly off the JSON loaded in step 2 — do not issue a second listing call:
+5. Before analyzing the problem, fetch and read **all comments and replies** from the issue tracker (GitHub, JIRA, or Bugsnag). For GitHub, JIRA, and Bugsnag issues, read `comments[]` directly off the JSON loaded in step 2 — do not issue a second listing call:
    - Group comments by conversation thread (e.g., review threads, reply chains).
    - For each thread, determine:
      - **Current requirements** — requests or conditions that are still valid and unfulfilled.
@@ -193,7 +195,7 @@ Post the non-technical report on the issue tracker where the task with the assig
 
 - **GitHub** (task filed as a GitHub issue): post as a comment on the original issue
 - **JIRA** (task filed in JIRA): post as a JIRA comment formatted with JIRA Wiki Markup per `@rules/jira/general.mdc` (no Markdown headings, fenced code blocks, or tables)
-- **Bugsnag** (task originated from a Bugsnag error): post as a comment on the linked GitHub issue (if available)
+- **Bugsnag** (task originated from a Bugsnag error): post the non-technical report as a comment directly on the Bugsnag error via `skills/code-review-bugsnag/scripts/upsert-comment.sh <URL|TRIPLE> -` (requires `BUGSNAG_TOKEN`; falls back to a Bugsnag MCP server when the script is unavailable). Also mirror it as a comment on the linked GitHub issue from `linkedIssues[]` when one exists.
 
 The non-technical report must be understandable by non-technical testers and product managers and contain:
 
@@ -208,6 +210,10 @@ The non-technical report must be understandable by non-technical testers and pro
 ### JIRA-specific follow-up
 - Link the created PR back to the JIRA issue.
 - Do not change the JIRA issue status — per `@rules/jira/general.mdc`, status transitions are handled by humans only.
+
+### Bugsnag-specific follow-up
+- The created PR is linked through the Bugsnag error's existing GitHub integration (`linkedIssues[]`); do not invent a second link.
+- Do not change the Bugsnag error status (fixed / ignored / snoozed) automatically — like JIRA transitions, marking an error fixed is left to a human after the fix is verified in production.
 
 ## References
 

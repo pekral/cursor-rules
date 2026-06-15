@@ -31,8 +31,8 @@ metadata:
 - Detect the originating tracker from the PR description / linked issue.
 - **GitHub-originated:** run `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>` against the linked issue. Read the full `body`, every entry in `comments[]` (including replies), and every referenced attachment URL.
 - **JIRA-originated:** run `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>`. Read `descriptionText`, `comments[]`, and any attachment metadata.
-- **Bugsnag-originated:** read the linked GitHub issue (the project mirrors Bugsnag errors to GitHub) and apply the GitHub branch.
-- Never call `gh`, `acli`, or REST endpoints directly — always use the deterministic loaders.
+- **Bugsnag-originated:** run `skills/code-review-bugsnag/scripts/load-issue.sh <URL|TRIPLE>` (requires `BUGSNAG_TOKEN`) to read the error class, `message`, `context`, and `latestEvent.stacktrace` as the assignment. The error is also mirrored to GitHub via `linkedIssues[]`; load that linked GitHub issue as well to pick up any human-authored acceptance criteria and apply the GitHub branch on top.
+- Never call `gh`, `acli`, `api.bugsnag.com`, or REST endpoints directly — always use the deterministic loaders.
 - Group comments by thread. Discard outdated or superseded requirements (per the comment-analysis rules in `@skills/resolve-issue/SKILL.md`). Keep only the **current** requirements as the source of truth.
 
 ### 2. Extract verifiable requirements

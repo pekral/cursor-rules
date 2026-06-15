@@ -1078,6 +1078,7 @@ test('race-condition-review skill is referenced only by code review skills', fun
         $packageDir . '/skills/code-review/SKILL.md',
         $packageDir . '/skills/code-review-github/SKILL.md',
         $packageDir . '/skills/code-review-jira/SKILL.md',
+        $packageDir . '/skills/code-review-bugsnag/SKILL.md',
     ];
 
     foreach ($expectedFiles as $expectedFile) {

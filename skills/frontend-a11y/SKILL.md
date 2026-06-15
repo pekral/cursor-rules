@@ -205,6 +205,73 @@ For Alpine transitions, branch on the media query:
 
 ---
 
+## WCAG 2.2 success criteria
+
+WCAG 2.2 added criteria that templated Blade/Livewire UI frequently misses. These complement the patterns above.
+
+### Target size — SC 2.5.8 (AA)
+
+Interactive targets must be at least **24×24 CSS px** (or have 24px spacing around them). Icon-only buttons and tight table-row actions are the usual offenders.
+
+```blade
+{{-- BAD: 16px hit area --}}
+<button type="button" class="h-4 w-4" aria-label="Edit" wire:click="edit">
+    <x-heroicon-o-pencil aria-hidden="true" />
+</button>
+
+{{-- GOOD: 24px minimum hit area (padding counts toward the target) --}}
+<button type="button" class="h-6 w-6 p-1 -m-1" aria-label="Edit" wire:click="edit">
+    <x-heroicon-o-pencil aria-hidden="true" class="h-4 w-4" />
+</button>
+```
+
+### Focus appearance — SC 2.4.11 (AA)
+
+Every focusable element needs a clearly visible focus indicator. Never strip the outline without replacing it; prefer `focus-visible:` so the ring shows for keyboard users without firing on mouse click.
+
+```blade
+{{-- BAD: focus removed, keyboard users lose their place --}}
+<button class="focus:outline-none" wire:click="save">Save</button>
+
+{{-- GOOD: high-contrast ring, keyboard-only --}}
+<button class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+        wire:click="save">Save</button>
+```
+
+### Redundant entry — SC 3.3.7 (A)
+
+Within one process (multi-step form, checkout) never ask the user to re-enter information they already provided. Persist it on the Livewire component (or session) and prefill, offering an explicit "same as …" shortcut instead of a blank field.
+
+```blade
+<label><input type="checkbox" wire:model.live="billingSameAsShipping"> Billing address same as shipping</label>
+@unless ($billingSameAsShipping)
+    {{-- billing fields, prefilled from the shipping step --}}
+@endunless
+```
+
+### Dragging movements — SC 2.5.7 (AA)
+
+Any drag-to-reorder/drag-to-move interaction must have a single-pointer alternative (move up/down buttons or a position field), so users who cannot drag can still operate it.
+
+```blade
+<li>
+    {{ $item->name }}
+    <button type="button" aria-label="Move up" wire:click="moveUp({{ $item->id }})"><x-heroicon-o-arrow-up aria-hidden="true" /></button>
+    <button type="button" aria-label="Move down" wire:click="moveDown({{ $item->id }})"><x-heroicon-o-arrow-down aria-hidden="true" /></button>
+</li>
+```
+
+### Error suggestions — SC 3.3.3 (AA)
+
+When validation fails and a fix is known, the message must suggest the correction, not just report invalidity. Keep the suggestion generic enough not to leak sensitive data (see `@rules/security/backend.md`).
+
+```php
+// BAD: 'date' => 'Invalid value.'
+// GOOD: 'date' => 'Enter the date as YYYY-MM-DD, e.g. 2026-06-15.'
+```
+
+---
+
 ## Anti-patterns
 
 ```blade
@@ -229,4 +296,9 @@ For Alpine transitions, branch on the media query:
 - [ ] Moving elements have a stable `wire:key` so focus survives re-render.
 - [ ] Token color pairs meet AA contrast in light and dark; state is not color-only.
 - [ ] Animations respect `motion-reduce:` / `prefers-reduced-motion`.
+- [ ] Interactive targets are at least 24×24 CSS px (SC 2.5.8).
+- [ ] Focus indicators are visible via `focus-visible:` and never stripped without replacement (SC 2.4.11).
+- [ ] Multi-step flows never re-ask data already entered (SC 3.3.7).
+- [ ] Drag-to-reorder interactions have a single-pointer alternative (SC 2.5.7).
+- [ ] Validation messages suggest the correction without leaking sensitive data (SC 3.3.3).
 - [ ] Filament's generated accessibility attributes are left intact.

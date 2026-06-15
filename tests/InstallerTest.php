@@ -1527,6 +1527,12 @@ test('CR skills publish through the publish helper — GitHub always-new, JIRA s
     expect($jiraScriptBody)->not->toContain('acli jira workitem comment add');
     expect($jiraScriptBody)->not->toContain('acli jira config get');
     expect($jiraScriptBody)->toContain('acli jira workitem comment list --key "$KEY" --json --paginate');
+    // Issue #569 CR: a failed `comment list` call must exit 3, not be flattened
+    // to `{"comments":[]}` by `jq -s` (which would skip the upsert lookup and
+    // post a duplicate comment). The acli exit status is captured separately so
+    // failure returns 1, and the caller turns that into exit 3.
+    expect($jiraScriptBody)->toContain('raw="$(acli jira workitem comment list --key "$KEY" --json --paginate 2>/dev/null)" || return 1');
+    expect($jiraScriptBody)->toContain('if ! COMMENTS_JSON="$(list_comments)"; then');
     expect($jiraScriptBody)->toMatch('/if ! grep -Fq "\$MARKER" <<<"\$BODY"; then\s+BODY="\$\{BODY\}\s+\$\{MARKER\}"/');
 
     $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');

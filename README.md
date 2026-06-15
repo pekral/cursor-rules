@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **49 comprehensive Agent skills** for automated workflows (v0.8.3)
+- **57 comprehensive Agent skills** for automated workflows (v0.8.3)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -104,7 +104,7 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 
 # 🎯 Skills Overview — **v0.8.3**
 
-> Current release includes 49 skills for issue resolution, code review, refactoring, testing, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
+> Current release includes 57 skills for issue resolution, planning, code review, refactoring, testing, performance benchmarking, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -125,6 +125,9 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `refresh-claude-md` | Regenerate or create the project `CLAUDE.md` from the current codebase — re-detect tech stack, verified build/test commands, directory structure, and conventions while preserving every human-authored section. Adapted from the ECC `codebase-onboarding` skill; runs only when `CLAUDE.md` is stale or missing. |
 | `cleanup-local-branches` | Prune dead local Git branches — those whose upstream was deleted on origin (gone) and those with no origin counterpart inactive for more than six months — while protecting the current and default branches and previewing every deletion. |
 | `git-workflow` | Choose a Git branching strategy and handle merge vs rebase, conflicts, stashing, undoing mistakes, and release tagging — complements the commit/PR conventions in `@rules/git/general.mdc`, `cleanup-local-branches`, and `merge-github-pr`. |
+| `product-capability` | Turn a clear-but-underspecified PRD into an engineering-ready capability plan that exposes invariants, interfaces, and unresolved decisions before any code is written, then hands off to `blueprint` or `create-issues-from-text`. |
+| `blueprint` | Turn a large objective into a sequenced construction plan of 3–12 one-PR steps with dependency edges, cold-start context briefs, and exit criteria — reviewed adversarially and registered as Markdown so a fresh agent can pick up any step. |
+| `autonomous-loops` | Reference catalog of loop patterns for running Claude Code autonomously — from a single sequential pipeline to multi-agent DAG orchestration — anchored to this repo's real skills with `composer build` / `composer skill-check` as the gate between iterations. |
 
 ## Code Review, Security & Architecture
 
@@ -146,6 +149,8 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `refactor-entry-point-to-action` | Refactor controller/job/command/listener entry-point logic into Action classes. |
 | `smartest-project-addition` | Propose one high-impact, low-risk project improvement. |
 | `understand-propose-implement-verify` | Enforce a strict 4-step loop: understand, propose, implement, verify. |
+| `production-audit` | Read-only production-readiness audit from cheap local git/code/CI/config evidence — risk lenses across auth, data integrity, payments, jobs, and deployment — returning a scored ship/block verdict with specific fixes and hard caps for critical gaps. |
+| `automation-audit-ops` | Evidence-first, read-only inventory of every automation in the repo (GitHub Actions, Claude Code hooks/settings, MCP servers, composer scripts, the installer, the skills catalog, scheduler) classified live/broken/redundant with keep/merge/cut/fix recommendations. |
 
 ## Testing & Quality Automation
 
@@ -158,6 +163,8 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `test-driven-development` | Enforce strict red-green-refactor flow for bugfixes and features. |
 | `tester-cookbook` | Turn a JIRA task and its linked PRs into a concise QA report for a non-technical tester — focused on what to report back to the dev team, optionally with brief steps to reach the result — delivered as a JIRA Wiki Markup comment. |
 | `e2e-testing` | Write or stabilize Playwright end-to-end browser tests against a Laravel app — gated on Playwright already being present, otherwise defers to manual testing or Pest/Dusk. |
+| `benchmark` | Measure performance baselines and detect regressions in a Laravel app — page Core Web Vitals, API latency percentiles, build/test velocity, and DB query timing — stored as git-tracked baselines for team comparison. |
+| `benchmark-optimization-loop` | Turn a vague speed goal ("make it faster", "reduce p95") into a bounded, measured optimization loop that promotes only verified, correctness-preserving wins via a baseline, a variant ledger, and a promotion gate. |
 
 ## Platform & Data
 
@@ -167,6 +174,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `mysql-problem-solver` | Diagnose and optimize MySQL queries, indexes, and execution plans. |
 | `laravel-telescope` | Analyze Laravel Telescope request data from URL, match entries in DB, and propose concrete optimizations. |
 | `mysql-patterns` | Advanced MySQL patterns in Laravel — upserts, JSON columns, full-text search, partitioning, replication/read-write splitting, and deadlock handling — beyond the query tuning in `@rules/sql/optimalize.mdc`. |
+| `postgres-patterns` | Advanced PostgreSQL patterns in Laravel — GIN/BRIN/partial/covering indexes, jsonb, `ON CONFLICT` upserts, `SKIP LOCKED` queue workers, cursor pagination, RLS, and `timestamptz`/`numeric` typing — the Postgres counterpart to `mysql-patterns`. |
 | `redis-patterns` | Redis in Laravel — caching strategies, atomic/distributed locks, rate limiting, stampede protection, pub/sub, pipelines, and key/TTL design. |
 | `docker-patterns` | Docker and docker-compose for a Laravel app — multi-stage PHP-FPM images, services (nginx, MySQL, Redis, queue worker, scheduler, Vite build), healthchecks, secrets, and image hardening. |
 | `latency-critical-systems` | Latency-sensitive Laravel paths — realtime dashboards, streaming, queues, and caches — where p95 latency and data freshness matter (Octane, Horizon, Redis, read replicas). |

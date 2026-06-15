@@ -1515,9 +1515,18 @@ test('CR skills publish through the publish helper — GitHub always-new, JIRA s
     $jiraScriptBody = (string) file_get_contents($jiraScript);
     expect($jiraScriptBody)->toContain('MARKER_KEY="${3:-cr-comment}"');
     expect($jiraScriptBody)->toContain('{anchor:${MARKER_KEY}-actor-${ACTOR_SLUG}}');
-    expect($jiraScriptBody)->toContain('acli jira me --json');
-    expect($jiraScriptBody)->toContain('acli jira workitem comment edit');
-    expect($jiraScriptBody)->toContain('acli jira workitem comment add');
+    // Issue #569: the helper was written against an acli build that no longer
+    // matches the installed one. Actor/site come from `acli jira auth status`
+    // (no `acli jira me --json`), and comments are upserted via the current
+    // `comment create` / `comment update` subcommands (not `add` / `edit`).
+    expect($jiraScriptBody)->toContain('acli jira auth status');
+    expect($jiraScriptBody)->not->toContain('acli jira me --json');
+    expect($jiraScriptBody)->toContain('acli jira workitem comment update');
+    expect($jiraScriptBody)->toContain('acli jira workitem comment create');
+    expect($jiraScriptBody)->not->toContain('acli jira workitem comment edit');
+    expect($jiraScriptBody)->not->toContain('acli jira workitem comment add');
+    expect($jiraScriptBody)->not->toContain('acli jira config get');
+    expect($jiraScriptBody)->toContain('acli jira workitem comment list --key "$KEY" --json --paginate');
     expect($jiraScriptBody)->toMatch('/if ! grep -Fq "\$MARKER" <<<"\$BODY"; then\s+BODY="\$\{BODY\}\s+\$\{MARKER\}"/');
 
     $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');

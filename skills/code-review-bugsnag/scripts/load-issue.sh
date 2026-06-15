@@ -55,7 +55,8 @@
 # Notes:
 #   - The script is the single deterministic source of Bugsnag context. Skills must
 #     never call api.bugsnag.com directly: changes to the JSON shape happen here,
-#     in one place — mirroring code-review-github/scripts/load-issue.sh.
+#     in one place — mirroring code-review-github/scripts/load-issue.sh. The shared
+#     parse / HTTP / slug-resolution helpers live in _lib.sh alongside this script.
 #   - Bugsnag's Data Access API keys resources by numeric id, not by the slugs that
 #     appear in dashboard URLs, so the script resolves org slug -> org id ->
 #     project slug -> project id before fetching the error.
@@ -75,7 +76,9 @@
 #   3  Bugsnag fetch failed (auth, not found, or API error)
 set -euo pipefail
 
-API="https://api.bugsnag.com"
+PROG="${0##*/}"
+# shellcheck source=_lib.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/_lib.sh"
 
 usage() {
   cat >&2 <<'EOF'
@@ -94,93 +97,22 @@ if [[ $# -ne 1 || -z "${1:-}" ]]; then
   exit 1
 fi
 
-INPUT="$1"
+bsnag_require_tools
+bsnag_require_token
 
-for bin in curl jq; do
-  if ! command -v "$bin" >/dev/null 2>&1; then
-    echo "load-issue.sh: required tool not found: $bin" >&2
-    exit 2
-  fi
-done
-
-TOKEN="${BUGSNAG_TOKEN:-${BUGSNAG_AUTH_TOKEN:-}}"
-if [[ -z "$TOKEN" ]]; then
-  echo "load-issue.sh: BUGSNAG_TOKEN is not set (export a Data Access API token)" >&2
-  exit 2
-fi
-
-# --- parse org slug / project slug / error id ------------------------------
-ORG_SLUG=""
-PROJ_SLUG=""
-ERROR_ID=""
-
-if [[ "$INPUT" =~ ^https?://(www\.)?app\.bugsnag\.com/ ]]; then
-  parsed="$(printf '%s' "$INPUT" | sed -nE 's#^https?://(www\.)?app\.bugsnag\.com/([^/]+)/([^/]+)/errors/([0-9a-fA-F]+).*#\2 \3 \4#p')"
-elif [[ "$INPUT" =~ ^[^/]+/[^/]+/[0-9a-fA-F]+$ ]]; then
-  parsed="$(printf '%s' "$INPUT" | awk -F/ '{print $1, $2, $3}')"
-else
-  echo "load-issue.sh: argument must be an app.bugsnag.com URL or <org>/<project>/<error-id>: $INPUT" >&2
-  exit 1
-fi
-
-if [[ -z "${parsed:-}" ]]; then
-  echo "load-issue.sh: could not extract org/project/error from input: $INPUT" >&2
-  exit 1
-fi
+parsed="$(bsnag_parse_ref "$1")" || exit 1
 ORG_SLUG="$(printf '%s' "$parsed" | awk '{print $1}')"
 PROJ_SLUG="$(printf '%s' "$parsed" | awk '{print $2}')"
 ERROR_ID="$(printf '%s' "$parsed" | awk '{print $3}')"
 
-# --- HTTP helper ------------------------------------------------------------
-# bsnag_get <url>  -> body on stdout; non-2xx aborts with exit 3.
-bsnag_get() {
-  local url="$1" body http
-  body="$(curl -sS -w $'\n%{http_code}' \
-    -H "Authorization: token ${TOKEN}" \
-    -H "X-Version: 2" \
-    -H "Content-Type: application/json" \
-    "$url")" || { echo "load-issue.sh: network error calling $url" >&2; exit 3; }
-  http="${body##*$'\n'}"
-  body="${body%$'\n'*}"
-  if [[ "$http" -lt 200 || "$http" -ge 300 ]]; then
-    echo "load-issue.sh: Bugsnag API returned HTTP $http for $url" >&2
-    exit 3
-  fi
-  printf '%s' "$body"
-}
-
-# --- resolve org id from slug ----------------------------------------------
+# --- resolve org id + project id (slugs are not API keys) -------------------
 ORGS_JSON="$(bsnag_get "${API}/user/organizations")"
 ORG_ID="$(printf '%s' "$ORGS_JSON" | jq -r --arg s "$ORG_SLUG" 'map(select(.slug == $s)) | .[0].id // empty')"
 if [[ -z "$ORG_ID" ]]; then
-  echo "load-issue.sh: organization slug not found or not accessible: $ORG_SLUG" >&2
+  echo "${PROG}: organization slug not found or not accessible: $ORG_SLUG" >&2
   exit 3
 fi
-
-# --- resolve project id from slug (paginate via Link rel=next) -------------
-PROJ_JSON=""
-next="${API}/organizations/${ORG_ID}/projects?per_page=100&sort=created_at&direction=asc"
-pages=0
-while [[ -n "$next" && "$pages" -lt 30 ]]; do
-  pages=$((pages + 1))
-  headers="$(mktemp)"
-  page_body="$(curl -sS -D "$headers" \
-    -H "Authorization: token ${TOKEN}" -H "X-Version: 2" "$next")" \
-    || { rm -f "$headers"; echo "load-issue.sh: network error listing projects" >&2; exit 3; }
-  match="$(printf '%s' "$page_body" | jq -c --arg s "$PROJ_SLUG" 'map(select(.slug == $s)) | .[0] // empty' 2>/dev/null || true)"
-  if [[ -n "$match" ]]; then
-    PROJ_JSON="$match"
-    rm -f "$headers"
-    break
-  fi
-  next="$(grep -i '^link:' "$headers" | sed -nE 's/.*<([^>]+)>; *rel="next".*/\1/p' || true)"
-  rm -f "$headers"
-done
-
-if [[ -z "$PROJ_JSON" ]]; then
-  echo "load-issue.sh: project slug not found in organization: $PROJ_SLUG" >&2
-  exit 3
-fi
+PROJ_JSON="$(bsnag_resolve_project_json "$ORG_ID" "$PROJ_SLUG")"
 PROJ_ID="$(printf '%s' "$PROJ_JSON" | jq -r '.id')"
 
 # --- fetch error, comments, latest event -----------------------------------

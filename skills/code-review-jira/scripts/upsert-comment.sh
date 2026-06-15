@@ -144,9 +144,16 @@ fi
 # `.comments` array; `jq -s` slurps the pages into a single list. Comment
 # bodies come back as Atlassian Document Format (ADF) objects, so the marker is
 # matched against the stringified body rather than a raw string.
+#
+# The acli call and the jq transform are kept separate so a failed list call
+# (non-zero acli exit) returns 1 instead of being silently flattened to
+# `{"comments":[]}` by jq -s — that distinction is what lets the caller exit 3
+# rather than mistake an API failure for an empty comment set and post a
+# duplicate comment.
 list_comments() {
-  acli jira workitem comment list --key "$KEY" --json --paginate 2>/dev/null \
-    | jq -s '{ comments: ([ .[].comments // [] ] | add // []) }' 2>/dev/null || true
+  local raw
+  raw="$(acli jira workitem comment list --key "$KEY" --json --paginate 2>/dev/null)" || return 1
+  printf '%s' "$raw" | jq -s '{ comments: ([ .[].comments // [] ] | add // []) }' 2>/dev/null
 }
 
 find_marked_id() {
@@ -160,8 +167,7 @@ find_marked_id() {
       ' 2>/dev/null || true
 }
 
-COMMENTS_JSON="$(list_comments)"
-if [[ -z "$COMMENTS_JSON" ]]; then
+if ! COMMENTS_JSON="$(list_comments)"; then
   echo "upsert-comment.sh: failed to list comments on $KEY" >&2
   exit 3
 fi
@@ -192,6 +198,12 @@ else
   # The `create --json` shape varies across acli builds, so re-list and match
   # the just-written marker to resolve the new comment id deterministically.
   NEW_ID="$(find_marked_id "$(list_comments)")"
-  echo "https://${SITE}/browse/${KEY}?focusedCommentId=${NEW_ID}"
+  # The comment is already created; only drop the deep-link fragment when the
+  # re-list could not resolve the id, so stdout stays a valid issue URL.
+  if [[ -n "$NEW_ID" ]]; then
+    echo "https://${SITE}/browse/${KEY}?focusedCommentId=${NEW_ID}"
+  else
+    echo "https://${SITE}/browse/${KEY}"
+  fi
   echo "action=created id=${NEW_ID}" >&2
 fi

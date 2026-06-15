@@ -12,7 +12,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **48 comprehensive Agent skills** for automated workflows (v0.8.3)
+- **49 comprehensive Agent skills** for automated workflows (v0.8.3)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -104,7 +104,7 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 
 # 🎯 Skills Overview — **v0.8.3**
 
-> Current release includes 48 skills for issue resolution, code review, refactoring, testing, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
+> Current release includes 49 skills for issue resolution, code review, refactoring, testing, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -135,6 +135,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `code-review` | Senior PHP code review focused on architecture, risk, and behavior (read-only). |
 | `code-review-github` | Review GitHub pull requests; posts technical findings on the PR and a non-technical `pr-summary` comment on every linked GitHub issue (read-only on the codebase; publishes only comments via `gh`). |
 | `code-review-jira` | Review changes linked to a JIRA ticket; posts technical findings on the GitHub PR and a non-technical `pr-summary` comment on the JIRA ticket (read-only on the codebase; publishes only comments via `gh` and `acli`). |
+| `code-review-bugsnag` | Review a fix linked to a Bugsnag error; posts technical findings on the linked GitHub PR and a non-technical `pr-summary` comment on the Bugsnag error (read-only on the codebase; publishes only comments via `gh` and the Data Access API, needs `BUGSNAG_TOKEN`). |
 | `process-code-review` | Process existing review feedback, resolve comments, and prepare next review cycle. |
 | `security-review` | OWASP-focused security review (injection, auth, SSRF, exposure, misconfigurations) — read-only. |
 | `api-review` | API design contract review (`@rules/api/general.mdc`) — resource-oriented REST, HTTP method/idempotence, idempotency keys, precise status codes, validation at the trust boundary. Self-scopes to API-surface diffs and runs on every CR — read-only. |

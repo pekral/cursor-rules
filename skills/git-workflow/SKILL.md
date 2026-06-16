@@ -63,19 +63,21 @@ git push --force-with-lease origin feature/user-auth
 Always `--force-with-lease`, never plain `--force`.
 
 ### Pull policy: sync a side branch before pulling it
-`@rules/git/general.mdc` *Pull Policy* requires every non-default branch to be rebased onto the latest default branch **before** it is pulled, so the side branch always carries the newest `main`. Mechanics:
+`@rules/git/general.mdc` *Pull Policy* requires every non-default branch to be rebased onto the latest default branch so it always carries the newest default-branch history. The default branch is `main` on some repos and `master` on others — resolve it instead of hardcoding `origin/main` (which does not exist on a `master`-default repo and makes the command fail). Order matters: take the branch's own remote **first**, then rebase the default branch in, then force-push — do not pull again afterwards.
 ```bash
+DEFAULT_BRANCH="$(git symbolic-ref --short refs/remotes/origin/HEAD | sed 's@^origin/@@')"
 git checkout feature/user-auth
 git fetch origin
-git rebase origin/main          # bring the latest main into the side branch
+git pull --rebase                     # 1) take the branch's own remote first
+git rebase "origin/$DEFAULT_BRANCH"   # 2) bring the latest default branch in
 # resolve conflicts if any, then: git rebase --continue
-git pull --rebase               # only now pull the branch's own remote
+git push --force-with-lease           # 3) publish; do NOT git pull again — it would undo the rebase
 ```
-If the rebase advanced the branch onto new `main` commits, immediately reinstall dependencies so the installed packages match the (possibly updated) lockfile:
+If the rebase changed `composer.lock` (the default branch updated dependencies), reinstall before continuing so the installed packages match the new lockfile:
 ```bash
-composer install                # run only when the rebase brought in new commits
+composer install                      # run only when composer.lock actually changed
 ```
-Then publish the rewritten branch (sole contributor only): `git push --force-with-lease`. The default branch itself is exempt — pull it directly with `git pull`. Read-only review skills are exempt too: they `git pull` only to read the diff and never rebase.
+The default branch itself is exempt — pull it directly with `git pull`. Read-only review skills are exempt too: they `git pull` only to read the diff and never rebase.
 
 ### Never rebase shared/public history
 Do NOT rebase a branch that has been pushed and that others may have based work on, nor any protected branch (`main`, `develop`), nor already-merged history. Rebase rewrites commits and breaks everyone downstream. For published branches, fix forward with `git revert` instead.
@@ -173,7 +175,7 @@ If you wire a pre-commit or pre-push hook, run the project's own checks (the `co
 ## Done when
 - A branching strategy is chosen with a stated reason.
 - Merge vs rebase is applied correctly and no shared/public history was rebased.
-- A non-default branch was rebased onto the latest default branch before being pulled, and `composer install` was re-run whenever that rebase brought in new commits.
+- A non-default branch was synced (own remote pulled, then the resolved default branch rebased in, then force-pushed — never hardcoding `origin/main`), and `composer install` was re-run whenever that rebase changed `composer.lock`.
 - Conflicts are resolved with markers removed and project checks re-run.
 - Any undo used the right tool for whether the commit was pushed.
 - Releases are tagged with annotated semver tags pushed to origin.

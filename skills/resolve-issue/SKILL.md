@@ -48,7 +48,7 @@ Before starting the resolution flow:
    - If the issue does not belong to the current project, refuse to process it and inform the user.
 2. Fetch and analyze the issue from the detected source by running the deterministic loader for that tracker — never call `gh`, `acli`, or REST endpoints directly. Read all required fields off the resulting JSON document.
    - **GitHub:** `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>`. If the script is unavailable (missing tool, exit code 2/3), fall back to the GitHub MCP server.
-   - **JIRA:** `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>`. If the script is unavailable (missing tool, exit code 2/3), fall back to the JIRA MCP server.
+   - **JIRA:** `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>` for the structured JSON, or `skills/code-review-jira/scripts/gather-issue-context.sh <KEY|URL>` for a full Markdown context brief in one pass (issue + comments + attachments + recursively-loaded linked issues + an inventory of external URLs to follow). Read attachment content and the inventoried URLs with your own tools — `acli` cannot fetch them; follow useful links recursively to a sensible depth. If the script is unavailable (missing tool, exit code 2/3), fall back to the JIRA MCP server.
    - **Bugsnag:** `skills/code-review-bugsnag/scripts/load-issue.sh <URL|TRIPLE>` (requires `BUGSNAG_TOKEN`). The JSON carries the error class, message, status, `context`, the in-project `latestEvent.stacktrace` frames (the entry point for the TDD reproduction), `comments[]`, and `linkedIssues[]` (the mirrored GitHub issue/PR). If the script is unavailable (missing tool/token, exit code 2/3), fall back to a Bugsnag MCP server.
 3. Define exact requirements and expected behavior.
 4. Classify the task (bug or feature).
@@ -209,7 +209,7 @@ The non-technical report must be understandable by non-technical testers and pro
 
 ### JIRA-specific follow-up
 - Link the created PR back to the JIRA issue.
-- Do not change the JIRA issue status — per `@rules/jira/general.mdc`, status transitions are handled by humans only.
+- Once the PR is open, move the issue to the project's Code Review status by running `skills/code-review-jira/scripts/transition-to-code-review.sh <KEY|URL>`. This is the single sanctioned status transition (per `@rules/jira/general.mdc`); the helper refuses any non-review target and only reports success after confirming the issue actually reached the review column. When it exits 5 — the review-status name differs for this project and could not be auto-resolved — discover the real name via the JIRA MCP server's available-transitions and re-run with it as the `STATUS` argument, or ask a human. Perform no other status transition; all others remain human-only.
 
 ### Bugsnag-specific follow-up
 - The created PR is linked through the Bugsnag error's existing GitHub integration (`linkedIssues[]`); do not invent a second link.

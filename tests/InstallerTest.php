@@ -2005,6 +2005,81 @@ test('resolve-issue moves the issue to code review via the transition helper aft
     expect($content)->toContain('skills/code-review-jira/scripts/transition-to-code-review.sh');
 });
 
+test('new GitHub agent scripts are shipped, executable, and documented', function (): void {
+    $packageDir = dirname(__DIR__);
+    $scripts = [
+        'gather-issue-context.sh' => 'Usage: gather-issue-context.sh <NUMBER|URL>',
+        'parse-comments.sh' => 'Usage: parse-comments.sh <NUMBER|URL>',
+    ];
+
+    foreach ($scripts as $name => $usage) {
+        $script = $packageDir . '/skills/code-review-github/scripts/' . $name;
+        expect(file_exists($script))->toBeTrue();
+        expect(is_executable($script))->toBeTrue();
+
+        $content = (string) file_get_contents($script);
+        expect($content)->toStartWith('#!/usr/bin/env bash');
+        expect($content)->toContain($usage);
+    }
+});
+
+test('new Bugsnag agent scripts are shipped, executable, and documented', function (): void {
+    $packageDir = dirname(__DIR__);
+    $scripts = [
+        'gather-issue-context.sh' => 'Usage: gather-issue-context.sh <URL|ORG_SLUG/PROJECT_SLUG/ERROR_ID>',
+        'parse-comments.sh' => 'Usage: parse-comments.sh <URL|ORG_SLUG/PROJECT_SLUG/ERROR_ID>',
+    ];
+
+    foreach ($scripts as $name => $usage) {
+        $script = $packageDir . '/skills/code-review-bugsnag/scripts/' . $name;
+        expect(file_exists($script))->toBeTrue();
+        expect(is_executable($script))->toBeTrue();
+
+        $content = (string) file_get_contents($script);
+        expect($content)->toStartWith('#!/usr/bin/env bash');
+        expect($content)->toContain($usage);
+    }
+});
+
+test('github gather-issue-context persists linked items as compact single-line JSON', function (): void {
+    // Regression guard (same class of bug fixed for the JIRA gatherer):
+    // load-issue.sh emits pretty multi-line JSON while the linked-item render /
+    // URL passes read the accumulator file line by line, so each record must
+    // collapse to a single line via `jq -c` or every linked item is dropped.
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review-github/scripts/gather-issue-context.sh');
+
+    expect($content)->toContain('jq -c . >> "$RELATED_JSON_FILE"');
+    expect($content)->toContain('while IFS= read -r line; do');
+});
+
+test('GitHub context-consuming skills offer gather-issue-context.sh', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skills = [
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/resolve-issue/SKILL.md',
+        $packageDir . '/skills/prepare-issue-context/SKILL.md',
+    ];
+
+    foreach ($skills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('skills/code-review-github/scripts/gather-issue-context.sh');
+    }
+});
+
+test('Bugsnag context-consuming skills offer gather-issue-context.sh', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skills = [
+        $packageDir . '/skills/code-review-bugsnag/SKILL.md',
+        $packageDir . '/skills/resolve-issue/SKILL.md',
+    ];
+
+    foreach ($skills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('skills/code-review-bugsnag/scripts/gather-issue-context.sh');
+    }
+});
+
 test('install with prune on non-existent target directory does nothing', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/skills/some-skill/SKILL.md', 'content');

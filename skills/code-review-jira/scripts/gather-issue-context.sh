@@ -159,10 +159,15 @@ while [[ "$depth" -le "$DEPTH" && "${#FRONTIER[@]}" -gt 0 ]]; do
     SEEN+=("$k")
     j="$(load "$k")" || true
     [[ -z "$j" ]] && continue
-    printf '%s\n' "$j" >> "$RELATED_JSON_FILE"
+    # Persist ONE compact JSON object per line — load-issue.sh emits pretty
+    # (multi-line) JSON, and the render / URL passes below read this file back
+    # line by line, so each record must collapse to a single line or the
+    # readback parses fragments and silently drops every related issue.
+    printf '%s' "$j" | jq -c . >> "$RELATED_JSON_FILE" 2>/dev/null || continue
     while IFS= read -r nk; do [[ -n "$nk" ]] && NEXT+=("$nk"); done < <(related_keys "$j")
   done
-  FRONTIER=("${NEXT[@]:-}")
+  FRONTIER=()
+  [[ ${#NEXT[@]} -gt 0 ]] && FRONTIER=("${NEXT[@]}")
   depth=$((depth + 1))
 done
 

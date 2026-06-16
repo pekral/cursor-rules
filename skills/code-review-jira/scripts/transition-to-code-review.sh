@@ -124,6 +124,11 @@ if ! ISSUE_JSON="$("$SCRIPT_DIR/load-issue.sh" "$KEY")"; then
 fi
 CURRENT_STATUS="$(printf '%s' "$ISSUE_JSON" | jq -r '.status // empty')"
 SITE="$(printf '%s' "$ISSUE_JSON" | jq -r '.url // empty' | sed -nE 's#https?://([^/]+)/.*#\1#p')"
+# Fall back to the authenticated acli site when the loaded JSON carries no URL,
+# so the emitted link never degrades to a malformed https:///browse/<KEY>.
+if [[ -z "$SITE" ]]; then
+  SITE="$(acli jira auth status 2>/dev/null | awk -F': *' 'tolower($0) ~ /site:/ { gsub(/[[:space:]]+$/, "", $2); print $2; exit }')"
+fi
 
 if [[ -n "$CURRENT_STATUS" && "$(printf '%s' "$CURRENT_STATUS" | tr '[:upper:]' '[:lower:]')" == "$target_lower" ]]; then
   echo "https://${SITE:-}/browse/${KEY}"

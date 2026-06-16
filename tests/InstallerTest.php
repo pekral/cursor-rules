@@ -1931,6 +1931,80 @@ test('github-consuming skills route context loading through load-issue.sh', func
     }
 });
 
+test('new JIRA agent scripts are shipped, executable, and documented', function (): void {
+    $packageDir = dirname(__DIR__);
+    $scripts = [
+        'gather-issue-context.sh' => 'Usage: gather-issue-context.sh <KEY|URL>',
+        'parse-comments.sh' => 'Usage: parse-comments.sh <KEY|URL>',
+        'transition-to-code-review.sh' => 'Usage: transition-to-code-review.sh <KEY|URL> [<STATUS>]',
+    ];
+
+    foreach ($scripts as $name => $usage) {
+        $script = $packageDir . '/skills/code-review-jira/scripts/' . $name;
+        expect(file_exists($script))->toBeTrue();
+        expect(is_executable($script))->toBeTrue();
+
+        $content = (string) file_get_contents($script);
+        expect($content)->toStartWith('#!/usr/bin/env bash');
+        expect($content)->toContain($usage);
+    }
+});
+
+test('gather-issue-context persists linked issues as compact single-line JSON', function (): void {
+    // Regression guard: load-issue.sh emits pretty (multi-line) JSON, while the
+    // related-issue render / URL passes read the accumulator file line by line.
+    // Each record must collapse to a single line via `jq -c`, otherwise every
+    // linked issue is silently dropped (the readback parses JSON fragments).
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review-jira/scripts/gather-issue-context.sh');
+
+    expect($content)->toContain('jq -c . >> "$RELATED_JSON_FILE"');
+    expect($content)->not->toContain('printf \'%s\n\' "$j" >> "$RELATED_JSON_FILE"');
+    expect($content)->toContain('while IFS= read -r line; do');
+});
+
+test('transition-to-code-review refuses non-review targets and re-verifies the landed status', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review-jira/scripts/transition-to-code-review.sh');
+
+    // Guard: only a review status is allowed.
+    expect($content)->toContain('is not a Code Review status');
+    // Post-transition re-read so an acli false-positive "looped transition" is caught.
+    expect($content)->toContain('acli jira workitem transition --key "$KEY" --status "$TARGET" --yes');
+    expect($content)->toContain('exit 5');
+});
+
+test('JIRA context-consuming skills offer gather-issue-context.sh', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skills = [
+        $packageDir . '/skills/resolve-issue/SKILL.md',
+        $packageDir . '/skills/prepare-issue-context/SKILL.md',
+        $packageDir . '/skills/tester-cookbook/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+    ];
+
+    foreach ($skills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('skills/code-review-jira/scripts/gather-issue-context.sh');
+    }
+});
+
+test('jira rule permits the single code-review transition via the helper only', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/jira/general.mdc');
+
+    expect($content)->toContain('transition-to-code-review.sh');
+    expect($content)->toContain('human-only');
+    expect($content)->toContain('Never change JIRA issue status');
+});
+
+test('resolve-issue moves the issue to code review via the transition helper after the PR is open', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    expect($content)->toContain('skills/code-review-jira/scripts/transition-to-code-review.sh');
+});
+
 test('install with prune on non-existent target directory does nothing', function (): void {
     $root = installerCreateProjectRoot();
     installerWriteFile($root . '/skills/some-skill/SKILL.md', 'content');

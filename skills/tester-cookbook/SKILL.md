@@ -34,7 +34,7 @@ metadata:
 ## Required approach
 
 ### 1. Load JIRA context
-- Load the task via `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>` — never call `acli` directly. If the loader is unavailable (missing tool, exit code 2/3), fall back to the JIRA MCP server.
+- Load the task via `skills/code-review-jira/scripts/load-issue.sh <KEY|URL>` — never call `acli` directly. For the full task context in one pass (description, all comments, attachments, recursively-loaded linked issues, and an inventory of external URLs), run `skills/code-review-jira/scripts/gather-issue-context.sh <KEY|URL>` instead. If the loader is unavailable (missing tool, exit code 2/3), fall back to the JIRA MCP server.
 - Read `summary`, `descriptionText`, every entry in `comments[]`, and the linked-PR list off the resulting JSON document.
 
 ### 2. Load each linked PR for impact analysis

@@ -12,6 +12,17 @@ globs: ["*"]
 - Use small, focused commits (one logical change per commit).
 - Use meaningful branch names.
 
+## Pull Policy
+- The default branch (`main` / `master`) is pulled directly: `git checkout main && git pull`. No rebase step applies to it.
+- Before pulling any **other** branch you are working on (a feature / fix / PR branch), first sync it with the default branch so it always carries the latest `main`:
+    1. `git fetch origin`
+    2. While on the side branch, rebase the default branch into it: `git rebase origin/main` (replays the branch's commits on top of the newest `main`).
+    3. Resolve any conflicts (`@skills/git-workflow/SKILL.md`), then `git rebase --continue`.
+    4. Only then pull the branch's own remote, with rebase to keep history linear: `git pull --rebase`.
+- If the rebase brought in new commits from `main` (the branch advanced onto newer history), run `composer install` immediately afterwards so the installed packages match the updated `composer.lock`.
+- Publishing the rebased branch to its remote uses `git push --force-with-lease` (never plain `--force`, and only when you are the sole contributor — see `@skills/git-workflow/SKILL.md`).
+- **Read-only review skills are exempt.** A read-only skill switches to the branch and runs `git pull` only to read the diff; it must never rebase, `composer install`, or otherwise rewrite the branch or working tree.
+
 ## Commit Messages
 - Language: English
 - Format: `type(scope): short description`

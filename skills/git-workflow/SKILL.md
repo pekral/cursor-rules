@@ -62,6 +62,21 @@ git push --force-with-lease origin feature/user-auth
 ```
 Always `--force-with-lease`, never plain `--force`.
 
+### Pull policy: sync a side branch before pulling it
+`@rules/git/general.mdc` *Pull Policy* requires every non-default branch to be rebased onto the latest default branch **before** it is pulled, so the side branch always carries the newest `main`. Mechanics:
+```bash
+git checkout feature/user-auth
+git fetch origin
+git rebase origin/main          # bring the latest main into the side branch
+# resolve conflicts if any, then: git rebase --continue
+git pull --rebase               # only now pull the branch's own remote
+```
+If the rebase advanced the branch onto new `main` commits, immediately reinstall dependencies so the installed packages match the (possibly updated) lockfile:
+```bash
+composer install                # run only when the rebase brought in new commits
+```
+Then publish the rewritten branch (sole contributor only): `git push --force-with-lease`. The default branch itself is exempt — pull it directly with `git pull`. Read-only review skills are exempt too: they `git pull` only to read the diff and never rebase.
+
 ### Never rebase shared/public history
 Do NOT rebase a branch that has been pushed and that others may have based work on, nor any protected branch (`main`, `develop`), nor already-merged history. Rebase rewrites commits and breaks everyone downstream. For published branches, fix forward with `git revert` instead.
 
@@ -158,6 +173,7 @@ If you wire a pre-commit or pre-push hook, run the project's own checks (the `co
 ## Done when
 - A branching strategy is chosen with a stated reason.
 - Merge vs rebase is applied correctly and no shared/public history was rebased.
+- A non-default branch was rebased onto the latest default branch before being pulled, and `composer install` was re-run whenever that rebase brought in new commits.
 - Conflicts are resolved with markers removed and project checks re-run.
 - Any undo used the right tool for whether the commit was pushed.
 - Releases are tagged with annotated semver tags pushed to origin.

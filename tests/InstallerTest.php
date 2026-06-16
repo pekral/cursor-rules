@@ -1687,6 +1687,16 @@ test('every code review skill invokes assignment-compliance-check', function ():
     }
 });
 
+test('every code review skill runs analyze-problem for assignment conformance', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    foreach (['code-review', 'code-review-github', 'code-review-jira', 'code-review-bugsnag'] as $skill) {
+        $content = (string) file_get_contents($packageDir . '/skills/' . $skill . '/SKILL.md');
+        expect($content)->toContain('@skills/analyze-problem/SKILL.md');
+        expect($content)->toContain('assignment conformance');
+    }
+});
+
 test('readme reports the current skill count and lists tester-cookbook and security-threat-analysis', function (): void {
     $packageDir = dirname(__DIR__);
     $readme = (string) file_get_contents($packageDir . '/README.md');

@@ -24,7 +24,7 @@ metadata:
 - Identify the task from the provided issue code or URL
 - Find all open pull requests for the task
   - If multiple PRs exist, process each independently
-- Before processing a PR, switch to the PR branch and pull latest changes
+- Before processing a PR, switch to the PR branch and pull latest changes following `@rules/git/general.mdc` *Pull Policy*: `git fetch origin`, rebase the default branch into the PR branch (`git rebase origin/main`), resolve any conflicts, then `git pull --rebase`. If the rebase brought in new commits from `main`, run `composer install` immediately so dependencies match the updated `composer.lock`. Republish the rebased branch with `git push --force-with-lease`. If the rebase surfaces conflicts that cannot be resolved cleanly, stop and report it (the existing merge-conflict constraint).
 
 ### For each PR:
 

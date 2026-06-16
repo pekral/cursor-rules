@@ -78,7 +78,7 @@ render_item() {
     ( if .kind == "pr" then
         ( line("Branch"; "\(.headRefName // "?") → \(.baseRefName // "?")"),
           line("Draft"; (.isDraft | tostring)),
-          line("Mergeable"; "\(.mergeable // "?") / \(.mergeStateStatus // "?")"),
+          (if (.mergeable // "") == "" then empty else "- **Mergeable:** \(.mergeable) / \(.mergeStateStatus // "?")" end),
           line("Review decision"; .reviewDecision),
           line("Diff"; "+\(.additions // 0) -\(.deletions // 0) across \(.changedFiles // 0) file(s)") )
       else empty end ),

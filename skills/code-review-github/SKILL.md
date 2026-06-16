@@ -26,6 +26,7 @@ Run a full code review for GitHub pull requests and publish findings directly to
 
 ### 1. Load Context
 - Load PR context by running `skills/code-review-github/scripts/load-issue.sh <NUMBER|URL>` — the single deterministic entry point. Never call `gh issue view`, `gh pr view`, or `gh api /repos/.../issues/...` directly. Read PR header, description, comments, commits, files, reviews, status checks, and `closingIssues` off the resulting JSON document.
+- For a single ready-to-read context brief — the issue/PR plus its body, comments, changed files, commits, reviews, CI checks, recursively-loaded linked issues/PRs, and an inventory of external URLs, rendered as Markdown — run `skills/code-review-github/scripts/gather-issue-context.sh <NUMBER|URL>` instead of hand-assembling the JSON. To read only the comments as a structured array, use `skills/code-review-github/scripts/parse-comments.sh <NUMBER|URL>`. Both build on `load-issue.sh`, so the same exit codes and MCP fallback apply. Attachment content and the inventoried URLs are not fetched by the scripts — read them with your own tools when a finding depends on them.
 - Load each linked issue (from `closingIssues[]`) the same way — pass its number or URL to the same script.
 - If the script is unavailable (missing tool, exit code 2/3) fall back to the GitHub MCP server. Always prefer the MCP fallback for data the script cannot cover: review-thread / line-anchored comments, per-commit check runs, and binary attachment contents.
 - If multiple PRs exist for one issue, review each independently

@@ -3227,6 +3227,42 @@ test('applyCoAuthoredByPreference skips non-claude editors', function (): void {
     expect(InstallerClaudeSettings::applyCoAuthoredByPreference('cursor'))->toBeFalse();
 });
 
+test('ensureCoAuthoredByDisabled preserves empty JSON objects elsewhere in settings.json', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, '{"attribution": {}}');
+
+    try {
+        InstallerClaudeSettings::ensureCoAuthoredByDisabled($home);
+
+        $raw = (string) file_get_contents($settingsPath);
+        expect($raw)->toContain('"attribution": {}');
+        expect($raw)->not->toContain('"attribution": []');
+
+        $decoded = json_decode($raw, false, 512, JSON_THROW_ON_ERROR);
+        assert($decoded instanceof stdClass);
+        expect($decoded->attribution)->toBeInstanceOf(stdClass::class);
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureBundledScriptPermissions preserves empty JSON objects elsewhere in settings.json', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, '{"attribution": {}}');
+
+    try {
+        InstallerClaudeSettings::ensureBundledScriptPermissions($home);
+
+        $raw = (string) file_get_contents($settingsPath);
+        expect($raw)->toContain('"attribution": {}');
+        expect($raw)->not->toContain('"attribution": []');
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
 test('dependency-selection rule gates every new Composer package on activity and compatibility', function (): void {
     $packageDir = dirname(__DIR__);
     $rulePath = $packageDir . '/rules/php/dependency-selection.mdc';

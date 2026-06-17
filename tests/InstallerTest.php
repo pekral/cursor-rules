@@ -1693,9 +1693,12 @@ test('code review skills delegate the non-technical issue-tracker summary to pr-
 test('every code review skill invokes assignment-compliance-check', function (): void {
     $packageDir = dirname(__DIR__);
 
-    foreach (['code-review', 'code-review-github', 'code-review-jira', 'code-review-bugsnag'] as $skill) {
-        $content = (string) file_get_contents($packageDir . '/skills/' . $skill . '/SKILL.md');
-        expect($content)->toContain('@skills/assignment-compliance-check/SKILL.md');
+    $wrappers = glob($packageDir . '/skills/code-review*/SKILL.md');
+    assert($wrappers !== false);
+    expect($wrappers)->not->toBeEmpty();
+
+    foreach ($wrappers as $skillFile) {
+        expect((string) file_get_contents($skillFile))->toContain('@skills/assignment-compliance-check/SKILL.md');
     }
 });
 

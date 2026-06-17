@@ -4023,6 +4023,18 @@ test('agents directory ships the talos code-writing subagent with required front
     expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
 });
 
+test('agents directory ships the metis problem-analysis subagent with required frontmatter', function (): void {
+    $packageDir = dirname(__DIR__);
+    $agentPath = $packageDir . '/agents/metis.md';
+
+    expect(is_file($agentPath))->toBeTrue();
+
+    $content = (string) file_get_contents($agentPath);
+    expect($content)->toContain('name: metis');
+    expect($content)->toContain('tools: Read, Glob, Grep, Bash');
+    expect($content)->toContain('@skills/analyze-problem/SKILL.md');
+});
+
 test('resolveAgentsSource returns the package agents directory when it exists', function (): void {
     $packageDir = dirname(__DIR__);
 

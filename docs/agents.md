@@ -28,6 +28,14 @@ The tireless bronze automaton, named after **Talos**, the forged guardian that w
 - **Orchestrates:** `resolve-issue`.
 - **Safety:** stops at the PR — never reviews its own work and never merges.
 
+### <img src="../assets/agents/metis.svg" alt="metis avatar" width="48" align="left"> `metis` — problem-analysis advisor
+
+The counsel of wise planning, named after **Metis**, the Titaness of deliberation and cunning planning (and mother of Athena). Give it a problem — a tracker link, a described failure, or an under-specified assignment — and it runs the analyze-problem framework, proposes the smallest safe solution, and publishes a reusable plan as a GitHub issue, then hands back an `Analysis done` summary. It is the thinking front-end to the roster: `metis` the mind (analysis), `talos` the hands (implementation), `argos` the eyes (review).
+
+- **Trigger:** a problem needs analysis, or a vague assignment needs a proposed solution before any code is written.
+- **Orchestrates:** `analyze-problem`.
+- **Safety:** read-only — never edits, commits, pushes, or implements; publishes its plan to the tracker.
+
 ## Naming convention — Greek mythology
 
 Every agent is named after a figure from **Greek mythology**, chosen so the figure's role matches the agent's function. Use the lowercase name as the agent `name:` and file id (`agents/<name>.md`).
@@ -36,6 +44,7 @@ Every agent is named after a figure from **Greek mythology**, chosen so the figu
 |---|---|---|
 | `argos` | Argos Panoptes, the hundred-eyed all-seeing watcher | nothing escapes his gaze → thorough PR inspection |
 | `talos` | Talos, the bronze automaton forged to work and guard without rest | tireless artificial labourer → forges working code |
+| `metis` | Metis, Titaness of wise counsel and cunning planning | deliberation before action → problem analysis & planning |
 
 Naming ideas for future agents: `themis` (order / verdict), `rhadamanthys` (fair judge), `athena` (wisdom / architecture), `hermes` (delivery / merge).
 

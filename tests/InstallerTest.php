@@ -4203,3 +4203,11 @@ test('resolve-issue skill anchors phase planning on the one-phase-one-commit git
     expect($content)->toContain('one phase = one commit');
     expect($content)->toContain('@rules/git/general.mdc');
 });
+
+test('resolve-issue skill refuses to resolve a closed / inactive task', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    expect($content)->toContain('The issue must be open / active.');
+    expect($content)->toContain('do not resolve it');
+});

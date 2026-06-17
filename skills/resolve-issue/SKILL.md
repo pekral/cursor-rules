@@ -169,7 +169,7 @@ Resolve any **Critical** or **Moderate** finding from the security review before
 
 Once review and testing are clean:
 
-- Create a branch and commit changes following `@rules/git/general.mdc`
+- Create a branch (name always in English, regardless of the assignment language) and commit changes following `@rules/git/general.mdc`
 - Create a pull request with:
   - clear description of the change
   - reference to the original issue

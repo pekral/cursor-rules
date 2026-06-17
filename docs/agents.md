@@ -36,7 +36,7 @@ The counsel of wise planning, named after **Metis**, the Titaness of deliberatio
 - **Orchestrates:** `analyze-problem`.
 - **Safety:** read-only — never edits, commits, pushes, or implements; publishes its plan to the tracker.
 
-### <img src="../assets/agents/daidalos.svg" alt="daidalos avatar" width="48" align="left"> `daidalos` — engineering-workflow orchestrator
+### <img src="../assets/agents/daidalos.png" alt="daidalos avatar" width="48" align="left"> `daidalos` — engineering-workflow orchestrator
 
 The master craftsman who runs the workshop, named after **Daidalos**, the legendary engineer who designed the work and directed the makers. It is the **entry point** for a free-form engineering request — *"resolve a random issue"*, *"resolve this URL"*, *"implement this"*. It resolves a concrete source, decides whether the task needs a plan first, and routes: ambiguous / large → `metis` (analysis), clear → `talos` (implementation), then `argos` (review). It owns only the routing decision — `metis` the mind, `talos` the hands, `argos` the eyes; `daidalos` the workshop lead that directs them.
 

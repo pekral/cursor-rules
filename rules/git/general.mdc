@@ -10,6 +10,7 @@ globs: ["*"]
 ## Git Rules
 - Never push directly to `main` branch. NEVER.
 - Use small, focused commits (one logical change per commit).
+- **One phase = one commit.** When the issue is complex and split into phases — explicit `Phase N` headings, numbered milestones, ordered acceptance-criteria blocks, or a step-by-step plan written by the reporter — resolve each phase as **exactly one commit** in the PR, in the original phase order. Never merge, reorder, or re-scope phases into a single commit. When no phases are marked but the work covers multiple distinct concerns, split it into independently reviewable phases the same way and map one phase per commit; keep a small atomic change as a single commit (do not invent artificial phases).
 - Use meaningful branch names, always written in English regardless of the assignment language.
 
 ## Pull Policy

@@ -4059,3 +4059,19 @@ test('resolve-issue skill requires the created branch name to be in English', fu
 
     expect($content)->toContain('name always in English, regardless of the assignment language');
 });
+
+test('git/general.mdc mandates one commit per phase for phased issues', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/git/general.mdc');
+
+    expect($content)->toContain('One phase = one commit.');
+    expect($content)->toContain('exactly one commit');
+});
+
+test('resolve-issue skill anchors phase planning on the one-phase-one-commit git rule', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    expect($content)->toContain('one phase = one commit');
+    expect($content)->toContain('@rules/git/general.mdc');
+});

@@ -89,7 +89,7 @@ Only after Read, Map, and Verify are complete may phase planning and implementat
 
 ### Phase planning (commit plan)
 
-Before writing any code, decide how the in-scope work will be split into commits within the PR.
+Before writing any code, decide how the in-scope work will be split into commits within the PR, applying the **one phase = one commit** rule from `@rules/git/general.mdc` *Git Rules*.
 
 1. **Detect existing phases** in the issue description and the kept comments. Phase markers include explicit headings such as `Phase 1`, numbered milestones, ordered acceptance-criteria blocks, or a step-by-step plan written by the reporter.
 2. **If phases exist:** treat each phase as exactly **one commit**. Keep the original phase order as commit order. Do not merge, reorder, or re-scope phases.

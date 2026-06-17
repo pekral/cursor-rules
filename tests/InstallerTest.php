@@ -4035,6 +4035,19 @@ test('agents directory ships the metis problem-analysis subagent with required f
     expect($content)->toContain('@skills/analyze-problem/SKILL.md');
 });
 
+test('agents directory ships the daidalos orchestrator subagent with required frontmatter', function (): void {
+    $packageDir = dirname(__DIR__);
+    $agentPath = $packageDir . '/agents/daidalos.md';
+
+    expect(is_file($agentPath))->toBeTrue();
+
+    $content = (string) file_get_contents($agentPath);
+    expect($content)->toContain('name: daidalos');
+    expect($content)->toContain('tools: Read, Glob, Grep, Bash');
+    expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
+    expect($content)->toContain('@skills/autoresolve-oldest-github-issue/SKILL.md');
+});
+
 test('resolveAgentsSource returns the package agents directory when it exists', function (): void {
     $packageDir = dirname(__DIR__);
 

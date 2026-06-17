@@ -1,3 +1,5 @@
+{assignment_verdict}
+
 h2. How to test
 
 # [If the change is reachable only behind a test parameter (feature flag, ENV switch, query string, request header, admin toggle, allow-listed account), this first step *must* enable it — naming the exact value: admin switch label _New pricing preview_, ENV {{BETA_PRICING=1}}, query {{?preview=1}}, feature key {{feature.new_pricing}}. Omit this step when the change is reachable unconditionally.]
@@ -5,6 +7,8 @@ h2. How to test
 # [Outcome the tester verifies]
 
 {embedded_blocks}
+
+{quote}Render the {{assignment_verdict}} slot at the very top *only when the calling CR wrapper passes an {{h2. Assignment Compliance}} block* (the changes do not satisfy the assignment). It is a single bold line in the assignment language stating non-compliance and the gap count {{N}} (taken from the block's _Critical gaps found: N_ verdict / count of gap entries), pointing the reader to the detail below — e.g. {{⚠️ *Changes do not satisfy the assignment — N gap(s). See Assignment Compliance below.*}} (Czech assignment → {{⚠️ *Změny nesplňují zadání — N nedostatk(ů). Viz Assignment Compliance níže.*}}). When the changes satisfy the assignment (no Assignment Compliance block passed) or no tracker is linked, omit this slot entirely — including the surrounding blank line — so the comment begins at {{h2. How to test}}. Never render a positive "satisfies the assignment" line; only non-compliance is surfaced.{quote}
 
 {quote}This JIRA comment carries *only how to test* the change. Render the {{embedded_blocks}} slot only when the calling CR wrapper passes one or more JIRA Wiki Markup blocks — the {{h2. Clarifying questions}} block (open questions the reviewer needs answered before the work can be accepted) and/or the {{h2. Assignment Compliance}} block returned by {{@skills/assignment-compliance-check/SKILL.md}} (discrepancies with the assignment and Critical items). Each block is already converted to Wiki Markup; append it verbatim, in the order received, separated by a single blank line. When no blocks are passed, omit this slot entirely — including the surrounding blank lines — so the comment ends right after the test steps. Do not add an _Authors_ line, a _Summary of changes_ section, severity counts, file paths, line numbers, or code snippets — those belong on the GitHub PR comment, not here.{quote}
 

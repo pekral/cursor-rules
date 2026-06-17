@@ -3975,3 +3975,17 @@ test('analyze-problem skill requires pre-implementation research and a plan arti
     expect($content)->toContain('**Sources**');
     expect($content)->toContain('**Success criteria**');
 });
+
+test('git/general.mdc mandates English branch names regardless of assignment language', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/git/general.mdc');
+
+    expect($content)->toContain('always written in English regardless of the assignment language');
+});
+
+test('resolve-issue skill requires the created branch name to be in English', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    expect($content)->toContain('name always in English, regardless of the assignment language');
+});

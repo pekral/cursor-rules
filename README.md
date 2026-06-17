@@ -189,7 +189,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `frontend-patterns` | Livewire/Blade/Alpine UI patterns — component composition, state placement, performance, forms, and loading/empty/error states. |
 | `frontend-a11y` | Accessible UI in a Laravel app — semantic Blade markup, accessible forms, keyboard navigation with Alpine, focus and live-region management for Livewire, contrast, and Filament a11y. |
 | `vite-patterns` | Configure or optimize Vite (laravel-vite-plugin) asset bundling — entrypoints, the `@vite` Blade directive, HMR, env vars, aliases, manifests, code splitting, and production builds. |
-| `seo` | Audit, plan, or implement SEO in a Laravel app — crawlability, indexability, JSON-LD structured data in Blade, Core Web Vitals, on-page tags, and keyword mapping. |
+| `seo` | Audit, plan, or implement SEO in a Laravel app — crawlability, indexability, JSON-LD structured data in Blade, Core Web Vitals, on-page tags, keyword mapping, competitor gap analysis, E-E-A-T content quality, and measurement. |
 | `frontend-slides` | Build standalone HTML/CSS/JS presentation decks — self-contained single-file decks with viewport-fit layout, keyboard navigation, and browser Print-to-PDF export. |
 
 ## Content & Writing

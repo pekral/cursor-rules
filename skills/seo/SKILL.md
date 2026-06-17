@@ -1,6 +1,6 @@
 ---
 name: seo
-description: "Use when auditing, planning, or implementing SEO in a Laravel app — crawlability, indexability, JSON-LD structured data in Blade, Core Web Vitals, on-page tags, and keyword mapping."
+description: "Use when auditing, planning, or implementing SEO in a Laravel app — crawlability, indexability, JSON-LD structured data in Blade, Core Web Vitals, on-page tags, keyword mapping, competitor gap analysis, E-E-A-T content quality, and measurement."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
@@ -13,6 +13,7 @@ metadata:
 - One page maps to one clear primary search intent.
 - Every recommendation must be page-specific and implementable. No generic "improve SEO" output.
 - Mobile-first: indexing is mobile-first, so audit the mobile render.
+- White-hat only: recommend nothing that violates search-engine guidelines (no cloaking, paid links, doorway pages, or scaled spam content).
 
 ## Use when
 - Auditing crawlability, indexability, canonicals, or redirects.
@@ -21,6 +22,9 @@ metadata:
 - Improving Core Web Vitals (LCP, INP, CLS).
 - Doing keyword research and mapping keywords to URLs.
 - Planning internal linking, sitemap, or robots changes.
+- Comparing against competitors to find content or keyword gaps.
+- Assessing content quality and E-E-A-T signals.
+- Defining what to measure after changes ship.
 
 ## Technical SEO
 
@@ -37,6 +41,22 @@ metadata:
 - Multilingual pages need correct `hreflang` when locales exist.
 - Sitemaps reflect the intended public surface only. Build a sitemap from Laravel routes/models, or use the optional `spatie/laravel-sitemap` package to crawl and emit `sitemap.xml`.
 - No duplicate URLs compete without canonical control (e.g. pagination, query-string facets).
+
+### Site-health audit checklist
+Walk these every audit; each item maps to a concrete file, route, or response to inspect — never report a category without naming where it occurs.
+
+| Check | What to look for | Where in Laravel |
+| --- | --- | --- |
+| Crawl errors | 4xx/5xx on linked URLs | server logs, route list, `php artisan route:list` |
+| Broken links | dead internal/outbound `href`s | Blade views, content models, a crawl pass |
+| Redirect chains | 2+ stacked hops | `Redirect::` rules, web-server rewrites |
+| Mixed content | `http://` assets on an HTTPS page | Blade asset refs; force `asset()`/`secure_url()` |
+| Duplicate content | same intent on multiple URLs | facets, pagination, casing/slash variants |
+| Thin content | low-value near-empty pages | auto-generated tag/archive pages |
+| Orphan pages | published but unlinked internally | compare sitemap/routes against internal links |
+
+- Orphan detection: a page in the sitemap or route list with no internal `href` pointing at it cannot be discovered by crawlers following links — surface it and add an internal link or drop it from the sitemap.
+- Mixed content: an HTTPS page that loads any `http://` asset is downgraded and may be blocked by the browser. Derive asset URLs from `asset()` / `secure_url()` so they inherit the request scheme.
 
 ### Canonical + meta in a Blade layout
 ```blade
@@ -90,7 +110,7 @@ Emit JSON-LD in the layout via a pushed stack so each page contributes its own s
 @endpush
 ```
 
-Build the array with `json_encode` (never string-concatenate user input) so values are escaped and the document stays valid.
+Build the array with `json_encode` (never string-concatenate user input) so values are escaped and the document stays valid. Validate the emitted markup with Google's Rich Results Test before relying on it.
 
 ## On-page rules
 
@@ -120,10 +140,45 @@ Meta:   Action + topic + value proposition + one supporting detail
 4. Map one primary keyword/theme to one URL.
 5. Detect and avoid cannibalization (two URLs targeting the same intent).
 
+## Competitor gap analysis
+Use competitors to find concrete, page-level opportunities — never to copy.
+
+- **Keyword gaps:** queries competitors rank for that the site does not. Map each gap to a new or existing URL, not a generic "write more content" note.
+- **Content gaps:** topics or intents covered by competitors but missing from the site's coverage map.
+- **SERP-feature gaps:** rich results competitors win (FAQ, breadcrumb, review stars) that the site's schema does not yet support.
+- **Site-structure gaps:** shallower paths or clearer internal linking that make competitor pages easier to crawl.
+- Output each gap as `[gap type] target query/topic → owning URL → concrete change`, so it slots straight into the audit output below.
+
+## Content quality and E-E-A-T
+Search engines reward Experience, Expertise, Authoritativeness, and Trustworthiness. Tie each signal to something on the page.
+
+- **Experience / expertise:** show a real, attributed author (`Article.author` in JSON-LD plus a visible byline) and first-hand detail, not paraphrased generalities.
+- **Authoritativeness:** cite primary sources and earn relevant links naturally; do not buy or exchange links.
+- **Trust:** keep content accurate and current, show a clear publish/updated date, and make contact / ownership discoverable.
+- **Helpful-content first:** write for the person with the query. Consolidate or differentiate thin near-duplicate pages instead of keeping them for keyword coverage.
+
 ## Internal linking
 - Link from strong pages to pages you want to rank.
 - Use descriptive anchor text; avoid generic anchors when a specific one fits.
 - Backfill links from new pages to relevant existing ones.
+
+## Measurement and reporting
+Every recommendation needs a measurable outcome; pick the metrics that match the change and capture a baseline before shipping.
+
+- **Visibility:** organic traffic, impressions, average position, keyword rankings.
+- **Engagement / conversion:** click-through rate, conversions, assisted conversions.
+- **Technical health:** Core Web Vitals (field data), index coverage, crawl errors.
+- Source field data from Search Console and Analytics, not lab numbers alone.
+- State the metric, its baseline, and the expected direction with each finding so the change is verifiable after release.
+
+## Tooling
+Validate audits and findings with real tools rather than asserting them:
+
+- **Search Console** — index coverage, queries, impressions/CTR, Core Web Vitals field data.
+- **PageSpeed Insights / Lighthouse** — Core Web Vitals diagnostics and lab traces.
+- **Rich Results Test** — confirm JSON-LD is valid and eligible before relying on it.
+- **A crawler** (e.g. Screaming Frog) — broken links, redirect chains, orphan pages, duplicate titles.
+- Prefer Laravel-native checks where they suffice: `php artisan route:list` for the public surface, a sitemap build for the intended index set.
 
 ## Audit output shape
 ```text
@@ -131,6 +186,7 @@ Meta:   Action + topic + value proposition + one supporting detail
 Location: resources/views/products/show.blade.php
 Issue: @section('title') falls back to the app name for every product, weakening relevance and creating duplicate signals.
 Fix: Render a unique title from the product name and primary category.
+Measure: distinct title coverage in Search Console; expect duplicate-title warnings to drop.
 ```
 
 ## Anti-patterns
@@ -143,11 +199,15 @@ Fix: Render a unique title from the product name and primary category.
 | advice without checking the actual page | read the real Blade view first |
 | generic "improve SEO" output | tie every recommendation to a page or asset |
 | hand-built canonical URLs | derive from named routes |
+| buying or exchanging links | earn links through useful content |
+| recommendation with no metric | state the metric and baseline to verify it |
 
 ## Done when
 - robots.txt, canonicals, and redirects are correct with no unintended `noindex`.
+- The site-health checklist passes: no crawl errors, broken links, mixed content, redirect chains, orphan pages, or thin/duplicate content go unsurfaced.
 - Sitemap reflects the public surface and important pages are shallow-depth.
 - Each audited page has one H1, a 50–60 char title, and a 120–160 char meta description.
-- Valid JSON-LD matches the page's real content.
+- Valid JSON-LD matches the page's real content and passes the Rich Results Test.
 - LCP/INP/CLS targets are met or have a concrete remediation plan.
-- Every finding cites a specific file or URL and a concrete fix.
+- Competitor and content gaps are captured as page-level, actionable findings.
+- Every finding cites a specific file or URL, a concrete fix, and a metric to verify it.

@@ -51,6 +51,49 @@ final class InstallerClaudeSettings
     }
 
     /**
+     * Disables AI co-author attribution in Claude Code commits/PRs by writing
+     * `includeCoAuthoredBy: false` into the user's settings, but only for the
+     * `claude`/`all` editors and when a usable home directory is available.
+     * Returns true when the setting was newly written; false in every other case.
+     */
+    public static function applyCoAuthoredByPreference(string $editor): bool
+    {
+        if (!InstallerPath::isClaudeMdEditor($editor)) {
+            return false;
+        }
+
+        $home = InstallerPath::resolveHomeDirectoryOrNull();
+
+        if ($home === null) {
+            return false;
+        }
+
+        return self::ensureCoAuthoredByDisabled($home);
+    }
+
+    /**
+     * Sets `includeCoAuthoredBy: false` in `<home>/.claude/settings.json` idempotently.
+     * Leaves an existing value untouched so a user who opted back in keeps their choice.
+     * Returns true only when the key was absent and is now written.
+     */
+    public static function ensureCoAuthoredByDisabled(string $home): bool
+    {
+        $settingsPath = self::resolveSettingsPath($home);
+        $existing = self::readSettings($settingsPath);
+
+        if (array_key_exists('includeCoAuthoredBy', $existing)) {
+            return false;
+        }
+
+        $existing['includeCoAuthoredBy'] = false;
+
+        InstallerPath::ensureDirectory(dirname($settingsPath));
+        self::writeSettings($settingsPath, $existing);
+
+        return true;
+    }
+
+    /**
      * Reads the `permissions.allow` list from `<home>/.claude/settings.json`,
      * sanitised to strings only. Returns an empty list when the file does not
      * exist or the section is missing.

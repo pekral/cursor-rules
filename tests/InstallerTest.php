@@ -3066,7 +3066,7 @@ test('install --editor=cursor --allow-bundled-scripts does not write settings.js
     }
 });
 
-test('install --editor=claude without --allow-bundled-scripts leaves settings.json untouched', function (): void {
+test('install --editor=claude without --allow-bundled-scripts still disables AI co-author attribution', function (): void {
     $root = installerCreateProjectRoot();
     $homeEnv = getenv('HOME');
     $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
@@ -3086,7 +3086,14 @@ test('install --editor=claude without --allow-bundled-scripts leaves settings.js
         $output = (string) ob_get_clean();
 
         expect($output)->not->toContain('Allowed');
-        expect(is_file($root . '/.claude/settings.json'))->toBeFalse();
+        expect($output)->toContain('Disabled AI co-author attribution (includeCoAuthoredBy: false) in ~/.claude/settings.json.');
+
+        $settingsPath = $root . '/.claude/settings.json';
+        expect(is_file($settingsPath))->toBeTrue();
+
+        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        assert(is_array($data));
+        expect($data['includeCoAuthoredBy'])->toBeFalse();
     } finally {
         installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
     }
@@ -3155,6 +3162,69 @@ test('install --editor=claude --allow-bundled-scripts is idempotent across two c
     } finally {
         installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
     }
+});
+
+test('ensureCoAuthoredByDisabled writes includeCoAuthoredBy false into a fresh settings.json', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+
+    try {
+        $written = InstallerClaudeSettings::ensureCoAuthoredByDisabled($home);
+
+        expect($written)->toBeTrue();
+
+        $settingsPath = $home . '/.claude/settings.json';
+        expect(is_file($settingsPath))->toBeTrue();
+
+        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        assert(is_array($data));
+        expect($data['includeCoAuthoredBy'])->toBeFalse();
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureCoAuthoredByDisabled respects an existing includeCoAuthoredBy value', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, (string) json_encode(['includeCoAuthoredBy' => true]));
+
+    try {
+        $written = InstallerClaudeSettings::ensureCoAuthoredByDisabled($home);
+
+        expect($written)->toBeFalse();
+
+        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        assert(is_array($data));
+        expect($data['includeCoAuthoredBy'])->toBeTrue();
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('ensureCoAuthoredByDisabled merges into existing settings.json without dropping unrelated keys', function (): void {
+    $home = sys_get_temp_dir() . '/claude-settings-' . bin2hex(random_bytes(4));
+    $settingsPath = $home . '/.claude/settings.json';
+    installerWriteFile($settingsPath, (string) json_encode([
+        'theme' => 'dark',
+        'permissions' => ['allow' => ['Bash(git status:*)']],
+    ], JSON_PRETTY_PRINT));
+
+    try {
+        $written = InstallerClaudeSettings::ensureCoAuthoredByDisabled($home);
+
+        expect($written)->toBeTrue();
+
+        $raw = (string) file_get_contents($settingsPath);
+        expect($raw)->toContain('"theme": "dark"');
+        expect($raw)->toContain('"Bash(git status:*)"');
+        expect($raw)->toContain('"includeCoAuthoredBy": false');
+    } finally {
+        installerRemoveDirectory($home);
+    }
+});
+
+test('applyCoAuthoredByPreference skips non-claude editors', function (): void {
+    expect(InstallerClaudeSettings::applyCoAuthoredByPreference('cursor'))->toBeFalse();
 });
 
 test('dependency-selection rule gates every new Composer package on activity and compatibility', function (): void {

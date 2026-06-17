@@ -29,3 +29,4 @@ globs: []
     - Numbered list: `1. item` → `# item`
     - Link: `[label](https://example.com)` → `[label|https://example.com]`
     - Quote: `> text` → `{quote}text{quote}`
+- **Verify before posting — no leaked Markdown.** After converting, scan the final comment body and confirm it contains **zero** Markdown control characters that JIRA would render literally: no `**` / `__` (bold), no leading `#` / `##` / `###` (ATX headings), no `` ` `` / ```` ``` ```` (inline / fenced code), no `- ` / `+ ` bullets, no `[label](url)` links. If any remain, convert them per the cheatsheet above before sending. The reader must never see a raw `**` or `#` in the rendered JIRA comment.

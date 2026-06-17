@@ -1601,18 +1601,30 @@ test('JIRA non-technical CR summary delegates to pr-summary Wiki Markup template
     $rule = (string) file_get_contents($packageDir . '/rules/jira/general.mdc');
     $skill = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
 
-    expect($template)->toContain('h2. Summary of changes');
+    // JIRA non-technical comment carries only "How to test" — no Summary of changes, no Authors.
     expect($template)->toContain('h2. How to test');
+    expect($template)->not->toContain('h2. Summary of changes');
     expect($template)->not->toContain('## Summary of changes');
+    expect($template)->not->toContain('h2. Authors');
     expect($template)->not->toContain('```');
 
     expect($rule)->toContain('Wiki markup conversion cheatsheet');
     expect($rule)->toContain('`{code:php} ... {code}`');
     expect($rule)->toContain('`[label|https://example.com]`');
+    expect($rule)->toContain('no leaked Markdown');
 
     expect($skill)->toContain('Delegate the JIRA comment to `@skills/pr-summary/SKILL.md`');
     expect($skill)->toContain('@skills/pr-summary/templates/pr-summary-jira.md');
     expect(is_file($packageDir . '/skills/code-review-jira/templates/jira-output.md'))->toBeFalse();
+
+    // JIRA report = how to test only, plus conditional clarifying questions / assignment discrepancies / critical.
+    $prSummary = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');
+    expect($prSummary)->toContain('output **only `How to test`**');
+    expect($prSummary)->toContain('No leaked markup on JIRA');
+    expect($skill)->toContain('Clarifying questions block (conditional)');
+    expect($skill)->toContain('only `How to test`');
+    expect($skill)->toContain('no leaked Markdown');
+    expect($template)->toContain('h2. Clarifying questions');
 });
 
 test('GitHub PR comment templates use a compact AI-parseable header with severity icons', function (): void {

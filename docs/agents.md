@@ -36,6 +36,16 @@ The counsel of wise planning, named after **Metis**, the Titaness of deliberatio
 - **Orchestrates:** `analyze-problem`.
 - **Safety:** read-only — never edits, commits, pushes, or implements; publishes its plan to the tracker.
 
+### <img src="../assets/agents/daidalos.svg" alt="daidalos avatar" width="48" align="left"> `daidalos` — engineering-workflow orchestrator
+
+The master craftsman who runs the workshop, named after **Daidalos**, the legendary engineer who designed the work and directed the makers. It is the **entry point** for a free-form engineering request — *"resolve a random issue"*, *"resolve this URL"*, *"implement this"*. It resolves a concrete source, decides whether the task needs a plan first, and routes: ambiguous / large → `metis` (analysis), clear → `talos` (implementation), then `argos` (review). It owns only the routing decision — `metis` the mind, `talos` the hands, `argos` the eyes; `daidalos` the workshop lead that directs them.
+
+- **Trigger:** a free-form engineering request that still needs a source resolved and a route chosen.
+- **Orchestrates:** `metis`, `talos`, `argos` (routing); reuses `resolve-issue` source detection and `autoresolve-oldest-github-issue` selection.
+- **Safety:** read-only router — never analyses, implements, or reviews itself; must be the top-level agent (not a nested subagent) per the one-level nesting rule below.
+
+> A future top-level, cross-domain orchestrator (reserved name `zeus`) will sit above `daidalos` and coordinate non-engineering domains too (e.g. marketing). `daidalos` owns the engineering tier only.
+
 ## Naming convention — Greek mythology
 
 Every agent is named after a figure from **Greek mythology**, chosen so the figure's role matches the agent's function. Use the lowercase name as the agent `name:` and file id (`agents/<name>.md`).
@@ -45,8 +55,9 @@ Every agent is named after a figure from **Greek mythology**, chosen so the figu
 | `argos` | Argos Panoptes, the hundred-eyed all-seeing watcher | nothing escapes his gaze → thorough PR inspection |
 | `talos` | Talos, the bronze automaton forged to work and guard without rest | tireless artificial labourer → forges working code |
 | `metis` | Metis, Titaness of wise counsel and cunning planning | deliberation before action → problem analysis & planning |
+| `daidalos` | Daidalos, the master craftsman who runs the workshop and directs the makers | head of production → routes engineering work to the right specialist |
 
-Naming ideas for future agents: `themis` (order / verdict), `rhadamanthys` (fair judge), `athena` (wisdom / architecture), `hermes` (delivery / merge).
+Naming ideas for future agents: `themis` (order / verdict), `rhadamanthys` (fair judge), `athena` (wisdom / architecture), `hermes` (delivery / merge), `zeus` (top-level cross-domain orchestrator above `daidalos`).
 
 ## Anatomy of an agent
 
@@ -82,6 +93,8 @@ Claude Code subagents invoked via the Task tool generally **cannot spawn their o
 
 1. **Lens skills called inline** by an orchestrating skill — e.g. `code-review-github` already runs `code-review`, `security-review`, `api-review`, `assignment-compliance-check` inline. This is the default and works today.
 2. **Parallel fan-out via the Workflow tool** — a DAG of agents for heavy runs that genuinely need concurrency.
+
+Because of this limit, an orchestrator like `daidalos` must be the **top-level agent the user talks to** — it routes by invoking the chosen path inline or by returning a routing handoff for the caller to execute, never by being a nested subagent that spawns `metis` / `talos` / `argos`. A future `zeus → daidalos → specialist` chain must use the same inline / Workflow model rather than three levels of Task-subagent nesting.
 
 ## Distribution
 

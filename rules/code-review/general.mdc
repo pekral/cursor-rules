@@ -23,6 +23,11 @@ globs: []
 ## Scope
 - Focus only on relevant changes in the PR unless broader context is required.
 
+## Assignment Conformance
+- Every code-review wrapper skill — one that produces a full PR review against a linked issue / task (`@skills/code-review`, `@skills/code-review-github`, `@skills/code-review-jira`, `@skills/code-review-bugsnag`) — must run `@skills/assignment-compliance-check/SKILL.md` as an **always-run** step on every CR run, so the implementation is always checked against what the assignment actually asked for. Any unmet requirement is a **Critical** finding.
+- This invariant is mandatory and inheritable: any new CR wrapper added later must wire the same always-run assignment check before it is considered complete.
+- Single-lens specialized review skills (`@skills/api-review`, `@skills/security-review`) intentionally do **not** run it — functional / assignment conformance is owned by the wrapper. Duplicating the check inside a lens is a defect per `@rules/compound-engineering/general.mdc`, not a safeguard.
+
 ## Reuse Existing Logic
 - For every block of newly added or modified logic, search the codebase for an existing implementation that already does the same thing (helper, Service, Action, Data Builder, DTO, trait, ModelManager, Repository, scope, etc.).
 - If equivalent logic already exists, flag the change and require reusing it instead of introducing a parallel implementation.

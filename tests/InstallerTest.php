@@ -1467,6 +1467,22 @@ test('CR run produces one consolidated linked-tracker comment per linked issue (
     expect($jiraTemplate)->toContain('@skills/assignment-compliance-check/SKILL.md');
 });
 
+test('pr-summary surfaces an assignment non-compliance verdict at the top of the tracker comment', function (): void {
+    $packageDir = dirname(__DIR__);
+    $prSummary = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');
+    $githubTemplate = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-github.md');
+    $jiraTemplate = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-jira.md');
+
+    expect($prSummary)->toContain('Assignment non-compliance verdict (top banner)');
+    expect($prSummary)->toContain('{assignment_verdict}');
+
+    foreach ([$githubTemplate, $jiraTemplate] as $template) {
+        expect($template)->toContain('{assignment_verdict}');
+        expect($template)->toContain('do not satisfy the assignment');
+        expect($template)->toContain('omit this slot entirely');
+    }
+});
+
 test('CR skills publish through the publish helper — GitHub always-new, JIRA single-comment upsert keyed by the current actor', function (): void {
     $packageDir = dirname(__DIR__);
 

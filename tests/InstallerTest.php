@@ -4010,6 +4010,19 @@ test('agents directory ships the argos code-review subagent with required frontm
     expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
 });
 
+test('agents directory ships the talos code-writing subagent with required frontmatter', function (): void {
+    $packageDir = dirname(__DIR__);
+    $agentPath = $packageDir . '/agents/talos.md';
+
+    expect(is_file($agentPath))->toBeTrue();
+
+    $content = (string) file_get_contents($agentPath);
+    expect($content)->toContain('name: talos');
+    expect($content)->toContain('tools: Read, Write, Edit, Glob, Grep, Bash');
+    expect($content)->toContain('@skills/resolve-issue/SKILL.md');
+    expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
+});
+
 test('resolveAgentsSource returns the package agents directory when it exists', function (): void {
     $packageDir = dirname(__DIR__);
 

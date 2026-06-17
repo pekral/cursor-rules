@@ -212,6 +212,7 @@ Agents = specialised orchestration roles over multiple skills
 | Agent | Role | Orchestrated skills |
 |---|---|---|
 | `argos` | All-seeing code-review gatekeeper. Reviews a PR from context or a tracker link, posts the results to the PR, and hands back a CR-done handoff. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag` |
+| `talos` | Tireless code-writing implementer. Implements an issue from context or a tracker link, validates with tests, opens a PR, and hands back an Impl-done handoff. Stops at the PR — never reviews or merges. | `resolve-issue` |
 
 ### How to use `argos` in practice
 
@@ -234,6 +235,22 @@ Agents = specialised orchestration roles over multiple skills
 3. `argos` detects the tracker, runs the matching `code-review-*` skill, lets it **post the review to the PR**, then returns a handoff: `CR done` + PR link + source link + Critical/Moderate/Minor counts + assignment-conformance verdict.
 
 `argos` is **read-only** — it never applies fixes, commits, pushes, or merges. Those belong to separate agents.
+
+### How to use `talos` in practice
+
+1. Install for Claude Code (or every editor), exactly as for `argos` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.
+
+2. Invoke it with a **source** — a GitHub issue/PR, a JIRA key, a Bugsnag error, or just the task you want implemented:
+
+   ```text
+   @talos implement #123
+   @talos implement https://your.atlassian.net/browse/PROJ-42
+   @talos implement the failing upload validation
+   ```
+
+3. `talos` detects the source, runs `resolve-issue` to implement the change with tests and open a PR, then returns a handoff: `Impl done` + PR link + source link + branch + a summary of what changed and the test result.
+
+`talos` **stops at the PR** — it never reviews its own work or merges. Hand the PR to `argos` for review next.
 
 ---
 

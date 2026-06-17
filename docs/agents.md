@@ -12,13 +12,12 @@ Agents = specialised orchestration roles over multiple skills
 
 Every agent has its own avatar under [`assets/agents/`](../assets/agents). When no custom artwork has been supplied yet, the slot falls back to the universal placeholder ([`placeholder.svg`](../assets/agents/placeholder.svg)) — swap `assets/agents/<name>.svg` to give an agent its own face.
 
-### <img src="../assets/agents/argos.svg" alt="argos avatar" width="48" align="left"> `argos` — code-review gatekeeper
+### <img src="../assets/agents/argos.png" alt="argos avatar" width="48" align="left"> `argos` — code-review gatekeeper
 
 The all-seeing code-review gatekeeper, named after **Argos Panoptes**, the hundred-eyed watcher nothing escaped. Give it a PR — from the current context or a tracker link (GitHub, JIRA, Bugsnag) — and it loads the source, runs the matching `code-review-*` wrapper skill, posts the findings to the PR, and hands back a `CR done` summary with links and Critical / Moderate / Minor counts.
 
 - **Trigger:** a pull request needs reviewing.
 - **Orchestrates:** `code-review-github`, `code-review-jira`, `code-review-bugsnag`.
-- **Avatar:** universal placeholder (no custom artwork supplied yet).
 - **Safety:** read-only — never edits, commits, pushes, or merges.
 
 ## Naming convention — Greek mythology

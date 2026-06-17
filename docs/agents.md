@@ -20,7 +20,7 @@ The all-seeing code-review gatekeeper, named after **Argos Panoptes**, the hundr
 - **Orchestrates:** `code-review-github`, `code-review-jira`, `code-review-bugsnag`.
 - **Safety:** read-only — never edits, commits, pushes, or merges.
 
-### <img src="../assets/agents/talos.svg" alt="talos avatar" width="48" align="left"> `talos` — code-writing implementer
+### <img src="../assets/agents/talos.png" alt="talos avatar" width="48" align="left"> `talos` — code-writing implementer
 
 The tireless bronze automaton, named after **Talos**, the forged guardian that worked without rest. Give it a source — a tracker link (GitHub, JIRA, Bugsnag) or the current task — and it implements the fix or feature, validates it with tests, opens a pull request, and hands back an `Impl done` summary with links. It is the write-side counterpart to `argos`: `argos` is the tireless eye (review), `talos` the tireless hands (implementation).
 

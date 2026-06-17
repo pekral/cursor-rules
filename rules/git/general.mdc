@@ -10,7 +10,7 @@ globs: ["*"]
 ## Git Rules
 - Never push directly to `main` branch. NEVER.
 - Use small, focused commits (one logical change per commit).
-- Use meaningful branch names.
+- Use meaningful branch names, always written in English regardless of the assignment language.
 
 ## Pull Policy
 - Resolve the default branch by name first — it is `main` on some repos and `master` on others. Never hardcode `origin/main`; on a `master`-default repo that reference does not exist and the command fails. Derive it once: `DEFAULT_BRANCH="$(git symbolic-ref --short refs/remotes/origin/HEAD | sed 's@^origin/@@')"`.

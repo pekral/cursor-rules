@@ -21,7 +21,7 @@ You accept exactly one **source** for the review, in this order of preference:
    - GitHub source (or plain context / local branch) → `@skills/code-review-github/SKILL.md`
    - JIRA source → `@skills/code-review-jira/SKILL.md`
    - Bugsnag source → `@skills/code-review-bugsnag/SKILL.md`
-3. The wrapper owns the whole review pipeline (assignment compliance, code-review, security-review, api-review, refactoring lens, coverage gate) and the publishing contract (technical PR comment + non-technical tracker summary). **Do not re-implement any of it and do not duplicate its rules** — defer to the skills as the source of truth.
+3. The wrapper owns the whole review pipeline and the publishing contract (technical PR comment + non-technical tracker summary). It drives — directly or through `@skills/code-review/SKILL.md` — the full set of CR skills: `prepare-issue-context` (`MODE=cr` pre-flight), `assignment-compliance-check`, `code-review`, `analyze-problem` (assignment-conformance lens), `security-review`, `api-review`, `class-refactoring` (`MODE=cr`), and the coverage gate on every run; `refactor-entry-point-to-action` (`MODE=cr`), `mysql-problem-solver`, and `race-condition-review` when their triggers fire; and `pr-summary` to publish the non-technical summary. **Do not re-implement any of it and do not duplicate its rules** — the wrappers (and the skills they invoke) are the source of truth for which CR skills run and when.
 
 ## Output — handoff to the caller
 

@@ -213,6 +213,7 @@ Agents = specialised orchestration roles over multiple skills
 |---|---|---|
 | `argos` | All-seeing code-review gatekeeper. Reviews a PR from context or a tracker link, posts the results to the PR, and hands back a CR-done handoff. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag` |
 | `talos` | Tireless code-writing implementer. Implements an issue from context or a tracker link, validates with tests, opens a PR, and hands back an Impl-done handoff. Stops at the PR — never reviews or merges. | `resolve-issue` |
+| `metis` | Problem-analysis advisor. Analyses a problem or a vague assignment, proposes the smallest safe solution, and publishes a reusable plan as a GitHub issue, then hands back an Analysis-done handoff. Read-only — never implements. | `analyze-problem` |
 
 ### How to use `argos` in practice
 
@@ -251,6 +252,22 @@ Agents = specialised orchestration roles over multiple skills
 3. `talos` detects the source, runs `resolve-issue` to implement the change with tests and open a PR, then returns a handoff: `Impl done` + PR link + source link + branch + a summary of what changed and the test result.
 
 `talos` **stops at the PR** — it never reviews its own work or merges. Hand the PR to `argos` for review next.
+
+### How to use `metis` in practice
+
+1. Install for Claude Code (or every editor), exactly as for `argos` / `talos` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.
+
+2. Invoke it with a **subject** — a GitHub issue/PR, a JIRA key, a Bugsnag error, or just a problem you want thought through:
+
+   ```text
+   @metis analyse #123
+   @metis analyse https://your.atlassian.net/browse/PROJ-42
+   @metis analyse why the nightly export job times out
+   ```
+
+3. `metis` runs `analyze-problem`, then returns a handoff: `Analysis done` + a link to the published plan-artifact issue + the subject link + a one-line root cause + the recommended solution.
+
+`metis` is **read-only** — it analyses and plans, but never edits code, commits, or implements. Hand its plan issue to `talos` to build next.
 
 ---
 

@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Pekral\CursorRules;
 
 use JsonException;
+use stdClass;
 
 final class InstallerClaudeSettings
 {
@@ -81,11 +82,11 @@ final class InstallerClaudeSettings
         $settingsPath = self::resolveSettingsPath($home);
         $existing = self::readSettings($settingsPath);
 
-        if (array_key_exists('includeCoAuthoredBy', $existing)) {
+        if (property_exists($existing, 'includeCoAuthoredBy')) {
             return false;
         }
 
-        $existing['includeCoAuthoredBy'] = false;
+        $existing->includeCoAuthoredBy = false;
 
         InstallerPath::ensureDirectory(dirname($settingsPath));
         self::writeSettings($settingsPath, $existing);
@@ -133,52 +134,46 @@ final class InstallerClaudeSettings
     }
 
     /**
-     * @return array<string, mixed>
+     * Decodes settings into a `stdClass` object (not an associative array) so that
+     * empty JSON objects (`{}`) elsewhere in the file survive the read/write round-trip.
+     * `json_decode(..., true)` would turn `{}` into `[]`, which `json_encode` then writes
+     * back as a JSON array — corrupting object-typed keys such as Claude Code's
+     * `attribution` and tripping `/doctor`'s schema validation.
      */
-    private static function readSettings(string $path): array
+    private static function readSettings(string $path): stdClass
     {
         if (!is_file($path)) {
-            return [];
+            return new stdClass();
         }
 
         $contents = file_get_contents($path);
 
         if ($contents === false || trim($contents) === '') {
-            return [];
+            return new stdClass();
         }
 
         try {
-            $data = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
+            $data = json_decode($contents, false, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             throw InstallerFailure::settingsJsonInvalid($path, $exception->getMessage());
         }
 
-        if (!is_array($data)) {
+        if (!$data instanceof stdClass) {
             throw InstallerFailure::settingsJsonInvalid($path, 'top-level value is not an object');
         }
 
-        $normalized = [];
-
-        foreach ($data as $key => $value) {
-            $normalized[(string) $key] = $value;
-        }
-
-        return $normalized;
+        return $data;
     }
 
-    /**
-     * @param array<string, mixed> $existing
-     * @return array<string, mixed>
-     */
-    private static function mergePermissions(array $existing): array
+    private static function mergePermissions(stdClass $existing): stdClass
     {
-        $permissions = $existing['permissions'] ?? [];
+        $permissions = $existing->permissions ?? null;
 
-        if (!is_array($permissions)) {
-            $permissions = [];
+        if (!$permissions instanceof stdClass) {
+            $permissions = new stdClass();
         }
 
-        $allow = $permissions['allow'] ?? [];
+        $allow = $permissions->allow ?? null;
 
         if (!is_array($allow)) {
             $allow = [];
@@ -192,25 +187,24 @@ final class InstallerClaudeSettings
             }
         }
 
-        $permissions['allow'] = $allow;
-        $existing['permissions'] = $permissions;
+        $permissions->allow = $allow;
+        $existing->permissions = $permissions;
 
         return $existing;
     }
 
     /**
-     * @param array<string, mixed> $data
      * @return array<int, string>
      */
-    private static function extractAllow(array $data): array
+    private static function extractAllow(stdClass $data): array
     {
-        $permissions = $data['permissions'] ?? [];
+        $permissions = $data->permissions ?? null;
 
-        if (!is_array($permissions)) {
+        if (!$permissions instanceof stdClass) {
             return [];
         }
 
-        $allow = $permissions['allow'] ?? [];
+        $allow = $permissions->allow ?? null;
 
         if (!is_array($allow)) {
             return [];
@@ -219,10 +213,7 @@ final class InstallerClaudeSettings
         return array_values(array_filter($allow, static fn (mixed $entry): bool => is_string($entry)));
     }
 
-    /**
-     * @param array<string, mixed> $data
-     */
-    private static function writeSettings(string $path, array $data): void
+    private static function writeSettings(string $path, stdClass $data): void
     {
         try {
             $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);

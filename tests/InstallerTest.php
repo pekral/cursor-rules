@@ -407,9 +407,12 @@ test('install with editor=all copies all files to all rule and skill directories
 
     $rulesTargets = InstallerPath::resolveRulesTargetDirectories($root, InstallerPath::EDITOR_ALL);
     $skillTargets = InstallerPath::resolveSkillsTargetDirectories($root, InstallerPath::EDITOR_ALL);
+    $agentTargets = InstallerPath::resolveAgentsTargetDirectories($root, InstallerPath::EDITOR_ALL);
+    $expectedAgentsCount = installerCountFiles($packageDir . '/agents');
     $claudeMdCount = InstallerPath::resolveClaudeMdSource() !== null ? 1 : 0;
     $expectedTotalFiles = $expectedRulesCount * count($rulesTargets)
         + $expectedSkillsCount * count($skillTargets)
+        + $expectedAgentsCount * count($agentTargets)
         + $claudeMdCount;
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
@@ -430,6 +433,11 @@ test('install with editor=all copies all files to all rule and skill directories
         foreach ($skillTargets as $skillsTarget) {
             $actualSkillsCount = installerCountFiles($skillsTarget);
             expect($actualSkillsCount)->toBe($expectedSkillsCount, 'Skills: all source files in ' . $skillsTarget);
+        }
+
+        foreach ($agentTargets as $agentsTarget) {
+            $actualAgentsCount = installerCountFiles($agentsTarget);
+            expect($actualAgentsCount)->toBe($expectedAgentsCount, 'Agents: all source files in ' . $agentsTarget);
         }
 
         expect($output)->toContain(sprintf('(%d files,', $expectedTotalFiles));
@@ -3987,19 +3995,103 @@ test('duplicate and unsupported ECC skills were intentionally not ported', funct
     expect(is_dir($packageDir . '/skills/test-driven-development'))->toBeTrue();
 });
 
-test('bundled Claude Code subagents feature is fully removed from package and installer', function (): void {
+test('agents directory ships the argus code-review subagent with required frontmatter', function (): void {
+    $packageDir = dirname(__DIR__);
+    $agentPath = $packageDir . '/agents/argus.md';
+
+    expect(is_file($agentPath))->toBeTrue();
+
+    $content = (string) file_get_contents($agentPath);
+    expect($content)->toContain('name: argus');
+    expect($content)->toContain('tools: Read, Glob, Grep, Bash');
+    expect($content)->toContain('@skills/code-review-github/SKILL.md');
+    expect($content)->toContain('@skills/code-review-jira/SKILL.md');
+    expect($content)->toContain('@skills/code-review-bugsnag/SKILL.md');
+    expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
+});
+
+test('resolveAgentsSource returns the package agents directory when it exists', function (): void {
     $packageDir = dirname(__DIR__);
 
-    expect(is_dir($packageDir . '/agents'))->toBeFalse();
+    expect(InstallerPath::resolveAgentsSource())->toBe($packageDir . '/agents');
+});
 
-    $installerPath = (string) file_get_contents($packageDir . '/src/InstallerPath.php');
-    expect($installerPath)->not->toContain('resolveAgentsSource');
-    expect($installerPath)->not->toContain('resolveAgentsTargetDirectories');
-    expect($installerPath)->not->toContain('isAgentsEditor');
+test('isAgentsEditor matches only claude and all', function (): void {
+    expect(InstallerPath::isAgentsEditor(InstallerPath::EDITOR_CLAUDE))->toBeTrue();
+    expect(InstallerPath::isAgentsEditor(InstallerPath::EDITOR_ALL))->toBeTrue();
+    expect(InstallerPath::isAgentsEditor(InstallerPath::EDITOR_CURSOR))->toBeFalse();
+    expect(InstallerPath::isAgentsEditor(InstallerPath::EDITOR_CODEX))->toBeFalse();
+});
 
-    $readme = (string) file_get_contents($packageDir . '/README.md');
-    expect($readme)->not->toContain('## Claude Code Subagents');
-    expect($readme)->not->toContain('@agent-');
+test('resolveAgentsTargetDirectories returns .claude/agents for editor=claude', function (): void {
+    expect(InstallerPath::resolveAgentsTargetDirectories('/project', InstallerPath::EDITOR_CLAUDE))
+        ->toBe(['/project/.claude/agents']);
+});
+
+test('resolveAgentsTargetDirectories returns .claude/agents for editor=all', function (): void {
+    expect(InstallerPath::resolveAgentsTargetDirectories('/project', InstallerPath::EDITOR_ALL))
+        ->toBe(['/project/.claude/agents']);
+});
+
+test('resolveAgentsTargetDirectories returns empty list for editor=cursor', function (): void {
+    expect(InstallerPath::resolveAgentsTargetDirectories('/project', InstallerPath::EDITOR_CURSOR))->toBe([]);
+});
+
+test('resolveAgentsTargetDirectories returns empty list for editor=codex', function (): void {
+    expect(InstallerPath::resolveAgentsTargetDirectories('/project', InstallerPath::EDITOR_CODEX))->toBe([]);
+});
+
+test('install with editor=claude copies the argus agent to .claude/agents', function (): void {
+    $root = installerCreateProjectRoot();
+    $homeEnv = getenv('HOME');
+    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
+    putenv('HOME=' . $root);
+
+    if (getenv('USERPROFILE') !== false) {
+        putenv('USERPROFILE=' . $root);
+    }
+
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=claude']);
+        ob_end_clean();
+
+        expect(is_file($root . '/.claude/agents/argus.md'))->toBeTrue();
+        expect(is_dir($root . '/.cursor/agents'))->toBeFalse();
+        expect(is_dir($root . '/.codex/agents'))->toBeFalse();
+    } finally {
+        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
+    }
+});
+
+test('install with editor=cursor does not copy agents', function (): void {
+    $root = installerCreateProjectRoot();
+    $homeEnv = getenv('HOME');
+    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
+    putenv('HOME=' . $root);
+
+    if (getenv('USERPROFILE') !== false) {
+        putenv('USERPROFILE=' . $root);
+    }
+
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
+        ob_end_clean();
+
+        expect(is_dir($root . '/.cursor/agents'))->toBeFalse();
+        expect(is_dir($root . '/.claude/agents'))->toBeFalse();
+    } finally {
+        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
+    }
 });
 
 test('code-generation skills enforce a Read, Map & Verify pre-flight before implementing', function (): void {

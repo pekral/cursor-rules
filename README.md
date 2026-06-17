@@ -211,9 +211,9 @@ Agents = specialised orchestration roles over multiple skills
 
 | Agent | Role | Orchestrated skills |
 |---|---|---|
-| `argus` | All-seeing code-review gatekeeper. Reviews a PR from context or a tracker link, posts the results to the PR, and hands back a CR-done handoff. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag` |
+| `argos` | All-seeing code-review gatekeeper. Reviews a PR from context or a tracker link, posts the results to the PR, and hands back a CR-done handoff. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag` |
 
-### How to use `argus` in practice
+### How to use `argos` in practice
 
 1. Install for Claude Code (or every editor):
 
@@ -226,14 +226,14 @@ Agents = specialised orchestration roles over multiple skills
 2. Invoke it with a **source** — a GitHub PR/issue, a JIRA key, a Bugsnag error, or just the current branch/PR:
 
    ```text
-   @argus review PR #123
-   @argus review https://your.atlassian.net/browse/PROJ-42
-   @argus review the current diff
+   @argos review PR #123
+   @argos review https://your.atlassian.net/browse/PROJ-42
+   @argos review the current diff
    ```
 
-3. `argus` detects the tracker, runs the matching `code-review-*` skill, lets it **post the review to the PR**, then returns a handoff: `CR done` + PR link + source link + Critical/Moderate/Minor counts + assignment-conformance verdict.
+3. `argos` detects the tracker, runs the matching `code-review-*` skill, lets it **post the review to the PR**, then returns a handoff: `CR done` + PR link + source link + Critical/Moderate/Minor counts + assignment-conformance verdict.
 
-`argus` is **read-only** — it never applies fixes, commits, pushes, or merges. Those belong to separate agents.
+`argos` is **read-only** — it never applies fixes, commits, pushes, or merges. Those belong to separate agents.
 
 ---
 

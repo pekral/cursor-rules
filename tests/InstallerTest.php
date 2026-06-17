@@ -3995,14 +3995,14 @@ test('duplicate and unsupported ECC skills were intentionally not ported', funct
     expect(is_dir($packageDir . '/skills/test-driven-development'))->toBeTrue();
 });
 
-test('agents directory ships the argus code-review subagent with required frontmatter', function (): void {
+test('agents directory ships the argos code-review subagent with required frontmatter', function (): void {
     $packageDir = dirname(__DIR__);
-    $agentPath = $packageDir . '/agents/argus.md';
+    $agentPath = $packageDir . '/agents/argos.md';
 
     expect(is_file($agentPath))->toBeTrue();
 
     $content = (string) file_get_contents($agentPath);
-    expect($content)->toContain('name: argus');
+    expect($content)->toContain('name: argos');
     expect($content)->toContain('tools: Read, Glob, Grep, Bash');
     expect($content)->toContain('@skills/code-review-github/SKILL.md');
     expect($content)->toContain('@skills/code-review-jira/SKILL.md');
@@ -4041,7 +4041,7 @@ test('resolveAgentsTargetDirectories returns empty list for editor=codex', funct
     expect(InstallerPath::resolveAgentsTargetDirectories('/project', InstallerPath::EDITOR_CODEX))->toBe([]);
 });
 
-test('install with editor=claude copies the argus agent to .claude/agents', function (): void {
+test('install with editor=claude copies the argos agent to .claude/agents', function (): void {
     $root = installerCreateProjectRoot();
     $homeEnv = getenv('HOME');
     $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
@@ -4060,7 +4060,7 @@ test('install with editor=claude copies the argus agent to .claude/agents', func
         Installer::run(['cursor-rules', 'install', '--editor=claude']);
         ob_end_clean();
 
-        expect(is_file($root . '/.claude/agents/argus.md'))->toBeTrue();
+        expect(is_file($root . '/.claude/agents/argos.md'))->toBeTrue();
         expect(is_dir($root . '/.cursor/agents'))->toBeFalse();
         expect(is_dir($root . '/.codex/agents'))->toBeFalse();
     } finally {

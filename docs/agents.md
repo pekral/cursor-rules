@@ -8,13 +8,26 @@ Skills = reusable workflows
 Agents = specialised orchestration roles over multiple skills
 ```
 
+## Agent roster
+
+Every agent has its own avatar under [`assets/agents/`](../assets/agents). When no custom artwork has been supplied yet, the slot falls back to the universal placeholder ([`placeholder.svg`](../assets/agents/placeholder.svg)) — swap `assets/agents/<name>.svg` to give an agent its own face.
+
+### <img src="../assets/agents/argos.svg" alt="argos avatar" width="48" align="left"> `argos` — code-review gatekeeper
+
+The all-seeing code-review gatekeeper, named after **Argos Panoptes**, the hundred-eyed watcher nothing escaped. Give it a PR — from the current context or a tracker link (GitHub, JIRA, Bugsnag) — and it loads the source, runs the matching `code-review-*` wrapper skill, posts the findings to the PR, and hands back a `CR done` summary with links and Critical / Moderate / Minor counts.
+
+- **Trigger:** a pull request needs reviewing.
+- **Orchestrates:** `code-review-github`, `code-review-jira`, `code-review-bugsnag`.
+- **Avatar:** universal placeholder (no custom artwork supplied yet).
+- **Safety:** read-only — never edits, commits, pushes, or merges.
+
 ## Naming convention — Greek mythology
 
 Every agent is named after a figure from **Greek mythology**, chosen so the figure's role matches the agent's function. Use the lowercase name as the agent `name:` and file id (`agents/<name>.md`).
 
 | Agent | Greek figure | Why it fits |
 |---|---|---|
-| `argus` | Argus Panoptes, the hundred-eyed all-seeing watcher | nothing escapes his gaze → thorough PR inspection |
+| `argos` | Argos Panoptes, the hundred-eyed all-seeing watcher | nothing escapes his gaze → thorough PR inspection |
 
 Naming ideas for future agents: `themis` (order / verdict), `rhadamanthys` (fair judge), `athena` (wisdom / architecture), `hermes` (delivery / merge).
 
@@ -24,7 +37,7 @@ An agent is a Markdown file with frontmatter + a system prompt:
 
 ```markdown
 ---
-name: argus
+name: argos
 description: When to auto-delegate to this agent (the trigger sentence).
 tools: Read, Glob, Grep, Bash
 model: sonnet
@@ -62,5 +75,5 @@ The installer copies `agents/` to `.claude/agents/` for `--editor=claude` and `-
 1. Pick a Greek figure whose myth matches the job; use the lowercase name.
 2. Create `agents/<name>.md` with the frontmatter + an orchestration-only system prompt that delegates to skills and returns a handoff.
 3. Add it to the README *Claude Code Subagents* table.
-4. Add a test asserting the file ships with its required frontmatter (mirror the `argus` test in `tests/InstallerTest.php`).
+4. Add a test asserting the file ships with its required frontmatter (mirror the `argos` test in `tests/InstallerTest.php`).
 5. Run `composer build` — the installer file-count tests pick up the new agent automatically.

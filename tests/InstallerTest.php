@@ -4048,6 +4048,16 @@ test('agents directory ships the daidalos orchestrator subagent with required fr
     expect($content)->toContain('@skills/autoresolve-oldest-github-issue/SKILL.md');
 });
 
+test('daidalos drives the end-to-end orchestration loop through resolve-issue and process-code-review', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+
+    expect($content)->toContain('@skills/analyze-problem');
+    expect($content)->toContain('@skills/resolve-issue');
+    expect($content)->toContain('@skills/process-code-review');
+    expect($content)->toContain('0 Critical');
+});
+
 test('resolveAgentsSource returns the package agents directory when it exists', function (): void {
     $packageDir = dirname(__DIR__);
 

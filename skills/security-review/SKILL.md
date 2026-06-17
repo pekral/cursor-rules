@@ -42,10 +42,30 @@ Avoid generic best-practice noise.
 - privilege escalation
 - broken access control
 
+### Session & Token Management
+- session fixation — session ID not rotated after privilege change (login, role elevation)
+- missing or weak session expiry / idle timeout
+- token reuse — refresh / reset / verification tokens that are not single-use or not invalidated after use
+- predictable or low-entropy tokens (sequential IDs, `rand()`, timestamps) where a secret is required
+- session cookie flags — `HttpOnly`, `Secure`, `SameSite` missing on auth cookies (cross-check `@rules/security/backend.md` *HTTP Security headers and Cookies*)
+
+### Cryptography & Secrets
+- weak or broken algorithms (MD5 / SHA-1 for passwords, ECB mode, `DES`); passwords not hashed with the platform's adaptive hash (`bcrypt` / `argon2` / Laravel `Hash`)
+- hardcoded keys, credentials, or salts in source / config (cross-check the *General Secure Coding Practices* secret rule)
+- missing encryption-at-rest / in-transit for sensitive fields where the assignment requires it
+- non-constant-time comparison of secrets, signatures, or tokens (timing side channel)
+- insecure randomness for security values — `rand()` / `mt_rand()` / `uniqid()` instead of `random_bytes()` / `Str::random()`
+
 ### Data Exposure
 - sensitive data leaks (API, logs, errors)
 - unsafe error messages (stack traces, paths, DB details)
 - **safe validation & error texts (issue #540)** — walk every user-facing string the diff adds or modifies (FormRequest `messages()` / `attributes()`, exception messages reaching JSON / Inertia / Blade responses, Notification subject and body, Mailable bodies, API error envelopes, flash messages, `__()` / `trans()` / `Lang::get()` / `@lang` / `t()` / `i18next.t()` calls **across every locale shipped by the project** — every key under `lang/`, `resources/lang/`, `translations/`, and locale `*.json` / `*.po` / `*.mo` files) against `@rules/security/backend.md` *Safe Validation & Error Messages* (and `@rules/security/frontend.md` / `@rules/security/mobile.md` for the equivalent client surfaces). Flag — and rewrite in the **Suggested Fix** — any wording that (a) distinguishes which auth factor failed (email vs password vs lock vs 2FA vs verification), (b) confirms a resource exists to an unauthorized caller (replace with the project's generic `404` envelope), (c) interpolates the rejected user input verbatim into the message, (d) reveals stack traces / file paths / framework versions / fully-qualified class names / DB table or column names / SQL fragments / queue or cache driver identifiers, or (e) leaks proximity to the password / token policy rule beyond the rule the user can read. Translation drift — a translated locale reintroducing identity-revealing wording the source removed — is the same finding evaluated per locale. Severity: **Critical** on auth / password-reset / sign-up / authorization surfaces (directly exploitable for enumeration); **Medium** elsewhere. Schema-level validation that does not leak existence ("The age must be at least 18.") is not a finding.
+
+### Security Logging & Monitoring
+- security-relevant events not logged (failed logins, authorization denials, privilege changes, password / email changes) where the project already has an audit-log facility to use
+- sensitive data written to logs — passwords, tokens, full card / PII — instead of being redacted
+- log injection — unsanitized user input written to logs enabling forged or CRLF-split entries
+- detection gaps the diff introduces by removing or bypassing an existing audit-trail hook
 
 ### External Interaction (APIs & SSRF)
 - outbound requests with user-controlled input
@@ -86,6 +106,7 @@ Severity: **Critical** when the indicator maps to active RCE / MITM / persistenc
   - exploitable in real scenarios
   - impactful (data access, privilege escalation, RCE)
 - Deprioritize theoretical or low-impact findings
+- **Risk-based severity** — set each finding's severity from likelihood × impact, not the category alone. Likelihood weighs how reachable the entry point is (unauthenticated and public > authenticated > internal-only) and how trivial the exploit is (single request > requires a chained precondition). Impact weighs blast radius (RCE / full account takeover / mass data exposure > single-record leak > low-value disclosure). A theoretically-serious category behind an unreachable path is downgraded; a "minor"-looking flaw on an unauthenticated public endpoint is upgraded. State the likelihood and impact in one phrase in the finding description so the severity is auditable.
 
 ---
 

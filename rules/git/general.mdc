@@ -31,7 +31,7 @@ globs: ["*"]
 - Keep messages concise and specific.
 - Use lowercase for `type` and `scope`.
 - Do not end with a period.
-- Never include signatures or attribution (e.g. "Made with Cursor").
+- Never include signatures or attribution. This covers AI co-author trailers: no `Co-Authored-By:` lines and no "Generated with"/"Made with" notes (e.g. "Made with Cursor", "Generated with Claude Code").
 
 ### Allowed Types
 - feat: New feature

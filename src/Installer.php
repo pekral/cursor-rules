@@ -93,8 +93,9 @@ final class Installer
         $claudeMdSource = InstallerPath::isClaudeMdEditor($editor) ? InstallerPath::resolveClaudeMdSource() : null;
         $copied += self::installSingleFile($claudeMdSource, InstallerPath::resolveClaudeMdTarget($root));
         $permissionsAdded = InstallerClaudeSettings::applyIfRequested($allowBundledScripts, $editor);
+        $coAuthoredByDisabled = InstallerClaudeSettings::applyCoAuthoredByPreference($editor);
 
-        self::reportInstallSummary($copied, $pruned, $permissionsAdded);
+        self::reportInstallSummary($copied, $pruned, $permissionsAdded, $coAuthoredByDisabled);
 
         return 0;
     }
@@ -135,12 +136,16 @@ final class Installer
         return [$totalCopied, $totalPruned];
     }
 
-    private static function reportInstallSummary(int $copied, int $pruned, int $permissionsAdded): void
+    private static function reportInstallSummary(int $copied, int $pruned, int $permissionsAdded, bool $coAuthoredByDisabled): void
     {
         echo sprintf('Cursor rules installed (%d files, %d pruned).%s', $copied, $pruned, PHP_EOL);
 
         if ($permissionsAdded > 0) {
             echo sprintf('Allowed %d bundled-script permission(s) in ~/.claude/settings.json.%s', $permissionsAdded, PHP_EOL);
+        }
+
+        if ($coAuthoredByDisabled) {
+            echo sprintf('Disabled AI co-author attribution (includeCoAuthoredBy: false) in ~/.claude/settings.json.%s', PHP_EOL);
         }
     }
 

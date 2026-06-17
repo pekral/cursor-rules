@@ -20,6 +20,14 @@ The all-seeing code-review gatekeeper, named after **Argos Panoptes**, the hundr
 - **Orchestrates:** `code-review-github`, `code-review-jira`, `code-review-bugsnag`.
 - **Safety:** read-only — never edits, commits, pushes, or merges.
 
+### <img src="../assets/agents/talos.svg" alt="talos avatar" width="48" align="left"> `talos` — code-writing implementer
+
+The tireless bronze automaton, named after **Talos**, the forged guardian that worked without rest. Give it a source — a tracker link (GitHub, JIRA, Bugsnag) or the current task — and it implements the fix or feature, validates it with tests, opens a pull request, and hands back an `Impl done` summary with links. It is the write-side counterpart to `argos`: `argos` is the tireless eye (review), `talos` the tireless hands (implementation).
+
+- **Trigger:** an issue or task needs implementing.
+- **Orchestrates:** `resolve-issue`.
+- **Safety:** stops at the PR — never reviews its own work and never merges.
+
 ## Naming convention — Greek mythology
 
 Every agent is named after a figure from **Greek mythology**, chosen so the figure's role matches the agent's function. Use the lowercase name as the agent `name:` and file id (`agents/<name>.md`).
@@ -27,6 +35,7 @@ Every agent is named after a figure from **Greek mythology**, chosen so the figu
 | Agent | Greek figure | Why it fits |
 |---|---|---|
 | `argos` | Argos Panoptes, the hundred-eyed all-seeing watcher | nothing escapes his gaze → thorough PR inspection |
+| `talos` | Talos, the bronze automaton forged to work and guard without rest | tireless artificial labourer → forges working code |
 
 Naming ideas for future agents: `themis` (order / verdict), `rhadamanthys` (fair judge), `athena` (wisdom / architecture), `hermes` (delivery / merge).
 
@@ -39,7 +48,7 @@ An agent is a Markdown file with frontmatter + a system prompt:
 name: argos
 description: When to auto-delegate to this agent (the trigger sentence).
 tools: Read, Glob, Grep, Bash
-model: sonnet
+model: opus
 ---
 
 System prompt: what the agent does, which skills it orchestrates, and the handoff it returns.

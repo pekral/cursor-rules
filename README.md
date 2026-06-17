@@ -199,6 +199,44 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 
 ---
 
+## Claude Code Subagents
+
+Agents are a thin orchestration layer over the existing skills — they don't replace them and they don't duplicate their prompts. The roster is named after **Greek mythology** by function (see [`docs/agents.md`](docs/agents.md)).
+
+```text
+Rules  = long-lived project standards
+Skills = reusable workflows
+Agents = specialised orchestration roles over multiple skills
+```
+
+| Agent | Role | Orchestrated skills |
+|---|---|---|
+| `argus` | All-seeing code-review gatekeeper. Reviews a PR from context or a tracker link, posts the results to the PR, and hands back a CR-done handoff. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag` |
+
+### How to use `argus` in practice
+
+1. Install for Claude Code (or every editor):
+
+   ```bash
+   vendor/bin/cursor-rules install --editor=claude   # or --editor=all
+   ```
+
+   Agents land in `.claude/agents/`. They are **not** installed for `--editor=cursor` or `--editor=codex`.
+
+2. Invoke it with a **source** — a GitHub PR/issue, a JIRA key, a Bugsnag error, or just the current branch/PR:
+
+   ```text
+   @argus review PR #123
+   @argus review https://your.atlassian.net/browse/PROJ-42
+   @argus review the current diff
+   ```
+
+3. `argus` detects the tracker, runs the matching `code-review-*` skill, lets it **post the review to the PR**, then returns a handoff: `CR done` + PR link + source link + Critical/Moderate/Minor counts + assignment-conformance verdict.
+
+`argus` is **read-only** — it never applies fixes, commits, pushes, or merges. Those belong to separate agents.
+
+---
+
 ## Rules Overview
 
 Rules included in this package:

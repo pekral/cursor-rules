@@ -115,6 +115,13 @@ final class Installer
             $payloads[] = [$skillsSource, InstallerPath::resolveSkillsTargetDirectories($root, $editor)];
         }
 
+        $agentsSource = InstallerPath::resolveAgentsSource();
+        $agentsTargets = InstallerPath::resolveAgentsTargetDirectories($root, $editor);
+
+        if ($agentsSource !== null && $agentsTargets !== []) {
+            $payloads[] = [$agentsSource, $agentsTargets];
+        }
+
         return $payloads;
     }
 

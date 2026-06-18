@@ -14,7 +14,7 @@ This is a reference skill. It does not run a loop itself — it helps you pick t
 - `composer build` and `composer skill-check` are non-negotiable gates between iterations. An iteration that does not pass them is not "done" and must not advance the loop or merge.
 - Every loop needs an explicit stop condition (max iterations, no open work, or a documented blocker). Never run unbounded.
 - Stop on blockers, never force through them: merge conflict, failing CI, unresolved Critical/Moderate findings, or a gate failure ends the loop with a report.
-- Each work unit runs in its own git worktree so parallel units cannot corrupt each other's tree.
+- Parallel multi-unit patterns (e.g. the DAG below) are an explicit opt-in: only when the user chooses parallel orchestration does each work unit run in its own git worktree so units cannot corrupt each other's tree. A single sequential loop never creates a worktree on its own — it works in the current tree per `@rules/git/general.mdc` *Worktrees / Workspaces*.
 - Do not expose sensitive/internal details in user-facing loop reports.
 
 ## Use when

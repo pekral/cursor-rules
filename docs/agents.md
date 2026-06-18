@@ -151,7 +151,7 @@ So `defaultMode: acceptEdits` + `permissions.allow: ["Edit", "Write"]` alone are
 
 The permission-mode / `allow` settings (`--permission-mode acceptEdits`, `permissions.allow: ["Edit", "Write"]`) remain a prerequisite, but on their own they do **not** cross the sandbox boundary. See the Claude Code [sandboxing](https://code.claude.com/docs/en/sandboxing) and [subagents](https://code.claude.com/docs/en/sub-agents) docs for the full schema.
 
-This package does **not** flip any of these automatically — they are security-sensitive and stay an explicit, human-owned decision.
+**Installer shortcut (opt-in).** The first sandbox option above can be applied for you: run the installer with `--allow-subagent-writes` (with `--editor=claude` or `--editor=all`) and it writes `"sandbox": { "enabled": true, "filesystem": { "allowWrite": ["."] } }` into the project's `.claude/settings.json`, validating the generated block so it can never be written malformed. It leaves an existing `sandbox` block untouched. This package still flips **nothing by default** — the flag is the explicit, human-owned opt-in, never automatic.
 
 ## Distribution
 

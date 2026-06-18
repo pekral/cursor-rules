@@ -23,6 +23,7 @@ final class Installer
         $symlink = in_array('--symlink', $normalizedArgv, true);
         $prune = in_array('--prune', $normalizedArgv, true);
         $allowBundledScripts = in_array('--allow-bundled-scripts', $normalizedArgv, true);
+        $allowSubagentWrites = in_array('--allow-subagent-writes', $normalizedArgv, true);
 
         try {
             if ($command === 'help') {
@@ -43,7 +44,7 @@ final class Installer
                 return 1;
             }
 
-            return self::install($force, $symlink, $prune, $editor, $allowBundledScripts);
+            return self::install($force, $symlink, $prune, $editor, $allowBundledScripts, $allowSubagentWrites);
         } catch (InstallerFailure $exception) {
             fwrite(STDERR, $exception->getMessage() . PHP_EOL);
 
@@ -71,21 +72,19 @@ final class Installer
     private static function showHelp(): int
     {
         echo "Usage:\n";
-        echo "  vendor/bin/cursor-rules install --editor=EDITOR [--force] [--symlink] [--prune] [--allow-bundled-scripts]\n\n";
-        echo "Options:\n";
-        echo "  --editor=EDITOR         Target editor (required): cursor, claude, codex, all.\n";
+        echo "  vendor/bin/cursor-rules install --editor=EDITOR [--force] [--symlink] [--prune] [--allow-bundled-scripts] [--allow-subagent-writes]\n\n";
+        echo "Options:\n  --editor=EDITOR         Target editor (required): cursor, claude, codex, all.\n";
         echo "  --force                 Overwrite existing files.\n";
         echo "  --symlink               Create symlinks instead of copying (falls back to copy on Windows).\n";
         echo "  --prune                 Remove files in target that no longer exist in source.\n";
-        echo "  --allow-bundled-scripts Whitelist this package's bundled scripts in ~/.claude/settings.json\n";
-        echo "                          so Claude Code stops asking for confirmation on each run. Opt-in;\n";
-        echo "                          only effective with --editor=claude or --editor=all. Adds specific\n";
-        echo "                          patterns (load-issue.sh) rather than blanket-allowing everything.\n";
+        echo "  --allow-bundled-scripts Whitelist bundled scripts (load-issue.sh) in ~/.claude/settings.json. Opt-in; --editor=claude/all only.\n";
+        echo "  --allow-subagent-writes Enable subagent file writes via a sandbox block (sandbox.filesystem.allowWrite: [\".\"]) in the project\n";
+        echo "                          .claude/settings.json. Opt-in; --editor=claude/all only. Leaves an existing block untouched.\n";
 
         return 0;
     }
 
-    private static function install(bool $force, bool $symlink, bool $prune, string $editor, bool $allowBundledScripts): int
+    private static function install(bool $force, bool $symlink, bool $prune, string $editor, bool $allowBundledScripts, bool $allowSubagentWrites): int
     {
         $root = InstallerPath::resolveProjectRoot();
         [$copied, $pruned] = self::runAllSyncs(self::collectSyncPayloads($root, $editor), $force, $symlink, $prune);
@@ -94,8 +93,13 @@ final class Installer
         $copied += self::installSingleFile($claudeMdSource, InstallerPath::resolveClaudeMdTarget($root));
         $permissionsAdded = InstallerClaudeSettings::applyIfRequested($allowBundledScripts, $editor);
         $coAuthoredByDisabled = InstallerClaudeSettings::applyCoAuthoredByPreference($editor);
+        $subagentWritesEnabled = InstallerClaudeSettings::applySubagentWritesIfRequested($allowSubagentWrites, $editor, $root);
 
         self::reportInstallSummary($copied, $pruned, $permissionsAdded, $coAuthoredByDisabled);
+
+        if ($subagentWritesEnabled) {
+            echo sprintf('Enabled subagent file writes (sandbox.filesystem.allowWrite) in .claude/settings.json.%s', PHP_EOL);
+        }
 
         return 0;
     }

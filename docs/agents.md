@@ -121,6 +121,21 @@ user → daidalos                                         (top-level; resolves s
 
 The convergence gate is **0 Critical + 0 Moderate**; on `maxIterations` or a blocker the run stops and escalates instead of reporting success.
 
+## Troubleshooting — subagent file writes blocked
+
+**Symptom:** a write-capable agent (`talos`) reports it cannot write files — *"sandbox blocking file writes"* — and the run stops with a `Blocked: sandbox denied file write` handoff (or the main thread is tempted to finish the implementation itself).
+
+**Cause:** the agent declares `Write` / `Edit` in its frontmatter, but those tools are *capabilities*, not grants. The actual write is gated by the Claude Code **permission mode / sandbox**, and a dispatched subagent runs **non-interactively** — it cannot prompt for approval. When `Edit` / `Write` is not pre-permitted, the write is denied at runtime. This is an environment setting, not something the agent definition or this package can grant.
+
+**Correct behaviour (already enforced):** the blocked agent returns `Blocked: sandbox denied file write` and the orchestrator escalates it — the work is **never** silently completed outside the delegated, reviewed pipeline (`@rules/compound-engineering/general.mdc` *Blocked delegation is a hard stop*).
+
+**Remediation (the human enables subagent writes), any one of):**
+- Run the session in a permission mode that pre-accepts edits, e.g. start Claude Code with `--permission-mode acceptEdits` (or switch mode in-session), so dispatched subagents may apply `Edit` / `Write` without an interactive prompt.
+- Pre-allow the write tools in `settings.json` `permissions.allow` (e.g. `"Edit"`, `"Write"`) for the project, scoped as narrowly as your policy allows.
+- If a Bash/filesystem **sandbox** is active and denying writes to the working tree, grant the working directory write access (or disable the write-blocking sandbox for the run) per your Claude Code sandbox configuration.
+
+This package does **not** flip any of these automatically — they are security-sensitive and stay an explicit, human-owned decision.
+
 ## Distribution
 
 The installer copies `agents/` to `.claude/agents/` for `--editor=claude` and `--editor=all` only — Claude Code is the only editor with a native subagent format, so `--editor=cursor` and `--editor=codex` skip agents.

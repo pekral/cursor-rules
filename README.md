@@ -256,6 +256,8 @@ Agents = specialised orchestration roles over multiple skills
 
 `talos` **stops at the PR** — it never reviews its own work or merges. Hand the PR to `argos` for review next.
 
+> **If `talos` reports `Blocked: sandbox denied file write`:** dispatched subagents run non-interactively, so file writes are denied unless the session pre-permits them. Enable subagent writes (run with `--permission-mode acceptEdits`, or pre-allow `Edit` / `Write` in `settings.json`, or grant the sandbox working-tree write access) and re-run — see [`docs/agents.md`](docs/agents.md) *Troubleshooting — subagent file writes blocked*. The run correctly stops instead of silently finishing the work in the main thread.
+
 ### How to use `metis` in practice
 
 1. Install for Claude Code (or every editor), exactly as for `argos` / `talos` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.

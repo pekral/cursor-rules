@@ -11,6 +11,7 @@ Compound engineering is **not** "let the AI write the code". It is a system wher
 - **Every change must make future work easier, not harder.** A change that adds hidden coupling, ships an undocumented decision, or introduces a new abstraction where an existing part of the system already fit is a defect to correct — not something to ship and move on from.
 - **Every mistake, insight, or decision worth more than this one task gets written down** where the next agent *and* the next human will find it. Knowledge that lives only in someone's head, a chat thread, or a closed PR does not compound.
 - The human stays in the loop on direction and quality; the agents do the planning, implementing, and reviewing against that direction.
+- **Blocked delegation is a hard stop, never a silent bypass.** When a dispatched agent cannot do its job because the environment denies it — most commonly a write-capable implementer (e.g. `talos`) whose `Write` / `Edit` is refused by the harness sandbox / permission layer even though the agent declares those tools — the run **stops and reports the blocker with its remediation**. Do **not** silently complete the blocked agent's work in the main thread (or in another agent's context): that bypasses the delegated, reviewed pipeline (no implementer→reviewer loop, no quality gates), hides the failure from the human, and breaks the compounding loop. Surface *what was blocked*, *why* (the denied capability), and *how to unblock it* (the environment change the human must make), then halt.
 
 ## Compound Memory (per project)
 

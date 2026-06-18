@@ -120,8 +120,8 @@ final class InstallerClaudeSettings
      * tree to `permissions.allow` in the project's `.claude/settings.local.json`,
      * idempotently, so a dispatched subagent (e.g. `talos`) may write files without
      * interactive approval. Existing allow entries and unrelated keys are preserved.
-     * The result is validated before and after the write (round-trip) so a malformed
-     * file can never be produced. Returns true only when at least one entry was added.
+     * The written file is re-read and validated so a malformed file can never be
+     * accepted. Returns true only when at least one entry was added.
      */
     public static function ensureSubagentWritesEnabled(string $projectRoot): bool
     {
@@ -132,8 +132,6 @@ final class InstallerClaudeSettings
         if (!self::prependAllowEntries($existing, $required)) {
             return false;
         }
-
-        self::validateSubagentWritePermissions($existing, $required, $settingsPath);
 
         InstallerPath::ensureDirectory(dirname($settingsPath));
         self::writeSettings($settingsPath, $existing);
@@ -220,6 +218,27 @@ final class InstallerClaudeSettings
      */
     private static function prependAllowEntries(stdClass $existing, array $entries): bool
     {
+        [$permissions, $allow] = self::resolveAllowList($existing);
+        $missing = array_values(array_filter($entries, static fn (string $entry): bool => !in_array($entry, $allow, true)));
+
+        if ($missing === []) {
+            return false;
+        }
+
+        $permissions->allow = [...$missing, ...$allow];
+        $existing->permissions = $permissions;
+
+        return true;
+    }
+
+    /**
+     * Resolves the settings object's `permissions` container (creating it when absent
+     * or the wrong shape) and its `permissions.allow` list sanitised to strings only.
+     *
+     * @return array{0: \stdClass, 1: array<int, string>}
+     */
+    private static function resolveAllowList(stdClass $existing): array
+    {
         $permissions = $existing->permissions ?? null;
 
         if (!$permissions instanceof stdClass) {
@@ -232,17 +251,7 @@ final class InstallerClaudeSettings
             $allow = [];
         }
 
-        $allow = array_values(array_filter($allow, static fn (mixed $entry): bool => is_string($entry)));
-        $missing = array_values(array_filter($entries, static fn (string $entry): bool => !in_array($entry, $allow, true)));
-
-        if ($missing === []) {
-            return false;
-        }
-
-        $permissions->allow = [...$missing, ...$allow];
-        $existing->permissions = $permissions;
-
-        return true;
+        return [$permissions, array_values(array_filter($allow, static fn (mixed $entry): bool => is_string($entry)))];
     }
 
     /**
@@ -279,19 +288,7 @@ final class InstallerClaudeSettings
 
     private static function mergePermissions(stdClass $existing): stdClass
     {
-        $permissions = $existing->permissions ?? null;
-
-        if (!$permissions instanceof stdClass) {
-            $permissions = new stdClass();
-        }
-
-        $allow = $permissions->allow ?? null;
-
-        if (!is_array($allow)) {
-            $allow = [];
-        }
-
-        $allow = array_values(array_filter($allow, static fn (mixed $entry): bool => is_string($entry)));
+        [$permissions, $allow] = self::resolveAllowList($existing);
 
         foreach (self::getBundledScriptPermissions() as $pattern) {
             if (!in_array($pattern, $allow, true)) {

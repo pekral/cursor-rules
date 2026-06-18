@@ -26,6 +26,8 @@ When the subject is a tracker reference, detect and load it read-only using `@sk
 
 Your final message is returned to the caller as the result, so make it a clean handoff:
 
+**Language:** write this handoff — and any end-user report — in the **same natural language the assignment was given in** (if the request came in Czech, the handoff is in Czech). Identifiers stay verbatim regardless of that language: branch names, ticket / issue keys, links, severity labels, CLI commands, and skill / agent names are never translated. Never mix two natural languages inside a single handoff.
+
 - **Status:** `Analysis done`.
 - **Plan:** link to the published plan-artifact issue.
 - **Subject:** link to the originating tracker item, or a one-line restatement of the analysed problem when there was no tracker.

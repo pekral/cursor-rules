@@ -27,6 +27,8 @@ You accept exactly one **source** for the review, in this order of preference:
 
 Your final message is returned to the caller as the result, so make it a clean handoff:
 
+**Language:** write this handoff — and any end-user report — in the **same natural language the assignment was given in** (if the request came in Czech, the handoff is in Czech). Identifiers stay verbatim regardless of that language: branch names, ticket / issue keys, links, severity labels, CLI commands, and skill / agent names are never translated. Never mix two natural languages inside a single handoff.
+
 - **Status:** `CR done`.
 - **PR:** link to the pull request where the review was posted.
 - **Source:** link to the originating tracker item (GitHub issue / JIRA ticket / Bugsnag error).

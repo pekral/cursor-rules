@@ -11,14 +11,6 @@ final class InstallerClaudeSettings
 {
 
     /**
-     * Working-tree-relative path the sandbox grants subagents write access to.
-     * `.` resolves to the session's current working directory at runtime, so a
-     * dispatched subagent may write the project it is invoked in — and nothing
-     * outside it — without the human re-approving each write interactively.
-     */
-    private const string SANDBOX_WRITABLE_ROOT = '.';
-
-    /**
      * Bundled scripts that are safe to run without per-call confirmation.
      * Patterns match both project-local (`.claude/skills/.../scripts/...`) and
      * home (`~/.claude/skills/.../scripts/...`) install locations.
@@ -35,7 +27,7 @@ final class InstallerClaudeSettings
 
     public static function resolveSettingsPath(string $home): string
     {
-        return self::claudeSettingsPath($home);
+        return $home . '/.claude/settings.json';
     }
 
     /**
@@ -102,17 +94,17 @@ final class InstallerClaudeSettings
         return true;
     }
 
-    public static function resolveProjectSettingsPath(string $projectRoot): string
+    public static function resolveProjectLocalSettingsPath(string $projectRoot): string
     {
-        return self::claudeSettingsPath($projectRoot);
+        return $projectRoot . '/.claude/settings.local.json';
     }
 
     /**
-     * Enables subagent file writes in the project's `.claude/settings.json` only
-     * when the caller opted in (`--allow-subagent-writes`) and the editor is
-     * `claude` or `all`. Returns true when the sandbox block was newly written;
-     * false in every other case. Opt-in by design — this flips a security-relevant
-     * sandbox setting, so it stays an explicit, human-owned decision.
+     * Enables dispatched-subagent file writes only when the caller opted in
+     * (`--allow-subagent-writes`) and the editor is `claude` or `all`. Returns true
+     * when at least one allow entry was newly written; false in every other case.
+     * Opt-in by design — this grants a write permission, so it stays an explicit,
+     * human-owned decision.
      */
     public static function applySubagentWritesIfRequested(bool $allowSubagentWrites, string $editor, string $projectRoot): bool
     {
@@ -124,57 +116,49 @@ final class InstallerClaudeSettings
     }
 
     /**
-     * Writes the sandbox block that grants dispatched subagents write access to
-     * the working tree into the project's `.claude/settings.json`, idempotently.
-     * Leaves an existing `sandbox` value untouched so a user who tuned it keeps
-     * their choice. The generated block is validated before and after the write
-     * (round-trip) so a malformed file can never be produced. Returns true only
-     * when the block was absent and is now written.
+     * Prepends scoped `Edit` / `Write` permission entries for the project working
+     * tree to `permissions.allow` in the project's `.claude/settings.local.json`,
+     * idempotently, so a dispatched subagent (e.g. `talos`) may write files without
+     * interactive approval. Existing allow entries and unrelated keys are preserved.
+     * The result is validated before and after the write (round-trip) so a malformed
+     * file can never be produced. Returns true only when at least one entry was added.
      */
     public static function ensureSubagentWritesEnabled(string $projectRoot): bool
     {
-        $settingsPath = self::resolveProjectSettingsPath($projectRoot);
+        $settingsPath = self::resolveProjectLocalSettingsPath($projectRoot);
         $existing = self::readSettings($settingsPath);
+        $required = self::buildSubagentWritePermissions($projectRoot);
 
-        if (property_exists($existing, 'sandbox')) {
+        if (!self::prependAllowEntries($existing, $required)) {
             return false;
         }
 
-        $existing->sandbox = self::buildSandboxSettings();
-        self::validateSandboxSettings($existing, $settingsPath);
+        self::validateSubagentWritePermissions($existing, $required, $settingsPath);
 
         InstallerPath::ensureDirectory(dirname($settingsPath));
         self::writeSettings($settingsPath, $existing);
 
-        self::validateSandboxSettings(self::readSettings($settingsPath), $settingsPath);
+        self::validateSubagentWritePermissions(self::readSettings($settingsPath), $required, $settingsPath);
 
         return true;
     }
 
     /**
-     * Validates that the `sandbox` block in a settings object has the exact shape
-     * Claude Code expects: `{ "enabled": <bool>, "filesystem": { "allowWrite": [<non-empty string>, ...] } }`.
-     * Throws InstallerFailure on any deviation so an invalid config is never written or accepted.
+     * Validates that every required subagent-write permission entry is present in
+     * `permissions.allow` as a string. Throws InstallerFailure on any deviation so an
+     * invalid config is never written or accepted.
+     *
+     * @param array<int, string> $required
      */
-    public static function validateSandboxSettings(stdClass $data, string $path): void
+    public static function validateSubagentWritePermissions(stdClass $data, array $required, string $path): void
     {
-        $sandbox = $data->sandbox ?? null;
+        $allow = self::extractAllow($data);
 
-        if (!$sandbox instanceof stdClass) {
-            throw InstallerFailure::settingsSandboxInvalid($path, 'sandbox must be a JSON object');
+        foreach ($required as $entry) {
+            if (!in_array($entry, $allow, true)) {
+                throw InstallerFailure::settingsSubagentWritesInvalid($path, sprintf('missing allow entry "%s"', $entry));
+            }
         }
-
-        if (!property_exists($sandbox, 'enabled') || !is_bool($sandbox->enabled)) {
-            throw InstallerFailure::settingsSandboxInvalid($path, 'sandbox.enabled must be a boolean');
-        }
-
-        $filesystem = $sandbox->filesystem ?? null;
-
-        if (!$filesystem instanceof stdClass) {
-            throw InstallerFailure::settingsSandboxInvalid($path, 'sandbox.filesystem must be a JSON object');
-        }
-
-        self::validateAllowWrite($filesystem->allowWrite ?? null, $path);
     }
 
     /**
@@ -216,34 +200,49 @@ final class InstallerClaudeSettings
         return $added;
     }
 
-    private static function validateAllowWrite(mixed $allowWrite, string $path): void
+    /**
+     * @return array<int, string>
+     */
+    private static function buildSubagentWritePermissions(string $projectRoot): array
     {
-        if (!is_array($allowWrite) || $allowWrite === []) {
-            throw InstallerFailure::settingsSandboxInvalid($path, 'sandbox.filesystem.allowWrite must be a non-empty array');
-        }
-
-        foreach ($allowWrite as $entry) {
-            if (!is_string($entry) || $entry === '') {
-                throw InstallerFailure::settingsSandboxInvalid($path, 'sandbox.filesystem.allowWrite entries must be non-empty strings');
-            }
-        }
+        return [
+            sprintf('Edit(/%s/**)', $projectRoot),
+            sprintf('Write(/%s/**)', $projectRoot),
+        ];
     }
 
-    private static function buildSandboxSettings(): stdClass
+    /**
+     * Prepends the missing entries to `permissions.allow` (preserving order and
+     * existing entries) and recovers when `permissions` / `allow` carry the wrong
+     * shape. Returns true only when at least one entry was added.
+     *
+     * @param array<int, string> $entries
+     */
+    private static function prependAllowEntries(stdClass $existing, array $entries): bool
     {
-        $filesystem = new stdClass();
-        $filesystem->allowWrite = [self::SANDBOX_WRITABLE_ROOT];
+        $permissions = $existing->permissions ?? null;
 
-        $sandbox = new stdClass();
-        $sandbox->enabled = true;
-        $sandbox->filesystem = $filesystem;
+        if (!$permissions instanceof stdClass) {
+            $permissions = new stdClass();
+        }
 
-        return $sandbox;
-    }
+        $allow = $permissions->allow ?? null;
 
-    private static function claudeSettingsPath(string $base): string
-    {
-        return $base . '/.claude/settings.json';
+        if (!is_array($allow)) {
+            $allow = [];
+        }
+
+        $allow = array_values(array_filter($allow, static fn (mixed $entry): bool => is_string($entry)));
+        $missing = array_values(array_filter($entries, static fn (string $entry): bool => !in_array($entry, $allow, true)));
+
+        if ($missing === []) {
+            return false;
+        }
+
+        $permissions->allow = [...$missing, ...$allow];
+        $existing->permissions = $permissions;
+
+        return true;
     }
 
     /**

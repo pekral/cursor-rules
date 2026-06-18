@@ -125,33 +125,26 @@ The convergence gate is **0 Critical + 0 Moderate**; on `maxIterations` or a blo
 
 **Symptom:** a write-capable agent (`talos`) reports it cannot write files — *"sandbox blocking file writes"* — and the run stops with a `Blocked: sandbox denied file write` handoff (or the main thread is tempted to finish the implementation itself).
 
-**Cause:** the agent declares `Write` / `Edit` in its frontmatter, but those tools are *capabilities*, not grants. A dispatched subagent inherits the session's permission mode and `permissions.allow` list, yet **two boundaries still block its write that do not block the main thread**:
-
-1. a **background** subagent runs non-interactively and **auto-denies any write that would otherwise prompt** — it cannot fall back to an interactive approval the way the main thread can; and
-2. the OS-level **filesystem sandbox** grants write access only to the working directory and `$TMPDIR` by default — a write the sandbox boundary rejects is denied regardless of `permissions.allow`.
-
-So `defaultMode: acceptEdits` + `permissions.allow: ["Edit", "Write"]` alone are **not sufficient**: they are the *permission* layer, not the *sandbox* layer. This is an environment setting, not something the agent definition or this package can grant.
+**Cause:** the agent declares `Write` / `Edit` in its frontmatter, but those tools are *capabilities*, not grants. A dispatched subagent runs **non-interactively** — when its `Edit` / `Write` is not already pre-allowed for the path it targets, it cannot fall back to an interactive approval the way the main thread can, so the write is denied at runtime. This is an environment setting, not something the agent definition or this package can grant.
 
 **Correct behaviour (already enforced):** the blocked agent returns `Blocked: sandbox denied file write` and the orchestrator escalates it — the work is **never** silently completed outside the delegated, reviewed pipeline (`@rules/compound-engineering/general.mdc` *Blocked delegation is a hard stop*).
 
-**Remediation (the human enables subagent writes).** When `acceptEdits` + allowed `Edit` / `Write` are **already** set and the subagent is *still* blocked, the cause is the sandbox / background mode — fix that, not the permission mode:
+**Remediation (the human enables subagent writes) — pre-allow scoped `Edit` / `Write` on the working tree.** Add two scoped allow entries to **`permissions.allow`** in the project's `.claude/settings.local.json`, naming the project's absolute path:
 
-- **Grant the sandbox write access to the working tree.** Add a top-level `sandbox` block to `settings.json` so subagent writes to the project pass the OS-level boundary:
-  ```json
-  {
-    "sandbox": {
-      "enabled": true,
-      "filesystem": { "allowWrite": ["."] }
-    }
+```json
+{
+  "permissions": {
+    "allow": [
+      "Edit(//Users/me/Projects/my-app/**)",
+      "Write(//Users/me/Projects/my-app/**)"
+    ]
   }
-  ```
-  Add any path outside the project the work must write to the same `allowWrite` array (e.g. `["/tmp/output", "~/.cache/app"]`). Paths merge across user / project / local scopes; a `denyWrite` at any scope wins.
-- **Re-dispatch the blocked agent in the foreground, not the background.** A background subagent auto-denies any write that would otherwise prompt; a foreground dispatch uses the inherited `acceptEdits` mode (or can prompt interactively).
-- **Or disable the sandbox for the run** (`"sandbox": { "enabled": false }`) — broadest and least safe, dev-only.
+}
+```
 
-The permission-mode / `allow` settings (`--permission-mode acceptEdits`, `permissions.allow: ["Edit", "Write"]`) remain a prerequisite, but on their own they do **not** cross the sandbox boundary. See the Claude Code [sandboxing](https://code.claude.com/docs/en/sandboxing) and [subagents](https://code.claude.com/docs/en/sub-agents) docs for the full schema.
+This is the permanent, recommended fix: a dispatched subagent then writes the working tree without an interactive prompt. `settings.local.json` (personal, git-ignored) is the right home because the entries carry your machine-absolute path. A blanket `acceptEdits` permission mode also works for an interactive session, but the scoped allow entries survive across sessions and headless runs. See the Claude Code [permissions](https://code.claude.com/docs/en/permissions) and [subagents](https://code.claude.com/docs/en/sub-agents) docs.
 
-**Installer shortcut (opt-in).** The first sandbox option above can be applied for you: run the installer with `--allow-subagent-writes` (with `--editor=claude` or `--editor=all`) and it writes `"sandbox": { "enabled": true, "filesystem": { "allowWrite": ["."] } }` into the project's `.claude/settings.json`, validating the generated block so it can never be written malformed. It leaves an existing `sandbox` block untouched. This package still flips **nothing by default** — the flag is the explicit, human-owned opt-in, never automatic.
+**Installer shortcut (opt-in).** The fix above can be applied for you: run the installer with `--allow-subagent-writes` (with `--editor=claude` or `--editor=all`) and it prepends `Edit(//<project>/**)` and `Write(//<project>/**)` to `permissions.allow` in the project's `.claude/settings.local.json`, validating the result so it can never be written malformed. It leaves existing allow entries untouched and is idempotent. This package still grants **nothing by default** — the flag is the explicit, human-owned opt-in, never automatic.
 
 ## Distribution
 

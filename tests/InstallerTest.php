@@ -2758,7 +2758,7 @@ test('help text documents the --allow-subagent-writes flag', function (): void {
 
     expect($exitCode)->toBe(0);
     expect($output)->toContain('--allow-subagent-writes');
-    expect($output)->toContain('sandbox.filesystem.allowWrite');
+    expect($output)->toContain('.claude/settings.local.json');
 });
 
 test('normalizeCliArguments splits --allow-subagent-writes from a concatenated argv blob', function (): void {
@@ -3009,37 +3009,37 @@ test('ensureBundledScriptPermissions raises InstallerFailure when ~/.claude path
     }
 });
 
-test('resolveProjectSettingsPath joins the project root with /.claude/settings.json', function (): void {
-    expect(InstallerClaudeSettings::resolveProjectSettingsPath('/tmp/project'))->toBe('/tmp/project/.claude/settings.json');
+test('resolveProjectLocalSettingsPath joins the project root with /.claude/settings.local.json', function (): void {
+    expect(InstallerClaudeSettings::resolveProjectLocalSettingsPath('/tmp/project'))->toBe('/tmp/project/.claude/settings.local.json');
 });
 
-test('ensureSubagentWritesEnabled writes a valid sandbox block into a fresh settings.json', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-sandbox-' . bin2hex(random_bytes(4));
+test('ensureSubagentWritesEnabled writes scoped Edit/Write entries into a fresh settings.local.json', function (): void {
+    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
 
     try {
         $written = InstallerClaudeSettings::ensureSubagentWritesEnabled($root);
 
         expect($written)->toBeTrue();
 
-        $settingsPath = $root . '/.claude/settings.json';
+        $settingsPath = $root . '/.claude/settings.local.json';
         expect(is_file($settingsPath))->toBeTrue();
 
         $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
         assert(is_array($data));
-        $sandbox = $data['sandbox'];
-        assert(is_array($sandbox));
-        $filesystem = $sandbox['filesystem'];
-        assert(is_array($filesystem));
-        expect($sandbox['enabled'])->toBeTrue();
-        expect($filesystem['allowWrite'])->toBe(['.']);
+        $permissions = $data['permissions'];
+        assert(is_array($permissions));
+        expect($permissions['allow'])->toBe([
+            sprintf('Edit(/%s/**)', $root),
+            sprintf('Write(/%s/**)', $root),
+        ]);
     } finally {
         installerRemoveDirectory($root);
     }
 });
 
-test('ensureSubagentWritesEnabled merges into existing settings.json without dropping unrelated keys', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-sandbox-' . bin2hex(random_bytes(4));
-    $settingsPath = $root . '/.claude/settings.json';
+test('ensureSubagentWritesEnabled prepends to existing allow without dropping unrelated entries', function (): void {
+    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $settingsPath = $root . '/.claude/settings.local.json';
     installerWriteFile($settingsPath, (string) json_encode([
         'theme' => 'dark',
         'permissions' => ['allow' => ['Bash(git status:*)']],
@@ -3050,113 +3050,149 @@ test('ensureSubagentWritesEnabled merges into existing settings.json without dro
 
         expect($written)->toBeTrue();
 
+        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        assert(is_array($data));
+        $permissions = $data['permissions'];
+        assert(is_array($permissions));
+        expect($permissions['allow'])->toBe([
+            sprintf('Edit(/%s/**)', $root),
+            sprintf('Write(/%s/**)', $root),
+            'Bash(git status:*)',
+        ]);
+
         $raw = (string) file_get_contents($settingsPath);
         expect($raw)->toContain('"theme": "dark"');
-        expect($raw)->toContain('"Bash(git status:*)"');
-        expect($raw)->toContain('"sandbox"');
     } finally {
         installerRemoveDirectory($root);
     }
 });
 
-test('ensureSubagentWritesEnabled respects an existing sandbox block and leaves it untouched', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-sandbox-' . bin2hex(random_bytes(4));
-    $settingsPath = $root . '/.claude/settings.json';
+test('ensureSubagentWritesEnabled is idempotent when both entries are already present', function (): void {
+    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $settingsPath = $root . '/.claude/settings.local.json';
     installerWriteFile($settingsPath, (string) json_encode([
-        'sandbox' => ['enabled' => false],
+        'permissions' => ['allow' => [
+            sprintf('Edit(/%s/**)', $root),
+            sprintf('Write(/%s/**)', $root),
+        ],
+        ],
     ], JSON_PRETTY_PRINT));
 
     try {
-        $written = InstallerClaudeSettings::ensureSubagentWritesEnabled($root);
+        expect(InstallerClaudeSettings::ensureSubagentWritesEnabled($root))->toBeFalse();
+    } finally {
+        installerRemoveDirectory($root);
+    }
+});
 
-        expect($written)->toBeFalse();
+test('ensureSubagentWritesEnabled adds only the missing entry when one is already present', function (): void {
+    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $settingsPath = $root . '/.claude/settings.local.json';
+    installerWriteFile($settingsPath, (string) json_encode([
+        'permissions' => ['allow' => [sprintf('Write(/%s/**)', $root)]],
+    ], JSON_PRETTY_PRINT));
+
+    try {
+        expect(InstallerClaudeSettings::ensureSubagentWritesEnabled($root))->toBeTrue();
 
         $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
         assert(is_array($data));
-        $sandbox = $data['sandbox'];
-        assert(is_array($sandbox));
-        expect($sandbox['enabled'])->toBeFalse();
+        $permissions = $data['permissions'];
+        assert(is_array($permissions));
+        expect($permissions['allow'])->toBe([
+            sprintf('Edit(/%s/**)', $root),
+            sprintf('Write(/%s/**)', $root),
+        ]);
+    } finally {
+        installerRemoveDirectory($root);
+    }
+});
+
+test('ensureSubagentWritesEnabled recovers when permissions.allow is the wrong shape and drops non-strings', function (): void {
+    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $settingsPath = $root . '/.claude/settings.local.json';
+    installerWriteFile($settingsPath, (string) json_encode([
+        'permissions' => ['allow' => ['Bash(git status:*)', 42, null]],
+    ]));
+
+    try {
+        expect(InstallerClaudeSettings::ensureSubagentWritesEnabled($root))->toBeTrue();
+
+        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        assert(is_array($data));
+        $permissions = $data['permissions'];
+        assert(is_array($permissions));
+        expect($permissions['allow'])->toBe([
+            sprintf('Edit(/%s/**)', $root),
+            sprintf('Write(/%s/**)', $root),
+            'Bash(git status:*)',
+        ]);
+    } finally {
+        installerRemoveDirectory($root);
+    }
+});
+
+test('ensureSubagentWritesEnabled recovers when permissions key is the wrong shape', function (): void {
+    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $settingsPath = $root . '/.claude/settings.local.json';
+    installerWriteFile($settingsPath, (string) json_encode(['permissions' => 'not-an-object']));
+
+    try {
+        expect(InstallerClaudeSettings::ensureSubagentWritesEnabled($root))->toBeTrue();
+
+        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        assert(is_array($data));
+        $permissions = $data['permissions'];
+        assert(is_array($permissions));
+        expect($permissions['allow'])->toBe([
+            sprintf('Edit(/%s/**)', $root),
+            sprintf('Write(/%s/**)', $root),
+        ]);
     } finally {
         installerRemoveDirectory($root);
     }
 });
 
 test('applySubagentWritesIfRequested returns false when the flag is not set', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-sandbox-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
 
     expect(InstallerClaudeSettings::applySubagentWritesIfRequested(false, 'claude', $root))->toBeFalse();
-    expect(is_file($root . '/.claude/settings.json'))->toBeFalse();
+    expect(is_file($root . '/.claude/settings.local.json'))->toBeFalse();
 });
 
 test('applySubagentWritesIfRequested returns false for a non-claude editor', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-sandbox-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
 
     expect(InstallerClaudeSettings::applySubagentWritesIfRequested(true, 'cursor', $root))->toBeFalse();
-    expect(is_file($root . '/.claude/settings.json'))->toBeFalse();
+    expect(is_file($root . '/.claude/settings.local.json'))->toBeFalse();
 });
 
-test('applySubagentWritesIfRequested writes the sandbox block for editor=claude when requested', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-sandbox-' . bin2hex(random_bytes(4));
+test('applySubagentWritesIfRequested writes the allow entries for editor=claude when requested', function (): void {
+    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
 
     try {
         expect(InstallerClaudeSettings::applySubagentWritesIfRequested(true, 'claude', $root))->toBeTrue();
-        expect(is_file($root . '/.claude/settings.json'))->toBeTrue();
+        expect(is_file($root . '/.claude/settings.local.json'))->toBeTrue();
     } finally {
         installerRemoveDirectory($root);
     }
 });
 
-test('validateSandboxSettings accepts the generated block shape', function (): void {
-    $data = json_decode('{"sandbox":{"enabled":true,"filesystem":{"allowWrite":["."]}}}', false, 512, JSON_THROW_ON_ERROR);
+test('validateSubagentWritePermissions passes when every required entry is present', function (): void {
+    $data = json_decode('{"permissions":{"allow":["Edit(//tmp/p/**)","Write(//tmp/p/**)"]}}', false, 512, JSON_THROW_ON_ERROR);
     assert($data instanceof stdClass);
 
-    InstallerClaudeSettings::validateSandboxSettings($data, '/tmp/x');
+    InstallerClaudeSettings::validateSubagentWritePermissions($data, ['Edit(//tmp/p/**)', 'Write(//tmp/p/**)'], '/tmp/x');
 
     expect(true)->toBeTrue();
 });
 
-test('validateSandboxSettings rejects a sandbox that is not an object', function (): void {
-    $data = json_decode('{"sandbox":"nope"}', false, 512, JSON_THROW_ON_ERROR);
+test('validateSubagentWritePermissions throws when a required entry is missing', function (): void {
+    $data = json_decode('{"permissions":{"allow":["Edit(//tmp/p/**)"]}}', false, 512, JSON_THROW_ON_ERROR);
     assert($data instanceof stdClass);
 
     expect(static function () use ($data): void {
-        InstallerClaudeSettings::validateSandboxSettings($data, '/tmp/x');
-    })->toThrow(InstallerFailure::class);
-});
-
-test('validateSandboxSettings rejects a non-boolean enabled flag', function (): void {
-    $data = json_decode('{"sandbox":{"enabled":"yes","filesystem":{"allowWrite":["."]}}}', false, 512, JSON_THROW_ON_ERROR);
-    assert($data instanceof stdClass);
-
-    expect(static function () use ($data): void {
-        InstallerClaudeSettings::validateSandboxSettings($data, '/tmp/x');
-    })->toThrow(InstallerFailure::class);
-});
-
-test('validateSandboxSettings rejects a filesystem that is not an object', function (): void {
-    $data = json_decode('{"sandbox":{"enabled":true,"filesystem":42}}', false, 512, JSON_THROW_ON_ERROR);
-    assert($data instanceof stdClass);
-
-    expect(static function () use ($data): void {
-        InstallerClaudeSettings::validateSandboxSettings($data, '/tmp/x');
-    })->toThrow(InstallerFailure::class);
-});
-
-test('validateSandboxSettings rejects an empty allowWrite array', function (): void {
-    $data = json_decode('{"sandbox":{"enabled":true,"filesystem":{"allowWrite":[]}}}', false, 512, JSON_THROW_ON_ERROR);
-    assert($data instanceof stdClass);
-
-    expect(static function () use ($data): void {
-        InstallerClaudeSettings::validateSandboxSettings($data, '/tmp/x');
-    })->toThrow(InstallerFailure::class);
-});
-
-test('validateSandboxSettings rejects a non-string allowWrite entry', function (): void {
-    $data = json_decode('{"sandbox":{"enabled":true,"filesystem":{"allowWrite":[1]}}}', false, 512, JSON_THROW_ON_ERROR);
-    assert($data instanceof stdClass);
-
-    expect(static function () use ($data): void {
-        InstallerClaudeSettings::validateSandboxSettings($data, '/tmp/x');
+        InstallerClaudeSettings::validateSubagentWritePermissions($data, ['Edit(//tmp/p/**)', 'Write(//tmp/p/**)'], '/tmp/x');
     })->toThrow(InstallerFailure::class);
 });
 
@@ -3275,7 +3311,7 @@ test('install --editor=claude without --allow-bundled-scripts still disables AI 
     }
 });
 
-test('install --editor=claude --allow-subagent-writes writes the sandbox block and reports it', function (): void {
+test('install --editor=claude --allow-subagent-writes writes the allow entries and reports it', function (): void {
     $root = installerCreateProjectRoot();
     $homeEnv = getenv('HOME');
     $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
@@ -3294,25 +3330,27 @@ test('install --editor=claude --allow-subagent-writes writes the sandbox block a
         Installer::run(['cursor-rules', 'install', '--editor=claude', '--allow-subagent-writes']);
         $output = (string) ob_get_clean();
 
-        expect($output)->toContain('Enabled subagent file writes (sandbox.filesystem.allowWrite) in .claude/settings.json.');
+        expect($output)->toContain('Allowed subagent file writes (Edit/Write on the working tree) in .claude/settings.local.json.');
 
-        $settingsPath = $root . '/.claude/settings.json';
+        $settingsPath = $root . '/.claude/settings.local.json';
         expect(is_file($settingsPath))->toBeTrue();
 
         $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
         assert(is_array($data));
-        $sandbox = $data['sandbox'];
-        assert(is_array($sandbox));
-        $filesystem = $sandbox['filesystem'];
-        assert(is_array($filesystem));
-        expect($sandbox['enabled'])->toBeTrue();
-        expect($filesystem['allowWrite'])->toBe(['.']);
+        $permissions = $data['permissions'];
+        assert(is_array($permissions));
+        $allow = $permissions['allow'];
+        assert(is_array($allow));
+        expect($allow[0])->toStartWith('Edit(/');
+        expect($allow[1])->toStartWith('Write(/');
+        expect($allow[0])->toEndWith('/**)');
+        expect($allow[1])->toEndWith('/**)');
     } finally {
         installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
     }
 });
 
-test('install --editor=cursor --allow-subagent-writes does not write a sandbox block', function (): void {
+test('install --editor=cursor --allow-subagent-writes does not write settings.local.json', function (): void {
     $root = installerCreateProjectRoot();
     $homeEnv = getenv('HOME');
     $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
@@ -3331,14 +3369,14 @@ test('install --editor=cursor --allow-subagent-writes does not write a sandbox b
         Installer::run(['cursor-rules', 'install', '--editor=cursor', '--allow-subagent-writes']);
         $output = (string) ob_get_clean();
 
-        expect($output)->not->toContain('Enabled subagent file writes');
-        expect(is_file($root . '/.claude/settings.json'))->toBeFalse();
+        expect($output)->not->toContain('Allowed subagent file writes');
+        expect(is_file($root . '/.claude/settings.local.json'))->toBeFalse();
     } finally {
         installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
     }
 });
 
-test('install --editor=claude without --allow-subagent-writes does not write a sandbox block', function (): void {
+test('install --editor=claude without --allow-subagent-writes does not write settings.local.json', function (): void {
     $root = installerCreateProjectRoot();
     $homeEnv = getenv('HOME');
     $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
@@ -3357,12 +3395,8 @@ test('install --editor=claude without --allow-subagent-writes does not write a s
         Installer::run(['cursor-rules', 'install', '--editor=claude']);
         $output = (string) ob_get_clean();
 
-        expect($output)->not->toContain('Enabled subagent file writes');
-
-        $settingsPath = $root . '/.claude/settings.json';
-        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
-        assert(is_array($data));
-        expect(array_key_exists('sandbox', $data))->toBeFalse();
+        expect($output)->not->toContain('Allowed subagent file writes');
+        expect(is_file($root . '/.claude/settings.local.json'))->toBeFalse();
     } finally {
         installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
     }

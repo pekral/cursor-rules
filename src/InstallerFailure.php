@@ -39,4 +39,9 @@ final class InstallerFailure extends RuntimeException
         return new self(sprintf('Cannot write Claude settings file %s: %s.', $path, $reason));
     }
 
+    public static function settingsSandboxInvalid(string $path, string $reason): self
+    {
+        return new self(sprintf('Invalid sandbox settings for %s: %s.', $path, $reason));
+    }
+
 }

@@ -256,7 +256,7 @@ Agents = specialised orchestration roles over multiple skills
 
 `talos` **stops at the PR** — it never reviews its own work or merges. Hand the PR to `argos` for review next.
 
-> **If `talos` reports `Blocked: sandbox denied file write`:** dispatched subagents run non-interactively. `--permission-mode acceptEdits` and `permissions.allow: ["Edit", "Write"]` are necessary but **not sufficient** — a background subagent auto-denies any prompting write, and the OS-level filesystem sandbox only grants writes to the working tree / `$TMPDIR` by default. Grant the sandbox write access (`"sandbox": { "enabled": true, "filesystem": { "allowWrite": ["."] } }` in `settings.json`) and/or re-dispatch the agent in the foreground, then re-run — see [`docs/agents.md`](docs/agents.md) *Troubleshooting — subagent file writes blocked*. The run correctly stops instead of silently finishing the work in the main thread.
+> **If `talos` reports `Blocked: sandbox denied file write`:** dispatched subagents run non-interactively. `--permission-mode acceptEdits` and `permissions.allow: ["Edit", "Write"]` are necessary but **not sufficient** — a background subagent auto-denies any prompting write, and the OS-level filesystem sandbox only grants writes to the working tree / `$TMPDIR` by default. Grant the sandbox write access (`"sandbox": { "enabled": true, "filesystem": { "allowWrite": ["."] } }` in `settings.json` — or run the installer with `--allow-subagent-writes` to add it for you) and/or re-dispatch the agent in the foreground, then re-run — see [`docs/agents.md`](docs/agents.md) *Troubleshooting — subagent file writes blocked*. The run correctly stops instead of silently finishing the work in the main thread.
 
 ### How to use `metis` in practice
 

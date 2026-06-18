@@ -125,14 +125,31 @@ The convergence gate is **0 Critical + 0 Moderate**; on `maxIterations` or a blo
 
 **Symptom:** a write-capable agent (`talos`) reports it cannot write files — *"sandbox blocking file writes"* — and the run stops with a `Blocked: sandbox denied file write` handoff (or the main thread is tempted to finish the implementation itself).
 
-**Cause:** the agent declares `Write` / `Edit` in its frontmatter, but those tools are *capabilities*, not grants. The actual write is gated by the Claude Code **permission mode / sandbox**, and a dispatched subagent runs **non-interactively** — it cannot prompt for approval. When `Edit` / `Write` is not pre-permitted, the write is denied at runtime. This is an environment setting, not something the agent definition or this package can grant.
+**Cause:** the agent declares `Write` / `Edit` in its frontmatter, but those tools are *capabilities*, not grants. A dispatched subagent inherits the session's permission mode and `permissions.allow` list, yet **two boundaries still block its write that do not block the main thread**:
+
+1. a **background** subagent runs non-interactively and **auto-denies any write that would otherwise prompt** — it cannot fall back to an interactive approval the way the main thread can; and
+2. the OS-level **filesystem sandbox** grants write access only to the working directory and `$TMPDIR` by default — a write the sandbox boundary rejects is denied regardless of `permissions.allow`.
+
+So `defaultMode: acceptEdits` + `permissions.allow: ["Edit", "Write"]` alone are **not sufficient**: they are the *permission* layer, not the *sandbox* layer. This is an environment setting, not something the agent definition or this package can grant.
 
 **Correct behaviour (already enforced):** the blocked agent returns `Blocked: sandbox denied file write` and the orchestrator escalates it — the work is **never** silently completed outside the delegated, reviewed pipeline (`@rules/compound-engineering/general.mdc` *Blocked delegation is a hard stop*).
 
-**Remediation (the human enables subagent writes), any one of):**
-- Run the session in a permission mode that pre-accepts edits, e.g. start Claude Code with `--permission-mode acceptEdits` (or switch mode in-session), so dispatched subagents may apply `Edit` / `Write` without an interactive prompt.
-- Pre-allow the write tools in `settings.json` `permissions.allow` (e.g. `"Edit"`, `"Write"`) for the project, scoped as narrowly as your policy allows.
-- If a Bash/filesystem **sandbox** is active and denying writes to the working tree, grant the working directory write access (or disable the write-blocking sandbox for the run) per your Claude Code sandbox configuration.
+**Remediation (the human enables subagent writes).** When `acceptEdits` + allowed `Edit` / `Write` are **already** set and the subagent is *still* blocked, the cause is the sandbox / background mode — fix that, not the permission mode:
+
+- **Grant the sandbox write access to the working tree.** Add a top-level `sandbox` block to `settings.json` so subagent writes to the project pass the OS-level boundary:
+  ```json
+  {
+    "sandbox": {
+      "enabled": true,
+      "filesystem": { "allowWrite": ["."] }
+    }
+  }
+  ```
+  Add any path outside the project the work must write to the same `allowWrite` array (e.g. `["/tmp/output", "~/.cache/app"]`). Paths merge across user / project / local scopes; a `denyWrite` at any scope wins.
+- **Re-dispatch the blocked agent in the foreground, not the background.** A background subagent auto-denies any write that would otherwise prompt; a foreground dispatch uses the inherited `acceptEdits` mode (or can prompt interactively).
+- **Or disable the sandbox for the run** (`"sandbox": { "enabled": false }`) — broadest and least safe, dev-only.
+
+The permission-mode / `allow` settings (`--permission-mode acceptEdits`, `permissions.allow: ["Edit", "Write"]`) remain a prerequisite, but on their own they do **not** cross the sandbox boundary. See the Claude Code [sandboxing](https://code.claude.com/docs/en/sandboxing) and [subagents](https://code.claude.com/docs/en/sub-agents) docs for the full schema.
 
 This package does **not** flip any of these automatically — they are security-sensitive and stay an explicit, human-owned decision.
 

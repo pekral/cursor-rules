@@ -4008,6 +4008,9 @@ test('agents directory ships the argos code-review subagent with required frontm
     expect($content)->toContain('@skills/code-review-jira/SKILL.md');
     expect($content)->toContain('@skills/code-review-bugsnag/SKILL.md');
     expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
+    // No resolvable source falls back to the base read-only code-review skill rather than a tracker wrapper.
+    expect($content)->toContain('No resolvable source');
+    expect($content)->toContain('fall back to the default `@skills/code-review/SKILL.md`');
 });
 
 test('agents directory ships the talos code-writing subagent with required frontmatter', function (): void {

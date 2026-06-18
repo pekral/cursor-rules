@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types = 1);
+
+namespace Pekral\CursorRules;
+
+final readonly class InstallOptions
+{
+
+    public function __construct(
+        public bool $force,
+        public bool $symlink,
+        public bool $prune,
+        public bool $allowBundledScripts,
+        public bool $allowSubagentWrites,
+    ) {
+    }
+
+    /**
+     * @param array<int, string> $argv
+     */
+    public static function fromArgv(array $argv): self
+    {
+        return new self(
+            force: in_array('--force', $argv, true),
+            symlink: in_array('--symlink', $argv, true),
+            prune: in_array('--prune', $argv, true),
+            allowBundledScripts: in_array('--allow-bundled-scripts', $argv, true),
+            allowSubagentWrites: in_array('--allow-subagent-writes', $argv, true),
+        );
+    }
+
+}

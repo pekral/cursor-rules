@@ -35,7 +35,7 @@ final class InstallerClaudeSettings
 
     public static function resolveSettingsPath(string $home): string
     {
-        return $home . '/.claude/settings.json';
+        return self::claudeSettingsPath($home);
     }
 
     /**
@@ -104,7 +104,7 @@ final class InstallerClaudeSettings
 
     public static function resolveProjectSettingsPath(string $projectRoot): string
     {
-        return $projectRoot . '/.claude/settings.json';
+        return self::claudeSettingsPath($projectRoot);
     }
 
     /**
@@ -239,6 +239,11 @@ final class InstallerClaudeSettings
         $sandbox->filesystem = $filesystem;
 
         return $sandbox;
+    }
+
+    private static function claudeSettingsPath(string $base): string
+    {
+        return $base . '/.claude/settings.json';
     }
 
     /**

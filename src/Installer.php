@@ -19,11 +19,7 @@ final class Installer
     {
         $normalizedArgv = InstallerPath::normalizeCliArguments($argv);
         $command = $normalizedArgv[1] ?? 'help';
-        $force = in_array('--force', $normalizedArgv, true);
-        $symlink = in_array('--symlink', $normalizedArgv, true);
-        $prune = in_array('--prune', $normalizedArgv, true);
-        $allowBundledScripts = in_array('--allow-bundled-scripts', $normalizedArgv, true);
-        $allowSubagentWrites = in_array('--allow-subagent-writes', $normalizedArgv, true);
+        $options = InstallOptions::fromArgv($normalizedArgv);
 
         try {
             if ($command === 'help') {
@@ -44,7 +40,7 @@ final class Installer
                 return 1;
             }
 
-            return self::install($force, $symlink, $prune, $editor, $allowBundledScripts, $allowSubagentWrites);
+            return self::install($editor, $options);
         } catch (InstallerFailure $exception) {
             fwrite(STDERR, $exception->getMessage() . PHP_EOL);
 
@@ -84,16 +80,16 @@ final class Installer
         return 0;
     }
 
-    private static function install(bool $force, bool $symlink, bool $prune, string $editor, bool $allowBundledScripts, bool $allowSubagentWrites): int
+    private static function install(string $editor, InstallOptions $options): int
     {
         $root = InstallerPath::resolveProjectRoot();
-        [$copied, $pruned] = self::runAllSyncs(self::collectSyncPayloads($root, $editor), $force, $symlink, $prune);
+        [$copied, $pruned] = self::runAllSyncs(self::collectSyncPayloads($root, $editor), $options->force, $options->symlink, $options->prune);
 
         $claudeMdSource = InstallerPath::isClaudeMdEditor($editor) ? InstallerPath::resolveClaudeMdSource() : null;
         $copied += self::installSingleFile($claudeMdSource, InstallerPath::resolveClaudeMdTarget($root));
-        $permissionsAdded = InstallerClaudeSettings::applyIfRequested($allowBundledScripts, $editor);
+        $permissionsAdded = InstallerClaudeSettings::applyIfRequested($options->allowBundledScripts, $editor);
         $coAuthoredByDisabled = InstallerClaudeSettings::applyCoAuthoredByPreference($editor);
-        $subagentWritesEnabled = InstallerClaudeSettings::applySubagentWritesIfRequested($allowSubagentWrites, $editor, $root);
+        $subagentWritesEnabled = InstallerClaudeSettings::applySubagentWritesIfRequested($options->allowSubagentWrites, $editor, $root);
 
         self::reportInstallSummary($copied, $pruned, $permissionsAdded, $coAuthoredByDisabled);
 

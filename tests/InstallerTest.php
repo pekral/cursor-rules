@@ -4043,18 +4043,21 @@ test('agents directory ships the daidalos orchestrator subagent with required fr
 
     $content = (string) file_get_contents($agentPath);
     expect($content)->toContain('name: daidalos');
-    expect($content)->toContain('tools: Read, Glob, Grep, Bash');
+    expect($content)->toContain('tools: Task, Read, Glob, Grep, Bash');
     expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
     expect($content)->toContain('@skills/autoresolve-oldest-github-issue/SKILL.md');
 });
 
-test('daidalos drives the end-to-end orchestration loop through resolve-issue and process-code-review', function (): void {
+test('daidalos delegates the end-to-end run by dispatching metis, talos and argos to convergence', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');
 
-    expect($content)->toContain('@skills/analyze-problem');
+    // True delegation: each step is dispatched as the matching specialist agent through the Task tool.
+    expect($content)->toContain('dispatch `metis` through the Task tool');
+    expect($content)->toContain('Dispatch `talos` through the Task tool');
+    expect($content)->toContain('Dispatch `argos` through the Task tool');
+    // The implementation step still routes through resolve-issue (owned by talos), and the convergence gate is named.
     expect($content)->toContain('@skills/resolve-issue');
-    expect($content)->toContain('@skills/process-code-review');
     expect($content)->toContain('0 Critical');
 });
 

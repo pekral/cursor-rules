@@ -18,6 +18,7 @@ Merge pull requests that meet all required conditions.
 - Never merge PRs with conflicts
 - Never merge PRs with failing CI (unless explicitly instructed)
 - Never bypass required approvals or protections
+- The only tolerated CI failure is a **GitHub Actions billing / account-limit error** when the merge is **explicitly requested** (see *GitHub Actions billing exception* below). Any other failure — real test failure, lint, static analysis — still blocks.
 
 ---
 
@@ -33,13 +34,24 @@ Merge pull requests that meet all required conditions.
 For each PR, derive the verdict from the JSON document loaded in step 1:
 
 - No merge conflicts — `mergeable == "MERGEABLE"` and `mergeStateStatus` is not `DIRTY` or `BEHIND`
-- CI is passing — every entry in `statusCheckRollup[]` has a passing `state` (`SUCCESS` / `NEUTRAL` / `SKIPPED`)
+- CI is passing — every entry in `statusCheckRollup[]` has a passing `state` (`SUCCESS` / `NEUTRAL` / `SKIPPED`), **with the single billing exception below** when the merge was explicitly requested
 - Required approvals are present — `reviewDecision == "APPROVED"`
 - Branch is up to date with base branch — `mergeStateStatus != "BEHIND"`
 
 If any check fails:
 - do not merge
 - report reason
+
+#### GitHub Actions billing exception (explicit merge only)
+
+A single, narrow exception relaxes the CI-passing check — **only** when the caller explicitly requested the merge (an automatic / opportunistic merge never qualifies):
+
+- **When it applies:** the *only* blocking entries in `statusCheckRollup[]` are GitHub Actions runs that did **not** execute because of a billing / account-limit problem — typically a `state` of `ERROR` (or a workflow that never started) whose detail message is an unambiguous billing notice such as *"The job was not started because recent account payments have failed or your spending limit needs to be increased"*, *"billing"*, or *"spending limit"*. In that case the gate **ignores those specific entries** and allows the merge.
+- **Detection must stay conservative.** Treat an entry as a billing failure only when its message clearly names a billing / payment / spending-limit cause. A bare `ERROR` / `FAILURE` with no billing wording is a **real** failure — never assume billing. When in doubt, do not merge: report the ambiguous entry and stop.
+- **The exception is billing-only.** It never relaxes any other gate: a real CI failure (tests, lint, static analysis) on any non-billing entry, `mergeStateStatus == "DIRTY"` / `"BEHIND"`, an unmergeable state, or `reviewDecision != "APPROVED"` still blocks the merge regardless of the explicit request.
+- **Report what was waived.** When the merge proceeds under this exception, list each ignored billing entry (check name + the billing message) in the output so the waiver is auditable.
+
+When the merge was **not** explicitly requested, this exception does not apply — a billing failure blocks like any other failing check.
 
 ### 3. Merge
 

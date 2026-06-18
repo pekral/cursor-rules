@@ -127,6 +127,7 @@ globs:
 - Use typed DTOs for data exchange across layers.
 - Prefer Spatie Laravel Data when the project uses it.
 - Do not pass raw untyped arrays across layer boundaries when a DTO exists or should exist.
+- **Public methods return typed DTOs, not associative arrays.** When a public method produces a structured set of values (a record, a multi-key payload, an array shape with named keys), its return type must be a typed DTO — never a raw `array`. The exemptions are the same as `@rules/php/core-standards.mdc` Structure: single scalar / `bool` / `void` returns, a homogeneous list or `Collection` of one type, and array shapes fixed by a framework / vendor contract (`toArray()`, `jsonSerialize()`, `Arrayable`, `casts()`, FormRequest `rules()`, overrides of a `vendor/`-owned signature). Cite the exemption explicitly when it applies.
 - Use PHP attributes for mapping:
   - `#[MapInputName(...)]`
   - `#[MapName(...)]`
@@ -151,7 +152,7 @@ globs:
 - **All mapping / transformation / reshaping logic must live in a Data Builder — never inline in an Action, Service, controller, job, command, listener, or Livewire component.** This covers building a payload array, mapping a model or collection into another structure, renaming keys, applying default fallbacks, formatting values, or any other data shaping. A private helper such as `buildPayload(OrderModel $order): array { return ['client_email' => $order->customer->email, ...]; }` sitting inside an Action is a violation: move it into a Data Builder method and have the Action call `$this->orderPayloadDataBuilder->build($order)`. The one alternative home, per the **Data Modification (DRY)** section, is a **DTO named constructor** (`fromModel()` / `fromRequest()`) when the transformation produces a typed DTO directly — array / payload shaping goes to a Data Builder, model/request → DTO mapping may instead live on the DTO's named constructor; both are valid, inline mapping in the entry point is not.
 - **When `pekral/arch-app-services` is installed:** the dedicated Data Builder class (`app/DataBuilders/{Domain}/`) `use`s the `Pekral\Arch\DataBuilder\DataBuilder` trait, whose `$this->build($data, [...])` method runs the data through general and field-specific pipes (Laravel Pipeline) for normalization. Use the trait rather than hand-rolling a mapping loop. The trait belongs to the dedicated Data Builder class that the Action injects and calls — do **not** `use` the trait directly on the Action, which would put the mapping back inside `__invoke()`.
 - Data Builders are **not** Action pattern classes — they do not use `__invoke()` and may expose multiple public methods.
-- Each public method should accept input (array, request data, model, external API response, etc.) and return a typed DTO or normalized array.
+- Each public method should accept input (array, request data, model, external API response, etc.) and return a typed DTO. Fall back to a normalized array only when the downstream consumer is a framework / vendor contract that requires an array — e.g. a mass-assignment write payload handed to a ModelManager — and cite that reason; for everything else the return type is a DTO, not an array.
 - Data Builders must never query the database or perform side effects.
 - Store Data Builders under `app/DataBuilders/{Domain}/` and use the `DataBuilder` suffix.
 - Data Builders should be `final readonly` with constructor injection where practical.
@@ -273,6 +274,7 @@ globs:
   - feature-specific or use-case–specific query methods inside Repositories — Repositories must expose only basic, reusable queries; specialization belongs in Services or Actions composing those basic methods
   - calling Actions via `->__invoke()` instead of `$action(...)`
   - DTOs overriding `from()` only for key renaming instead of using mapping attributes
+  - a public method returning a structured associative array / array shape where a typed DTO should be returned (see **DTOs** → *Public methods return typed DTOs, not associative arrays*) — excludes single scalars, homogeneous lists / Collections, and array shapes fixed by a framework / vendor contract (`toArray()`, `jsonSerialize()`, `Arrayable`, `casts()`, FormRequest `rules()`)
   - plain service classes used where an Action is the better fit
   - pass-through Action whose `__invoke()` only forwards a single Service / Facade / Model Service call with no orchestration of its own — inline the single-use method into the Action, or remove the Action and call the reused service method directly (see the **Pass-through Action rule**)
   - Data Builder class using Action pattern (`__invoke()`) instead of named public methods

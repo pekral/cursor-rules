@@ -216,7 +216,7 @@ Agents = specialised orchestration roles over multiple skills
 | `argos` | All-seeing code-review gatekeeper. Reviews a PR from context or a tracker link, posts the results to the PR, and hands back a CR-done handoff. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag` |
 | `talos` | Tireless code-writing implementer. Implements an issue from context or a tracker link, validates with tests, opens a PR, and hands back an Impl-done handoff. Stops at the PR — never reviews or merges. | `resolve-issue` |
 | `metis` | Problem-analysis advisor. Analyses a problem or a vague assignment, proposes the smallest safe solution, and publishes a reusable plan as a GitHub issue, then hands back an Analysis-done handoff. Read-only — never implements. | `analyze-problem` |
-| `daidalos` | Engineering-workflow orchestrator. The entry point for a free-form request: resolves a concrete source, then routes to `metis` (analysis) or `talos` (implementation), then `argos` (review). Read-only router. | `metis`, `talos`, `argos` (routing) |
+| `daidalos` | Engineering-workflow orchestrator. The entry point for a free-form request: resolves a concrete source, then **dispatches** `metis` (analysis, if needed), `talos` (implementation), and `argos` (the review-and-fix loop to convergence) through the Task tool. Read-only orchestrator. | `metis`, `talos`, `argos` (dispatched) |
 
 ### How to use `argos` in practice
 
@@ -286,9 +286,9 @@ Agents = specialised orchestration roles over multiple skills
    @daidalos implement a dark-mode toggle for the settings page
    ```
 
-3. `daidalos` resolves a concrete source, then routes: ambiguous / large work → `metis` (analysis → plan) → `talos`; clear work → `talos` directly; then `argos` for review. It returns a handoff naming the chosen route and reason.
+3. `daidalos` resolves a concrete source, then **dispatches the matching specialist agent through the Task tool**: ambiguous / large work → `metis` (analysis → plan) → `talos`; clear work → `talos` directly; then `argos` for the review-and-fix loop to convergence. It returns a handoff naming the chosen route and reason, written in the same language as your request.
 
-`daidalos` is a **read-only router** — it never analyses, implements, or reviews itself, and (per the one-level subagent-nesting rule) it runs as the top-level agent you talk to, not as a nested subagent. A future top-level `zeus` will sit above it to coordinate non-engineering domains too.
+`daidalos` is a **read-only orchestrator** — it never analyses, implements, or reviews itself; it delegates every step by dispatching the matching specialist agent, and (per the one-level subagent-nesting rule) it runs as the top-level agent you talk to, spending that single nesting level on the dispatch rather than being a nested subagent itself. A future top-level `zeus` will sit above it to coordinate non-engineering domains too.
 
 ---
 

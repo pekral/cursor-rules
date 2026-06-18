@@ -38,12 +38,12 @@ The counsel of wise planning, named after **Metis**, the Titaness of deliberatio
 
 ### <img src="../assets/agents/daidalos.png" alt="daidalos avatar" width="48" align="left"> `daidalos` — engineering-workflow orchestrator
 
-The master craftsman who runs the workshop, named after **Daidalos**, the legendary engineer who designed the work and directed the makers. It is the **entry point** for a free-form engineering request — *"resolve a random issue"*, *"resolve this URL"*, *"implement this"* — and the conductor that drives the job to a clean, reviewed result. It resolves a concrete source, decides whether the task needs a plan first (`metis`), runs implementation (`talos`), then drives the **review-and-fix loop (`talos` ↔ `argos`) to convergence** (no Critical/Moderate findings), and reports the result to the user. `metis` the mind, `talos` the hands, `argos` the eyes; `daidalos` the workshop lead that directs them.
+The master craftsman who runs the workshop, named after **Daidalos**, the legendary engineer who designed the work and directed the makers. It is the **entry point** for a free-form engineering request — *"resolve a random issue"*, *"resolve this URL"*, *"implement this"* — and the conductor that drives the job to a clean, reviewed result. It resolves a concrete source, decides whether the task needs a plan first, then **delegates each step by dispatching the matching specialist agent** through the Task tool — `metis` (analysis, if needed), `talos` (implementation), `argos` (the **review-and-fix loop `talos` ↔ `argos` to convergence**, no Critical/Moderate findings) — and reports the result to the user. `metis` the mind, `talos` the hands, `argos` the eyes; `daidalos` the workshop lead that directs them.
 
 - **Trigger:** a free-form engineering request — from a vague idea to a tracker link — that should be carried end to end.
-- **Orchestrates (delegates to):** `analyze-problem` (metis step), `resolve-issue` (talos step — which already loops `code-review` + `security-review` to 0 Critical/Moderate before the PR), `process-code-review` (the `talos` ↔ `argos` convergence loop, `maxIterations = 5`); reuses `autoresolve-oldest-github-issue` selection and `resolve-issue` source detection.
+- **Orchestrates (dispatches via the Task tool):** `metis` (analysis step — owns `analyze-problem`), `talos` (implementation step — owns `resolve-issue`, which already loops `code-review` + `security-review` to 0 Critical/Moderate before the PR), `argos` (the `talos` ↔ `argos` convergence loop — owns `process-code-review` / `code-review-github`, `maxIterations = 5`); resolves the source itself reusing `autoresolve-oldest-github-issue` selection and `resolve-issue` source detection.
 - **Convergence gate:** the run is done only at **0 Critical + 0 Moderate**; on `maxIterations` or a blocker it stops and escalates rather than reporting success. Merging stays a separate, explicit step.
-- **Safety:** read-only orchestrator — never analyses, implements, or reviews itself; the iteration loop is skill-driven (state lives in the skill), and it must be the top-level agent (not a nested subagent) per the one-level nesting rule below.
+- **Safety:** read-only orchestrator — never analyses, implements, or reviews itself; it delegates each step by dispatching the matching specialist agent, the iteration loop is skill-driven (state lives in the skill the specialist owns), and it must be the top-level agent (not a nested subagent) per the one-level nesting rule below — that single level is what it spends to dispatch `metis` / `talos` / `argos`.
 
 > A future top-level, cross-domain orchestrator (reserved name `zeus`) will sit above `daidalos` and coordinate non-engineering domains too (e.g. marketing). `daidalos` owns the engineering tier only.
 
@@ -88,30 +88,33 @@ An agent's final message is returned to the caller as the tool result, so it mus
 - **Links** — the PR and the originating source (GitHub / JIRA / Bugsnag).
 - **Result summary** — the numbers the caller needs (e.g. Critical / Moderate / Minor counts, a verdict).
 
+**Language of the handoff / report.** Every agent writes the human-facing prose of its handoff and any end-user report in the **same natural language the assignment was given in** (if the request came in Czech, the handoff is in Czech). Identifiers stay verbatim regardless of that language — branch names, ticket / issue keys, links, severity labels, CLI commands, and skill / agent names are never translated, and two natural languages are never mixed inside a single handoff.
+
 ## Subagents of an agent
 
-Claude Code subagents invoked via the Task tool generally **cannot spawn their own subagents** (one level of nesting). Model an agent's "subagents" two ways:
+Claude Code subagents invoked via the Task tool generally **cannot spawn their own subagents** (one level of nesting). This shapes how the roster composes:
 
-1. **Lens skills called inline** by an orchestrating skill — e.g. `code-review-github` already runs `code-review`, `security-review`, `api-review`, `assignment-compliance-check` inline. This is the default and works today.
-2. **Parallel fan-out via the Workflow tool** — a DAG of agents for heavy runs that genuinely need concurrency.
+1. **A top-level orchestrator dispatches specialists through the Task tool.** `daidalos` runs as the top-level agent the user talks to, and spends its single nesting level dispatching `metis` / `talos` / `argos` directly. Each specialist then orchestrates its own skills inline — `talos` runs `resolve-issue`, `argos` runs `code-review-github`, and so on.
+2. **Lens skills called inline** by an orchestrating skill — e.g. `code-review-github` already runs `code-review`, `security-review`, `api-review`, `assignment-compliance-check` inline. This is what each dispatched specialist does in its own context, and it is also the fallback when no further nesting level is available.
+3. **Parallel fan-out via the Workflow tool** — a DAG of agents for heavy runs that genuinely need concurrency.
 
-Because of this limit, an orchestrator like `daidalos` must be the **top-level agent the user talks to** — it drives the run by invoking the chosen path inline (or, if invoked headless, returns a routing handoff for the caller to execute), never by being a nested subagent that spawns `metis` / `talos` / `argos`. A future `zeus → daidalos → specialist` chain must use the same inline / Workflow model rather than three levels of Task-subagent nesting.
+Because of the one-level limit, an orchestrator like `daidalos` must be the **top-level agent the user talks to** — it delegates each step by dispatching the matching specialist agent (or, if `daidalos` was itself invoked headless and the nesting level is already spent, returns a routing handoff for the caller to execute), never by becoming a nested subagent that tries to spawn `metis` / `talos` / `argos` from inside another agent. A future `zeus → daidalos → specialist` chain cannot stack three Task-subagent levels; it must collapse to a single dispatch level plus the inline / Workflow model.
 
-### End-to-end run (skill-driven, not nested-agent)
+### End-to-end run (agent-dispatched, skill-owned loop)
 
-The `daidalos` run carries a request all the way to a clean, reviewed result. Each step is a **skill** invoked inline; the iterative `talos` ↔ `argos` review-and-fix loop is **owned by the skills** (its state lives there), not modelled as agents calling agents:
+The `daidalos` run carries a request all the way to a clean, reviewed result. `daidalos` resolves the source itself, then **dispatches each step as the matching specialist agent through the Task tool**; the iterative `talos` ↔ `argos` review-and-fix loop is **owned by the skill the dispatched specialist drives** (its state lives there), not modelled as agents calling agents:
 
 ```text
-user → daidalos
+user → daidalos                                         (top-level; resolves source, then dispatches via Task tool)
          │  resolve source (autoresolve-oldest-github-issue selection / resolve-issue source-detection)
-         │  analyse? ── yes ─→ metis  = analyze-problem  (plan)
+         │  analyse? ── yes ─→ Task ▶ metis   (= analyze-problem → plan)
          │     │ no
          ▼     ▼
-       talos = resolve-issue
-         │   └─ inline loop: code-review + security-review → 0 Critical/Moderate → opens PR
+       Task ▶ talos   (= resolve-issue)
+         │        └─ inline loop: code-review + security-review → 0 Critical/Moderate → opens PR
          ▼
-       talos ↔ argos = process-code-review
-             └─ convergence loop: code-review-github (quiet) + fixes, maxIterations 5 → 0 Critical/Moderate
+       Task ▶ argos   (= process-code-review / code-review-github — the talos ↔ argos loop)
+                  └─ convergence loop: code-review-github (quiet) + fixes, maxIterations 5 → 0 Critical/Moderate
          ▼
        daidalos → reports result to the user   (merge stays a separate, explicit step)
 ```

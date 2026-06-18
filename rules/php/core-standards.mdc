@@ -63,7 +63,7 @@ globs: ["*"]
 - Use `match` where it improves clarity.
 - Use named arguments when they improve readability and reduce ambiguity.
 - Document iterable value types with generics where applicable.
-- Use array shapes for fixed structured arrays when DTOs are not appropriate.
+- Use array shapes for fixed structured arrays when DTOs are not appropriate (e.g. an internal / private helper, or a framework / vendor contract); for a **public** method returning a structured record the *Structure* section's public-return rule applies — return a DTO.
 - Avoid magic numbers; extract meaningful constants when the value has domain meaning.
 - Prefer specific exceptions over generic ones.
 - Catch specific exceptions only when recovery or translation is meaningful.

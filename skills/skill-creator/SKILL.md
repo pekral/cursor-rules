@@ -20,7 +20,7 @@ Focus on:
 ---
 
 ## Constraints
-- Apply `@rules/php/core-standards.mdc`
+- Apply `@rules/php/core-standards.mdc` **only once it is established that the skill being created targets PHP code work in a PHP project** — skip it for a stack-agnostic or non-PHP skill; do not load the PHP standards when the new skill does not touch PHP.
 - Apply `@rules/git/general.mdc`
 - Output must be in English
 - Do not modify other skills, rules, or production code

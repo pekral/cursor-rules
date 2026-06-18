@@ -7,7 +7,7 @@ metadata:
 ---
 
 ## Constraints
-- Apply `@rules/php/core-standards.mdc`
+- Apply `@rules/php/core-standards.mdc` **only once it is established that the project is a PHP project (PHP stack in `composer.json`) and the generated docs reference PHP code / commands** — skip it for a non-PHP repository; do not load the PHP standards for a README that does not document PHP.
 - Apply `@rules/git/general.mdc` — only when the user explicitly asks to commit or push the generated docs
 - Output must be in English unless the existing README is written in another language; then match it
 - **Zero hallucination** — never invent an install command, CLI flag, environment variable, config key, script name, badge, or setup step. Every concrete claim must be traceable to a file you read or a command whose output you captured

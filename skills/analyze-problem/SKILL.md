@@ -21,7 +21,7 @@ Focus on:
 ---
 
 ## Constraints
-- Apply @rules/php/core-standards.mdc
+- Apply `@rules/php/core-standards.mdc` **only once it is established that the project is a PHP project (PHP stack in `composer.json`) and the analyzed change touches PHP code** — skip it for a non-PHP problem (docs, tooling, infra, markdown, config); do not load the PHP standards for an analysis that does not touch PHP.
 - Apply @rules/compound-engineering/general.mdc — the pre-implementation research and the plan artifact below exist so the analysis compounds: it grounds the work in what already exists and leaves a reusable plan behind.
 - Never modify code
 - Output Markdown only

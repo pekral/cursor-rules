@@ -74,8 +74,8 @@ final class Installer
         echo "  --symlink               Create symlinks instead of copying (falls back to copy on Windows).\n";
         echo "  --prune                 Remove files in target that no longer exist in source.\n";
         echo "  --allow-bundled-scripts Whitelist bundled scripts (load-issue.sh) in ~/.claude/settings.json. Opt-in; --editor=claude/all only.\n";
-        echo "  --allow-subagent-writes Enable subagent file writes via a sandbox block (sandbox.filesystem.allowWrite: [\".\"]) in the project\n";
-        echo "                          .claude/settings.json. Opt-in; --editor=claude/all only. Leaves an existing block untouched.\n";
+        echo "  --allow-subagent-writes Allow dispatched-subagent file writes by adding scoped Edit/Write entries for the project\n";
+        echo "                          tree to permissions.allow in .claude/settings.local.json. Opt-in; --editor=claude/all only.\n";
 
         return 0;
     }
@@ -94,7 +94,7 @@ final class Installer
         self::reportInstallSummary($copied, $pruned, $permissionsAdded, $coAuthoredByDisabled);
 
         if ($subagentWritesEnabled) {
-            echo sprintf('Enabled subagent file writes (sandbox.filesystem.allowWrite) in .claude/settings.json.%s', PHP_EOL);
+            echo sprintf('Allowed subagent file writes (Edit/Write on the working tree) in .claude/settings.local.json.%s', PHP_EOL);
         }
 
         return 0;

@@ -12,7 +12,9 @@ Příčina je na úrovni Claude Code harnessu (sandbox / permission-mode pro nei
 
 ~~Záměrně se **nemění installer** tak, aby automaticky překlápěl bezpečnostní nastavení (sandbox off / allow všech editů) — to by bylo příliš široké a v rozporu s „jen na vyžádání" a security pravidly.~~
 
-**Update (na vyžádání uživatele):** installer **smí** to nastavení doplnit, ale **jen jako opt-in flag** `--allow-subagent-writes` (vzor `--allow-bundled-scripts`), nikdy automaticky. Zapisuje úzký `"sandbox": { "enabled": true, "filesystem": { "allowWrite": ["."] } }` do **projektového** `.claude/settings.json` (editor `claude`/`all`), existující `sandbox` blok nechá být a vygenerovaný blok validuje (`InstallerClaudeSettings::validateSandboxSettings`), aby nešel zapsat poškozený. „Jen na vyžádání" zůstává splněné — výchozí chování nepřeklápí nic.
+**Update (na vyžádání uživatele):** installer **smí** to nastavení doplnit, ale **jen jako opt-in flag** `--allow-subagent-writes` (vzor `--allow-bundled-scripts`), nikdy automaticky.
+
+**Korekce (ověřeno v praxi — projekt lasersoft):** `sandbox` blok subagentům zápis **neodblokoval**. Funkční „Možnost A" je přidat scoped permission entries `Edit(//<projekt>/**)` a `Write(//<projekt>/**)` na **začátek** pole `permissions.allow` v **projektovém `.claude/settings.local.json`** (ne `settings.json`, ne `sandbox` blok). Subagent (talos) pak zapisuje bez interaktivního schválení. Installer `--allow-subagent-writes` proto generuje tyto dvě scoped entries (idempotentně, prepend, existující entries nechá být) do `settings.local.json` a výsledek validuje (`InstallerClaudeSettings::validateSubagentWritePermissions`). `settings.local.json` je správný domov, protože entries nesou absolutní cestu vázanou na konkrétní stroj. „Jen na vyžádání" zůstává splněné — výchozí chování nepřidává nic.
 
 ## Implementation steps
 1. Přidat behaviorální pravidlo (alwaysApply): sandbox-write-blocked write-agent je hard blocker → stop + report + remediace; zákaz tichého dokončení v hlavním vlákně.

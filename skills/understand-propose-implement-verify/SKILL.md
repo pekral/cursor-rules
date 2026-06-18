@@ -7,8 +7,8 @@ metadata:
 ---
 
 ## Constraints
-- Apply `@rules/php/core-standards.mdc`
-- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
+- Apply `@rules/php/core-standards.mdc` **only once it is established that the project is a PHP project (PHP stack in `composer.json`) and the change touches PHP code** — skip it for non-PHP work (docs, tooling, infra, config); do not load the PHP standards for a task that does not touch PHP.
+- If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc` (likewise only when the change touches PHP)
 - Always follow this order: understand → propose → implement → verify
 - Prefer existing project skills over custom solutions; do not duplicate logic already covered by a skill
 

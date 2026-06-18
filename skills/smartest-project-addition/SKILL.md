@@ -7,7 +7,7 @@ metadata:
 ---
 
 ## Constraints
-- Apply `@rules/php/core-standards.mdc`
+- Apply `@rules/php/core-standards.mdc` **only once it is established that the project is a PHP project (PHP stack in `composer.json`) and the proposed addition touches PHP code** — skip it for a non-PHP project or a non-code proposal; do not load the PHP standards when the addition does not touch PHP.
 - Recommend exactly one addition
 - Do not include alternative proposals in the final answer
 - Do not implement code unless explicitly requested

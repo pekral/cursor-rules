@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # cursor-rules-resolve-loop.sh — interaktivní Claude Code loop, který systematicky řeší
 # GitHub issues V PROJEKTU, ze kterého ho spustíš (přes vendor/bin), jedno issue
-# za průchod. Bez worktrees. Auto mode (acceptEdits) zapnutý — vidíš celý průběh,
+# za průchod. Bez worktrees. Auto mode zapnutý — vidíš celý průběh,
 # Esc přeruší krok.
 #
 # Spuštění z projektu (po `composer require pekral/cursor-rules --dev`):
@@ -17,8 +17,9 @@
 #                         # merge:        autoresolve-oldest-github-issue (celý pipeline VČETNĚ merge)
 #   DRY_RUN=1             # nic nespustí — jen vypíše vyhodnocený prompt a příkaz (ověření)
 #
-# Auto mode = --permission-mode acceptEdits: edity bez dotazu, bash/gh/merge se
-# pro bezpečnost stále potvrzují.
+# Auto mode = --permission-mode auto: status line "auto mode on (shift+tab to
+# cycle) · esc to interrupt", edity bez dotazu, bash/gh/merge se pro bezpečnost
+# stále potvrzují.
 set -euo pipefail
 
 PROJECT="${PROJECT:-$PWD}"
@@ -55,10 +56,10 @@ else
 fi
 [ -n "$EXTRA" ] && PROMPT="$PROMPT $EXTRA"
 
-PERM=(--permission-mode acceptEdits)
+PERM=(--permission-mode auto)
 
 echo "▶ projekt : $PROJECT"
-echo "▶ režim   : MODE=$MODE  auto-accept editů  LABEL=${LABEL:-<any>}"
+echo "▶ režim   : MODE=$MODE  auto mode  LABEL=${LABEL:-<any>}"
 [ -n "$EXTRA" ] && echo "▶ extra   : $EXTRA"
 
 if [ -n "${DRY_RUN:-}" ]; then

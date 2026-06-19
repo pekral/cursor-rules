@@ -4359,20 +4359,21 @@ test('daidalos delegates the end-to-end run by dispatching metis, talos and argo
     expect($content)->toContain('0 Critical');
 });
 
-test('agents directory ships the momus human-perspective tester subagent with required frontmatter', function (): void {
+test('agents directory ships the apollon test-engineer subagent with required frontmatter', function (): void {
     $packageDir = dirname(__DIR__);
-    $agentPath = $packageDir . '/agents/momus.md';
+    $agentPath = $packageDir . '/agents/apollon.md';
 
     expect(is_file($agentPath))->toBeTrue();
 
     $content = (string) file_get_contents($agentPath);
-    expect($content)->toContain('name: momus');
-    expect($content)->toContain('tools: Read, Glob, Grep, Bash');
+    expect($content)->toContain('name: apollon');
+    // Write-capable test engineer: authors PHPUnit/Pest tests, so the tools line grants Write and Edit.
+    expect($content)->toContain('tools: Read, Write, Edit, Glob, Grep, Bash');
+    expect($content)->toContain('model: sonnet');
+    expect($content)->toContain('@skills/create-test/SKILL.md');
     expect($content)->toContain('@skills/test-like-human/SKILL.md');
+    expect($content)->toContain('@skills/e2e-testing/SKILL.md');
     expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
-    // Read-only wrapper: the tools line must not grant Write or Edit.
-    expect($content)->not->toContain('tools: Read, Write');
-    expect($content)->not->toContain('Edit, Glob');
 });
 
 test('resolveAgentsSource returns the package agents directory when it exists', function (): void {

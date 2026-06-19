@@ -1,0 +1,14 @@
+<svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="momus agent avatar">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b4252"/>
+      <stop offset="1" stop-color="#2e3440"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="32" fill="url(#bg)"/>
+  <!-- generic agent silhouette -->
+  <circle cx="80" cy="64" r="26" fill="#d8dee9"/>
+  <path d="M36 128c0-24 20-40 44-40s44 16 44 40v6H36z" fill="#d8dee9"/>
+  <!-- subtle ring marking it as a placeholder slot -->
+  <rect x="6" y="6" width="148" height="148" rx="28" fill="none" stroke="#4c566a" stroke-width="3" stroke-dasharray="8 8"/>
+</svg>

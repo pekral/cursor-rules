@@ -45,6 +45,15 @@ The master craftsman who runs the workshop, named after **Daidalos**, the legend
 - **Convergence gate:** the run is done only at **0 Critical + 0 Moderate**; on `maxIterations` or a blocker it stops and escalates rather than reporting success. Merging stays a separate, explicit step.
 - **Safety:** read-only orchestrator — never analyses, implements, or reviews itself; it delegates each step by dispatching the matching specialist agent, the iteration loop is skill-driven (state lives in the skill the specialist owns), and it must be the top-level agent (not a nested subagent) per the one-level nesting rule below — that single level is what it spends to dispatch `metis` / `talos` / `argos`.
 
+### <img src="../assets/agents/momus.svg" alt="momus avatar" width="48" align="left"> `momus` — human-perspective PR tester
+
+The fault-finding tester, named after **Momus**, the god of criticism, satire, and fault-finding who found a flaw in every work the gods made. Give it a pull request — from the current context or a tracker link (GitHub, JIRA, Bugsnag) — and it walks the change like a real user: it understands the assignment, exercises the app (UI / API / CLI), runs the mandatory `curl` checks on API changes, publishes a human-readable report to the PR via `pr-summary`, and hands back a `Test done` summary with `pass / fail / blocked / unclear` scenario counts and a readiness verdict. It is a thin wrapper over `test-like-human` — the same read-only-wrapper-plus-handoff shape as `argos`.
+
+- **Trigger:** a pull request needs validating from a real user's perspective — typically **on demand after `argos` has converged the review-and-fix loop**, not as part of it.
+- **Orchestrates:** `test-like-human` (which itself publishes through `pr-summary`).
+- **Safety:** read-only — never edits, commits, pushes, or merges; writing missing automated tests is out of scope (it records the gap and recommends `talos` / `create-test`).
+- **On-demand, outside the loop:** `test-like-human` is never auto-chained from the review pipeline, so `momus` is dispatched explicitly and is **not** part of the `daidalos` convergence loop.
+
 > A future top-level, cross-domain orchestrator (reserved name `zeus`) will sit above `daidalos` and coordinate non-engineering domains too (e.g. marketing). `daidalos` owns the engineering tier only.
 
 ## Naming convention — Greek mythology
@@ -57,6 +66,7 @@ Every agent is named after a figure from **Greek mythology**, chosen so the figu
 | `talos` | Talos, the bronze automaton forged to work and guard without rest | tireless artificial labourer → forges working code |
 | `metis` | Metis, Titaness of wise counsel and cunning planning | deliberation before action → problem analysis & planning |
 | `daidalos` | Daidalos, the master craftsman who runs the workshop and directs the makers | head of production → routes engineering work to the right specialist |
+| `momus` | Momus, the god of criticism, satire, and fault-finding | finds the flaw in every work → user-perspective testing |
 
 Naming ideas for future agents: `themis` (order / verdict), `rhadamanthys` (fair judge), `athena` (wisdom / architecture), `hermes` (delivery / merge), `zeus` (top-level cross-domain orchestrator above `daidalos`).
 

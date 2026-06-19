@@ -217,6 +217,7 @@ Agents = specialised orchestration roles over multiple skills
 | `talos` | Tireless code-writing implementer. Implements an issue from context or a tracker link, validates with tests, opens a PR, and hands back an Impl-done handoff. Stops at the PR — never reviews or merges. | `resolve-issue` |
 | `metis` | Problem-analysis advisor. Analyses a problem or a vague assignment, proposes the smallest safe solution, and publishes a reusable plan as a GitHub issue, then hands back an Analysis-done handoff. Read-only — never implements. | `analyze-problem` |
 | `daidalos` | Engineering-workflow orchestrator. The entry point for a free-form request: resolves a concrete source, then **dispatches** `metis` (analysis, if needed), `talos` (implementation), and `argos` (the review-and-fix loop to convergence) through the Task tool. Read-only orchestrator. | `metis`, `talos`, `argos` (dispatched) |
+| `momus` | Fault-finding human-perspective PR tester. Walks a PR like a real user (UI / API / CLI), runs the mandatory `curl` checks on API changes, publishes a human-readable report to the PR, and hands back a Test-done handoff with `pass / fail / blocked / unclear` counts and a readiness verdict. Read-only — dispatched on demand, outside the `daidalos` loop. | `test-like-human` |
 
 ### How to use `argos` in practice
 

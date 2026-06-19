@@ -41,18 +41,18 @@ The counsel of wise planning, named after **Metis**, the Titaness of deliberatio
 The master craftsman who runs the workshop, named after **Daidalos**, the legendary engineer who designed the work and directed the makers. It is the **entry point** for a free-form engineering request — *"resolve a random issue"*, *"resolve this URL"*, *"implement this"* — and the conductor that drives the job to a clean, reviewed result. It resolves a concrete source, decides whether the task needs a plan first, then **delegates each step by dispatching the matching specialist agent** through the Task tool — `metis` (analysis, if needed), `talos` (implementation), `argos` (the **review-and-fix loop `talos` ↔ `argos` to convergence**, no Critical/Moderate findings) — and reports the result to the user. `metis` the mind, `talos` the hands, `argos` the eyes; `daidalos` the workshop lead that directs them.
 
 - **Trigger:** a free-form engineering request — from a vague idea to a tracker link — that should be carried end to end.
-- **Orchestrates (dispatches via the Task tool):** `metis` (analysis step — owns `analyze-problem`), `talos` (implementation step — owns `resolve-issue`, which already loops `code-review` + `security-review` to 0 Critical/Moderate before the PR), `argos` (the `talos` ↔ `argos` convergence loop — owns `process-code-review` / `code-review-github`, `maxIterations = 5`); resolves the source itself reusing `autoresolve-oldest-github-issue` selection and `resolve-issue` source detection.
+- **Orchestrates (dispatches via the Task tool):** `metis` (analysis step — owns `analyze-problem`), `talos` (implementation step — owns `resolve-issue`, which runs a pre-PR self-check with `code-review` + `security-review` over its own diff — a self-validation pass, not the authoritative review that `argos` owns — to 0 Critical/Moderate before the PR), `argos` (the `talos` ↔ `argos` convergence loop — owns `process-code-review` / `code-review-github`, `maxIterations = 5`); resolves the source itself reusing `autoresolve-oldest-github-issue` selection and `resolve-issue` source detection.
 - **Convergence gate:** the run is done only at **0 Critical + 0 Moderate**; on `maxIterations` or a blocker it stops and escalates rather than reporting success. Merging stays a separate, explicit step.
 - **Safety:** read-only orchestrator — never analyses, implements, or reviews itself; it delegates each step by dispatching the matching specialist agent, the iteration loop is skill-driven (state lives in the skill the specialist owns), and it must be the top-level agent (not a nested subagent) per the one-level nesting rule below — that single level is what it spends to dispatch `metis` / `talos` / `argos`.
 
-### <img src="../assets/agents/momus.svg" alt="momus avatar" width="48" align="left"> `momus` — human-perspective PR tester
+### <img src="../assets/agents/apollon.png" alt="apollon avatar" width="48" align="left"> `apollon` — test engineer
 
-The fault-finding tester, named after **Momus**, the god of criticism, satire, and fault-finding who found a flaw in every work the gods made. Give it a pull request — from the current context or a tracker link (GitHub, JIRA, Bugsnag) — and it walks the change like a real user: it understands the assignment, exercises the app (UI / API / CLI), runs the mandatory `curl` checks on API changes, publishes a human-readable report to the PR via `pr-summary`, and hands back a `Test done` summary with `pass / fail / blocked / unclear` scenario counts and a readiness verdict. It is a thin wrapper over `test-like-human` — the same read-only-wrapper-plus-handoff shape as `argos`.
+The test engineer who reveals the truth about a change, named after **Apollo**, the god of truth, prophecy, and order, and the unerring archer who never misses the mark. Give it a change — an issue, a PR, or the current task — and it authors the test coverage and validates the behaviour: it designs the test scenarios (edge cases, regression) from the assignment, writes the PHPUnit / Pest tests, generates the browser test scenarios, verifies every acceptance criterion, and hunts the broken flows — understanding **both the code and the product assignment**. It hands back a `Tests done` summary with the authored tests, the acceptance-criteria coverage, and the broken flows found.
 
-- **Trigger:** a pull request needs validating from a real user's perspective — typically **on demand after `argos` has converged the review-and-fix loop**, not as part of it.
-- **Orchestrates:** `test-like-human` (which itself publishes through `pr-summary`).
-- **Safety:** read-only — never edits, commits, pushes, or merges; writing missing automated tests is out of scope (it records the gap and recommends `talos` / `create-test`).
-- **On-demand, outside the loop:** `test-like-human` is never auto-chained from the review pipeline, so `momus` is dispatched explicitly and is **not** part of the `daidalos` convergence loop.
+- **Trigger:** a change needs test coverage authored and its behaviour validated — design tests, write PHPUnit/Pest tests, generate browser scenarios, verify acceptance criteria, find broken flows.
+- **Orchestrates:** `create-test` / `create-missing-tests-in-pr` (PHPUnit/Pest authoring), `e2e-testing` (browser scenarios when Playwright is present), `test-like-human` (broken-flow hunting, publishes through `pr-summary`).
+- **Safety:** write-capable for **test code only** — never touches application code, never merges, never pushes to a protected default branch. A code fix surfaced by a broken flow is handed to `talos`.
+- **On-demand:** dispatched explicitly when test authoring / validation is wanted; `test-like-human` is never auto-chained from the review pipeline, so `apollon` is **not** part of the `daidalos` convergence loop.
 
 > A future top-level, cross-domain orchestrator (reserved name `zeus`) will sit above `daidalos` and coordinate non-engineering domains too (e.g. marketing). `daidalos` owns the engineering tier only.
 
@@ -66,7 +66,7 @@ Every agent is named after a figure from **Greek mythology**, chosen so the figu
 | `talos` | Talos, the bronze automaton forged to work and guard without rest | tireless artificial labourer → forges working code |
 | `metis` | Metis, Titaness of wise counsel and cunning planning | deliberation before action → problem analysis & planning |
 | `daidalos` | Daidalos, the master craftsman who runs the workshop and directs the makers | head of production → routes engineering work to the right specialist |
-| `momus` | Momus, the god of criticism, satire, and fault-finding | finds the flaw in every work → user-perspective testing |
+| `apollon` | Apollo, god of truth, prophecy, and order, and the unerring archer | reveals the truth about a change and hits the acceptance mark → test authoring & validation |
 
 Naming ideas for future agents: `themis` (order / verdict), `rhadamanthys` (fair judge), `athena` (wisdom / architecture), `hermes` (delivery / merge), `zeus` (top-level cross-domain orchestrator above `daidalos`).
 
@@ -121,7 +121,7 @@ user → daidalos                                         (top-level; resolves s
          │     │ no
          ▼     ▼
        Task ▶ talos   (= resolve-issue)
-         │        └─ inline loop: code-review + security-review → 0 Critical/Moderate → opens PR
+         │        └─ pre-PR self-check: code-review + security-review (self-validation, not the authoritative review) → 0 Critical/Moderate → opens PR
          ▼
        Task ▶ argos   (= process-code-review / code-review-github — the talos ↔ argos loop)
                   └─ convergence loop: code-review-github (quiet) + fixes, maxIterations 5 → 0 Critical/Moderate

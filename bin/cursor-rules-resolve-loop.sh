@@ -18,8 +18,9 @@
 #   DRY_RUN=1             # nic nespustí — jen vypíše vyhodnocený prompt a příkaz (ověření)
 #
 # Auto mode = --permission-mode auto: status line "auto mode on (shift+tab to
-# cycle) · esc to interrupt", edity bez dotazu, bash/gh/merge se pro bezpečnost
-# stále potvrzují.
+# cycle) · esc to interrupt". Auto-schvalování řídí rizikový klasifikátor —
+# bezpečné akce (edity, read-only příkazy, push na tuhle větev) běží bez dotazu,
+# rizikové (force push, push na main, destruktivní mazání, prod deploy) se ptají.
 set -euo pipefail
 
 PROJECT="${PROJECT:-$PWD}"
@@ -52,14 +53,14 @@ if [ "$MODE" = "merge" ]; then
   PROMPT="/loop autoresolve-oldest-github-issue${LABEL:+ (label ${LABEL})}"
 else
   LBL=""; [ -n "$LABEL" ] && LBL=" s labelem ${LABEL}"
-  PROMPT="/loop vyber nejstarší otevřené issue${LBL} v tomhle repu, spusť na něj resolve-issue (zastav se na PR, NEMERGUJ), pak skonči. Když žádné eligible issue není, skonči s hláškou NO_ISSUES."
+  PROMPT="/loop použij agenta daidalos, ať vyřeší nejstarší otevřené issue${LBL} v tomhle repu (zastav se na PR, NEMERGUJ), pak skonči. Když žádné eligible issue není, skonči s hláškou NO_ISSUES."
 fi
 [ -n "$EXTRA" ] && PROMPT="$PROMPT $EXTRA"
 
 PERM=(--permission-mode auto)
 
 echo "▶ projekt : $PROJECT"
-echo "▶ režim   : MODE=$MODE  auto mode  LABEL=${LABEL:-<any>}"
+echo "▶ režim   : MODE=$MODE  auto mode (edity bez dotazu)  LABEL=${LABEL:-<any>}"
 [ -n "$EXTRA" ] && echo "▶ extra   : $EXTRA"
 
 if [ -n "${DRY_RUN:-}" ]; then

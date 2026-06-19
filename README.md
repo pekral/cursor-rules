@@ -324,7 +324,7 @@ DRY_RUN=1 vendor/bin/cursor-rules-resolve-loop.sh "only bugs"   # print the reso
 | `MODE` | `pr` | `pr` = `resolve-issue`, stops at the PR (you merge); `merge` = `autoresolve-oldest-github-issue` (full pipeline incl. merge) |
 | `DRY_RUN` | _unset_ | print the resolved prompt + command and exit, launching nothing |
 
-**Auto mode & safety:** the loop runs with `--permission-mode acceptEdits` — edits apply without a prompt, but `bash` / `gh` / merge steps still ask for confirmation so you stay in control. Each pass resolves exactly one issue and stops on any blocker (merge conflict, failing CI, unresolved Critical/Moderate findings); bound the run by labelling only the issues the loop may touch.
+**Auto mode & safety:** the loop runs with `--permission-mode auto` (status line `auto mode on (shift+tab to cycle) · esc to interrupt`) — edits apply without a prompt, but `bash` / `gh` / merge steps still ask for confirmation so you stay in control. Each pass resolves exactly one issue and stops on any blocker (merge conflict, failing CI, unresolved Critical/Moderate findings); bound the run by labelling only the issues the loop may touch.
 
 ---
 

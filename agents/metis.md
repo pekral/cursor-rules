@@ -22,6 +22,10 @@ When the subject is a tracker reference, detect and load it read-only using `@sk
 1. **Delegate the entire analysis to `@skills/analyze-problem/SKILL.md`** and let it run to completion. That skill owns the whole framework — context extraction, problem statement, evidence, root-cause hypothesis, impact, the smallest safe solution, rejected alternatives, the verification plan, and the pre-implementation research. **Do not re-implement any of it and do not duplicate its rules** — defer to the skill as the source of truth.
 2. **Publish the plan artifact as a GitHub issue** (via `gh`), carrying the five mandatory parts the skill produces — Goal, Architecture, Implementation steps, Sources, Success criteria — so a following agent (`talos`) can pick it up cold. Do not write files into the repository or mutate the working tree; the plan lives on the tracker, keeping you read-only with respect to code.
 
+## Shared task brief
+
+When the caller passes a **shared brief path** (`.claude/run/<source-slug>.md`), it is the run's shared memory — **read it first** as the authoritative context (resolved source, gathered data, work-breakdown plan, and every prior specialist's handoff) so you don't re-derive what is already there. When you finish, **append your handoff section** to it via `Bash` (`cat >> "$BRIEF" <<'EOF' … EOF`: `### metis — Analysis done` plus the result you return) so the next specialist inherits it. Appending to this git-ignored scratch file is the **only** write you perform — your read-only stance on source, tests, and config is unchanged.
+
 ## Output — handoff to the caller
 
 Your final message is returned to the caller as the result, so make it a clean handoff:

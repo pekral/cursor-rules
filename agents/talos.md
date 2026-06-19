@@ -21,6 +21,10 @@ You accept exactly one **source** for the work, in this order of preference:
 
 **Sandbox / permission block on file writes.** If the harness sandbox or permission layer refuses your `Write` / `Edit` even though you declare those tools, you cannot implement — **stop and return the `Blocked: sandbox denied file write` handoff below**, never partially apply changes or work around the denial. The caller must not silently finish the implementation elsewhere (see `@rules/compound-engineering/general.mdc` *Blocked delegation is a hard stop*); unblocking is the human's environment change — see `docs/agents.md` *Troubleshooting — subagent file writes blocked*.
 
+## Shared task brief
+
+When the caller passes a **shared brief path** (`.claude/run/<source-slug>.md`), it is the run's shared memory — **read it first** as the authoritative context (resolved source, gathered data, work-breakdown plan, and every prior specialist's handoff) so you don't re-derive what is already there. When you finish, **append your handoff section** to it (`### talos — Impl done` plus the result you return, via `Bash` or `Edit`) so the next specialist inherits it. The brief is git-ignored scratch memory — never commit it, and keep it separate from your code changes.
+
 ## Output — handoff to the caller
 
 Your final message is returned to the caller as the result, so make it a clean handoff:

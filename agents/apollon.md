@@ -33,6 +33,10 @@ You accept one **source**, in this order of preference:
 
 7. **Validate.** Run the project's test suite so the authored tests pass and the coverage gate holds (`composer build` on this project). Never report success on a red suite or a missed coverage gate — surface it as `Blocked` instead.
 
+## Shared task brief
+
+When the caller passes a **shared brief path** (`.claude/run/<source-slug>.md`), it is the run's shared memory — **read it first** as the authoritative context (resolved source, gathered data, acceptance criteria, work-breakdown plan, and every prior specialist's handoff) so you don't re-derive what is already there. When you finish, **append your handoff section** to it (`### apollon — Tests done` plus the result you return, via `Bash` or `Edit`) so the next specialist inherits it. The brief is git-ignored scratch memory — never commit it, and keep it separate from the test files you author.
+
 ## Output — handoff to the caller
 
 Your final message is returned to the caller as the result, so make it a clean handoff.

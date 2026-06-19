@@ -4344,6 +4344,19 @@ test('agents directory ships the daidalos orchestrator subagent with required fr
     expect($content)->toContain('tools: Task, Read, Glob, Grep, Bash');
     expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
     expect($content)->toContain('@skills/autoresolve-oldest-github-issue/SKILL.md');
+    // Shared task brief: daidalos gathers context into a git-ignored ephemeral brief before dispatching.
+    expect($content)->toContain('Shared task brief');
+    expect($content)->toContain('.claude/run/');
+});
+
+test('every dispatched agent reads and appends to the shared task brief', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    foreach (['metis', 'talos', 'argos', 'apollon'] as $agent) {
+        $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
+        expect($content)->toContain('Shared task brief');
+        expect($content)->toContain('.claude/run/');
+    }
 });
 
 test('daidalos delegates the end-to-end run by dispatching metis, talos and argos to convergence', function (): void {

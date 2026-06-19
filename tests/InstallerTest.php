@@ -4359,6 +4359,19 @@ test('every dispatched agent reads and appends to the shared task brief', functi
     }
 });
 
+test('every agent definition declares a model in frontmatter', function (): void {
+    $packageDir = dirname(__DIR__);
+    $globResult = glob($packageDir . '/agents/*.md');
+    $agentFiles = $globResult !== false ? $globResult : [];
+
+    expect($agentFiles)->not->toBeEmpty();
+
+    foreach ($agentFiles as $agentFile) {
+        $content = (string) file_get_contents($agentFile);
+        expect($content)->toContain('model:');
+    }
+});
+
 test('daidalos delegates the end-to-end run by dispatching metis, talos and argos to convergence', function (): void {
     $packageDir = dirname(__DIR__);
     $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');

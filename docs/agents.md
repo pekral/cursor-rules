@@ -69,6 +69,15 @@ The test engineer who reveals the truth about a change, named after **Apollo**, 
 
 > A future top-level, cross-domain orchestrator (reserved name `zeus`) will sit above `daidalos` and coordinate non-engineering domains too (e.g. marketing). `daidalos` owns the engineering tier only.
 
+### <img src="../assets/agents/placeholder.svg" alt="keryx avatar" width="48" align="left"> `keryx` — release announcer / publicista
+
+The herald who carries the message after the work is done, named after **Kéryx**, the Greek state herald whose sole role was to deliver the official announcement. Give it a merged change, a release, or a shipped feature — from the current context or a tracker link — and it loads the source read-only, composes the announcement content (Twitter/X tweet ≤280 chars + thread, release notes, marketing summary with **pekral.cz** promotion), and hands back an `Announce done` summary with all drafts inline. It runs **post-delivery**, outside the CR loop — after `talos` has merged or after a release tag is cut.
+
+- **Trigger:** a merged change or release needs announcement content — tweet, thread, release notes, or marketing summary.
+- **Orchestrates:** `article-writing` (long-form content), `resolve-issue/references/source-detection` (source loading, read-only).
+- **Safety:** read-only — never edits, commits, pushes, or merges. Publishes only when explicitly asked and only through the canonical `upsert-comment.sh` wrapper — never raw `gh ... comment`.
+- **Registration dependency:** dispatchable only after the installer copies `agents/keryx.md` to `.claude/agents/`.
+
 ## Naming convention — Greek mythology
 
 Every agent is named after a figure from **Greek mythology**, chosen so the figure's role matches the agent's function. Use the lowercase name as the agent `name:` and file id (`agents/<name>.md`).
@@ -81,6 +90,7 @@ Every agent is named after a figure from **Greek mythology**, chosen so the figu
 | `daidalos` | Daidalos, the master craftsman who runs the workshop and directs the makers | head of production → routes engineering work to the right specialist |
 | `apollon` | Apollo, god of truth, prophecy, and order, and the unerring archer | reveals the truth about a change and hits the acceptance mark → test authoring & validation |
 | `athena` | Athena, goddess of wisdom and strategic defence, daughter of Metis | wisdom + strategic vigilance → dedicated security CR sentinel, parallel to argos |
+| `keryx` | Kéryx, the state herald who delivered official proclamations | official announcer, carries the message after the work is done → release announcer & publicista |
 
 Naming ideas for future agents: `themis` (order / verdict), `rhadamanthys` (fair judge), `hermes` (delivery / merge), `zeus` (top-level cross-domain orchestrator above `daidalos`).
 

@@ -28,6 +28,10 @@ Turn one-off lessons into reusable rules by maintaining a **per-project memory**
 - Do not write a project-specific lesson into this shared rules package as a new global rule. Per-project lessons stay in the project's own memory; only genuinely universal standards belong here.
 - Do not record secrets, credentials, or PII in the memory file.
 
+## Blocked delegation is a hard stop
+
+When an orchestrator delegates a step (analysis, implementation, review) and the delegate returns a blocker it cannot resolve — a denied file write, an unresolvable merge conflict, a non-converging review loop — the orchestrator **stops and escalates that blocker to the user**. It never silently works around the blocker by doing the delegated work itself in its own context; doing so discards the specialist boundary and hides the failure instead of compounding the fix.
+
 ## Code Review Application
 
 - Treat a change that makes future work harder — new abstraction where an existing part fit, undocumented non-obvious decision, hidden coupling — as a finding, with the concrete existing part it should have used.

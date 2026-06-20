@@ -20,7 +20,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **60 comprehensive Agent skills** for automated workflows (v0.8.4)
+- **60 comprehensive Agent skills** for automated workflows (v0.9.0)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -110,7 +110,7 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 
 ---
 
-# 🎯 Skills Overview — **v0.8.4**
+# 🎯 Skills Overview — **v0.9.0**
 
 > Current release includes 60 skills for issue resolution, planning, code review, refactoring, testing, performance benchmarking, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
 

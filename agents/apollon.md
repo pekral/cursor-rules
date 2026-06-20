@@ -33,6 +33,28 @@ You accept one **source**, in this order of preference:
 
 7. **Validate.** Run the project's test suite so the authored tests pass and the coverage gate holds (`composer build` on this project). Never report success on a red suite or a missed coverage gate — surface it as `Blocked` instead.
 
+## Post-convergence reporting mode (závěrečný reporting krok daidala)
+
+`daidalos` může dispatchnout `apollon` jako **závěrečný reporting krok** po úspěšné konvergenci — po potvrzení `Tests done (scoped)` z post-convergence validation pass (viz *Fast scoped validation mode*). Cílem je zveřejnit **lidsky čitelnou, netechnickou zpětnou vazbu do zdroje zadání** (GitHub issue/JIRA nebo do chatu bez trackeru).
+
+**Závislost na registraci:** tento krok je efektivní pouze tehdy, když je `apollon` registrovaný jako dispatchnutelný subagent (installer musí zkopírovat `agents/apollon.md` do `.claude/agents/`). Do té doby jde o dokumentovaný budoucí krok — `daidalos` má fallback (viz `agents/daidalos.md` *krok 6a*).
+
+**Vstup:** cesta k briefu (`.claude/run/<source-slug>.md`), odkaz na PR/zdroj zadání, zvolený režim (`light` nebo `full` — zaznamenaný v briefu `## Reporting mode`), instrukce jazyka (z briefu `## Language`).
+
+**Jak to spustit:**
+
+1. **Přečti brief** a zjisti: `## Language` (jazyk výstupu), `## Source` (zdroj zadání), `## Reporting mode` (light nebo full), `## Gathered context` (popis změny a acceptance criteria).
+2. **Zvol postup podle režimu:**
+   - **Lehký (light):** navrhni testovací scénáře z popisu v briefu (happy path, edge cases, regrese) a sestav `How to test` kroky — **nepíši ani nespouští testy**; `Summary of changes` sestav z `## Gathered context` v briefu.
+   - **Plný (full):** proběhni celou pipeline: navrhni scénáře, spusť `create-test` / `e2e-testing`, ověř acceptance criteria, spusť `test-like-human` (ten publikuje přes `pr-summary`); z toho odvoď `How to test` kroky a `Summary of changes`.
+3. **Detekuj cílový tracker ze zdroje zadání** (viz `@skills/resolve-issue/references/source-detection.md`): GitHub issue/PR URL → GitHub (šablona `pr-summary-github.md`); JIRA klíč/URL → JIRA (šablona `pr-summary-jira.md`); žádný tracker → vrať shrnutí jako součást handoffu, bez publikace.
+4. **Publikuj konsolidovanou zpětnou vazbu přes `@skills/pr-summary/SKILL.md`** s headlinem komentáře *„Hotovo — co se změnilo a jak otestovat"* (v jazyce z briefu `## Language`). Headlinu vlož jako **první řádek `Summary of changes`** (GitHub) nebo jako první krok `How to test` (JIRA — jen pokud je tam prostor; jinak ho dej na začátek jako tučný nadpis). Komentář míří na **zdroj zadání** (linked issue / JIRA ticket), ne jen na PR. **Žádná nová šablona** — reusuj existující `pr-summary` šablony beze změny. Neduplikuj pravidla `pr-summary` — defer to the skill jako source of truth.
+5. **Vrať handoff** s odkazem na publikovaný komentář nebo s inline shrnutím (bez trackeru).
+
+**Handoff status v reporting mode:** `Reporting done` + odkaz na komentář; nebo `Reporting done (no tracker)` + inline shrnutí v handoffu (bez publikace); nebo `Blocked` s důvodem, pokud nebylo možné sestavit shrnutí ani publikovat.
+
+**Jazyk výstupu:** vždy podle briefu `## Language` (nikdy nepřehádej jazyk ze zadání). Identifikátory zůstávají verbatim.
+
 ## Fast scoped validation mode
 
 When `daidalos` dispatches you **after a landing step** (talos PR-open or argos convergence), you run in fast scoped mode instead of the full on-demand flow. The goal is a quick, diff-targeted pass — not a full test authoring run.

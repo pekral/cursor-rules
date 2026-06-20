@@ -4,6 +4,12 @@
 # za průchod. Bez worktrees. Auto mode zapnutý — vidíš celý průběh,
 # Esc přeruší krok.
 #
+# Paralelní spuštění tohoto launcheru je nově serializované daidalosovým
+# write-lockem (.claude/run/.daidalos-write.lock): souběžné zápisové běhy
+# (full-delivery → talos) nad sdíleným working tree běží jeden po druhém,
+# read-only běhy (analysis-only → metis) paralelně. Vlastní worktree =
+# vlastní toplevel = vlastní zámek = paralelně. Skript sám se nemění.
+#
 # Spuštění z projektu (po `composer require pekral/cursor-rules --dev`):
 #   vendor/bin/cursor-rules-resolve-loop.sh ["extra text k promptu" ...]
 #

@@ -31,7 +31,7 @@ You accept one **source** for the review, in this order of preference:
 
 4. **Consolidate findings.** Deduplicate across the four skill outputs and severity-label each finding (severity labels stay verbatim: `Critical`, `Moderate`, `Minor`). A `Critical` finding blocks convergence.
 
-5. **Publish the security review.** When a GitHub PR URL is available, post the consolidated security findings as a PR comment (via `gh pr comment`). Format: severity-sorted list with code references and remediation hints. Lead with a summary line: `Security CR: N Critical / N Moderate / N Minor`. When there is no PR to publish to, the findings travel back in the handoff inline.
+5. **Hand off the security review.** Athéna does **not** post its own PR comment when dispatched alongside `argos` — its findings travel back in the `Security CR done` handoff and are recorded in the shared brief, and `argos` consolidates them into the single CR comment it publishes (see *Parallel dispatch model*). Only when Athéna runs standalone (no `argos` in the loop) **and** a GitHub PR URL is available does it publish directly, through the canonical CR channel `skills/code-review-github/scripts/upsert-comment.sh <PR-NUMBER|URL> -` (body on stdin; the helper appends the actor marker and POSTs a fresh comment) — never a raw `gh pr comment`. Format either way: severity-sorted list with code references and remediation hints, led by a summary line `Security CR: N Critical / N Moderate / N Minor`. When there is no PR to publish to, the findings travel back in the handoff inline.
 
 ## Security rules
 

@@ -36,11 +36,28 @@ slack_require_token() {
   fi
 }
 
+# slack_check_ok <method> <response-body> -> aborts (exit 3) on a malformed body or
+# Slack ok:false. Slack returns HTTP 200 even for logical errors, so .ok must always
+# be parsed; a body that is not valid JSON is itself an API failure (e.g. a proxy
+# error page). The jq error is surfaced to the project's error sink (stderr), not
+# suppressed, and the user sees a generic message rather than a raw parse error.
+slack_check_ok() {
+  local method="$1" response_body="$2" slack_error
+  if ! slack_error="$(printf '%s' "$response_body" | jq -r 'if .ok then empty else .error // "unknown_error" end')"; then
+    echo "${PROG}: Slack API returned an unexpected (non-JSON) response for ${method}" >&2
+    exit 3
+  fi
+  if [[ -n "$slack_error" ]]; then
+    echo "${PROG}: Slack API error from ${method}: ${slack_error}" >&2
+    exit 3
+  fi
+}
+
 # slack_post <api-method> <json-body> -> echoes response body; aborts on failure.
 # Sends a POST request with Authorization: Bearer. Checks HTTP status AND Slack
 # ok:false (Slack returns HTTP 200 even for logical errors).
 slack_post() {
-  local method="$1" body="$2" response http response_body slack_error
+  local method="$1" body="$2" response http response_body
   response="$(curl -sS -w $'\n%{http_code}' \
     -X POST \
     -H "Authorization: Bearer ${TOKEN}" \
@@ -53,18 +70,14 @@ slack_post() {
     echo "${PROG}: Slack API returned HTTP $http for ${method}" >&2
     exit 3
   fi
-  slack_error="$(printf '%s' "$response_body" | jq -r 'if .ok then empty else .error // "unknown_error" end' 2>/dev/null || true)"
-  if [[ -n "$slack_error" ]]; then
-    echo "${PROG}: Slack API error from ${method}: ${slack_error}" >&2
-    exit 3
-  fi
+  slack_check_ok "$method" "$response_body"
   printf '%s' "$response_body"
 }
 
 # slack_get <api-method> <query-string> -> echoes response body; aborts on failure.
 # Sends a GET request with Authorization: Bearer. Checks HTTP status AND Slack ok:false.
 slack_get() {
-  local method="$1" query="$2" url response http response_body slack_error
+  local method="$1" query="$2" url response http response_body
   url="${API}/${method}"
   if [[ -n "$query" ]]; then
     url="${url}?${query}"
@@ -78,10 +91,6 @@ slack_get() {
     echo "${PROG}: Slack API returned HTTP $http for ${method}" >&2
     exit 3
   fi
-  slack_error="$(printf '%s' "$response_body" | jq -r 'if .ok then empty else .error // "unknown_error" end' 2>/dev/null || true)"
-  if [[ -n "$slack_error" ]]; then
-    echo "${PROG}: Slack API error from ${method}: ${slack_error}" >&2
-    exit 3
-  fi
+  slack_check_ok "$method" "$response_body"
   printf '%s' "$response_body"
 }

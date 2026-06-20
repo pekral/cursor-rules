@@ -14,11 +14,21 @@ Every agent has its own avatar under [`assets/agents/`](../assets/agents). When 
 
 ### <img src="../assets/agents/argos.png" alt="argos avatar" width="48" align="left"> `argos` — code-review gatekeeper
 
-The all-seeing code-review gatekeeper, named after **Argos Panoptes**, the hundred-eyed watcher nothing escaped. Give it a PR — from the current context or a tracker link (GitHub, JIRA, Bugsnag) — and it loads the source, runs the matching `code-review-*` wrapper skill, posts the findings to the PR, and hands back a `CR done` summary with links and Critical / Moderate / Minor counts.
+The all-seeing code-review gatekeeper, named after **Argos Panoptes**, the hundred-eyed watcher nothing escaped. Give it a PR — from the current context or a tracker link (GitHub, JIRA, Bugsnag) — and it loads the source, runs the matching `code-review-*` wrapper skill, posts the findings to the PR, and hands back a `CR done` summary with links and Critical / Moderate / Minor counts. Argos focuses on **code quality, architecture, and optimisation**; security is owned by `athena`. When `daidalos` dispatches both in parallel, argos consolidates `athena`'s security findings into the final CR summary before publishing.
 
-- **Trigger:** a pull request needs reviewing.
+- **Trigger:** a pull request needs reviewing (code quality, architecture, optimisation).
 - **Orchestrates:** `code-review-github`, `code-review-jira`, `code-review-bugsnag`.
 - **Safety:** read-only — never edits, commits, pushes, or merges.
+
+### <img src="../assets/agents/athena.png" alt="athena avatar" width="48" align="left"> `athena` — security CR sentinel
+
+The strategic security sentinel, named after **Athena**, goddess of wisdom and strategic defence, and daughter of Metis. Give it a PR — from the current context or a tracker link — and it orchestrates all security skills, applies all security rules, labels each finding (Critical / Moderate / Minor), posts a consolidated security review to the PR, and hands back a `Security CR done` summary with counts. Dispatched by `daidalos` **in parallel with `argos`** — two independent CR passes on the same PR, results consolidated by `argos`.
+
+- **Trigger:** a pull request needs a dedicated security review.
+- **Orchestrates:** `security-review`, `laravel-security`, `security-bounty-hunter`, `security-threat-analysis`.
+- **Rules applied:** `@rules/security/backend.md`, `@rules/security/frontend.md`, `@rules/security/mobile.md`.
+- **Safety:** read-only — never edits, commits, pushes, or merges.
+- **Registration dependency:** dispatchable only after the installer copies `agents/athena.md` to `.claude/agents/`. Until then, security runs inline in `code-review-github → security-review` (the continuity fallback).
 
 ### <img src="../assets/agents/talos.png" alt="talos avatar" width="48" align="left"> `talos` — code-writing implementer
 
@@ -38,12 +48,12 @@ The counsel of wise planning, named after **Metis**, the Titaness of deliberatio
 
 ### <img src="../assets/agents/daidalos.png" alt="daidalos avatar" width="48" align="left"> `daidalos` — engineering-workflow orchestrator
 
-The master craftsman who runs the workshop, named after **Daidalos**, the legendary engineer who designed the work and directed the makers. It is the **entry point** for a free-form engineering request — *"resolve a random issue"*, *"resolve this URL"*, *"implement this"* — and the conductor that drives the job to a clean, reviewed result. It resolves a concrete source, decides whether the task needs a plan first, then **delegates each step by dispatching the matching specialist agent** through the Task tool — `metis` (analysis, if needed), `talos` (implementation), `apollon` (fast scoped validation after each landing step, and post-convergence reporting), `argos` (the **review-and-fix loop `talos` ↔ `argos` to convergence**, no Critical/Moderate findings) — and reports the result to the user. `metis` the mind, `talos` the hands, `argos` the eyes, `apollon` the scoped-validation gate and post-convergence reporter; `daidalos` the workshop lead that directs them.
+The master craftsman who runs the workshop, named after **Daidalos**, the legendary engineer who designed the work and directed the makers. It is the **entry point** for a free-form engineering request — *"resolve a random issue"*, *"resolve this URL"*, *"implement this"* — and the conductor that drives the job to a clean, reviewed result. It resolves a concrete source, decides whether the task needs a plan first, then **delegates each step by dispatching the matching specialist agent** through the Task tool — `metis` (analysis, if needed), `talos` (implementation), `apollon` (fast scoped validation after each landing step, and post-convergence reporting), `argos` (code quality / architecture / optimisation CR) and `athena` (security CR, dispatched **in parallel with `argos`**) — and reports the result to the user. `metis` the mind, `talos` the hands, `argos` the eyes, `athena` the security sentinel, `apollon` the scoped-validation gate and post-convergence reporter; `daidalos` the workshop lead that directs them.
 
 - **Trigger:** a free-form engineering request — from a vague idea to a tracker link — that should be carried end to end.
-- **Orchestrates (dispatches via the Task tool):** `metis` (analysis step — owns `analyze-problem`), `talos` (implementation step — owns `resolve-issue`, which runs a pre-PR self-check with `code-review` + `security-review` over its own diff — a self-validation pass, not the authoritative review that `argos` owns — to 0 Critical/Moderate before the PR), `apollon` (fast scoped validation gate — dispatched after talos PR-open and after argos convergence; runs only the tests covering the diff and verifies the relevant acceptance criteria; full `composer build` only for broad changes; **and post-convergence reporting** — dispatched once more after argos convergence is confirmed, to publish a human-readable non-technical summary to the source tracker via `pr-summary`), `argos` (the `talos` ↔ `argos` convergence loop — owns `process-code-review` / `code-review-github`, `maxIterations = 5`); resolves the source itself reusing `autoresolve-oldest-github-issue` selection and `resolve-issue` source detection.
-- **Convergence gate:** the run is done only at **0 Critical + 0 Moderate**; on `maxIterations` or a blocker it stops and escalates rather than reporting success. Merging stays a separate, explicit step — when instructed, always via `@skills/merge-github-pr/SKILL.md`, never ad-hoc CLI.
-- **Safety:** read-only orchestrator — never analyses, implements, or reviews itself; it delegates each step by dispatching the matching specialist agent, the iteration loop is skill-driven (state lives in the skill the specialist owns), and it must be the top-level agent (not a nested subagent) per the one-level nesting rule below — that single level is what it spends to dispatch `metis` / `talos` / `apollon` / `argos`.
+- **Orchestrates (dispatches via the Task tool):** `metis` (analysis step — owns `analyze-problem`), `talos` (implementation step — owns `resolve-issue`, which runs a pre-PR self-check with `code-review` + `security-review` over its own diff — a self-validation pass, not the authoritative review that `argos` owns — to 0 Critical/Moderate before the PR), `apollon` (fast scoped validation gate — dispatched after talos PR-open and after argos convergence; runs only the tests covering the diff and verifies the relevant acceptance criteria; full `composer build` only for broad changes; **and post-convergence reporting** — dispatched once more after argos convergence is confirmed, to publish a human-readable non-technical summary to the source tracker via `pr-summary`), `argos` (code quality / architecture / optimisation CR — part of the `talos` ↔ `argos` convergence loop, owns `process-code-review` / `code-review-github`, `maxIterations = 5`), `athena` (security CR — dispatched **in parallel with `argos`** on the same PR; `daidalos` is the dispatcher for both, never `argos` → `athena`; `athena` is active only after the installer registers it — fallback: security runs inline in `code-review-github → security-review`); resolves the source itself reusing `autoresolve-oldest-github-issue` selection and `resolve-issue` source detection.
+- **Convergence gate:** the run is done only at **0 Critical + 0 Moderate** (security Critical findings from `athena` count); on `maxIterations` or a blocker it stops and escalates rather than reporting success. Merging stays a separate, explicit step — when instructed, always via `@skills/merge-github-pr/SKILL.md`, never ad-hoc CLI.
+- **Safety:** read-only orchestrator — never analyses, implements, or reviews itself; it delegates each step by dispatching the matching specialist agent, the iteration loop is skill-driven (state lives in the skill the specialist owns), and it must be the top-level agent (not a nested subagent) per the one-level nesting rule below — that single level is what it spends to dispatch `metis` / `talos` / `apollon` / `argos` / `athena`.
 
 ### <img src="../assets/agents/apollon.png" alt="apollon avatar" width="48" align="left"> `apollon` — test engineer and post-convergence reporter
 
@@ -65,13 +75,14 @@ Every agent is named after a figure from **Greek mythology**, chosen so the figu
 
 | Agent | Greek figure | Why it fits |
 |---|---|---|
-| `argos` | Argos Panoptes, the hundred-eyed all-seeing watcher | nothing escapes his gaze → thorough PR inspection |
+| `argos` | Argos Panoptes, the hundred-eyed all-seeing watcher | nothing escapes his gaze → thorough PR inspection (quality, architecture, optimisation) |
 | `talos` | Talos, the bronze automaton forged to work and guard without rest | tireless artificial labourer → forges working code |
 | `metis` | Metis, Titaness of wise counsel and cunning planning | deliberation before action → problem analysis & planning |
 | `daidalos` | Daidalos, the master craftsman who runs the workshop and directs the makers | head of production → routes engineering work to the right specialist |
 | `apollon` | Apollo, god of truth, prophecy, and order, and the unerring archer | reveals the truth about a change and hits the acceptance mark → test authoring & validation |
+| `athena` | Athena, goddess of wisdom and strategic defence, daughter of Metis | wisdom + strategic vigilance → dedicated security CR sentinel, parallel to argos |
 
-Naming ideas for future agents: `themis` (order / verdict), `rhadamanthys` (fair judge), `athena` (wisdom / architecture), `hermes` (delivery / merge), `zeus` (top-level cross-domain orchestrator above `daidalos`).
+Naming ideas for future agents: `themis` (order / verdict), `rhadamanthys` (fair judge), `hermes` (delivery / merge), `zeus` (top-level cross-domain orchestrator above `daidalos`).
 
 ## Anatomy of an agent
 
@@ -149,8 +160,11 @@ user → daidalos                                         (top-level; resolves s
        Task ▶ apollon   (fast scoped validation — diff-targeted tests + acceptance-criteria check; full build only for broad changes)
          │        └─ Tests done (scoped) → proceed | Blocked → escalate to talos
          ▼
-       Task ▶ argos   (= process-code-review / code-review-github — the talos ↔ argos loop)
-         │        └─ convergence loop: code-review-github (quiet) + fixes, maxIterations 5 → 0 Critical/Moderate
+       Task ▶ argos   (= process-code-review / code-review-github — code quality / architecture / optimisation — the talos ↔ argos loop)
+       Task ▶ athena  (= security-review + laravel-security + security-bounty-hunter + security-threat-analysis — parallel security CR; dispatched by daidalos, not by argos)
+         │        └─ argos: convergence loop (code-review-github + fixes, maxIterations 5); reads athena's Security CR done from brief → consolidates → 0 Critical/Moderate
+         │           athena: Security CR done → findings recorded in brief for argos to consolidate
+         │           (athena dispatch guarded by registration check — fallback: security inline in code-review-github → security-review)
          ▼
        Task ▶ apollon   (fast scoped validation — final gate after convergence)
          │        └─ Tests done (scoped) → proceed | Blocked → escalate to user

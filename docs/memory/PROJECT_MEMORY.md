@@ -13,3 +13,10 @@
 - Rule:    An `agents/<name>.md` file is documentation only. For an agent to be dispatchable in Claude tooling the agent type must also be installed/registered (the installer syncs copies into `.claude/`). Until that happens, the agent cannot be spawned and the orchestrator must fall back to available registered agents or treat the step as blocked. Document the dependency explicitly in the agent's own file and in the issue that introduces the agent.
 - Example: `agents/apollon.md` was added in #628; daidalos correctly noted "agent type `apollon` is not registered in this environment" and continued with `metis / talos / argos`. The push-level gate becomes effective only after `apollon` is installed.
 - Source:  https://github.com/pekral/cursor-rules/pull/633   Added: 2026-06-20
+
+### parallel-agent-publication-contract — Parallel-dispatched agents must route findings through the shared brief, not publish directly
+
+- Trigger: a new CR / security / review agent is introduced that daidalos dispatches in parallel with an existing agent (e.g. `athena` alongside `argos`); the new agent's output step uses raw `gh pr comment` / `gh issue comment` to publish its findings.
+- Rule:    Any agent dispatched in parallel must hand off findings via the shared task brief so the consolidating agent (e.g. `argos`) can merge and publish them as a single report. Direct publication is permitted only in standalone mode (no parallel dispatch), and even then must go through the canonical `upsert-comment.sh` wrapper — never raw `gh pr comment` or `gh issue comment`. Writing raw comment commands in a parallel-dispatch context breaks the consolidation contract and produces duplicate / uncoordinated comment threads.
+- Example: `agents/athena.md` step 5 originally used `gh pr comment` to publish directly; argos flagged this as Moderate in PR #638 (commit `82abc16`); fixed to hand off via shared brief when dispatched with argos, and use `upsert-comment.sh` in standalone mode.
+- Source:  https://github.com/pekral/cursor-rules/pull/638   Added: 2026-06-20

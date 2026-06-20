@@ -20,7 +20,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **60 comprehensive Agent skills** for automated workflows (v0.9.0)
+- **61 comprehensive Agent skills** for automated workflows (v0.9.0)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -112,7 +112,7 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 
 # 🎯 Skills Overview — **v0.9.0**
 
-> Current release includes 60 skills for issue resolution, planning, code review, refactoring, testing, performance benchmarking, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
+> Current release includes 61 skills for issue resolution, planning, code review, refactoring, testing, performance benchmarking, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 

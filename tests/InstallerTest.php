@@ -4368,6 +4368,20 @@ test('agents directory ships the athena security-CR subagent with required front
     expect($content)->toContain('read-only');
 });
 
+test('athena also runs a pre-implementation security-analysis mode that feeds talos', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/agents/athena.md');
+
+    // Dual-mode contract: security analysis (pre-implementation) plus security review (post-implementation).
+    expect($content)->toContain('Security analysis mode (pre-implementation)');
+    expect($content)->toContain('Security review mode (post-implementation)');
+    // Analysis mode frames the remediation through analyze-problem so talos can implement it.
+    expect($content)->toContain('@skills/analyze-problem/SKILL.md');
+    // Both handoff statuses exist so the caller can route the result.
+    expect($content)->toContain('Security analysis done');
+    expect($content)->toContain('Security CR done');
+});
+
 test('every dispatched agent reads and appends to the shared task brief', function (): void {
     $packageDir = dirname(__DIR__);
 
@@ -4404,6 +4418,16 @@ test('daidalos delegates the end-to-end run by dispatching metis, talos and argo
     // The implementation step still routes through resolve-issue (owned by talos), and the convergence gate is named.
     expect($content)->toContain('@skills/resolve-issue');
     expect($content)->toContain('0 Critical');
+});
+
+test('daidalos dispatches athena for a pre-implementation security-risk analysis that feeds talos', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+
+    // Security-focused tasks are analysed by athena before talos implements them.
+    expect($content)->toContain('dispatch `athena` through the Task tool');
+    expect($content)->toContain('security analysis mode');
+    expect($content)->toContain('Security analysis done');
 });
 
 test('agents directory ships the apollon test-engineer subagent with required frontmatter', function (): void {

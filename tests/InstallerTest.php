@@ -4371,7 +4371,7 @@ test('agents directory ships the athena security-CR subagent with required front
 test('every dispatched agent reads and appends to the shared task brief', function (): void {
     $packageDir = dirname(__DIR__);
 
-    foreach (['metis', 'talos', 'argos', 'apollon', 'athena'] as $agent) {
+    foreach (['metis', 'talos', 'argos', 'apollon', 'athena', 'keryx'] as $agent) {
         $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
         expect($content)->toContain('Shared task brief');
         expect($content)->toContain('.claude/run/');
@@ -4421,6 +4421,24 @@ test('agents directory ships the apollon test-engineer subagent with required fr
     expect($content)->toContain('@skills/test-like-human/SKILL.md');
     expect($content)->toContain('@skills/e2e-testing/SKILL.md');
     expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
+});
+
+test('agents directory ships the keryx release-announcer subagent with required frontmatter', function (): void {
+    $packageDir = dirname(__DIR__);
+    $agentPath = $packageDir . '/agents/keryx.md';
+
+    expect(is_file($agentPath))->toBeTrue();
+
+    $content = (string) file_get_contents($agentPath);
+    expect($content)->toContain('name: keryx');
+    expect($content)->toContain('tools: Read, Glob, Grep, Bash');
+    expect($content)->toContain('model: sonnet');
+    expect($content)->toContain('@skills/article-writing/SKILL.md');
+    expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
+    // Read-only stance: never edits, commits, pushes, or merges.
+    expect($content)->toContain('read-only');
+    // Publishes only via the canonical wrapper, never raw gh commands.
+    expect($content)->toContain('upsert-comment');
 });
 
 test('resolveAgentsSource returns the package agents directory when it exists', function (): void {

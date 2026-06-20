@@ -30,7 +30,7 @@ When the caller passes a **shared brief path** (`.claude/run/<source-slug>.md`),
 
 Your final message is returned to the caller as the result, so make it a clean handoff:
 
-**Language:** write this handoff — and any end-user report — in the **same natural language the assignment was given in** (if the request came in Czech, the handoff is in Czech). Identifiers stay verbatim regardless of that language: branch names, ticket / issue keys, links, severity labels, CLI commands, and skill / agent names are never translated. Never mix two natural languages inside a single handoff.
+**Language:** write this handoff — and any end-user report — in the **same natural language the assignment was given in** (if the request came in Czech, the handoff is in Czech). **When the caller passed a shared brief, its recorded `## Language` field is the authoritative source — reply in that language** rather than re-guessing it from the prompt. Identifiers stay verbatim regardless of that language: branch names, ticket / issue keys, links, severity labels, CLI commands, and skill / agent names are never translated. Never mix two natural languages inside a single handoff.
 
 - **Status:** `Analysis done`.
 - **Plan:** link to the published plan-artifact issue.

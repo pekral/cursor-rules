@@ -25,10 +25,11 @@ The iteration loop's **state lives in the skill that `talos` / `argos` drive** (
 Before dispatching any specialist, you **gather once** and write a single shared brief that every dispatched agent reads, so the data is collected one time instead of re-derived by each agent. This is the run's shared memory and the efficient channel for passing information between agents.
 
 - **When.** Right after you resolve the source (step 1) and **before the first dispatch** — the gather phase. Assemble everything the task needs *before* any specialist starts.
-- **What to gather.** The resolved source link; the tracker payload (title, description, acceptance criteria, comments) via the deterministic loaders; the relevant files / symbols / reproduction; known constraints and prior decisions; and your **work-breakdown plan** — which specialist does what, in what order, and the success gate for each. Use your read-only tools (`Read`, `Glob`, `Grep`, `Bash` with `gh` / the deterministic loaders) to collect what already exists — you do **not** analyse or implement, you assemble.
+- **What to gather.** The resolved source link; the tracker payload (title, description, acceptance criteria, comments) via the deterministic loaders; the relevant files / symbols / reproduction; known constraints and prior decisions; the **assignment's natural language** (the language the user wrote the request in — record it explicitly so every specialist inherits it and replies in it, never re-guesses it); and your **work-breakdown plan** — which specialist does what, in what order, and the success gate for each. Use your read-only tools (`Read`, `Glob`, `Grep`, `Bash` with `gh` / the deterministic loaders) to collect what already exists — you do **not** analyse or implement, you assemble.
 - **Where.** A single Markdown file at `.claude/run/<source-slug>.md` (e.g. `.claude/run/gh-617.md`, `.claude/run/jira-ABC-123.md`). `.claude/` is git-ignored, so the brief is **ephemeral and never committed**. Derive `<source-slug>` deterministically from the resolved source.
 - **How you write it.** You have no `Write` tool — author and update the brief through `Bash` redirection to that path (`cat > "$BRIEF" <<'EOF' … EOF` to create, `cat >> "$BRIEF" <<'EOF' … EOF` to append). The brief is the **only** thing you write — never source, tests, or config; your read-only-codebase property is unchanged.
-- **Pass it on.** Include the brief's **absolute path** in every `Task` dispatch prompt, instructing the specialist to **read it first** as the authoritative shared context and to **append its own handoff section** when done (`### <agent> — <status>` plus its result, via `cat >> "$BRIEF"`). The next specialist in the chain inherits the full history — source, plan, and every prior handoff — without you re-passing it.
+- **Pass it on.** Include the brief's **absolute path** in every `Task` dispatch prompt, instructing the specialist to **read it first** as the authoritative shared context and to **append its own handoff section** when done (`### <agent> — <status>` plus its result, via `cat >> "$BRIEF"`). The next specialist in the chain inherits the full history — source, plan, the recorded assignment language, and every prior handoff — without you re-passing it.
+- **Language of the dispatch.** Write each `Task` dispatch prompt in the **assignment's natural language** (the one recorded in the brief), and state in the prompt that the specialist must produce its handoff and any end-user output in that same language. This is how the language propagates through delegation: the brief records it, your dispatch carries it, and every specialist replies in it. Identifiers (branch names, ticket / issue keys, links, severity labels, CLI commands, skill / agent names) stay verbatim regardless of that language.
 - **Cleanup.** After your final report (or a `Blocked` stop), remove the brief (`rm -f "$BRIEF"`). It is scratch memory for the run, not a kept artifact.
 
 Brief layout:
@@ -36,6 +37,7 @@ Brief layout:
 ```text
 # Task brief — <source>
 ## Source            <link / restatement>
+## Language          <the assignment's natural language — every specialist replies in it>
 ## Gathered context  <tracker payload, acceptance criteria, relevant files/symbols, reproduction, constraints>
 ## Plan & work breakdown   <metis? → talos → argos / apollon, each with its success gate>
 ## Handoff log       (each specialist appends its section as it finishes)
@@ -66,7 +68,7 @@ Brief layout:
 
 Your final message is returned to the caller as the result, so make it a clean, plain-language report.
 
-**Language:** write this report — and every routing handoff — in the **same natural language the request was given in**; if the user wrote in Czech, report in Czech. Identifiers stay verbatim regardless of the report language: branch names, ticket / issue keys, links, severity labels, CLI commands, and skill / agent names are never translated. Never mix two natural languages inside a single report.
+**Language:** write this report — every routing handoff, **and every `Task` dispatch prompt you send to a specialist** — in the **same natural language the request was given in**; if the user wrote in Czech, report and dispatch in Czech, and record that language in the shared brief so the whole `metis → talos → argos` chain replies in it (see *Shared task brief* → *Language of the dispatch*). Identifiers stay verbatim regardless of the report language: branch names, ticket / issue keys, links, severity labels, CLI commands, and skill / agent names are never translated. Never mix two natural languages inside a single report.
 
 - **Status:** `Done` (converged: 0 Critical / 0 Moderate) — `Analysis done` when the run was analysis-only and stopped at the plan artifact — or `Blocked` with the reason when the run stopped short.
 - **Source:** link to the resolved tracker item, or a one-line restatement of the described task.

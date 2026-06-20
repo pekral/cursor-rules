@@ -11,22 +11,70 @@ Compound engineering is **not** "let the AI write the code". It is a system wher
 - **Every change must make future work easier, not harder.** A change that adds hidden coupling, ships an undocumented decision, or introduces a new abstraction where an existing part of the system already fit is a defect to correct — not something to ship and move on from.
 - **Every mistake, insight, or decision worth more than this one task gets written down** where the next agent *and* the next human will find it. Knowledge that lives only in someone's head, a chat thread, or a closed PR does not compound.
 - The human stays in the loop on direction and quality; the agents do the planning, implementing, and reviewing against that direction.
-- **Blocked delegation is a hard stop, never a silent bypass.** When a dispatched agent cannot do its job because the environment denies it — most commonly a write-capable implementer (e.g. `talos`) whose `Write` / `Edit` is refused by the harness sandbox / permission layer even though the agent declares those tools — the run **stops and reports the blocker with its remediation**. Do **not** silently complete the blocked agent's work in the main thread (or in another agent's context): that bypasses the delegated, reviewed pipeline (no implementer→reviewer loop, no quality gates), hides the failure from the human, and breaks the compounding loop. Surface *what was blocked*, *why* (the denied capability), and *how to unblock it* (the environment change the human must make), then halt.
 
 ## Compound Memory (per project)
 
 Turn one-off lessons into reusable rules by maintaining a **per-project memory**. This memory is project-specific by definition — it lives **in the project being worked on, never in this shared rules package**. A lesson learned on one project does not become a global rule shipped to every project; it stays in that project's own memory.
 
-- **Where to store it (use what the project already has, in this order):** the project's `CLAUDE.md`, `.cursor/rules/project.mdc`, or a dedicated learnings / decision-log file (e.g. `docs/decisions/`). The installer never overwrites `CLAUDE.md` or `.cursor/rules/project.mdc`, so they are safe, durable homes for accumulated memory.
-- **When to record an entry:** whenever a review comment, a bug, or a design decision reveals a lesson that will recur. The canonical trigger: it is discovered that a certain *kind* of change belongs in an **existing part of the system rather than in a new abstraction** — capture that as a rule or a worked example so the next agent reaches for the existing part first instead of re-deriving (or re-mistaking) it.
-- **What each entry contains:** the situation that triggered it, the rule or decision, and a short concrete example. Keep entries short and greppable — prefer one rule per lesson over a long essay.
-- **Review comments and post-mortems are inputs to this memory, not throwaway chat.** When a code-review finding or a human correction generalizes beyond the current PR, promote it into the per-project memory so it stops recurring. That is how mistakes and review comments become the team's collective memory.
+### Where to store it (the memory file)
+
+- **Canonical home:** a dedicated, greppable, curated memory file at `docs/memory/PROJECT_MEMORY.md` in the project being worked on. It is the index *and* the body — an index line at the top plus one short entry per lesson, the same shape as a `MEMORY.md` index with one fact per topic.
+- **Keep it separate from the hand-maintained files.** The memory file is auto-appended by agents, so it must be **distinct** from `CLAUDE.md` and `.cursor/rules/project.mdc`, which humans curate by hand — an auto-write must never clobber human prose. Reference the memory file from `CLAUDE.md` (a one-line pointer) so it stays discoverable, exactly as a `MEMORY.md` index makes its facts discoverable.
+- **The installer never touches it.** `docs/memory/PROJECT_MEMORY.md` is project data, not package data — the rules installer only syncs `rules/`, `skills/`, `agents/`, and `CLAUDE.md`, so it never creates, overwrites, or prunes the memory file. The file is therefore a safe, durable home that survives re-installation, the same guarantee `CLAUDE.md` and `.cursor/rules/project.mdc` carry.
+- **Fallback for projects without a `docs/` convention:** when a project demonstrably has no `docs/` tree and refuses to grow one, fall back to a learnings / decision-log file the project already uses (e.g. `docs/decisions/`); never fall back to writing lessons into `CLAUDE.md` or `.cursor/rules/project.mdc` themselves.
+
+### Entry format (greppable, one lesson per entry)
+
+Each entry is short and scannable — prefer one rule per lesson over a long essay:
+
+```
+### <slug> — <one-line lesson>
+- Trigger: <the recurring situation that makes this lesson apply again>
+- Rule:    <the decision / what to do next time>
+- Example: <a concrete pointer: file / area / symbol>
+- Source:  <PR / issue link>   Added: <YYYY-MM-DD>
+```
+
+### Promotion bar (record only the most important things)
+
+An entry is written **only** when the lesson clears all three gates — this is what keeps the memory small and curated instead of an endless log:
+
+1. **It will recur beyond this one task** — the lesson generalizes to future work, not a one-off detail of this issue.
+2. **It cost real effort to discover** — it was non-obvious, surprising, or only learned after a wrong turn (a review finding, a bug, a rejected approach, an architectural decision).
+3. **It is not already captured elsewhere** — the lesson is not already obvious from the code, the tests, the git history, or an existing rule. If reading the code already teaches it, do not duplicate it into memory.
+
+The canonical trigger to record: it is discovered that a certain *kind* of change belongs in an **existing part of the system rather than in a new abstraction** — capture that so the next agent reaches for the existing part first instead of re-deriving (or re-mistaking) it. A trivial task that clears none of the gates writes **nothing**.
+
+### Curation pass (run on every write)
+
+Before appending, curate so the file stays small and non-redundant:
+
+- **Dedup** — if an equivalent entry already exists, do not add a second; strengthen the existing one only if the new occurrence adds a sharper trigger or example.
+- **Supersede** — when a new lesson contradicts or replaces an older entry, update the old entry (or mark it superseded) instead of leaving both.
+- **Prune** — drop entries that no longer hold (the code they referenced was removed, the rule was promoted into a real `rules/**` file).
+- **Soft cap** — keep the file small; when it grows past a comfortable size, consolidate related entries rather than letting it sprawl.
+
+### Read protocol (load memory before acting)
+
+The memory only compounds if it is **read at the start of each task**, before re-deriving anything:
+
+- The **daidalos gather phase** reads the memory file and folds the relevant entries into the shared brief under a `## Project memory` section, so every dispatched specialist inherits the lessons without re-deriving them.
+- `@skills/analyze-problem` (*Context extraction*) and `@skills/prepare-issue-context` consult the memory file before mapping scenarios to code.
+
+### What feeds the memory
+
+Review comments and post-mortems are **inputs** to this memory, not throwaway chat. When a code-review finding or a human correction generalizes beyond the current PR, promote it through the promotion bar so it stops recurring — that is how mistakes and review comments become the team's collective memory. The write happens at task convergence (end of `@skills/resolve-issue`, `@skills/process-code-review`, and the final report), after the review loop reaches 0 Critical / 0 Moderate, via `@skills/record-project-memory`.
 
 ## What Not To Do
 
 - Do not let a durable lesson live only in a commit message or a closed PR thread — promote the reusable part into the project's memory file.
 - Do not write a project-specific lesson into this shared rules package as a new global rule. Per-project lessons stay in the project's own memory; only genuinely universal standards belong here.
-- Do not record secrets, credentials, or PII in the memory file.
+- Do not record secrets, credentials, tokens, or PII in the memory file — the same prohibition that applies to logs and tracker comments applies to memory.
+- Do not auto-append lessons that fail the promotion bar — an uncurated log of every task is noise, not memory.
+
+## Blocked delegation is a hard stop
+
+When an orchestrator delegates a step (analysis, implementation, review) and the delegate returns a blocker it cannot resolve — most commonly a write-capable implementer (e.g. `talos`) whose `Write` / `Edit` is refused by the harness sandbox / permission layer even though the agent declares those tools, but equally an unresolvable merge conflict or a non-converging review loop — the run **stops and reports the blocker with its remediation**, never a silent bypass. Do **not** silently complete the blocked agent's work in the main thread (or in another agent's context): that bypasses the delegated, reviewed pipeline (no implementer→reviewer loop, no quality gates), hides the failure from the human, and breaks the compounding loop. Surface *what was blocked*, *why* (the denied capability), and *how to unblock it* (the environment change the human must make), then halt.
 
 ## Code Review Application
 

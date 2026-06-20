@@ -209,6 +209,10 @@ The non-technical report must be understandable by non-technical testers and pro
 - **Risk areas and edge cases:** specific scenarios the tester should focus on to catch potential regressions or unexpected behavior
 - **Pre-existing fixes also covered by this PR (when any):** plain-language one-line summary per pre-existing fix commit produced by *Pre-existing issue handling*, plus a one-line "what to re-verify" hint per fix so the tester knows the additional regression surface to validate. Omit the bullet entirely when no pre-existing fix landed.
 
+### Compound memory (record durable lessons)
+
+After the reviews converged (no Critical / Moderate) and the reports are posted, run `@skills/record-project-memory/SKILL.md` with the converged task context and the PR link. It writes to the project memory file (`docs/memory/PROJECT_MEMORY.md`) **only** the lessons that clear the promotion bar in `@rules/compound-engineering/general.mdc` *Compound Memory (per project)* — a trivial task records nothing. This is how a review finding or a non-obvious decision from this PR stops recurring on the next task.
+
 ### GitHub-specific follow-up
 - If the original repository uses a `ready for review` (or equivalent) label, apply it to the source issue once the PR is open to signal it is ready for reviewers. Skip this step when the project does not use such labels.
 
@@ -237,6 +241,7 @@ The non-technical report must be understandable by non-technical testers and pro
 - Technical report posted on the GitHub PR
 - Non-technical report posted on the original issue tracker
 - For JIRA issues: PR is linked back and a summary comment is posted
+- Durable lessons (if any cleared the promotion bar) were recorded into the project memory file via `@skills/record-project-memory/SKILL.md`
 
 ## Output Humanization
 - Use [blader/humanizer](https://github.com/blader/humanizer) for all skill outputs to keep the text natural and human-friendly.

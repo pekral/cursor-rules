@@ -209,6 +209,7 @@ Rules:
 - **Run the final publishing run inline.** Invoke the appropriate CR wrapper directly in this skill's context with publishing enabled — this is the **only** review whose output reaches the PR / issue tracker. The invocation must include the PR URL, the converged state (Critical + Moderate == 0), and the instruction to post the final PR comment + linked-issue / JIRA mirror per the CR wrapper's contract. Do not dispatch as a subagent — run it sequentially in the current context:
   - GitHub: `@skills/code-review-github/SKILL.md`
   - JIRA: `@skills/code-review-jira/SKILL.md`
+- **Record durable lessons.** After the final publish, run `@skills/record-project-memory/SKILL.md` with the converged CR context and the PR link. It appends to `docs/memory/PROJECT_MEMORY.md` only the lessons that clear the promotion bar in `@rules/compound-engineering/general.mdc` *Compound Memory (per project)* (a recurring CR finding is the canonical input); a CR that surfaced nothing durable records nothing.
 - Share a concise completion report (in-conversation, not on the tracker):
   - PR link
   - resolved items

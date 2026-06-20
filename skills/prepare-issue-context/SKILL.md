@@ -48,6 +48,7 @@ Do **not** run this skill for tasks that are obviously stateless (formatting, de
 - Load the issue via the deterministic loader — `skills/code-review-github/scripts/load-issue.sh` or `skills/code-review-jira/scripts/load-issue.sh`. To pull the whole context in one pass, prefer the matching `gather-issue-context.sh` (issue + comments + attachments + recursively-loaded linked issues/PRs + an inventory of external URLs): `skills/code-review-jira/scripts/gather-issue-context.sh <KEY|URL>` for JIRA, `skills/code-review-github/scripts/gather-issue-context.sh <NUMBER|URL>` for GitHub. Never call `gh`, `acli`, or REST endpoints directly.
 - Read the full `body` / `descriptionText`, every entry in `comments[]`, every attachment URL, and the linked PRs.
 - Group comments by thread per `@skills/resolve-issue/SKILL.md` *Comment analysis* — keep only the **current** requirements.
+- **Consult the per-project compound memory** (`docs/memory/PROJECT_MEMORY.md` per `@rules/compound-engineering/general.mdc` *Compound Memory (per project)*) before mapping scenarios to code in step 3: read it when present and reuse any entry whose `Trigger:` matches this assignment so the mapping builds on recorded lessons instead of re-deriving them.
 
 ### 2. Extract concrete scenarios
 For every numbered step, bullet, or paragraph in the *Jak otestovat* / *How to test* / acceptance-criteria section of the assignment, record one scenario:

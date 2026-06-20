@@ -4349,10 +4349,29 @@ test('agents directory ships the daidalos orchestrator subagent with required fr
     expect($content)->toContain('.claude/run/');
 });
 
+test('agents directory ships the athena security-CR subagent with required frontmatter', function (): void {
+    $packageDir = dirname(__DIR__);
+    $agentPath = $packageDir . '/agents/athena.md';
+
+    expect(is_file($agentPath))->toBeTrue();
+
+    $content = (string) file_get_contents($agentPath);
+    expect($content)->toContain('name: athena');
+    expect($content)->toContain('tools: Read, Glob, Grep, Bash');
+    expect($content)->toContain('model: opus');
+    expect($content)->toContain('@skills/security-review/SKILL.md');
+    expect($content)->toContain('@skills/laravel-security/SKILL.md');
+    expect($content)->toContain('@skills/security-bounty-hunter/SKILL.md');
+    expect($content)->toContain('@skills/security-threat-analysis/SKILL.md');
+    expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
+    // Read-only stance: never edits, commits, pushes, or merges.
+    expect($content)->toContain('read-only');
+});
+
 test('every dispatched agent reads and appends to the shared task brief', function (): void {
     $packageDir = dirname(__DIR__);
 
-    foreach (['metis', 'talos', 'argos', 'apollon'] as $agent) {
+    foreach (['metis', 'talos', 'argos', 'apollon', 'athena'] as $agent) {
         $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
         expect($content)->toContain('Shared task brief');
         expect($content)->toContain('.claude/run/');
@@ -4455,6 +4474,7 @@ test('install with editor=claude copies the argos agent to .claude/agents', func
         ob_end_clean();
 
         expect(is_file($root . '/.claude/agents/argos.md'))->toBeTrue();
+        expect(is_file($root . '/.claude/agents/athena.md'))->toBeTrue();
         expect(is_dir($root . '/.cursor/agents'))->toBeFalse();
         expect(is_dir($root . '/.codex/agents'))->toBeFalse();
     } finally {

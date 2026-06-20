@@ -4,6 +4,14 @@
 
 # Cursor Rules for PHP and Laravel
 
+<p align="center">
+  <a href="https://packagist.org/packages/pekral/cursor-rules"><img src="https://img.shields.io/packagist/v/pekral/cursor-rules" alt="Packagist Version"></a>
+  <a href="https://packagist.org/packages/pekral/cursor-rules"><img src="https://img.shields.io/packagist/dt/pekral/cursor-rules" alt="Total Downloads"></a>
+  <a href="https://packagist.org/packages/pekral/cursor-rules"><img src="https://img.shields.io/packagist/php-v/pekral/cursor-rules" alt="PHP Version"></a>
+  <a href="https://github.com/pekral/cursor-rules/blob/master/LICENSE"><img src="https://img.shields.io/packagist/l/pekral/cursor-rules" alt="License"></a>
+  <a href="https://pekral.cz"><img src="https://img.shields.io/badge/by-pekral.cz-blue" alt="by pekral.cz"></a>
+</p>
+
 **Cursor rules for PHP and Laravel** — a complete set of `.mdc` rule files and Agent skills for Cursor, Claude Code, and Codex. One package for PHP and Laravel cursor rules: coding standards, testing, and conventions. The installer discovers the project root (via `composer.json` lookup from the current directory), mirrors the `rules/` directory into the editor's rules path and the `skills/` directory into the editor's skills path, and copies or symlinks every file into the target project. Use cursor rules for PHP and Laravel to keep every edit aligned with enforced standards, plus comprehensive Agent skills for issue resolution, bug fixing, code review, security analysis, refactoring, testing, frontend and UI, platform and data, and package review.
 
 ## Why This Package

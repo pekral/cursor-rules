@@ -112,6 +112,14 @@ The handoff above is the *return* channel. For the *forward* channel — passing
 - **No new write scope.** Every agent already carries `Bash`, so the brief is created and appended through `Bash` redirection (`cat >> "$BRIEF" <<'EOF' … EOF`) to the git-ignored scratch path. No agent gains `Write` / `Edit` over the codebase from this — the read-only reviewers (`argos`, `metis`) and the read-only orchestrator (`daidalos`) keep their read-only-codebase stance; the brief is the only file they touch, and it is not source.
 - **Top-level runs only.** The brief's value — a single gather shared across **separate** dispatched subagents — materialises only when `daidalos` runs **top-level** and dispatches `talos` / `argos` as real Task subagents (separate processes, shared filesystem). A `daidalos` invoked **as a subagent itself** has already spent the one nesting level, so it cannot dispatch separate specialists and instead returns a routing handoff (*Subagents of an agent*, case (b)) — there is no second process to read or append the brief, so the read-then-append loop does not apply to that nested case.
 
+## Concurrency — working-tree write-lock
+
+Several top-level `daidalos` runs can target the **same project at once** (interactively, or via `bin/cursor-rules-resolve-loop.sh`). When worktrees are not enabled they share **one git working tree**, so two runs that both write to it would corrupt each other's checkout and uncommitted edits. `daidalos` guards this with a **scope-conditioned write-lock**:
+
+- **Read-only runs run in parallel.** An analysis-only run (dispatching `metis`) never modifies the working tree, so it takes **no** lock — any number of analysis runs overlap freely, with each other and with a writing run.
+- **Writing runs serialise.** A full-delivery run (dispatching `talos`) acquires a lock before the dispatch and runs one at a time. A second writing run that finds a live holder stops with `Blocked` and a remediation (wait and retry, or request an isolated worktree) instead of dispatching `talos` into another run's changes.
+- **Keyed to the toplevel.** The lock is a directory at `.claude/run/.daidalos-write.lock` inside the current toplevel's git-ignored `.claude/run/`. An isolated worktree is a different toplevel with its own lock, so worktree-isolated runs run in parallel even for full delivery; the shared tree (no worktree) contends on the same lock and serialises. Acquire is atomic (`mkdir`), a stale lock from a crashed run is reclaimed via a `kill -0` PID probe, and the lock is released on the final report and on any `Blocked` stop. See `agents/daidalos.md` *Concurrency & the working-tree write-lock* for the mechanism.
+
 ## Subagents of an agent
 
 Claude Code subagents invoked via the Task tool generally **cannot spawn their own subagents** (one level of nesting). This shapes how the roster composes:

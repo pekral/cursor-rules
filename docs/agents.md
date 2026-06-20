@@ -32,7 +32,7 @@ The strategic security sentinel, named after **Athena**, goddess of wisdom and s
 
 ### <img src="../assets/agents/talos.png" alt="talos avatar" width="48" align="left"> `talos` — code-writing implementer
 
-The tireless bronze automaton, named after **Talos**, the forged guardian that worked without rest. Give it a source — a tracker link (GitHub, JIRA, Bugsnag) or the current task — and it implements the fix or feature, validates it with tests, opens a pull request, and hands back an `Impl done` summary with links. It is the write-side counterpart to `argos`: `argos` is the tireless eye (review), `talos` the tireless hands (implementation).
+The tireless bronze automaton, named after **Talos**, the forged guardian that worked without rest. Give it a source — a tracker link (GitHub, JIRA, Bugsnag) or the current task — and it implements the fix or feature, runs local checks (`composer build`: tests, phpstan, pint, rector, phpcs, skill-check) and fixes their errors, opens a pull request, and hands back an `Impl done` summary with links. Code review (quality, architecture, optimisation) belongs to `argos`; security CR belongs to `athena`; scoped validation gating belongs to `apollon` — `talos` does not own any of these. Read-only CR runs by `argos` and `athena` may run in parallel; write-capable runs are serialised via the working-tree write-lock (rule #627). It is the write-side counterpart to `argos`: `argos` is the tireless eye (review), `talos` the tireless hands (implementation).
 
 - **Trigger:** an issue or task needs implementing.
 - **Orchestrates:** `resolve-issue`.

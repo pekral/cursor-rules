@@ -4605,3 +4605,93 @@ test('resolve-issue skill refuses to resolve a closed / inactive task', function
     expect($content)->toContain('The issue must be open / active.');
     expect($content)->toContain('do not resolve it');
 });
+
+test('compound-engineering rule defines the per-project memory file convention (issue #626)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/rules/compound-engineering/general.mdc');
+
+    expect($content)->toContain('docs/memory/PROJECT_MEMORY.md');
+    expect($content)->toContain('### Promotion bar');
+    expect($content)->toContain('### Curation pass');
+    expect($content)->toContain('### Read protocol');
+    expect($content)->toContain('Do not record secrets, credentials, tokens, or PII in the memory file');
+});
+
+test('compound-engineering rule provides the Blocked delegation hard-stop section referenced by agents (issue #626)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $rule = (string) file_get_contents($packageDir . '/rules/compound-engineering/general.mdc');
+    $daidalos = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+    $talos = (string) file_get_contents($packageDir . '/agents/talos.md');
+
+    expect($rule)->toContain('## Blocked delegation is a hard stop');
+    expect(substr_count($rule, '## Blocked delegation is a hard stop'))->toBe(1);
+    expect($daidalos)->toContain('*Blocked delegation is a hard stop*');
+    expect($talos)->toContain('*Blocked delegation is a hard stop*');
+});
+
+test('record-project-memory skill exists and is write-only to the memory file (issue #626)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $skill = $packageDir . '/skills/record-project-memory/SKILL.md';
+
+    expect(is_file($skill))->toBeTrue();
+
+    $content = (string) file_get_contents($skill);
+    expect($content)->toContain('name: record-project-memory');
+    expect($content)->toContain('docs/memory/PROJECT_MEMORY.md');
+    expect($content)->toContain('promotion bar');
+    expect($content)->toContain('Curation pass');
+    expect($content)->toContain('Never record secrets, credentials, tokens, or PII');
+});
+
+test('compound memory reads are hooked into the context phases (issue #626)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $daidalos = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+    $analyze = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');
+    $prepare = (string) file_get_contents($packageDir . '/skills/prepare-issue-context/SKILL.md');
+
+    expect($daidalos)->toContain('## Project memory');
+    expect($daidalos)->toContain('docs/memory/PROJECT_MEMORY.md');
+    expect($analyze)->toContain('docs/memory/PROJECT_MEMORY.md');
+    expect($prepare)->toContain('docs/memory/PROJECT_MEMORY.md');
+});
+
+test('compound memory writes are hooked into convergence steps (issue #626)', function (): void {
+    $packageDir = dirname(__DIR__);
+    $resolve = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+    $process = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+    $daidalos = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+
+    expect($resolve)->toContain('@skills/record-project-memory/SKILL.md');
+    expect($process)->toContain('@skills/record-project-memory/SKILL.md');
+    expect($daidalos)->toContain('record-project-memory');
+});
+
+test('installer never installs the per-project memory file into a target project (issue #626)', function (): void {
+    $root = installerCreateProjectRoot();
+    $homeEnv = getenv('HOME');
+    $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
+    putenv('HOME=' . $root);
+
+    if (getenv('USERPROFILE') !== false) {
+        putenv('USERPROFILE=' . $root);
+    }
+
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=all']);
+        ob_end_clean();
+
+        foreach (['.cursor', '.claude', '.codex'] as $editorDir) {
+            expect(is_file($root . '/' . $editorDir . '/docs/memory/PROJECT_MEMORY.md'))->toBeFalse();
+            expect(is_dir($root . '/' . $editorDir . '/docs/memory'))->toBeFalse();
+        }
+
+        expect(is_file($root . '/docs/memory/PROJECT_MEMORY.md'))->toBeFalse();
+    } finally {
+        installerRestoreEnvAndCleanup($homeBefore, $originalCwd, $root);
+    }
+});

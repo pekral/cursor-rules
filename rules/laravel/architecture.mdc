@@ -103,6 +103,11 @@ globs:
 - Services must not execute direct Eloquent queries or `DB::` calls — delegate reads to Repositories and writes to ModelManagers.
 
 ## Repositories and ModelManagers
+- **Eloquent / query-builder queries belong in a repository class — always, regardless of whether `pekral/arch-app-services` is installed.** Inline Eloquent chains (e.g. `EmailModel::query()->whereNotNull('reminder_at')->...->get()`) written directly in a controller, Livewire component, job, action, or command are an anti-pattern. Encapsulate every multi-condition or business-filter query in a dedicated repository class (e.g. `EmailRepository`) with a method name that expresses the intent (`getPendingReminders()`). Reasonable exceptions where inline queries are acceptable:
+  - Simple single-model lookups with no business filter logic: `Model::find($id)`, `Model::findOrFail($id)`.
+  - Eager-loading relationships at the call site: `$model->load(['relation'])` or `->with(['relation'])` as a loading hint, not a business query.
+  - Code that already lives inside a repository class or model scope.
+  - Framework / vendor contracts that require an inline query (e.g. a policy method, an Eloquent scope defined on the model, a seeder/factory).
 - **Read/write split is mandatory and package-defined:** every database **read** lives in a Repository extending `Pekral\Arch\Repository\Mysql\BaseRepository`; every database **write/update/delete** lives in a ModelManager extending `Pekral\Arch\ModelManager\Mysql\BaseModelManager`. Both are generic over the Eloquent model (`@extends BaseRepository<\App\Models\User>`) and implement the protected `getModelClassName(): string`.
 - All database read operations (Eloquent queries, `DB::` calls, query builder) must be encapsulated in Repository classes — never inline in Actions, Services, Facades, controllers, jobs, commands, listeners, or Livewire components.
 - Repositories are read-only:
@@ -271,6 +276,7 @@ globs:
   - domain-specific code placed under `app/Concerns/` — anything tied to a concrete model, aggregate, feature flow, or business rule must move into the relevant business-logic layer under `app/{Domain}/` per **Shared Concerns (Traits)**
   - shared, reusable trait or helper logic placed outside `app/Concerns/` while being consumed by two or more unrelated domains, layers, or entry points — must be consolidated into `app/Concerns/` per **Shared Concerns (Traits)**
 - Mark as moderate:
+  - inline Eloquent / query-builder chain written directly in a controller, Livewire component, job, action, or command instead of being encapsulated in a repository method — applies to any multi-condition or business-filter query outside a repository class; simple `Model::find($id)` / `Model::findOrFail($id)` lookups, eager-loading hints (`->with()` / `->load()`), queries already inside a repository, and framework / vendor contract calls are exempt (see **Repositories and ModelManagers**)
   - feature-specific or use-case–specific query methods inside Repositories — Repositories must expose only basic, reusable queries; specialization belongs in Services or Actions composing those basic methods
   - calling Actions via `->__invoke()` instead of `$action(...)`
   - DTOs overriding `from()` only for key renaming instead of using mapping attributes

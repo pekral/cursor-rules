@@ -38,10 +38,10 @@ The counsel of wise planning, named after **Metis**, the Titaness of deliberatio
 
 ### <img src="../assets/agents/daidalos.png" alt="daidalos avatar" width="48" align="left"> `daidalos` — engineering-workflow orchestrator
 
-The master craftsman who runs the workshop, named after **Daidalos**, the legendary engineer who designed the work and directed the makers. It is the **entry point** for a free-form engineering request — *"resolve a random issue"*, *"resolve this URL"*, *"implement this"* — and the conductor that drives the job to a clean, reviewed result. It resolves a concrete source, decides whether the task needs a plan first, then **delegates each step by dispatching the matching specialist agent** through the Task tool — `metis` (analysis, if needed), `talos` (implementation), `argos` (the **review-and-fix loop `talos` ↔ `argos` to convergence**, no Critical/Moderate findings) — and reports the result to the user. `metis` the mind, `talos` the hands, `argos` the eyes; `daidalos` the workshop lead that directs them.
+The master craftsman who runs the workshop, named after **Daidalos**, the legendary engineer who designed the work and directed the makers. It is the **entry point** for a free-form engineering request — *"resolve a random issue"*, *"resolve this URL"*, *"implement this"* — and the conductor that drives the job to a clean, reviewed result. It resolves a concrete source, decides whether the task needs a plan first, then **delegates each step by dispatching the matching specialist agent** through the Task tool — `metis` (analysis, if needed), `talos` (implementation), `apollon` (fast scoped validation after each landing step), `argos` (the **review-and-fix loop `talos` ↔ `argos` to convergence**, no Critical/Moderate findings) — and reports the result to the user. `metis` the mind, `talos` the hands, `argos` the eyes, `apollon` the scoped-validation gate; `daidalos` the workshop lead that directs them.
 
 - **Trigger:** a free-form engineering request — from a vague idea to a tracker link — that should be carried end to end.
-- **Orchestrates (dispatches via the Task tool):** `metis` (analysis step — owns `analyze-problem`), `talos` (implementation step — owns `resolve-issue`, which runs a pre-PR self-check with `code-review` + `security-review` over its own diff — a self-validation pass, not the authoritative review that `argos` owns — to 0 Critical/Moderate before the PR), `argos` (the `talos` ↔ `argos` convergence loop — owns `process-code-review` / `code-review-github`, `maxIterations = 5`); resolves the source itself reusing `autoresolve-oldest-github-issue` selection and `resolve-issue` source detection.
+- **Orchestrates (dispatches via the Task tool):** `metis` (analysis step — owns `analyze-problem`), `talos` (implementation step — owns `resolve-issue`, which runs a pre-PR self-check with `code-review` + `security-review` over its own diff — a self-validation pass, not the authoritative review that `argos` owns — to 0 Critical/Moderate before the PR), `apollon` (fast scoped validation gate — dispatched after talos PR-open and after argos convergence; runs only the tests covering the diff and verifies the relevant acceptance criteria; full `composer build` only for broad changes), `argos` (the `talos` ↔ `argos` convergence loop — owns `process-code-review` / `code-review-github`, `maxIterations = 5`); resolves the source itself reusing `autoresolve-oldest-github-issue` selection and `resolve-issue` source detection.
 - **Convergence gate:** the run is done only at **0 Critical + 0 Moderate**; on `maxIterations` or a blocker it stops and escalates rather than reporting success. Merging stays a separate, explicit step — when instructed, always via `@skills/merge-github-pr/SKILL.md`, never ad-hoc CLI.
 - **Safety:** read-only orchestrator — never analyses, implements, or reviews itself; it delegates each step by dispatching the matching specialist agent, the iteration loop is skill-driven (state lives in the skill the specialist owns), and it must be the top-level agent (not a nested subagent) per the one-level nesting rule below — that single level is what it spends to dispatch `metis` / `talos` / `argos`.
 
@@ -52,7 +52,9 @@ The test engineer who reveals the truth about a change, named after **Apollo**, 
 - **Trigger:** a change needs test coverage authored and its behaviour validated — design tests, write PHPUnit/Pest tests, generate browser scenarios, verify acceptance criteria, find broken flows.
 - **Orchestrates:** `create-test` / `create-missing-tests-in-pr` (PHPUnit/Pest authoring), `e2e-testing` (browser scenarios when Playwright is present), `test-like-human` (broken-flow hunting, publishes through `pr-summary`).
 - **Safety:** write-capable for **test code only** — never touches application code, never merges, never pushes to a protected default branch. A code fix surfaced by a broken flow is handed to `talos`.
-- **On-demand:** dispatched explicitly when test authoring / validation is wanted; `test-like-human` is never auto-chained from the review pipeline, so `apollon` is **not** part of the `daidalos` convergence loop.
+- **Two modes:**
+  - **On-demand** — dispatched explicitly when full test authoring and validation is wanted (`create-test`, `e2e-testing`, `test-like-human`). `test-like-human` is never auto-chained from the review pipeline.
+  - **Fast scoped validation gate (push-level)** — `daidalos` dispatches `apollon` automatically after each landing step: once after `talos` opens the PR and once after `argos` convergence. In this mode `apollon` derives the changed surface from the diff, runs only the affected tests, and verifies the relevant acceptance criteria against the diff. Full `composer build` is used only when the change is broad (shared/core/config files or more than 10 files changed). This gate runs at push-level granularity — inside the `argos` loop itself would violate the one-level nesting rule, so `daidalos` is the dispatcher, not `argos`. Handoff: `Tests done (scoped)` or `Blocked` (forwarded back to `talos`).
 
 > A future top-level, cross-domain orchestrator (reserved name `zeus`) will sit above `daidalos` and coordinate non-engineering domains too (e.g. marketing). `daidalos` owns the engineering tier only.
 
@@ -143,11 +145,19 @@ user → daidalos                                         (top-level; resolves s
        Task ▶ talos   (= resolve-issue)
          │        └─ pre-PR self-check: code-review + security-review (self-validation, not the authoritative review) → 0 Critical/Moderate → opens PR
          ▼
+       Task ▶ apollon   (fast scoped validation — diff-targeted tests + acceptance-criteria check; full build only for broad changes)
+         │        └─ Tests done (scoped) → proceed | Blocked → escalate to talos
+         ▼
        Task ▶ argos   (= process-code-review / code-review-github — the talos ↔ argos loop)
-                  └─ convergence loop: code-review-github (quiet) + fixes, maxIterations 5 → 0 Critical/Moderate
+         │        └─ convergence loop: code-review-github (quiet) + fixes, maxIterations 5 → 0 Critical/Moderate
+         ▼
+       Task ▶ apollon   (fast scoped validation — final gate after convergence)
+         │        └─ Tests done (scoped) → proceed | Blocked → escalate to user
          ▼
        daidalos → reports result to the user   (merge stays a separate, explicit step — always via @skills/merge-github-pr/SKILL.md)
 ```
+
+The apollon dispatch runs at **push-level granularity** — once after `talos` opens the PR and once after `argos` converges. Running it inside the `argos` loop would require `argos` to dispatch `apollon` as a subagent, which violates the one-level nesting rule (the nesting level is already spent on dispatching `argos` from `daidalos`). `daidalos` is therefore the correct dispatcher for both `apollon` passes.
 
 The convergence gate is **0 Critical + 0 Moderate**; on `maxIterations` or a blocker the run stops and escalates instead of reporting success.
 

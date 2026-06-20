@@ -4371,7 +4371,7 @@ test('agents directory ships the athena security-CR subagent with required front
 test('every dispatched agent reads and appends to the shared task brief', function (): void {
     $packageDir = dirname(__DIR__);
 
-    foreach (['metis', 'talos', 'argos', 'apollon', 'athena', 'keryx'] as $agent) {
+    foreach (['metis', 'talos', 'argos', 'apollon', 'athena', 'hermes'] as $agent) {
         $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
         expect($content)->toContain('Shared task brief');
         expect($content)->toContain('.claude/run/');
@@ -4423,14 +4423,14 @@ test('agents directory ships the apollon test-engineer subagent with required fr
     expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
 });
 
-test('agents directory ships the keryx release-announcer subagent with required frontmatter', function (): void {
+test('agents directory ships the hermes release-announcer subagent with required frontmatter', function (): void {
     $packageDir = dirname(__DIR__);
-    $agentPath = $packageDir . '/agents/keryx.md';
+    $agentPath = $packageDir . '/agents/hermes.md';
 
     expect(is_file($agentPath))->toBeTrue();
 
     $content = (string) file_get_contents($agentPath);
-    expect($content)->toContain('name: keryx');
+    expect($content)->toContain('name: hermes');
     expect($content)->toContain('tools: Read, Glob, Grep, Bash');
     expect($content)->toContain('model: sonnet');
     expect($content)->toContain('@skills/article-writing/SKILL.md');

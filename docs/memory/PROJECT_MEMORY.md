@@ -20,3 +20,10 @@
 - Rule:    Any agent dispatched in parallel must hand off findings via the shared task brief so the consolidating agent (e.g. `argos`) can merge and publish them as a single report. Direct publication is permitted only in standalone mode (no parallel dispatch), and even then must go through the canonical `upsert-comment.sh` wrapper — never raw `gh pr comment` or `gh issue comment`. Writing raw comment commands in a parallel-dispatch context breaks the consolidation contract and produces duplicate / uncoordinated comment threads.
 - Example: `agents/athena.md` step 5 originally used `gh pr comment` to publish directly; argos flagged this as Moderate in PR #638 (commit `82abc16`); fixed to hand off via shared brief when dispatched with argos, and use `upsert-comment.sh` in standalone mode.
 - Source:  https://github.com/pekral/cursor-rules/pull/638   Added: 2026-06-20
+
+### agent-new-mode-status-result-parity — Adding a new run-mode to an agent requires extending both Status and Result in the handoff section
+
+- Trigger: a new run-mode or output branch is added to an agent definition (e.g. a "Decomposition done" path that returns before a PR is opened); the author updates `Result:` with the new value but leaves the `Status:` line unchanged.
+- Rule:    Every new run-mode that produces a distinct output must appear in **both** the `Status:` line **and** the `Result:` list in the agent's *Output — handoff* section, and must be consistent with the status values defined in every cross-file peer (e.g. `daidalos.md` ↔ `metis.md`). Update all affected files atomically in the same commit; a missing `Status` value for a new mode is an incomplete contract that the CR loop will flag as Moderate.
+- Example: `agents/daidalos.md` *Output — handoff* `Status` line omitted `Decomposition done` while `agents/metis.md` defined it and issue #639 step 4 required it; argos caught this as Moderate in iteration 1 of PR #640 (fix commit `392203d`).
+- Source:  https://github.com/pekral/cursor-rules/pull/640   Added: 2026-06-20

@@ -21,6 +21,7 @@ When the subject is a tracker reference, detect and load it read-only using `@sk
 
 1. **Delegate the entire analysis to `@skills/analyze-problem/SKILL.md`** and let it run to completion. That skill owns the whole framework — context extraction, problem statement, evidence, root-cause hypothesis, impact, the smallest safe solution, rejected alternatives, the verification plan, and the pre-implementation research. **Do not re-implement any of it and do not duplicate its rules** — defer to the skill as the source of truth.
 2. **Publish the plan artifact as a GitHub issue** (via `gh`), carrying the five mandatory parts the skill produces — Goal, Architecture, Implementation steps, Sources, Success criteria — so a following agent (`talos`) can pick it up cold. Do not write files into the repository or mutate the working tree; the plan lives on the tracker, keeping you read-only with respect to code.
+3. **Decomposition mode** — when the caller (`daidalos`) asks you to decompose a broad assignment into multiple issues, run `@skills/create-issues-from-text` (fallback `@skills/create-issue` for a single issue) instead of publishing one plan artifact: prepare each issue as an independently deliverable assignment, and fill its `## Dependencies` / ordering from the ordered, independently-reviewable Implementation steps the analysis already produces. Do not duplicate those skills' rules — defer to them. Return the list of created issues with URLs and the planned resolve order in the handoff.
 
 ## Shared task brief
 
@@ -32,8 +33,8 @@ Your final message is returned to the caller as the result, so make it a clean h
 
 **Language:** write this handoff — and any end-user report — in the **same natural language the assignment was given in** (if the request came in Czech, the handoff is in Czech). **When the caller passed a shared brief, its recorded `## Language` field is the authoritative source — reply in that language** rather than re-guessing it from the prompt. Identifiers stay verbatim regardless of that language: branch names, ticket / issue keys, links, severity labels, CLI commands, and skill / agent names are never translated. Never mix two natural languages inside a single handoff.
 
-- **Status:** `Analysis done`.
-- **Plan:** link to the published plan-artifact issue.
+- **Status:** `Analysis done` — or `Decomposition done` when running in decomposition mode (step 3).
+- **Plan:** link to the published plan-artifact issue — or, in decomposition mode, the list of created issues with URLs and the planned resolve order.
 - **Subject:** link to the originating tracker item, or a one-line restatement of the analysed problem when there was no tracker.
 - **Root cause:** one line — the most probable cause (with certainty) for a bug, or the target behaviour for a feature.
 - **Recommended solution:** one line — the smallest safe solution proposed.

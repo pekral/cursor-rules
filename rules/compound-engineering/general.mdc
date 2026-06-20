@@ -74,7 +74,7 @@ Review comments and post-mortems are **inputs** to this memory, not throwaway ch
 
 ## Blocked delegation is a hard stop
 
-When an orchestrator delegates a step (analysis, implementation, review) and the delegate returns a blocker it cannot resolve — a denied file write, an unresolvable merge conflict, a non-converging review loop — the orchestrator **stops and escalates that blocker to the user**. It never silently works around the blocker by doing the delegated work itself in its own context; doing so discards the specialist boundary and hides the failure instead of compounding the fix.
+When an orchestrator delegates a step (analysis, implementation, review) and the delegate returns a blocker it cannot resolve — most commonly a write-capable implementer (e.g. `talos`) whose `Write` / `Edit` is refused by the harness sandbox / permission layer even though the agent declares those tools, but equally an unresolvable merge conflict or a non-converging review loop — the run **stops and reports the blocker with its remediation**, never a silent bypass. Do **not** silently complete the blocked agent's work in the main thread (or in another agent's context): that bypasses the delegated, reviewed pipeline (no implementer→reviewer loop, no quality gates), hides the failure from the human, and breaks the compounding loop. Surface *what was blocked*, *why* (the denied capability), and *how to unblock it* (the environment change the human must make), then halt.
 
 ## Code Review Application
 

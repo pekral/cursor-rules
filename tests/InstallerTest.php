@@ -4439,6 +4439,12 @@ test('daidalos marks a cross-cutting mix of requirements as an EPIC with linked 
     expect($daidalos)->toContain('one sub-issue per application area');
     expect($daidalos)->toContain('linked back to the parent');
 
+    // The EPIC variant wins over the plain decomposition bullet when both could apply.
+    expect($daidalos)->toContain('this EPIC variant takes precedence');
+
+    // EPIC run-mode parity: the handoff contract omits PR / feedback for an EPIC run too.
+    expect($daidalos)->toContain('or an EPIC run, which have no PR');
+
     // The how lives in the create-issues-from-text skill, which daidalos / metis defer to.
     $skill = (string) file_get_contents($packageDir . '/skills/create-issues-from-text/SKILL.md');
     expect($skill)->toContain('EPIC parent & sub-issues');

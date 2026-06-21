@@ -4,6 +4,8 @@ All notable changes to `cursor-rules` will be documented in this file.
 
 ## [Unreleased]
 
+- ✨ **Added**: `SECURITY.md` at the repository root (#664) — documents the plugin trust model (`allow-plugins`, the standard Composer opt-in), the two security-sensitive installer flags (`--allow-bundled-scripts` and `--allow-subagent-writes`) with their exact behaviour, safety guarantees, and implementation references (`src/InstallerClaudeSettings.php`), a table of every path the installer writes, and a responsible-disclosure channel (GitHub Security Advisory preferred). Cross-linked with `README.md` (CLI Switches), `docs/agents.md` (Troubleshooting — subagent file writes blocked), and `docs/plans/agent-sandbox-write-blocked.md`.
+
 - ✨ **Added**: public **editor compatibility matrix** in `README.md` documenting support status across editors — Cursor ✅ (rules + skills), Claude ✅ (rules + skills + agents), Codex skills ✅ / rules experimental (unverified until confirmed) (#663).
 
 - 📝 **Changed**: README and `composer.json` package metadata reposition the project explicitly as a PHP/Laravel Composer plugin (installs Cursor/Claude/Codex rules + agent skills), not a generic AI-rules bundle (#662).

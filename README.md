@@ -37,6 +37,16 @@ The `--editor` flag is **required**. Use it to choose the target agent:
 - **codex**: `.codex/rules`, `.codex/skills`, and when `HOME`/`USERPROFILE` is set also `~/.codex/skills`
 - **all**: all of the above (Cursor, Claude, Codex in project + home)
 
+### Editor compatibility
+
+| Feature | Cursor | Claude | Codex |
+|---------|--------|--------|-------|
+| Rules | ✅ | ✅ | experimental / unverified |
+| Skills | ✅ | ✅ | ✅ |
+| Agents | — | ✅ | — |
+
+Agents are installed only for `--editor=claude` and `--editor=all`; they are skipped for `cursor` and `codex` because only Claude Code has a native subagent format. Codex rules support is listed as experimental / unverified — the installer copies the files into `.codex/rules`, but native rule loading by Codex has not been confirmed; report your findings in [#663](https://github.com/pekral/cursor-rules/issues/663).
+
 When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`.
 
 **Important:** By default, the installer only copies missing files and keeps existing content untouched. Use the `--force` flag to overwrite existing files: `vendor/bin/cursor-rules install --force`. This is particularly useful when you want to update rules to their latest versions or when you've made local changes that should be replaced. The file `.cursor/rules/project.mdc` and `CLAUDE.md` are never overwritten once they exist in the target project, so you can safely customize them.

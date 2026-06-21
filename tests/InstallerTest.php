@@ -4358,7 +4358,7 @@ test('agents directory ships the athena security-CR subagent with required front
     $content = (string) file_get_contents($agentPath);
     expect($content)->toContain('name: athena');
     expect($content)->toContain('tools: Read, Glob, Grep, Bash');
-    expect($content)->toContain('model: opus');
+    expect($content)->toContain('model: fable');
     expect($content)->toContain('@skills/security-review/SKILL.md');
     expect($content)->toContain('@skills/laravel-security/SKILL.md');
     expect($content)->toContain('@skills/security-bounty-hunter/SKILL.md');

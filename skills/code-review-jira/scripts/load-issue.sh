@@ -176,7 +176,7 @@ def tryParseTrimEnd:
   | { s: $s, parsed: null }
   | until(.parsed != null or (.s | length) == 0;
       .s |= .[0:length-1]
-      | .parsed = (.s | fromjson?))
+      | .parsed = (.s | fromjson? // null))
   | .parsed;
 
 def unwrapJavaToString:

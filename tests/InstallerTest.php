@@ -4430,6 +4430,22 @@ test('daidalos dispatches athena for a pre-implementation security-risk analysis
     expect($content)->toContain('Security analysis done');
 });
 
+test('daidalos marks a cross-cutting mix of requirements as an EPIC with linked sub-issues', function (): void {
+    $packageDir = dirname(__DIR__);
+    $daidalos = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+
+    // daidalos detects the cross-cutting mix and dispatches metis to build the EPIC parent + sub-issues.
+    expect($daidalos)->toContain('EPIC parent');
+    expect($daidalos)->toContain('one sub-issue per application area');
+    expect($daidalos)->toContain('linked back to the parent');
+
+    // The how lives in the create-issues-from-text skill, which daidalos / metis defer to.
+    $skill = (string) file_get_contents($packageDir . '/skills/create-issues-from-text/SKILL.md');
+    expect($skill)->toContain('EPIC parent & sub-issues');
+    expect($skill)->toContain('gh label create EPIC');
+    expect($skill)->toContain('Part of #<parent>');
+});
+
 test('agents directory ships the apollon test-engineer subagent with required frontmatter', function (): void {
     $packageDir = dirname(__DIR__);
     $agentPath = $packageDir . '/agents/apollon.md';

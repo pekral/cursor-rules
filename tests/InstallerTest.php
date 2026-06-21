@@ -1140,6 +1140,33 @@ test('unified resolve-issue skill requires code review before PR creation', func
     expect($reviewLoopSection)->not->toContain('@skills/code-review-jira/SKILL.md');
 });
 
+test('draft-PR-until-review-converges policy is wired through the rule and the PR-lifecycle skills', function (): void {
+    $packageDir = dirname(__DIR__);
+
+    // Canonical policy lives in the git rule.
+    $git = (string) file_get_contents($packageDir . '/rules/git/general.mdc');
+    expect($git)->toContain('### Draft pull requests');
+    expect($git)->toContain('gh pr create --draft');
+    expect($git)->toContain('gh pr ready');
+    // A Draft is never merged — the merge skill skips it.
+    expect($git)->toContain('isDraft == true');
+
+    // resolve-issue opens the PR as a Draft.
+    $resolve = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+    expect($resolve)->toContain('Open the pull request as a Draft');
+    expect($resolve)->toContain('gh pr create --draft');
+
+    // process-code-review promotes the PR out of Draft only after convergence.
+    $process = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+    expect($process)->toContain('Promote the PR out of Draft');
+    expect($process)->toContain('gh pr ready');
+
+    // merge-github-pr refuses to merge a Draft and reads isDraft from the loader.
+    $merge = (string) file_get_contents($packageDir . '/skills/merge-github-pr/SKILL.md');
+    expect($merge)->toContain('Not a Draft');
+    expect($merge)->toContain('isDraft == false');
+});
+
 test('resolve-random skills are not shipped in source skills directory', function (): void {
     $packageDir = dirname(__DIR__);
     expect(is_dir($packageDir . '/skills/resolve-random-github-issue'))->toBeFalse();

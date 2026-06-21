@@ -57,3 +57,11 @@
 - Example: PR #672 (issue #664) introduced SECURITY.md that gated all home-dir writes behind opt-in flags; argos found the unconditional `includeCoAuthoredBy` write (Critical) and the `allow-plugins` auto-install hook (Moderate) were missing. Source references: `src/Installer.php:91`, `src/InstallerClaudeSettings.php:60-95`, `src/ComposerPlugin.php:43-69`.
 - Source:  https://github.com/pekral/cursor-rules/pull/672   Added: 2026-06-22
 - Role:    shared
+
+### os-branch-coverage-ignore-test-via-observable-api — Test OS-gated branches wrapped in @codeCoverageIgnore via observable behaviour, not by rewriting PHP_OS
+
+- Trigger: a new OS-conditional branch in `src/Installer.php` (or similar) is wrapped in `@codeCoverageIgnoreStart/End` because the deciding value is a PHP constant (`PHP_OS`) that cannot be overwritten in a test; the task requires a smoke test for the branch without breaking `--min=100` coverage.
+- Rule:    Do not try to rewrite `PHP_OS`, inject a fake OS parameter, or use runkit/uopz — these are brittle and break simplicity-first. Instead: (1) leave the branch `@codeCoverageIgnore` (it does not count against `--min=100`); (2) write the test against the public API (`Installer::run`) to verify observable behaviour; (3) use the existing `installerSymlinkUnsupported()` helper (`tests/Pest.php:65`) as a gate — on Windows-like hosts assert the copy-fallback hard (`is_link === false`), on other hosts assert the real symlink output (`is_link === true`). Never leave a branch-conditional test with an empty assertion — both paths must assert something concrete.
+- Example: `tests/InstallerTest.php` — "install creates regular files (copy fallback), never symlinks, when symlinks are unsupported (Windows-like)" (added in #665); `tests/Pest.php:65` `installerSymlinkUnsupported()` helper; `src/Installer.php:351-360` `canSymlink()` Windows branch with `@codeCoverageIgnoreStart/End`.
+- Source:  https://github.com/pekral/cursor-rules/pull/673   Added: 2026-06-22
+- Role:    talos

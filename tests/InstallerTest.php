@@ -261,6 +261,67 @@ test('install creates symlinks when requested', function (): void {
     }
 });
 
+test('install without --symlink installs regular files via copy fallback, not symlinks', function (): void {
+    $root = installerCreateProjectRoot();
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
+        ob_end_clean();
+
+        $target = $root . '/.cursor/rules/php/core-standards.mdc';
+        $packageSource = __DIR__ . '/../rules/php/core-standards.mdc';
+
+        expect(is_file($target))->toBeTrue();
+        expect(is_link($target))->toBeFalse();
+        expect(file_get_contents($target))->toBe(file_get_contents($packageSource));
+
+        $script = $root . '/.cursor/skills/code-review-github/scripts/load-issue.sh';
+        expect(is_file($script))->toBeTrue();
+        expect(is_link($script))->toBeFalse();
+        expect(is_executable($script))->toBeTrue();
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
+test('install creates regular files (copy fallback), never symlinks, when symlinks are unsupported (Windows-like)', function (): void {
+    $root = installerCreateProjectRoot();
+    $cwd = getcwd();
+    $originalCwd = $cwd !== false ? $cwd : '';
+
+    try {
+        chdir($root);
+        ob_start();
+        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--symlink']);
+        ob_end_clean();
+
+        $target = $root . '/.cursor/rules/php/core-standards.mdc';
+
+        expect(is_file($target))->toBeTrue();
+        expect(file_get_contents($target))->not->toBeEmpty();
+
+        if (installerSymlinkUnsupported()) {
+            expect(is_link($target))->toBeFalse();
+        } else {
+            expect(is_link($target))->toBeTrue();
+        }
+    } finally {
+        if ($originalCwd !== '') {
+            chdir($originalCwd);
+        }
+
+        installerRemoveDirectory($root);
+    }
+});
+
 test('install copies nested directories', function (): void {
     $root = installerCreateProjectRoot();
     $cwd = getcwd();

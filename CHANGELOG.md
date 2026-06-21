@@ -4,6 +4,8 @@ All notable changes to `cursor-rules` will be documented in this file.
 
 ## [Unreleased]
 
+- ✨ **Added**: public **editor compatibility matrix** in `README.md` documenting support status across editors — Cursor ✅ (rules + skills), Claude ✅ (rules + skills + agents), Codex skills ✅ / rules experimental (unverified until confirmed) (#663).
+
 - 📝 **Changed**: README and `composer.json` package metadata reposition the project explicitly as a PHP/Laravel Composer plugin (installs Cursor/Claude/Codex rules + agent skills), not a generic AI-rules bundle (#662).
 
 ## [0.9.0] - 2026-06-20

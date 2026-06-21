@@ -21,7 +21,8 @@ You accept one **source** for the review, in this order of preference:
 
 ## How to run
 
-1. **Detect the source** using `@skills/resolve-issue/references/source-detection.md`. Load context only through the deterministic loaders (`skills/code-review-github/scripts/load-issue.sh`, `gather-issue-context.sh`, and the JIRA / Bugsnag equivalents) — never call `gh pr view`, `acli`, or `api.bugsnag.com` directly.
+0. **Load per-role project memory.** Before doing any review work, read `docs/memory/PROJECT_MEMORY.md` (if present) and filter it to entries where `Role: argos` or `Role: shared` (per `@rules/compound-engineering/general.mdc` *Read protocol*). Reuse any entry whose `Trigger:` matches the current review — do not re-derive lessons the project already recorded. Skip entries tagged for other roles.
+1. **Detect the source** using `@skills/resolve-issue/references/source-detection.md`. Load context only through the deterministic loaders (`skills/code-review-github/scripts/load-issue.sh`, `gather-issue-context.sh`, and the JIRA / Bugsnag equivalents) — never call `gh pr view`, `acli`, or `api.bugsnag.com` directly. If a needed function is absent from an existing loader script, extend that script rather than writing an ad-hoc call.
 2. **Pick the code-review skill from the resolved source.** The source — the URL/reference you detected in step 1 — decides which skill runs:
    - **GitHub** source (PR/issue URL or `#123`, or a current context that resolves to a GitHub PR) → `@skills/code-review-github/SKILL.md`
    - **JIRA** source (key or URL) → `@skills/code-review-jira/SKILL.md`

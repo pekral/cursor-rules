@@ -1,9 +1,10 @@
 {
   "name": "pekral/cursor-rules",
-  "description": "PHP and Laravel Cursor rules — coding standards, testing, and conventions for Cursor editor",
+  "description": "Composer plugin for PHP and Laravel projects that installs Cursor/Claude/Codex rules and agent skills — coding standards, testing, and conventions",
   "license": "MIT",
   "type": "composer-plugin",
   "keywords": [
+    "composer-plugin",
     "cursor",
     "cursor-rules",
     "cursor-editor",

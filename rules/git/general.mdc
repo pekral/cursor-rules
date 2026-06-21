@@ -60,6 +60,13 @@ globs: ["*"]
 - Include links to all sources used during analysis.
 - Prefer adding these as a comment on the related GitHub issue.
 
+### Draft pull requests — open as Draft until the PR is ready to merge
+A pull request is a **Draft** for as long as it is **not yet ready to merge and agents will keep working on it** — the canonical case in this workflow is an agent-opened PR that still has to pass the post-PR authoritative review/fix loop (`@skills/code-review-github/SKILL.md` + `@skills/process-code-review/SKILL.md`, i.e. the `argos` / `athena` ↔ `talos` convergence loop) before it can be merged. The Draft state is the visible signal that the PR is work-in-progress and the hard code-review merge gate is still unmet.
+
+- **Open as Draft.** When an agent creates a PR that still needs that review/fix loop, create it as a Draft: `gh pr create --draft …`. This covers every agent-driven PR-creation path (`@skills/resolve-issue/SKILL.md`, and the Finalization step of `@skills/process-code-review/SKILL.md` when it has to create the PR itself).
+- **Mark ready on convergence.** The PR is promoted out of Draft (`gh pr ready <PR>`) **only** once the code review has converged to **0 Critical + 0 Moderate** on its final diff. This transition is owned by `@skills/process-code-review/SKILL.md` (it runs the convergence loop), and is performed only after the loop exits converged — never on a PR that still carries Critical / Moderate findings.
+- **A Draft PR is never merged.** `@skills/merge-github-pr/SKILL.md` treats `isDraft == true` as not-ready and skips it: a Draft mirrors the unmet code-review gate. If a Draft PR's review has in fact converged, mark it ready first (the `process-code-review` step above), then merge — never merge a Draft directly, and the GitHub Actions billing exception never relaxes this.
+
 ### Testing
 - Suggest how to test the changes (UI, API, etc.).
 - Verify that tests exist:
@@ -91,3 +98,4 @@ globs: ["*"]
 - If no code review exists for the PR, or the latest review still carries unresolved Critical / Moderate findings, **do not merge** — run (or re-run) the review to convergence first via `@skills/code-review-github/SKILL.md` + `@skills/process-code-review/SKILL.md`, then merge.
 - If the diff changed after the last review (new commits pushed), the prior review is stale — re-run the code review on the new diff before merging.
 - This gate is independent of the GitHub `reviewDecision` approval state: a GitHub "Approved" without a converged code review (0 Critical + 0 Moderate) is **not** sufficient to merge.
+- A **Draft** PR is never merged (see *Draft pull requests* above): the Draft state mirrors the unmet code-review gate, so `@skills/merge-github-pr/SKILL.md` skips any `isDraft == true` PR and reports it. A converged PR is taken out of Draft by `@skills/process-code-review/SKILL.md` before it reaches the merge step.

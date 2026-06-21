@@ -175,7 +175,8 @@ Resolve any **Critical** or **Moderate** finding from the security review before
 Once review and testing are clean:
 
 - Create a branch (name always in English, regardless of the assignment language) and commit changes following `@rules/git/general.mdc`
-- Create a pull request with:
+- **Open the pull request as a Draft** (`gh pr create --draft …`) per `@rules/git/general.mdc` *Draft pull requests*. The inline review loop above is the implementer's pre-PR self-check, **not** the authoritative code review — the authoritative `code-review-github` / `process-code-review` (the `argos` / `athena` ↔ `talos` convergence loop) still runs **after** the PR exists, so at creation time the PR is not yet ready to merge and agents will keep working on it. It is promoted out of Draft (`gh pr ready`) by `@skills/process-code-review/SKILL.md` once that review converges to 0 Critical + 0 Moderate.
+- Create the pull request with:
   - clear description of the change
   - reference to the original issue
   - testing instructions

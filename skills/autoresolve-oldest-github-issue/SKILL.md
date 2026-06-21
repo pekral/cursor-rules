@@ -54,19 +54,19 @@ metadata:
 
 ### 5. Process review feedback
 - **Run inline.** Invoke `@skills/process-code-review/SKILL.md` directly in this skill's context, passing the **PR URL** plus the instruction "drive the review loop on this PR to convergence (Critical + Moderate == 0) and return the iteration count, residual finding counts, and the final status comment URL". Do not dispatch as a subagent — run it sequentially in the current context.
-- This is the convergence loop: it resolves comments, applies Suggested Fix snippets, re-runs the review in quiet mode, and exits when `criticalCount + moderateCount == 0` (or after its `maxIterations` safety net).
+- This is the convergence loop: it resolves comments, applies Suggested Fix snippets, re-runs the review in quiet mode, and exits when `criticalCount + moderateCount == 0` (or after its `maxIterations` safety net). On convergence it also promotes the PR out of Draft (`gh pr ready`) per `@rules/git/general.mdc` *Draft pull requests*, so the merge step in step 6 sees a non-draft, ready PR.
 - If the run reports residual Critical or Moderate findings, **stop**. Report the residual findings and the PR URL; do not attempt the merge.
 
 ### 6. Merge the PR
 - Invoke `@skills/merge-github-pr/SKILL.md` with the **PR URL**.
-- The merge skill performs its own pre-checks (`mergeable`, `mergeStateStatus`, `statusCheckRollup[]`, `reviewDecision`) and will skip the merge with a reason on any failure. Surface that reason verbatim in the final report.
+- The merge skill performs its own pre-checks (`isDraft`, `mergeable`, `mergeStateStatus`, `statusCheckRollup[]`, `reviewDecision`) and will skip the merge with a reason on any failure. Surface that reason verbatim in the final report.
 
 ### 7. Stop on blockers
 At any step, stop the chain and produce the final report when:
 - `resolve-issue` does not produce a PR
 - `code-review-github` reports the PR has merge conflicts (review cancelled per its own contract)
 - `process-code-review` cannot drive Critical + Moderate findings to zero within its iteration cap
-- `merge-github-pr` reports `mergeable != MERGEABLE`, `mergeStateStatus` in `DIRTY` / `BEHIND`, any non-passing entry in `statusCheckRollup[]`, or `reviewDecision != APPROVED`
+- `merge-github-pr` reports `isDraft == true` (the PR is still a Draft — its review has not converged), `mergeable != MERGEABLE`, `mergeStateStatus` in `DIRTY` / `BEHIND`, any non-passing entry in `statusCheckRollup[]`, or `reviewDecision != APPROVED`
 
 Never retry or "fix" the blocker outside the contract of the delegated skill that surfaced it.
 

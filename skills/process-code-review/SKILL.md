@@ -155,7 +155,7 @@ This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, 
 
 - Do **not** auto-invoke `@skills/test-like-human/SKILL.md`. The user-perspective testing skill runs **on demand only** — leave it for the user to trigger via `/test-like-human` after the PR is updated.
 - Commit and push changes
-- If PR does not exist, create it according to @rules/git/general.mdc
+- If PR does not exist, create it according to @rules/git/general.mdc — as a **Draft** (`gh pr create --draft`) per *Draft pull requests*; the **Promote the PR out of Draft** step below marks it ready once this converged run is published
   - Title in English (per `@rules/git/general.mdc`)
   - Body in the assignment language (per `@rules/reports/general.mdc`)
 
@@ -183,6 +183,14 @@ gh api graphql -f query='mutation($threadId:ID!){ resolveReviewThread(input:{thr
 - Resolve **only** threads that were fixed. Leave a thread unresolved when its point was rejected or deferred, and record the rejection reason in the `cr-status` report instead of resolving it.
 - If `gh api graphql` is unavailable, fall back to the GitHub MCP server's resolve-review-thread operation.
 - Resolving a thread is a GitHub PR state change, not a code change — it stays within the read-fixes-push-resolve flow this skill already owns and never touches the protected main branch.
+
+#### Promote the PR out of Draft (GitHub)
+
+Convergence is exactly the moment the PR becomes ready to merge, so this skill owns the Draft → ready transition per `@rules/git/general.mdc` *Draft pull requests*:
+
+- Because this step runs only after the **Review loop converged** (`criticalCount + moderateCount == 0`), mark the PR ready for review now: `gh pr ready <PR-NUMBER|URL>`. This is the same class of GitHub PR state change as resolving a review thread, not a code change.
+- Do **this only on a converged loop.** If the loop hit `maxIterations` without converging, the PR stays a Draft — never promote a PR that still carries Critical / Moderate findings.
+- A PR that was already non-draft stays non-draft; `gh pr ready` is idempotent. If `gh pr ready` is unavailable, fall back to the GitHub MCP server's mark-ready operation.
 
 #### Per-item justification (required)
 

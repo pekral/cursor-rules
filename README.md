@@ -2,7 +2,7 @@
   <img src="assets/logo.png" alt="Cursor rules" width="280">
 </p>
 
-# Cursor Rules for PHP and Laravel
+# Cursor Rules for PHP and Laravel — Composer Plugin
 
 <p align="center">
   <a href="https://packagist.org/packages/pekral/cursor-rules"><img src="https://img.shields.io/packagist/v/pekral/cursor-rules" alt="Packagist Version"></a>
@@ -12,11 +12,11 @@
   <a href="https://pekral.cz"><img src="https://img.shields.io/badge/by-pekral.cz-blue" alt="by pekral.cz"></a>
 </p>
 
-**Cursor rules for PHP and Laravel** — a complete set of `.mdc` rule files and Agent skills for Cursor, Claude Code, and Codex. One package for PHP and Laravel cursor rules: coding standards, testing, and conventions. The installer discovers the project root (via `composer.json` lookup from the current directory), mirrors the `rules/` directory into the editor's rules path and the `skills/` directory into the editor's skills path, and copies or symlinks every file into the target project. Use cursor rules for PHP and Laravel to keep every edit aligned with enforced standards, plus comprehensive Agent skills for issue resolution, bug fixing, code review, security analysis, refactoring, testing, frontend and UI, platform and data, and package review.
+**Cursor rules for PHP and Laravel** — a **Composer plugin** for PHP/Laravel projects that installs a complete set of `.mdc` rule files and Agent skills for Cursor, Claude Code, and Codex. One package for PHP and Laravel cursor rules: coding standards, testing, and conventions. The installer discovers the project root (via `composer.json` lookup from the current directory), mirrors the `rules/` directory into the editor's rules path and the `skills/` directory into the editor's skills path, and copies or symlinks every file into the target project. Use cursor rules for PHP and Laravel to keep every edit aligned with enforced standards, plus comprehensive Agent skills for issue resolution, bug fixing, code review, security analysis, refactoring, testing, frontend and UI, platform and data, and package review.
 
 ## Why This Package
 
-- cursor rules for PHP and Laravel in one Composer-installable package
+- a Composer plugin: PHP/Laravel cursor rules + agent skills in one `composer require --dev` package
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments

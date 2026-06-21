@@ -12,6 +12,7 @@ metadata:
 - Operate on the current Git repository's GitHub remote only — refuse if the remote is not GitHub
 - Process exactly **one** issue per invocation; never loop into a second issue
 - Never bypass quality gates of the delegated skills (`resolve-issue`, `code-review-github`, `process-code-review`, `merge-github-pr`)
+- **Code review is a hard merge gate** (`@rules/git/general.mdc` *Merging*): never reach step 6 (merge) until steps 4–5 have run a code review on the PR's final diff and driven it to **0 Critical + 0 Moderate**. A merge without a converged code review is forbidden — do not skip or reorder steps 4–5 to merge sooner.
 - Never force-merge: stop on merge conflict, failing CI, missing approvals, or unresolved Critical/Moderate CR findings
 - Never alter the original issue body, labels, or assignees outside what the delegated skills already do
 - Do not expose sensitive/internal details in user-facing messages

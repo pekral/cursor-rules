@@ -33,6 +33,25 @@ composer require pekral/cursor-rules --dev --no-plugins   # skip the plugin duri
 composer config allow-plugins.pekral/cursor-rules true     # then grant trust manually
 ```
 
+### Auto-install hook
+
+Granting `allow-plugins: true` also enables the package's Composer plugin to react to `post-install-cmd` and `post-update-cmd` events. By default the plugin does **nothing** on these events. The auto-install hook is activated only when you add the following opt-in to your project's `composer.json`:
+
+```json
+{
+  "extra": {
+    "cursor-rules": {
+      "auto-install": true,
+      "editor": "claude"
+    }
+  }
+}
+```
+
+When `auto-install` is `true`, every `composer install` or `composer update` automatically runs `Installer::run(['cursor-rules', 'install', '--force', '--editor=<editor>'])` — the same installer that you would call manually, with `--force` and without any opt-in flags (`--allow-bundled-scripts`, `--allow-subagent-writes`). **Security implication:** any package that ships a `post-install-cmd` / `post-update-cmd` hook and is trusted via `allow-plugins` can trigger code execution during a routine `composer install`. Review the `extra.cursor-rules` block in your `composer.json` before enabling `auto-install`, and treat it the same way you treat other Composer script hooks.
+
+See also: [README — Automatic Installation via Composer Plugin](README.md#automatic-installation-via-composer-plugin).
+
 ## Installer security flags
 
 All security-sensitive installer flags are **opt-in by design** — the package grants no additional permissions by default.
@@ -77,7 +96,8 @@ See also: [docs/agents.md — Troubleshooting (subagent file writes blocked)](do
 
 | Path | Created by | Condition |
 |------|-----------|-----------|
-| `~/.claude/settings.json` | `--allow-bundled-scripts` | `--editor=claude` or `--editor=all`; `HOME`/`USERPROFILE` set |
+| `~/.claude/settings.json` — sets `includeCoAuthoredBy: false` | `install` (unconditional) | `--editor=claude` or `--editor=all`; `HOME`/`USERPROFILE` set; key absent — never overwrites an existing value |
+| `~/.claude/settings.json` — adds `permissions.allow` bundled-script entries | `--allow-bundled-scripts` | `--editor=claude` or `--editor=all`; `HOME`/`USERPROFILE` set |
 | `.claude/settings.local.json` | `--allow-subagent-writes` | `--editor=claude` or `--editor=all` |
 | `.cursor/rules/`, `.claude/rules/`, `.codex/rules/` | `install` | always, for the chosen editor |
 | `.cursor/skills/`, `.claude/skills/`, `.codex/skills/` | `install` | always, for the chosen editor |

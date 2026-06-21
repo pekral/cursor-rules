@@ -87,3 +87,7 @@ globs: ["*"]
 
 ## Merging
 - Use rebase and merge strategy
+- **Code review is a hard merge gate — never optional, never skipped.** A PR may be merged only after a code review has been run on its **final diff** (the exact commits being merged) and the review reports **no errors**: zero Critical and zero Moderate findings. Minor findings do not block. This gate applies to **every** merge path — manual, orchestrated (`daidalos`), and autonomous (`autoresolve-oldest-github-issue`) — and is owned by `@skills/merge-github-pr/SKILL.md`.
+- If no code review exists for the PR, or the latest review still carries unresolved Critical / Moderate findings, **do not merge** — run (or re-run) the review to convergence first via `@skills/code-review-github/SKILL.md` + `@skills/process-code-review/SKILL.md`, then merge.
+- If the diff changed after the last review (new commits pushed), the prior review is stale — re-run the code review on the new diff before merging.
+- This gate is independent of the GitHub `reviewDecision` approval state: a GitHub "Approved" without a converged code review (0 Critical + 0 Moderate) is **not** sufficient to merge.

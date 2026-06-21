@@ -49,3 +49,11 @@
 - Example: issue #653 assumed `apollon` was documentation-only (per the older `agent-file-vs-registration` entry); by #654 `apollon` was a registered dispatchable agent, so the first implementation missed per-role memory parity for it. Surfaced as 2 Moderate CR findings, fixed in commit `43b6c07`.
 - Role:    shared
 - Source:  https://github.com/pekral/cursor-rules/pull/654   Added: 2026-06-21
+
+### installer-security-doc-source-of-truth — Security docs must enumerate unconditional installer writes, not only opt-in-gated ones
+
+- Trigger: writing or reviewing security / trust-model documentation (SECURITY.md, README CLI Switches, installer trust model) for a PHP Composer installer that also ships a ComposerPlugin; the author describes which files the installer writes and gates all of them behind opt-in CLI flags.
+- Rule:    The source of truth for what the installer writes is `src/Installer.php`, `src/InstallerClaudeSettings.php`, and `src/ComposerPlugin.php` — not the CLI flag list. At minimum two surfaces must be named explicitly: (1) `Installer::install()` calls `applyCoAuthoredByPreference()` unconditionally for `--editor=claude|all`, writing `includeCoAuthoredBy: false` into `~/.claude/settings.json` when the key is absent (never overwrites); (2) `allow-plugins: true` in `composer.json` unlocks the `ComposerPlugin` `post-install-cmd` / `post-update-cmd` hook which, when `extra.cursor-rules.auto-install: true` is set, runs the installer with `--force` on every `composer install` / `composer update` — a code-execution surface not gated behind any explicit user invocation. Omitting either surface lets a CR flag it as Critical (home-dir write) or Moderate (auto-install hook).
+- Example: PR #672 (issue #664) introduced SECURITY.md that gated all home-dir writes behind opt-in flags; argos found the unconditional `includeCoAuthoredBy` write (Critical) and the `allow-plugins` auto-install hook (Moderate) were missing. Source references: `src/Installer.php:91`, `src/InstallerClaudeSettings.php:60-95`, `src/ComposerPlugin.php:43-69`.
+- Source:  https://github.com/pekral/cursor-rules/pull/672   Added: 2026-06-22
+- Role:    shared

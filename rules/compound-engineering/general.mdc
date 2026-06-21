@@ -33,7 +33,10 @@ Each entry is short and scannable — prefer one rule per lesson over a long ess
 - Rule:    <the decision / what to do next time>
 - Example: <a concrete pointer: file / area / symbol>
 - Source:  <PR / issue link>   Added: <YYYY-MM-DD>
+- Role:    <daidalos | metis | talos | argos | apollon | shared>
 ```
+
+The `Role:` field scopes the lesson to the agent role that benefits most from it. Use `shared` for lessons relevant to all roles. `daidalos` = orchestration / briefing / dispatch decisions; `metis` = analysis / problem framing; `talos` = implementation / PR mechanics; `argos` = code review / CR loop; `apollon` = test authoring / validation. A lesson may carry only one role value — when it applies to two or more roles, prefer `shared`.
 
 ### Promotion bar (record only the most important things)
 
@@ -58,8 +61,27 @@ Before appending, curate so the file stays small and non-redundant:
 
 The memory only compounds if it is **read at the start of each task**, before re-deriving anything:
 
-- The **daidalos gather phase** reads the memory file and folds the relevant entries into the shared brief under a `## Project memory` section, so every dispatched specialist inherits the lessons without re-deriving them.
-- `@skills/analyze-problem` (*Context extraction*) and `@skills/prepare-issue-context` consult the memory file before mapping scenarios to code.
+- The **daidalos gather phase** reads the memory file and folds the relevant entries into the shared brief under a `## Project memory` section, so every dispatched specialist inherits the lessons without re-deriving them. `daidalos` reads the **full** file (it is the orchestrator and must see all roles).
+- Each **specialist agent** (`metis`, `talos`, `argos`, `apollon`) reads only the entries where `Role:` matches its own role **or** `Role: shared` — narrowing the context to the lessons it can directly act on.
+- `@skills/analyze-problem` (*Context extraction*) and `@skills/prepare-issue-context` consult the memory file before mapping scenarios to code, filtering by the calling agent's role.
+
+#### Per-role read filter
+
+When reading `docs/memory/PROJECT_MEMORY.md` as a specialist (not as `daidalos`), apply this filter:
+
+```
+include entries where Role: == <your-role> OR Role: == shared
+```
+
+Grep idiom: `grep -A5 "^### " docs/memory/PROJECT_MEMORY.md | grep -E "Role:.*(<your-role>|shared)"` — then include the entries that match.
+
+### Write protocol (per-agent write at convergence)
+
+At task convergence (end of `@skills/resolve-issue`, `@skills/process-code-review`, and `daidalos` step 7), each agent that participated in the run writes its own durable lessons **tagged with its `Role:`** via `@skills/record-project-memory`. The promotion bar and curation pass apply unchanged — trivial tasks write nothing.
+
+`daidalos` drives the per-agent write loop: for every agent role that genuinely participated in the run (derivable from the handoff log in the shared brief), call `@skills/record-project-memory` with that role's converged context and the matching `AGENT_ROLE`. Only after all role passes complete does `daidalos` remove the brief and release the write-lock.
+
+The loop is ordered by participation: `metis` (if dispatched) → `talos` → `argos` → `apollon` (if dispatched) → `daidalos` (orchestration lessons last). Skip roles not active in this run.
 
 ### What feeds the memory
 

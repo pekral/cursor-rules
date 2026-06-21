@@ -46,7 +46,7 @@ Brief layout:
 
 ## Concurrency & the working-tree write-lock
 
-Multiple top-level `daidalos` runs can be launched against the **same project at the same time** (interactively, or in parallel through `bin/cursor-rules-resolve-loop.sh`). When worktrees are not enabled they all share **one git working tree** (per `@rules/git/general.mdc` *Worktrees / Workspaces*, a worktree is opt-in — otherwise the tree is shared). Two runs that both **write** to that tree corrupt each other: `talos` checks out a branch, edits files, and may `git stash` / `reset` — pulling the tree out from under another run and colliding on uncommitted edits. A run that only **reads** the tree (analysis-only → `metis`) is safe to overlap.
+Multiple top-level `daidalos` runs can be launched against the **same project at the same time** (interactively, or in parallel). When worktrees are not enabled they all share **one git working tree** (per `@rules/git/general.mdc` *Worktrees / Workspaces*, a worktree is opt-in — otherwise the tree is shared). Two runs that both **write** to that tree corrupt each other: `talos` checks out a branch, edits files, and may `git stash` / `reset` — pulling the tree out from under another run and colliding on uncommitted edits. A run that only **reads** the tree (analysis-only → `metis`) is safe to overlap.
 
 The fix is a **scope-conditioned write-lock**: only the writing scope (full-delivery → dispatch `talos`) takes the lock and serialises; the read-only scope (analysis-only → `metis`) takes nothing and stays parallel. The scope signal already exists — it is the classification you make in step 3 (`analysis-only` vs `full-delivery`).
 

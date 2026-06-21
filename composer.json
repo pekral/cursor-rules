@@ -63,8 +63,7 @@
     }
   },
   "bin": [
-    "bin/cursor-rules",
-    "bin/cursor-rules-resolve-loop.sh"
+    "bin/cursor-rules"
   ],
   "archive": {
     "exclude": [

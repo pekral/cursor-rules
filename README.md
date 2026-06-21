@@ -314,39 +314,6 @@ Agents = specialised orchestration roles over multiple skills
 
 `daidalos` is a **read-only orchestrator** — it never analyses, implements, or reviews itself; it delegates every step by dispatching the matching specialist agent, and (per the one-level subagent-nesting rule) it runs as the top-level agent you talk to, spending that single nesting level on the dispatch rather than being a nested subagent itself. A future top-level `zeus` will sit above it to coordinate non-engineering domains too.
 
-### Autonomous issue loop — `cursor-rules-resolve-loop.sh`
-
-The package ships a bundled launcher that runs an **interactive** Claude Code loop to resolve a repository's GitHub issues **one issue per pass**, in the project you run it from. It is interactive on purpose — you see every step and can press `Esc` to interrupt — and it never creates git worktrees.
-
-It is registered as a Composer binary, so after installing the package it is available at `vendor/bin/cursor-rules-resolve-loop.sh`:
-
-```bash
-composer require pekral/cursor-rules --dev
-vendor/bin/cursor-rules install --editor=claude   # so the project has the resolve-issue / autoresolve skills
-```
-
-**Prerequisites:** the `claude` CLI and `gh` on `PATH`, `gh auth status` authenticated, a GitHub `origin` remote, and the cursor-rules skills present (installed in the project as above, or globally in `~/.claude/skills`).
-
-**Usage** — run it from the project root. Any positional text is **appended to the loop prompt** to narrow the scope:
-
-```bash
-vendor/bin/cursor-rules-resolve-loop.sh
-vendor/bin/cursor-rules-resolve-loop.sh "focus only on bug issues, skip enhancements"
-MODE=merge vendor/bin/cursor-rules-resolve-loop.sh
-DRY_RUN=1 vendor/bin/cursor-rules-resolve-loop.sh "only bugs"   # print the resolved command, run nothing
-```
-
-**Environment variables:**
-
-| Variable | Default | Meaning |
-|---|---|---|
-| `PROJECT` | current dir | project directory to operate in |
-| `LABEL` | `Resolve_by_AI` | only issues with this label (`LABEL=""` = any open issue) |
-| `MODE` | `pr` | `pr` = dispatches the `daidalos` agent, stops at the PR (you merge); `merge` = `autoresolve-oldest-github-issue` (full pipeline incl. merge) |
-| `DRY_RUN` | _unset_ | print the resolved prompt + command and exit, launching nothing |
-
-**Auto mode & safety:** the loop runs with `--permission-mode auto` (status line `auto mode on (shift+tab to cycle) · esc to interrupt`) — a risk classifier decides what is auto-approved: safe actions (edits, read-only commands, pushing the working branch) run without a prompt, while risky ones (force push, pushing to the default branch, destructive deletes, production deploys) still ask for confirmation so you stay in control. Each pass resolves exactly one issue and stops on any blocker (merge conflict, failing CI, unresolved Critical/Moderate findings); bound the run by labelling only the issues the loop may touch.
-
 ---
 
 ## Rules Overview

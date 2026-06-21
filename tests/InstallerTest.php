@@ -4452,6 +4452,21 @@ test('daidalos marks a cross-cutting mix of requirements as an EPIC with linked 
     expect($skill)->toContain('Part of #<parent>');
 });
 
+test('daidalos fans out analysis-only issues to metis in parallel when one request resolves multiple sources', function (): void {
+    $packageDir = dirname(__DIR__);
+    $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+
+    // The concurrency section turns analysis-only overlap-safety into an active parallel fan-out.
+    expect($content)->toContain('Parallel analysis fan-out');
+    expect($content)->toContain('dispatch their `metis` runs in parallel');
+    // Read-only analyses fan out; full-delivery still serialises on the single write-lock.
+    expect($content)->toContain('Only the read-only analyses fan out');
+    // Each parallel metis gets its own per-source brief so concurrent runs never collide.
+    expect($content)->toContain('own** shared brief');
+    // Step 3 classifies each resolved source independently when several were resolved.
+    expect($content)->toContain('classify **each one independently**');
+});
+
 test('agents directory ships the apollon test-engineer subagent with required frontmatter', function (): void {
     $packageDir = dirname(__DIR__);
     $agentPath = $packageDir . '/agents/apollon.md';

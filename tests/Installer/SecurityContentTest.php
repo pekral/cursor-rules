@@ -229,6 +229,24 @@ test('malicious-uploads dataset exists with README and all six payload categorie
     expect($readme)->toContain('never executed');
 });
 
+test('no dataset file in malicious-uploads/ contains a PHP open tag (issue #680)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $datasetDir = $packageDir . '/skills/security-review/datasets/malicious-uploads';
+
+    $paths = array_values(array_filter(
+        (array) glob($datasetDir . '/**/*', GLOB_NOSORT),
+        static fn (mixed $p): bool => is_string($p) && is_file($p),
+    ));
+
+    foreach ($paths as $path) {
+        $content = (string) file_get_contents($path);
+        expect($content)->not->toContain(
+            '<?php',
+            sprintf('Dataset fixture %s must not contain a PHP open tag — keep fixtures inert plain text.', basename($path)),
+        );
+    }
+});
+
 test('security-bounty-hunter keeps tooling optional and stays distinct from the review skills', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/security-bounty-hunter/SKILL.md');

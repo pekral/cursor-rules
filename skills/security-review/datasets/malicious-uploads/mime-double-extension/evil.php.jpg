@@ -1,12 +1,12 @@
-<?php
-// INERT FIXTURE — DO NOT EXECUTE OR UPLOAD TO A REAL SERVER
-// Purpose: tests that upload handlers reject files whose true type (PHP script) does not match
-// the declared extension (.jpg) — both the TYPE/TRANSPORT layer (magic-byte check) and the
-// CONTENT/RENDER layer (PHP code in a file served as an image) should produce findings.
-// Threat: if a web server is misconfigured (e.g. Apache mod_php processes .php in filenames
-// regardless of final extension), this file executes as PHP even though it ends in .jpg.
-// The double-extension attack bypasses simple extension-only checks.
-// Control: validate MIME type via magic bytes server-side, never by extension alone;
-// store uploaded files outside the webroot or with a generated non-executable name.
-echo "INERT: this content should never be executed";
-?>
+INERT FIXTURE — DO NOT EXECUTE OR UPLOAD TO A REAL SERVER
+Purpose: tests that upload handlers reject files whose true type (PHP script) does not match
+the declared extension (.jpg) — both the TYPE/TRANSPORT layer (magic-byte check) and the
+CONTENT/RENDER layer (PHP code in a file served as an image) should produce findings.
+Threat: if a web server is misconfigured (e.g. Apache mod_php processes .php in filenames
+regardless of final extension), this file executes as PHP even though it ends in .jpg.
+The double-extension attack bypasses simple extension-only checks.
+Control: validate MIME type via magic bytes server-side, never by extension alone;
+store uploaded files outside the webroot or with a generated non-executable name.
+
+Payload representation (inert, open tag intentionally absent to prevent PHP parsing):
+  [php-open-tag] echo "INERT: this content should never be executed"; [php-close-tag]

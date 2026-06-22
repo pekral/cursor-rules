@@ -37,7 +37,7 @@ Perform structured code review focused on:
 
 ### Cross-run history
 
-The CR wrappers publish the review through a **single-comment upsert** keyed by the current actor identity (see `@skills/code-review-github/SKILL.md` and `@skills/code-review-jira/SKILL.md`). Follow-up runs edit that one comment in place, so the per-run audit trail lives in the tracker's edit history. Do not load prior CR findings from PR comments and do not author a `Previous CR Status` section in the output — the upsert convention makes it redundant.
+The CR wrappers publish the review through an **always-new comment per CR run** (both GitHub and JIRA — see `@skills/code-review-github/SKILL.md` and `@skills/code-review-jira/SKILL.md`). Every run POSTs a fresh comment so the chronological sequence of comments is the audit trail; history never lives in a tracker's edit history. Do not load prior CR findings from PR comments and do not author a `Previous CR Status` section in the output — the always-new-comment convention makes it redundant.
 
 ### Issue Context Analysis
 

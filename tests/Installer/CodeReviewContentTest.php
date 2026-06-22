@@ -18,9 +18,9 @@ test('CR run produces one consolidated linked-tracker comment per linked issue (
     expect($github)->toContain('Consolidation contract (issue #498)');
     expect($github)->toContain('exactly one comment per linked issue');
 
-    expect($jira)->toContain('#### JIRA (consolidated non-technical comment — single-comment upsert per actor)');
+    expect($jira)->toContain('#### JIRA (consolidated non-technical comment — fresh comment per CR run)');
     expect($jira)->toContain('Consolidation contract (issue #498)');
-    expect($jira)->toContain('exactly one JIRA comment per (ticket, acli actor)');
+    expect($jira)->toContain('fresh JIRA comment');
 
     expect($githubTemplate)->toContain('{embedded_blocks}');
     expect($githubTemplate)->toContain('@skills/assignment-compliance-check/SKILL.md');
@@ -44,7 +44,7 @@ test('pr-summary surfaces an assignment non-compliance verdict at the top of the
     }
 });
 
-test('CR skills publish through the publish helper — GitHub always-new, JIRA single-comment upsert keyed by the current actor', function (): void {
+test('CR skills publish through the publish helper — GitHub always-new, JIRA always-new comment per CR run', function (): void {
     $packageDir = dirname(__DIR__, 2);
 
     $githubScript = $packageDir . '/skills/code-review-github/scripts/upsert-comment.sh';
@@ -94,20 +94,21 @@ test('CR skills publish through the publish helper — GitHub always-new, JIRA s
     expect($jiraScriptBody)->toContain('{anchor:${MARKER_KEY}-actor-${ACTOR_SLUG}}');
     // Issue #569: the helper was written against an acli build that no longer
     // matches the installed one. Actor/site come from `acli jira auth status`
-    // (no `acli jira me --json`), and comments are upserted via the current
-    // `comment create` / `comment update` subcommands (not `add` / `edit`).
+    // (no `acli jira me --json`), and comments are posted via the current
+    // `comment create` subcommand (not `add` / `edit` / `update`).
+    // Per user request (always-new convention): the helper no longer looks up
+    // or edits prior comments — every CR run posts a fresh JIRA comment.
     expect($jiraScriptBody)->toContain('acli jira auth status');
     expect($jiraScriptBody)->not->toContain('acli jira me --json');
-    expect($jiraScriptBody)->toContain('acli jira workitem comment update');
+    expect($jiraScriptBody)->not->toContain('acli jira workitem comment update');
     expect($jiraScriptBody)->toContain('acli jira workitem comment create');
     expect($jiraScriptBody)->not->toContain('acli jira workitem comment edit');
     expect($jiraScriptBody)->not->toContain('acli jira workitem comment add');
     expect($jiraScriptBody)->not->toContain('acli jira config get');
     expect($jiraScriptBody)->toContain('acli jira workitem comment list --key "$KEY" --json --paginate');
-    // Issue #569 CR: a failed `comment list` call must exit 3, not be flattened
-    // to `{"comments":[]}` by `jq -s` (which would skip the upsert lookup and
-    // post a duplicate comment). The acli exit status is captured separately so
-    // failure returns 1, and the caller turns that into exit 3.
+    // The list call now runs after create to resolve the new comment id for the
+    // deep-link URL; the acli exit status is still captured separately so a
+    // failed re-list degrades gracefully (returns the plain issue URL, exit 0).
     expect($jiraScriptBody)->toContain('raw="$(acli jira workitem comment list --key "$KEY" --json --paginate 2>/dev/null)" || return 1');
     expect($jiraScriptBody)->toContain('if ! COMMENTS_JSON="$(list_comments)"; then');
     expect($jiraScriptBody)->toMatch('/if ! grep -Fq "\$MARKER" <<<"\$BODY"; then\s+BODY="\$\{BODY\}\s+\$\{MARKER\}"/');

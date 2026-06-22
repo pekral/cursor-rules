@@ -45,6 +45,7 @@ Before reviewing code, load and analyze the full linked issue:
 4. If the issue contains test data or test scenarios, verify they are covered by existing or new tests. Flag missing test coverage as a finding.
 
 ### 2. Pre-checks
+- **CI coverage of checks.** From the `statusCheckRollup[]` in the loaded PR JSON, identify which checks ran on the PR head commit (`headRefOid`) and their result (`state` / `conclusion`). Pass this CI check map to the Coverage gate decision in `@skills/code-review/SKILL.md` (Validation → Coverage gate → Reuse CI results) so only missing or non-green checks are run locally.
 - If PR has merge conflicts → cancel review
 
 ### 3. Run Reviews

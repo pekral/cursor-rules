@@ -44,6 +44,7 @@ Before reviewing code, treat the Bugsnag error as the assignment:
 4. Verify the fix is covered by a regression test that fails before and passes after. Flag missing coverage as a finding.
 
 ### 2. Pre-checks
+- **CI coverage of checks.** Read `statusCheckRollup[]` from the GitHub PR JSON loaded in step 1 (via `skills/code-review-github/scripts/load-issue.sh`). Identify which checks ran on the PR head commit (`headRefOid`) and their result. Pass this CI check map to the Coverage gate decision in `@skills/code-review/SKILL.md` (Validation → Coverage gate → Reuse CI results) so only missing or non-green checks are run locally.
 - If the linked PR has conflicts → skip review for that PR.
 - If the error has no linked PR yet → report "no linked PR — review skipped" and stop.
 

@@ -31,7 +31,7 @@ Perform structured code review focused on:
 
 ## Execution
 
-- **Branch checkout gate (mandatory, always).** Before any analysis step, check out the branch that contains the changes and pull the latest commits — `git fetch`, `git checkout <branch>`, `git pull` — so the review always runs against the **actual current codebase on disk (the checked-out working tree)**, never against a remote diff in isolation. Confirm local `HEAD` matches the change branch's head commit. If the branch cannot be checked out (missing ref, detached `HEAD`, or local changes that would be overwritten), **stop and report it** instead of reviewing from a diff. Every subsequent step reads the checked-out files so findings reflect the real state of the code.
+- **Branch checkout gate (mandatory, always).** Before any analysis step, check out the branch that contains the changes and pull the latest commits — `git fetch`, `git checkout <branch>`, and `git pull` when the branch tracks a remote (skip the pull for a local-only branch that has no upstream, e.g. the read-only fallback review of a branch that maps to no PR) — so the review always runs against the **actual current codebase on disk (the checked-out working tree)**, never against a remote diff in isolation. Confirm local `HEAD` matches the change branch's head commit. If the branch cannot be checked out (missing ref, detached `HEAD`, or local changes that would be overwritten), **stop and report it** instead of reviewing from a diff. Every subsequent step reads the checked-out files so findings reflect the real state of the code.
 - Identify changes vs main branch.
 - Deduplicate previous findings.
 

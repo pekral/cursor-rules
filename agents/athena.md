@@ -50,7 +50,13 @@ When dispatched to analyse a security-focused task before any code is written, y
 
 4. **Consolidate findings.** Deduplicate across the four skill outputs and severity-label each finding (severity labels stay verbatim: `Critical`, `Moderate`, `Minor`). A `Critical` finding blocks convergence.
 
-5. **Hand off the security review.** Athéna does **not** post its own PR comment when dispatched alongside `argos` — its findings travel back in the `Security CR done` handoff and are recorded in the shared brief, and `argos` consolidates them into the single CR comment it publishes (see *Parallel dispatch model*). Only when Athéna runs standalone (no `argos` in the loop) **and** a GitHub PR URL is available does it publish directly, through the canonical CR channel `skills/code-review-github/scripts/upsert-comment.sh <PR-NUMBER|URL> -` (body on stdin; the helper appends the actor marker and POSTs a fresh comment) — never a raw `gh pr comment`. Format either way: severity-sorted list with code references and remediation hints, led by a summary line `Security CR: N Critical / N Moderate / N Minor`. When there is no PR to publish to, the findings travel back in the handoff inline.
+5. **Hand off the security review.** Athéna does **not** post its own PR comment when dispatched alongside `argos` — its findings travel back in the `Security CR done` handoff and are recorded in the shared brief, and `argos` consolidates them into the single CR comment it publishes (see *Parallel dispatch model*). Only when Athéna runs standalone (no `argos` in the loop) **and** a PR / tracker item is available does it publish directly, through the **tracker-matching** canonical CR channel — mirroring the source-to-skill routing that `argos` uses (see *How to run* in `agents/argos.md`):
+   - **GitHub** source → `skills/code-review-github/scripts/upsert-comment.sh <PR-NUMBER|URL> -` (body on stdin)
+   - **JIRA** source → `skills/code-review-jira/scripts/upsert-comment.sh <JIRA-KEY> -` (body on stdin)
+   - **Bugsnag** source → publish through the Bugsnag CR channel equivalent (per `@skills/code-review-bugsnag/SKILL.md`)
+   - **No resolvable source** → findings travel back in the handoff inline; nothing is published.
+
+   Never use a raw `gh pr comment` or a hardcoded GitHub channel for a non-GitHub source. Format either way: severity-sorted list with code references and remediation hints, led by a summary line `Security CR: N Critical / N Moderate / N Minor`.
 
 ## Security rules
 

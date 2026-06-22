@@ -347,3 +347,31 @@ test('agents directory ships the hermes release-announcer subagent with required
     // Publishes only via the canonical wrapper, never raw gh commands.
     expect($content)->toContain('upsert-comment');
 });
+
+test('parallel agents share their split output through the brief under an append lock with a barrier before consolidation', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $daidalos = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+
+    // The brief is the rendezvous where parallel agents' split output becomes available to peers.
+    expect($daidalos)->toContain('Parallel handoff sharing');
+    // Concurrency-safe append: a per-brief append lock guards every `cat >>` so parallel writes never interleave.
+    expect($daidalos)->toContain('Concurrency-safe append');
+    expect($daidalos)->toContain('$BRIEF.lock');
+    // Barrier: a peer's parallel output is only consolidated after every parallel handoff has landed in the brief.
+    expect($daidalos)->toContain('Barrier before consolidation');
+
+    // The two parallel CR agents reference the append lock so their handoffs never clobber each other.
+    foreach (['argos', 'athena'] as $agent) {
+        $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
+        expect($content)->toContain('$BRIEF.lock');
+    }
+});
+
+test('every agent keeps commit messages and PR titles in English regardless of the assignment language', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    foreach (['daidalos', 'talos', 'argos', 'athena', 'metis', 'apollon', 'hermes'] as $agent) {
+        $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
+        expect($content)->toContain('commit messages and PR titles are always English');
+    }
+});

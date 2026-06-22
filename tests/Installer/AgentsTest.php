@@ -190,6 +190,20 @@ test('athena references the laravel security audit workflow for existing-app aud
     expect($content)->toContain('@skills/laravel-security/references/audit-workflow.md');
 });
 
+test('athena standalone publishing routes to the tracker-matching CR channel, not always GitHub (issue #691)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/agents/athena.md');
+
+    // Standalone mode must route to the tracker-specific publish channel, not always GitHub.
+    expect($content)->toContain('skills/code-review-github/scripts/upsert-comment.sh');
+    expect($content)->toContain('skills/code-review-jira/scripts/upsert-comment.sh');
+    expect($content)->toContain('@skills/code-review-bugsnag/SKILL.md');
+    // Must not hardcode GitHub as the only standalone publish channel.
+    expect($content)->not->toContain('a GitHub PR URL is available does it publish directly');
+    // The tracker-matching routing must be explicit.
+    expect($content)->toContain('tracker-matching');
+});
+
 test('laravel-security audit-workflow ships with all 7 areas, severity mapping, and regression-test requirement', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/laravel-security/references/audit-workflow.md');

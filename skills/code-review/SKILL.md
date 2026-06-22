@@ -23,7 +23,7 @@ Perform structured code review focused on:
 - Apply @rules/php/dependency-selection.mdc — when the PR diff adds a new `require` / `require-dev` entry to `composer.json`, walk the Activity + Compatibility gates from that rule against the PR description / commit body. A missing selection note is a **Critical** finding; an adopted archived / abandoned / branch-pinned package is a **Critical** finding on the spot; a single-maintainer adoption without bus-factor flag is a **Moderate** finding.
 - If the current project uses Laravel, also apply `@rules/laravel/laravel.mdc`, `@rules/laravel/architecture.mdc`, `@rules/laravel/filament.mdc`, and `@rules/laravel/livewire.mdc`
 - Output findings only (no praise)
-- **Read-only skill** — never modify code, never stage / commit / push changes, and never run any git write operation (`git add`, `git commit`, `git push`, `git reset`, `git checkout -- …`, etc.). Switching to the relevant branch and `git pull` to read the latest diff are allowed; mutating the working tree or pushing to the remote is not. Output is the review markdown only.
+- **Read-only skill** — never modify code, never stage / commit / push changes, and never run any git write operation (`git add`, `git commit`, `git push`, `git reset`, `git checkout -- …`, etc.). Checking out the relevant branch and `git pull` to read the latest code are **required** (the mandatory Branch checkout gate below); mutating the working tree or pushing to the remote is not. Output is the review markdown only.
 - Apply @rules/reports/general.mdc — the review markdown handed to `code-review-github` / `code-review-jira` for publishing on the **GitHub PR** stays in canonical English per the rule's *Exception — technical CR findings on the GitHub PR* (severity labels, structured field labels, rule references, and code identifiers are all in English). The non-technical mirror that the wrappers delegate to `@skills/pr-summary/SKILL.md` follows the language of the source assignment — that is the wrapper's responsibility, not this skill's.
 - Do not duplicate findings the project's fixers already auto-correct (Pint, PHPCS, Rector — pure whitespace, import ordering, unused-use, single-line vs multi-line argument splits). Those are caught by the build. **Do** flag every rule violation a fixer does not cover — architectural breaches, structural rules, missing return types, untyped DTO boundaries, naming bound to a domain rule, testing-pattern violations, etc.
 
@@ -31,7 +31,7 @@ Perform structured code review focused on:
 
 ## Execution
 
-- Before starting, ensure you are on the branch that contains the changes to review. If not, switch to it.
+- **Branch checkout gate (mandatory, always).** Before any analysis step, check out the branch that contains the changes and pull the latest commits — `git fetch`, `git checkout <branch>`, `git pull` — so the review always runs against the **actual current codebase on disk (the checked-out working tree)**, never against a remote diff in isolation. Confirm local `HEAD` matches the change branch's head commit. If the branch cannot be checked out (missing ref, detached `HEAD`, or local changes that would be overwritten), **stop and report it** instead of reviewing from a diff. Every subsequent step reads the checked-out files so findings reflect the real state of the code.
 - Identify changes vs main branch.
 - Deduplicate previous findings.
 

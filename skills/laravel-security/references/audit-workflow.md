@@ -4,7 +4,7 @@ Defenzivní bezpečnostní auditor v autorizovaném prostředí. Cílem je nají
 
 ## Severity škála
 
-Auditní reportování používá 5 stupňů; konvergenční brána repo (CR) mapuje na 3 stupně:
+Auditní reportování používá 5 stupňů; konvergenční brána repo (CR) mapuje na 3 stupně (High+Medium splývají do Moderate, Low+Info splývají do Minor):
 
 | Auditní severity | CR severity | Blokuje konvergenci? |
 |------------------|-------------|----------------------|
@@ -39,7 +39,7 @@ Piny athena.md (`Critical`/`Moderate`/`Minor`) zůstávají beze změny — audi
 **Vzory Grep:**
 
 ```bash
-grep -rn "Post::find\|Model::find" app/Http/Controllers/
+grep -rn "::find\(\|::findOrFail\(\|::firstOrFail\(" app/Http/Controllers/
 grep -rn "->authorize\|Gate::authorize\|@can" app/ --include="*.php" --include="*.blade.php"
 ```
 
@@ -85,11 +85,12 @@ grep -rn "throttle:" routes/ app/
 ```php
 it('regenerates session on login', function (): void {
     $user = User::factory()->create();
-    $old = session()->getId();
+    $this->get('/login');
+    $guestToken = $this->app['session']->token();
 
-    post('/login', ['email' => $user->email, 'password' => 'password']);
+    $this->post('/login', ['email' => $user->email, 'password' => 'password']);
 
-    expect(session()->getId())->not->toBe($old);
+    expect($this->app['session']->token())->not->toBe($guestToken);
 });
 ```
 
@@ -219,16 +220,20 @@ grep -rn "Log::" app/ --include="*.php" | grep -i "password\|secret\|token"
 **Příklad regresního testu:**
 
 ```php
-it('does not log sensitive fields', function (): void {
+// Cíl: ten konkrétní Log:: řádek, který grep výše odhalí, např.:
+// Log::info('Auth attempt', ['token' => $request->bearerToken(), 'api_key' => $request->input('api_key')]);
+it('does not include secret/token/api_key value in the flagged log call context', function (): void {
     $logs = [];
     Log::listen(static function ($log) use (&$logs): void {
-        $logs[] = json_encode($log->context);
+        $logs[] = $log->context;
     });
 
-    post('/login', ['email' => 'a@b.com', 'password' => 'secret123']);
+    $secret = 'supersecret-' . uniqid();
+    // Nahraď volání endpointu tím, kde grep odhalil Log:: s citlivým klíčem.
+    $this->post('/api/example', ['api_key' => $secret]);
 
-    foreach ($logs as $entry) {
-        expect($entry)->not->toContain('secret123');
+    foreach ($logs as $context) {
+        expect(json_encode($context))->not->toContain($secret);
     }
 });
 ```

@@ -27,6 +27,15 @@ Apply `@rules/security/backend.md` *Malicious Code & Supply-Chain Indicators*, w
 
 Severity follows the backend rule.
 
+## Malicious File Upload Content (issue #680)
+Apply the same CONTENT / RENDER rules as `@rules/security/backend.md` *Malicious File Upload Content*, with these mobile-specific specifics:
+
+> **Scope boundary — CONTENT / RENDER only.** This rule covers the CONTENT / RENDER surface of an uploaded file (active content executed when the file's bytes, name, or metadata are later rendered or served). The file TYPE / TRANSPORT surface (extension allow-list, declared-vs-actual MIME, magic-byte signature, double extension, path traversal, executability in webroot) stays with `security-review/SKILL.md` File Handling — **raise one finding per violation, never both**. A single upload sink that fails both surfaces produces the type/transport finding for the accept decision and the content/render finding for the output decision, on distinct lines; never two findings for the same line.
+
+- **WebView must not render user-uploaded HTML or SVG without sanitization.** Loading a user-uploaded HTML or SVG file into a WebView gives it script execution capability. Always sanitize HTML/SVG content server-side before delivery and render it in a sandboxed WebView (`UIWebView` / `WKWebView` with a restrictive CSP, or `WebView` with `setJavaScriptEnabled(false)`) or as a static preview image rather than an interactive document.
+- **Shared / opened files must be validated.** Files opened via the OS share sheet, document picker, or deep link (iOS `UIDocumentPickerViewController`, Android `Intent.ACTION_OPEN_DOCUMENT`) arrive as attacker-controlled input. Validate the file's MIME and magic bytes server-side and treat filename and metadata fields as untrusted strings — escape or sanitize before displaying in UI.
+- **Do not render filenames or metadata into HTML contexts.** If the app embeds file metadata (name, EXIF tags, PDF author) into HTML rendered inside a WebView, escape all values as HTML entities; never concatenate raw strings into HTML.
+
 ## WebView Usage
 - Limit WebView access to trusted URLs, and disable JavaScript by default.
 - Enforce HTTPS in WebView to prevent loading insecure content.

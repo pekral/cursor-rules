@@ -86,9 +86,21 @@ Walk every line the diff adds or modifies in application code, shell / deploy / 
 Severity: **Critical** when the indicator maps to active RCE / MITM / persistence (silent fetch piped to a shell, TLS off on a credential request, both halves of the dropper pattern); **High** otherwise. Provide the four reproducer fields per the Critical / High requirement.
 
 ### File Handling
-- unsafe uploads (extension, MIME, signature)
+
+**TYPE / TRANSPORT layer** (this section owns the accept decision):
+- unsafe uploads (extension, MIME, signature) — extension allow-list, declared-vs-actual MIME mismatch, magic-byte / signature check, double extension (`evil.php.jpg`), path traversal in filename, executability in webroot
 - path traversal
 - execution risk (files in webroot)
+
+> **Scope boundary:** This section owns the TYPE / TRANSPORT surface (accept decision). The file CONTENT / RENDER surface (active content executed when the file's bytes, name, or metadata are later rendered or served) is owned by `@rules/security/backend.md` *Malicious File Upload Content (issue #680)* — **raise one finding per violation, never both**. A single upload sink that fails both surfaces produces the type/transport finding for the accept decision and the content/render finding for the output decision, on distinct lines; never two findings for the same line.
+
+**CONTENT / RENDER layer** (cross-check `@rules/security/backend.md` *Malicious File Upload Content (issue #680)*):
+- stored XSS from file content rendered as HTML
+- SVG with `<script>` / `on*` handlers served inline
+- CSV / Excel formula injection (leading `=`, `+`, `-`, `@`, `\t`, `\r`)
+- HTML / JS in filenames or metadata rendered into DOM without escaping
+- polyglot files served from application origin without `nosniff` / CSP
+- missing `Content-Disposition: attachment` or `X-Content-Type-Options: nosniff` on upload-serving endpoints
 
 ### Dependencies & Configuration
 - vulnerable packages (`composer.lock`, `composer audit`)

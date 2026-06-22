@@ -1,0 +1,8 @@
+INERT FIXTURE — DO NOT SERVE FROM AN APPLICATION ORIGIN WITHOUT nosniff
+Purpose: simulates a file declared and validated as an image (by name/MIME) but containing
+HTML/script content. Tests that both the TYPE/TRANSPORT layer AND the CONTENT/RENDER layer
+are checked.
+Threat: if served without X-Content-Type-Options: nosniff, the browser may sniff the content
+type as text/html and execute the embedded script.
+
+<html><body><script>alert('MIME sniffing XSS: this .jpg file was executed as HTML')</script></body></html>

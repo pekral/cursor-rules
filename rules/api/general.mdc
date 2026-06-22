@@ -68,6 +68,9 @@ Every endpoint is a trust boundary. Validate inputs **before** they reach busine
 
 Validation belongs in the dedicated boundary layer (FormRequest / Data Validator), not inline in the action or model. Error responses must follow the project's safe-error contract — see `@rules/security/backend.md` *Safe Validation & Error Messages* (no identity enumeration, no authorization-existence leak, no internal detail, no verbatim echo of attacker input).
 
+## Handling Known Failures After Validation
+Schema and business validation reject *malformed* input up front, but an endpoint can still fail on a **known, expected** condition once the operation runs — a business invariant breaks, the resource is in the wrong state, a downstream dependency is unavailable, a payment is declined, a quota is exhausted. These are not bugs and must not be treated as ones: letting them bubble uncaught into the global handler and the error reporter returns a generic `500` with no guidance, so the consumer cannot tell a transient hiccup from an action it must take. Map every known failure mode to its **precise status code** (`402`, `404`, `409`, `422`, `429`, `503`, …) with an **actionable, safe** message the consumer can branch on and a human can act on — model these as typed domain exceptions rendered centrally (or caught by the entry point for the specific type), never as ad-hoc `catch (\Throwable)` swallowing everything. **Unexpected** errors still propagate to the reporter as a generic `500`; do not catch-all to hide them. Messages obey the same safe-error contract above.
+
 ## Business Impact
 A poor API is not just a technical smell: it creates technical debt, forces expensive migrations, raises support load, and widens the attack surface. A well-designed, consistent, secure-by-default API lets internal teams and external consumers build faster and more safely. Weigh API changes by this impact, not only by local convenience.
 
@@ -82,6 +85,8 @@ A poor API is not just a technical smell: it creates technical debt, forces expe
 - Mark as **Moderate**:
   - imprecise success code — `200` for a creation (`201`), for an async hand-off (`202`), or where `204` (no body) is correct; or a body returned alongside `204`
   - error code collapsed into a generic one where a narrower code applies (`404`/`409`/`422`/`429` flattened to `400` or `500`)
+  - known, expected post-validation failure mode (business-invariant break, wrong resource state, declined payment, exhausted quota, unavailable dependency) left to bubble into a generic `500` / the error reporter with no precise status and no actionable message — must map to its narrow status code with a safe, actionable body (see **Handling Known Failures After Validation**); escalate to **Critical** on a payment / auth / data-loss path
+  - catch-all (`catch (\Throwable)` / `catch (\Exception)` / empty `catch {}`) at the endpoint that swallows unexpected errors and hides them from the error reporter, or turns an arbitrary exception into a fake success — catch only the named known types and let the rest surface as `500`
   - `PUT` used for a partial update or `PATCH` used for a full replacement
   - inconsistent contract shape across endpoints — divergent field casing, date format, pagination shape, or error envelope for the same concept
   - validation logic inlined in the action/controller/model instead of the dedicated boundary layer (FormRequest / Data Validator)

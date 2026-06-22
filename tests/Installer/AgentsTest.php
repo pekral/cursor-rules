@@ -182,6 +182,38 @@ test('athena also runs a pre-implementation security-analysis mode that feeds ta
     expect($content)->toContain('Security CR done');
 });
 
+test('athena references the laravel security audit workflow for existing-app audits', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/agents/athena.md');
+
+    // The 7-area audit workflow lives in a references file; athena links to it, not re-implements it.
+    expect($content)->toContain('@skills/laravel-security/references/audit-workflow.md');
+});
+
+test('laravel-security audit-workflow ships with all 7 areas, severity mapping, and regression-test requirement', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/laravel-security/references/audit-workflow.md');
+
+    // Severity mapping: 5-level audit scale maps to 3-level CR scale.
+    expect($content)->toContain('Critical');
+    expect($content)->toContain('Moderate');
+    expect($content)->toContain('Minor');
+
+    // All 7 audit areas must be present.
+    expect($content)->toContain('Authorization');
+    expect($content)->toContain('Authentication');
+    expect($content)->toContain('Validation');
+    expect($content)->toContain('XSS');
+    expect($content)->toContain('File upload');
+    expect($content)->toContain('Secrets');
+    expect($content)->toContain('Dependencies');
+
+    // Every confirmed finding must carry a regression-test sketch.
+    expect($content)->toContain('regresní test');
+    // Defensive framing: audit, not attack.
+    expect($content)->toContain('autorizovaném prostředí');
+});
+
 test('every dispatched agent reads and appends to the shared task brief', function (): void {
     $packageDir = dirname(__DIR__, 2);
 

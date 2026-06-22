@@ -1,0 +1,9 @@
+GIF89a INERT FIXTURE — DO NOT SERVE FROM AN APPLICATION ORIGIN OR OPEN IN A BROWSER
+Purpose: simulates a polyglot file that starts with a valid GIF magic byte sequence
+and also contains an HTML/JS payload.
+Threat: if this file is served from the application origin without X-Content-Type-Options: nosniff
+and a strict CSP, some browsers may execute it as HTML when navigated to directly.
+The control is to serve uploads from a separate cookieless origin and set nosniff.
+
+POLYGLOT PAYLOAD AREA (inert — magic bytes above make this pass naive GIF validation):
+<html><body><script>alert('polyglot XSS: this file passed as a GIF but executed as HTML')</script></body></html>

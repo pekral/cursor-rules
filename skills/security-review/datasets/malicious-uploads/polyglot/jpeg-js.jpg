@@ -1,0 +1,14 @@
+INERT FIXTURE — DO NOT SERVE FROM AN APPLICATION ORIGIN OR OPEN IN A BROWSER
+Purpose: simulates a polyglot file that could pass JPEG magic-byte validation
+(real polyglots embed the payload after the JPEG SOI marker; this is a text description only).
+Threat: a real JPEG/JS polyglot can pass image validation and then be loaded as a script
+via a <script src="..."> tag if served from the same origin.
+
+To create a real JPEG/JS polyglot for testing:
+  1. Take a valid JPEG file.
+  2. Append a JavaScript payload after the JPEG EOI marker (0xFF 0xD9).
+  3. The browser's JPEG decoder ignores trailing data; the JS engine executes from the start.
+
+Real-world control: serve all user uploads from a dedicated cookieless subdomain
+(e.g. uploads.example.com) so that even a polyglot executed as a script has no access
+to the application's cookies or localStorage.

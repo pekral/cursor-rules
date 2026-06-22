@@ -1,0 +1,12 @@
+INERT FIXTURE — DO NOT OPEN IN A SPREADSHEET APPLICATION
+Purpose: tests that CSV export handlers prefix dangerous leading characters with an apostrophe.
+Threat: cells starting with =, +, -, @ are interpreted as formulas by Excel / LibreOffice Calc.
+The DDE payload below can execute a shell command when the file is opened in a vulnerable spreadsheet.
+
+Name,Email,Comment
+Alice,alice@example.com,Normal comment
+=cmd|'/c calc'!A0,attacker@example.com,DDE formula injection
++cmd|'/c calc'!A0,attacker@example.com,Alternative DDE prefix
+-2+3+cmd|'/c calc'!A0,attacker@example.com,Arithmetic prefix injection
+@SUM(1+1)*cmd|'/c calc'!A0,attacker@example.com,@ prefix injection
+"=HYPERLINK(""https://attacker.example/"",""Click me"")",attacker@example.com,Hyperlink injection

@@ -27,6 +27,16 @@ Client-side, build-tooling, and Node / Electron code carry the same attacker ind
 
 Severity follows the backend rule. Browser sandboxes cannot disable TLS, so this clause targets Node / Electron / build-tooling code in the frontend tree.
 
+## Malicious File Upload Content (issue #680)
+Apply the same CONTENT / RENDER rules as `@rules/security/backend.md` *Malicious File Upload Content*, with these client-side specifics:
+
+> **Scope boundary — CONTENT / RENDER only.** This rule covers the CONTENT / RENDER surface of an uploaded file (active content executed when the file's bytes, name, or metadata are later rendered or served). The file TYPE / TRANSPORT surface (extension allow-list, declared-vs-actual MIME, magic-byte signature, double extension, path traversal, executability in webroot) stays with `security-review/SKILL.md` File Handling — **raise one finding per violation, never both**. A single upload sink that fails both surfaces produces the type/transport finding for the accept decision and the content/render finding for the output decision, on distinct lines; never two findings for the same line.
+
+- **Never use `innerHTML` for filenames or file content.** Filenames, EXIF fields, and any other user-controlled upload metadata must be inserted into the DOM via `textContent` or a framework binding — never via `innerHTML`, `outerHTML`, `dangerouslySetInnerHTML`, or `v-html`. Use `DOMPurify.sanitize()` before any insertion into a rich-text or HTML context.
+- **SVG uploads must not be rendered inline.** Never embed a user-uploaded SVG directly as inline HTML or via `<embed>` / `<object>` — these give the SVG a document origin and allow `<script>` and `on*` event handlers to execute. Load SVG previews exclusively via `<img src="...">` (which blocks script execution) and only after the backend has served it with `Content-Disposition: attachment` and `X-Content-Type-Options: nosniff`.
+- **Do not trust the client-supplied MIME type.** `File.type` in the browser reflects what the OS / browser reports — it is attacker-controllable. Never use it as the sole gate for accepting or rendering a file. Always defer to the backend's server-side MIME and magic-byte validation result.
+- **Previewing file content in the browser.** When rendering a preview (text, image, PDF) before upload, use a sandboxed `<iframe sandbox>` or a Blob URL with a strict Content-Type; never inject raw file bytes into the main document's DOM.
+
 ## CSS Handling
 - Sanitize all user inputs before applying them to style properties.
 - Avoid dynamic inline styles where possible.

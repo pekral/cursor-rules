@@ -1,0 +1,9 @@
+INERT FIXTURE — DO NOT OPEN IN A SPREADSHEET APPLICATION
+Purpose: tests that CSV handlers strip or escape leading tab and carriage-return characters
+that some spreadsheet parsers interpret as formula prefixes.
+Threat: a leading TAB or CR before a formula can bypass naive prefix-only guards.
+
+Name,Email,Comment
+Alice,alice@example.com,Normal comment
+	=cmd|'/c calc'!A0,attacker@example.com,Tab-prefixed DDE
+=cmd|'/c calc'!A0,attacker@example.com,CR-prefixed DDE

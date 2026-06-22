@@ -58,6 +58,14 @@
 - Source:  https://github.com/pekral/cursor-rules/pull/672   Added: 2026-06-22
 - Role:    shared
 
+### skills-tree-verbatim-distribution — Any file added under skills/ is distributed verbatim into consumer trees by the installer
+
+- Trigger: a PR adds a non-`SKILL.md` file under `skills/` (dataset, fixture, payload, README) — in particular any file whose content could be parsed or executed by a runtime (e.g. a `.php` file with `<?php`, a `.sh` with a shebang).
+- Rule:    `src/Installer.php` copies the entire `skills/` subtree verbatim into consumer `.cursor/skills/`, `.claude/skills/`, and `~/.claude/skills/` with no extension filter. Therefore every file added under `skills/` ships to every consumer. Dataset / fixture payloads must be INERT: no `<?php` open tag, no shebang, no executable syntax — represent the payload as plain text (e.g. `[php-open-tag] echo "xss"; [php-close-tag]`). Add a regression assertion in `tests/Installer/SecurityContentTest.php` that the dataset directory contains no PHP open tags (or equivalent runtime entry point) whenever a new executable-syntax category is introduced.
+- Example: `skills/security-review/datasets/malicious-uploads/mime-double-extension/evil.php.jpg` initially contained a real `<?php … ?>` block that passed `php -l`; argos caught it as Moderate in PR #685 iteration 1. Fix commit `a940708` neutered the block to plain text and added a regression guard in `tests/Installer/SecurityContentTest.php` (`no dataset file in malicious-uploads/ contains a PHP open tag`). Source of truth for what the installer ships: `src/Installer.php`. Dataset inertness is declared in per-directory READMEs and per-file INERT headers.
+- Source:  https://github.com/pekral/cursor-rules/pull/685   Added: 2026-06-22
+- Role:    shared
+
 ### os-branch-coverage-ignore-test-via-observable-api — Test OS-gated branches wrapped in @codeCoverageIgnore via observable behaviour, not by rewriting PHP_OS
 
 - Trigger: a new OS-conditional branch in `src/Installer.php` (or similar) is wrapped in `@codeCoverageIgnoreStart/End` because the deciding value is a PHP constant (`PHP_OS`) that cannot be overwritten in a test; the task requires a smoke test for the branch without breaking `--min=100` coverage.

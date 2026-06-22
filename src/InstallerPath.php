@@ -74,7 +74,7 @@ final class InstallerPath
         }
 
         set_error_handler(static fn (): bool => true);
-        $created = mkdir($directory, 0777, true);
+        $created = mkdir($directory, 0777, recursive: true);
         restore_error_handler();
 
         if (!$created && !is_dir($directory)) {
@@ -283,7 +283,7 @@ final class InstallerPath
 
         $editor = strtolower($editor);
 
-        return in_array($editor, self::getAllowedEditors(), true) ? $editor : null;
+        return in_array($editor, self::getAllowedEditors(), strict: true) ? $editor : null;
     }
 
     /**
@@ -307,7 +307,7 @@ final class InstallerPath
         // @codeCoverageIgnoreEnd
 
         try {
-            $data = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
+            $data = json_decode($contents, associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         } catch (JsonException) {
             return null;
         }

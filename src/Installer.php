@@ -58,7 +58,7 @@ final class Installer
                 $value = trim(substr($arg, strlen('--editor=')));
                 $value = strtolower($value);
 
-                return in_array($value, InstallerPath::getAllowedEditors(), true) ? $value : null;
+                return in_array($value, InstallerPath::getAllowedEditors(), strict: true) ? $value : null;
             }
         }
 
@@ -345,7 +345,7 @@ final class Installer
             return 0;
         }
 
-        return self::installFile($source, $target, false) ? 1 : 0;
+        return self::installFile($source, $target, symlink: false) ? 1 : 0;
     }
 
     private static function canSymlink(): bool

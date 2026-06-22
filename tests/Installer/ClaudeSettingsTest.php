@@ -218,7 +218,7 @@ test('ensureSubagentWritesEnabled writes scoped Edit/Write entries into a fresh 
         $settingsPath = $root . '/.claude/settings.local.json';
         expect(is_file($settingsPath))->toBeTrue();
 
-        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) file_get_contents($settingsPath), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         assert(is_array($data));
         $permissions = $data['permissions'];
         assert(is_array($permissions));
@@ -244,7 +244,7 @@ test('ensureSubagentWritesEnabled prepends to existing allow without dropping un
 
         expect($written)->toBeTrue();
 
-        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) file_get_contents($settingsPath), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         assert(is_array($data));
         $permissions = $data['permissions'];
         assert(is_array($permissions));
@@ -289,7 +289,7 @@ test('ensureSubagentWritesEnabled adds only the missing entry when one is alread
     try {
         expect(InstallerClaudeSettings::ensureSubagentWritesEnabled($root))->toBeTrue();
 
-        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) file_get_contents($settingsPath), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         assert(is_array($data));
         $permissions = $data['permissions'];
         assert(is_array($permissions));
@@ -312,7 +312,7 @@ test('ensureSubagentWritesEnabled recovers when permissions.allow is the wrong s
     try {
         expect(InstallerClaudeSettings::ensureSubagentWritesEnabled($root))->toBeTrue();
 
-        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) file_get_contents($settingsPath), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         assert(is_array($data));
         $permissions = $data['permissions'];
         assert(is_array($permissions));
@@ -334,7 +334,7 @@ test('ensureSubagentWritesEnabled recovers when permissions key is the wrong sha
     try {
         expect(InstallerClaudeSettings::ensureSubagentWritesEnabled($root))->toBeTrue();
 
-        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) file_get_contents($settingsPath), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         assert(is_array($data));
         $permissions = $data['permissions'];
         assert(is_array($permissions));
@@ -350,14 +350,14 @@ test('ensureSubagentWritesEnabled recovers when permissions key is the wrong sha
 test('applySubagentWritesIfRequested returns false when the flag is not set', function (): void {
     $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
 
-    expect(InstallerClaudeSettings::applySubagentWritesIfRequested(false, 'claude', $root))->toBeFalse();
+    expect(InstallerClaudeSettings::applySubagentWritesIfRequested(allowSubagentWrites: false, editor: 'claude', projectRoot: $root))->toBeFalse();
     expect(is_file($root . '/.claude/settings.local.json'))->toBeFalse();
 });
 
 test('applySubagentWritesIfRequested returns false for a non-claude editor', function (): void {
     $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
 
-    expect(InstallerClaudeSettings::applySubagentWritesIfRequested(true, 'cursor', $root))->toBeFalse();
+    expect(InstallerClaudeSettings::applySubagentWritesIfRequested(allowSubagentWrites: true, editor: 'cursor', projectRoot: $root))->toBeFalse();
     expect(is_file($root . '/.claude/settings.local.json'))->toBeFalse();
 });
 
@@ -365,7 +365,7 @@ test('applySubagentWritesIfRequested writes the allow entries for editor=claude 
     $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
 
     try {
-        expect(InstallerClaudeSettings::applySubagentWritesIfRequested(true, 'claude', $root))->toBeTrue();
+        expect(InstallerClaudeSettings::applySubagentWritesIfRequested(allowSubagentWrites: true, editor: 'claude', projectRoot: $root))->toBeTrue();
         expect(is_file($root . '/.claude/settings.local.json'))->toBeTrue();
     } finally {
         installerRemoveDirectory($root);
@@ -373,16 +373,16 @@ test('applySubagentWritesIfRequested writes the allow entries for editor=claude 
 });
 
 test('validateSubagentWritePermissions passes when every required entry is present', function (): void {
-    $data = json_decode('{"permissions":{"allow":["Edit(//tmp/p/**)","Write(//tmp/p/**)"]}}', false, 512, JSON_THROW_ON_ERROR);
+    $data = json_decode('{"permissions":{"allow":["Edit(//tmp/p/**)","Write(//tmp/p/**)"]}}', associative: false, depth: 512, flags: JSON_THROW_ON_ERROR);
     assert($data instanceof stdClass);
 
     InstallerClaudeSettings::validateSubagentWritePermissions($data, ['Edit(//tmp/p/**)', 'Write(//tmp/p/**)'], '/tmp/x');
 
-    expect(true)->toBeTrue();
+    expect(value: true)->toBeTrue();
 });
 
 test('validateSubagentWritePermissions throws when a required entry is missing', function (): void {
-    $data = json_decode('{"permissions":{"allow":["Edit(//tmp/p/**)"]}}', false, 512, JSON_THROW_ON_ERROR);
+    $data = json_decode('{"permissions":{"allow":["Edit(//tmp/p/**)"]}}', associative: false, depth: 512, flags: JSON_THROW_ON_ERROR);
     assert($data instanceof stdClass);
 
     expect(static function () use ($data): void {
@@ -497,7 +497,7 @@ test('install --editor=claude without --allow-bundled-scripts still disables AI 
         $settingsPath = $root . '/.claude/settings.json';
         expect(is_file($settingsPath))->toBeTrue();
 
-        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) file_get_contents($settingsPath), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         assert(is_array($data));
         expect($data['includeCoAuthoredBy'])->toBeFalse();
     } finally {
@@ -529,7 +529,7 @@ test('install --editor=claude --allow-subagent-writes writes the allow entries a
         $settingsPath = $root . '/.claude/settings.local.json';
         expect(is_file($settingsPath))->toBeTrue();
 
-        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) file_get_contents($settingsPath), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         assert(is_array($data));
         $permissions = $data['permissions'];
         assert(is_array($permissions));
@@ -672,7 +672,7 @@ test('ensureCoAuthoredByDisabled writes includeCoAuthoredBy false into a fresh s
         $settingsPath = $home . '/.claude/settings.json';
         expect(is_file($settingsPath))->toBeTrue();
 
-        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) file_get_contents($settingsPath), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         assert(is_array($data));
         expect($data['includeCoAuthoredBy'])->toBeFalse();
     } finally {
@@ -690,7 +690,7 @@ test('ensureCoAuthoredByDisabled respects an existing includeCoAuthoredBy value'
 
         expect($written)->toBeFalse();
 
-        $data = json_decode((string) file_get_contents($settingsPath), true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) file_get_contents($settingsPath), associative: true, depth: 512, flags: JSON_THROW_ON_ERROR);
         assert(is_array($data));
         expect($data['includeCoAuthoredBy'])->toBeTrue();
     } finally {
@@ -736,7 +736,7 @@ test('ensureCoAuthoredByDisabled preserves empty JSON objects elsewhere in setti
         expect($raw)->toContain('"attribution": {}');
         expect($raw)->not->toContain('"attribution": []');
 
-        $decoded = json_decode($raw, false, 512, JSON_THROW_ON_ERROR);
+        $decoded = json_decode($raw, associative: false, depth: 512, flags: JSON_THROW_ON_ERROR);
         assert($decoded instanceof stdClass);
         expect($decoded->attribution)->toBeInstanceOf(stdClass::class);
     } finally {

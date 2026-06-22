@@ -22,11 +22,11 @@ final readonly class InstallOptions
     public static function fromArgv(array $argv): self
     {
         return new self(
-            force: in_array('--force', $argv, true),
-            symlink: in_array('--symlink', $argv, true),
-            prune: in_array('--prune', $argv, true),
-            allowBundledScripts: in_array('--allow-bundled-scripts', $argv, true),
-            allowSubagentWrites: in_array('--allow-subagent-writes', $argv, true),
+            force: in_array('--force', $argv, strict: true),
+            symlink: in_array('--symlink', $argv, strict: true),
+            prune: in_array('--prune', $argv, strict: true),
+            allowBundledScripts: in_array('--allow-bundled-scripts', $argv, strict: true),
+            allowSubagentWrites: in_array('--allow-subagent-writes', $argv, strict: true),
         );
     }
 

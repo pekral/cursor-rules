@@ -241,7 +241,7 @@ test('findProjectRoot traverses directories up', function (): void {
         $reflection = new ReflectionClass(InstallerPath::class);
         $method = $reflection->getMethod('findProjectRoot');
 
-        $result = $method->invoke(null);
+        $result = $method->invoke(object: null);
         $expectedRoot = realpath($root);
         $expectedRoot = $expectedRoot !== false ? $expectedRoot : $root;
 

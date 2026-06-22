@@ -56,7 +56,7 @@ test('resolveEditorFromComposerJson returns null for invalid editor value', func
 
 test('resolveEditorFromComposerJson returns null when composer.json does not exist', function (): void {
     $root = sys_get_temp_dir() . '/no-composer-' . bin2hex(random_bytes(4));
-    mkdir($root, 0777, true);
+    mkdir($root, 0777, recursive: true);
 
     try {
         $editor = InstallerPath::resolveEditorFromComposerJson($root);

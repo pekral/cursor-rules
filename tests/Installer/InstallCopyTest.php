@@ -154,7 +154,7 @@ test('install never overwrites existing project.mdc in target', function (): voi
 
 test('install creates symlinks when requested', function (): void {
     if (installerSymlinkUnsupported()) {
-        expect(true)->toBeTrue();
+        expect(value: true)->toBeTrue();
 
         return;
     }
@@ -646,7 +646,7 @@ test('install from package root installs rules and skills into .cursor', functio
     $packageRoot = dirname(__DIR__, 2);
 
     if (!file_exists($packageRoot . '/composer.json') || !is_dir($packageRoot . '/rules')) {
-        expect(true)->toBeTrue();
+        expect(value: true)->toBeTrue();
 
         return;
     }
@@ -675,7 +675,7 @@ test('install from package root installs rules and skills into .cursor', functio
 
 test('install fails when copy fails due to unwritable destination', function (): void {
     if (posix_getuid() === 0) {
-        expect(true)->toBeTrue();
+        expect(value: true)->toBeTrue();
 
         return;
     }
@@ -709,7 +709,7 @@ test('install fails when copy fails due to unwritable destination', function ():
 
 test('install fails when existing file cannot be removed', function (): void {
     if (posix_getuid() === 0) {
-        expect(true)->toBeTrue();
+        expect(value: true)->toBeTrue();
 
         return;
     }

@@ -180,7 +180,7 @@ test('InstallerPruner removes empty parent directories after pruning', function 
 
 test('InstallerPruner handles unwritable file gracefully when pruning', function (): void {
     if (posix_getuid() === 0) {
-        expect(true)->toBeTrue();
+        expect(value: true)->toBeTrue();
 
         return;
     }
@@ -208,7 +208,7 @@ test('InstallerPruner handles unwritable file gracefully when pruning', function
 
 test('InstallerPruner handles unwritable parent directory when removing empty dirs', function (): void {
     if (posix_getuid() === 0) {
-        expect(true)->toBeTrue();
+        expect(value: true)->toBeTrue();
 
         return;
     }
@@ -227,7 +227,7 @@ test('InstallerPruner handles unwritable parent directory when removing empty di
         );
         restore_error_handler();
 
-        expect(true)->toBeTrue();
+        expect(value: true)->toBeTrue();
     } finally {
         chmod($root . '/target', 0755);
         installerRemoveDirectory($root);

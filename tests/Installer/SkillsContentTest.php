@@ -29,7 +29,7 @@ test('race-condition-review skill is referenced only by code review skills', fun
     }
 
     foreach ($skillFiles as $skillFile) {
-        if (in_array($skillFile, $expectedFiles, true)) {
+        if (in_array($skillFile, $expectedFiles, strict: true)) {
             continue;
         }
 

@@ -8,7 +8,7 @@ function installerEnsureDirectory(string $directory): void
         return;
     }
 
-    mkdir($directory, 0777, true);
+    mkdir($directory, 0777, recursive: true);
 }
 
 function installerCreateProjectRoot(): string

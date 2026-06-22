@@ -153,7 +153,7 @@ final class InstallerClaudeSettings
         $allow = self::extractAllow($data);
 
         foreach ($required as $entry) {
-            if (!in_array($entry, $allow, true)) {
+            if (!in_array($entry, $allow, strict: true)) {
                 throw InstallerFailure::settingsSubagentWritesInvalid($path, sprintf('missing allow entry "%s"', $entry));
             }
         }
@@ -219,7 +219,7 @@ final class InstallerClaudeSettings
     private static function prependAllowEntries(stdClass $existing, array $entries): bool
     {
         [$permissions, $allow] = self::resolveAllowList($existing);
-        $missing = array_values(array_filter($entries, static fn (string $entry): bool => !in_array($entry, $allow, true)));
+        $missing = array_values(array_filter($entries, static fn (string $entry): bool => !in_array($entry, $allow, strict: true)));
 
         if ($missing === []) {
             return false;
@@ -274,7 +274,7 @@ final class InstallerClaudeSettings
         }
 
         try {
-            $data = json_decode($contents, false, 512, JSON_THROW_ON_ERROR);
+            $data = json_decode($contents, associative: false, depth: 512, flags: JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             throw InstallerFailure::settingsJsonInvalid($path, $exception->getMessage());
         }
@@ -291,7 +291,7 @@ final class InstallerClaudeSettings
         [$permissions, $allow] = self::resolveAllowList($existing);
 
         foreach (self::getBundledScriptPermissions() as $pattern) {
-            if (!in_array($pattern, $allow, true)) {
+            if (!in_array($pattern, $allow, strict: true)) {
                 $allow[] = $pattern;
             }
         }

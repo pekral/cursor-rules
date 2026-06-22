@@ -126,9 +126,14 @@ Rules:
 5. If a pre-existing issue is **non-trivial** (would significantly expand the PR, requires architectural decisions, or affects shared infrastructure beyond the touched files), do **not** fix it inline. Move it to the *Out of scope (deferred)* group from step 7 and surface it under the PR's `## TODO` section with a one-line reason for deferral.
 
 ### If bug
-8. Reproduce the issue if possible.
-9. Write or update a test capturing the failure.
-10. Confirm the failure before applying the fix.
+
+**Mandatory: strict TDD — failing test first, blocking.**
+
+Run `@skills/test-driven-development/SKILL.md` as the governing cycle for every bug fix. The Iron Law (`NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST`) applies without exception:
+
+8. Write or update a test that reproduces the bug (the failing test). Follow the RED step in `@skills/test-driven-development/SKILL.md`.
+9. **Verify RED** — run the test and confirm it fails for the expected reason, not because of a syntax, setup, or typo issue. **Do not proceed to the fix until the test is observed failing.** This step is mandatory and blocking.
+10. Apply the fix (GREEN step) — write the smallest production change that makes the test pass, then verify all relevant tests pass.
 
 ### If feature
 8. Design a minimal implementation aligned with project architecture.

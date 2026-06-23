@@ -73,3 +73,19 @@
 - Example: `tests/InstallerTest.php` — "install creates regular files (copy fallback), never symlinks, when symlinks are unsupported (Windows-like)" (added in #665); `tests/Pest.php:65` `installerSymlinkUnsupported()` helper; `src/Installer.php:351-360` `canSymlink()` Windows branch with `@codeCoverageIgnoreStart/End`.
 - Source:  https://github.com/pekral/cursor-rules/pull/673   Added: 2026-06-22
 - Role:    talos
+
+### cross-cutting-rule-belongs-in-compound-engineering — A cross-cutting contract for all agents and skills belongs in rules/compound-engineering/general.mdc, not in skills/ or per-agent copy-paste
+
+- Trigger: a new rule or contract must apply to every agent and every skill uniformly — e.g. a cleanup obligation, a memory-files exception, a shared-brief protocol — and the implementer considers (a) adding a new file under `skills/`, (b) copy-pasting prose into each `agents/*.md`, or (c) creating a new standalone rule file.
+- Rule:    Place the rule in `rules/compound-engineering/general.mdc` (frontmatter `alwaysApply: true`, globs `*`), which is already the project's single source of truth for cross-cutting agent/skill contracts (memory lifecycle, shared task brief, draft PR, etc.). Do not add to `skills/` — `src/Installer.php` distributes every file under `skills/` verbatim to consumer trees (see `skills-tree-verbatim-distribution`), making prose rules an unintended delivery artifact. Do not copy-paste into each `agents/*.md` — a one-liner reference from each agent to the canonical rule is sufficient and keeps the source of truth in one place. Use the existing `tests/Installer/CompoundEngineeringContentTest.php` to add a pinning assertion for the new rule text so regressions are caught automatically.
+- Example: issue #694 required a temporary-file hygiene contract; adding it to `general.mdc` as `## Temporary-file hygiene (clean up on completion)` (PR #697) with a one-sentence reference from each agent and a pinning test in `CompoundEngineeringContentTest.php` converged with 0 CR findings in iteration 1.
+- Source:  https://github.com/pekral/cursor-rules/pull/697   Added: 2026-06-23
+- Role:    shared
+
+### agent-shared-task-brief-section-append-only — Adding text to Shared task brief sections in agents/*.md must not overwrite or reorder pinned phrases
+
+- Trigger: a task requires adding one or more sentences to the *Shared task brief* section (or any other prose section) of every `agents/*.md` file — e.g. a new cross-cutting rule reference — and the implementer edits the section freely, not knowing which exact phrases are pinned verbatim by `tests/InstallerTest.php` and/or `tests/Installer/CompoundEngineeringContentTest.php`.
+- Rule:    Before editing any section of an `agents/*.md` file, grep `tests/InstallerTest.php` and `tests/Installer/CompoundEngineeringContentTest.php` for the section heading and the surrounding prose to identify every pinned phrase. Append new sentences at the end of the section (or insert at a clearly unpinned position); never reorder existing sentences, split pinned paragraphs, or change wording of already-pinned lines. After editing, run `composer build` locally — a pinning assertion failure (`toContain`) is the precise error that surfaces a broken phrase.
+- Example: PR #697 added a one-sentence hygiene-rule reference to the *Shared task brief* section of 7 agent files; `composer build` passed (295/295, 100 % coverage) because each sentence was appended after the existing pinned prose without reordering. The guard is `tests/Installer/CompoundEngineeringContentTest.php` for `general.mdc` content and `tests/InstallerTest.php` for per-agent delegation contract phrases.
+- Source:  https://github.com/pekral/cursor-rules/pull/697   Added: 2026-06-23
+- Role:    talos

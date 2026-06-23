@@ -122,6 +122,12 @@ list_comments() {
 }
 
 find_latest_id() {
+  # Note: there is an inherent TOCTOU window between `create` and `list` —
+  # a concurrent comment from another actor could win the "latest" slot and
+  # produce a deep-link URL pointing to their comment instead of ours.
+  # This is a cosmetic accuracy issue only (graceful degradation falls back
+  # to the plain issue URL); it is the accepted trade-off of removing the
+  # anchor marker.
   printf '%s' "$1" \
     | jq -r '
         (.comments // [])

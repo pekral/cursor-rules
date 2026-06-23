@@ -157,6 +157,13 @@ test('CR skills publish through the publish helper — GitHub always-new, JIRA a
         expect($body)->toContain('**Last updated:**');
         expect($body)->not->toContain('## Previous CR Status');
     }
+
+    // Issue #695 follow-up: review-output.md must not mention the removed JIRA
+    // anchor marker or claim that follow-up runs edit the comment in place.
+    $reviewOutput = (string) file_get_contents($packageDir . '/skills/code-review/templates/review-output.md');
+    expect($reviewOutput)->not->toContain('{anchor:');
+    expect($reviewOutput)->not->toContain('edit that comment in place');
+    expect($reviewOutput)->toContain('Always-new comment');
 });
 
 test('process-code-review enforces a convergence loop with quiet iterations and a single final publish', function (): void {

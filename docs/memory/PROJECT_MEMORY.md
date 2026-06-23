@@ -89,3 +89,11 @@
 - Example: PR #697 added a one-sentence hygiene-rule reference to the *Shared task brief* section of 7 agent files; `composer build` passed (295/295, 100 % coverage) because each sentence was appended after the existing pinned prose without reordering. The guard is `tests/Installer/CompoundEngineeringContentTest.php` for `general.mdc` content and `tests/Installer/AgentsTest.php` for per-agent delegation contract phrases.
 - Source:  https://github.com/pekral/cursor-rules/pull/697   Added: 2026-06-23
 - Role:    talos
+
+### skills-tree-convention-removal-grep-full-tree — Removing or renaming a shared convention across skills/ requires grepping the full tree, not only the named files
+
+- Trigger: a task removes or renames a shared convention (marker text, function name, section title, or anchor pattern) that is referenced across multiple `skills/` files; the implementer updates only the explicitly named files (e.g. three SKILL.md files listed in the issue body) without searching for every reference.
+- Rule:    Before opening the PR, run `grep -r '<pattern>' skills/` across the whole `skills/` tree to find every occurrence of the convention being removed or renamed — including verbatim-distributed templates (`skills/code-review/templates/`), cross-skill SKILL.md files, and helper scripts. Any file that still mentions the old convention after the change is a live doc artifact shipped to consumer trees by `src/Installer.php` and will produce a Moderate CR finding. Pin the absence of the old pattern in `tests/Installer/CodeReviewContentTest.php` (or the relevant installer content test) with a `not->toContain(...)` assertion so regressions are caught automatically.
+- Example: PR #700 removed `{anchor:cr-comment-actor-<slug>}` from three SKILL.md files, but `skills/code-review/templates/review-output.md` and `skills/process-code-review/SKILL.md` still referenced the anchor and the in-place-edit claim — both missed because the search covered only the named file list. Two Moderate findings in argos iteration 1 caught the drift; fixed in commit `197a442` after a full-tree grep. Pin: `not->toContain('{anchor:')` + `not->toContain('edit that comment in place')` added to `tests/Installer/CodeReviewContentTest.php`.
+- Source:  https://github.com/pekral/cursor-rules/pull/700   Added: 2026-06-23
+- Role:    talos

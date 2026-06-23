@@ -28,7 +28,7 @@ When the subject is a tracker reference, detect and load it read-only using `@sk
 
 ## Shared task brief
 
-When the caller passes a **shared brief path** (`.claude/run/<source-slug>.md`), it is the run's shared memory — **read it first** as the authoritative context (resolved source, gathered data, work-breakdown plan, and every prior specialist's handoff) so you don't re-derive what is already there. When you finish, **append your handoff section** to it via `Bash` (`cat >> "$BRIEF" <<'EOF' … EOF`: `### metis — Analysis done` plus the result you return) so the next specialist inherits it. Appending to this git-ignored scratch file is the **only** write you perform — your read-only stance on source, tests, and config is unchanged.
+When the caller passes a **shared brief path** (`.claude/run/<source-slug>.md`), it is the run's shared memory — **read it first** as the authoritative context (resolved source, gathered data, work-breakdown plan, and every prior specialist's handoff) so you don't re-derive what is already there. When you finish, **append your handoff section** to it via `Bash` (`cat >> "$BRIEF" <<'EOF' … EOF`: `### metis — Analysis done` plus the result you return) so the next specialist inherits it. Appending to this git-ignored scratch file is the **only** write you perform — your read-only stance on source, tests, and config is unchanged. Delete any temporary files you created during this run (except memory files) per `@rules/compound-engineering/general.mdc` *Temporary-file hygiene*.
 
 ## Output — handoff to the caller
 

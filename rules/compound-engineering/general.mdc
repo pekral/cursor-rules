@@ -87,6 +87,23 @@ The loop is ordered by participation: `metis` (if dispatched) → `talos` → `a
 
 Review comments and post-mortems are **inputs** to this memory, not throwaway chat. When a code-review finding or a human correction generalizes beyond the current PR, promote it through the promotion bar so it stops recurring — that is how mistakes and review comments become the team's collective memory. The write happens at task convergence (end of `@skills/resolve-issue`, `@skills/process-code-review`, and the final report), after the review loop reaches 0 Critical / 0 Moderate, via `@skills/record-project-memory`.
 
+## Temporary-file hygiene (clean up on completion)
+
+On completion — both on the final handoff and on a `Blocked` stop — every agent and every skill must delete the temporary and unnecessary files it created during its run:
+
+- **Scratchpad files** written to the session scratchpad directory.
+- **System temp files** created via `/tmp`, `mktemp`, or `tempnam`.
+- **Shared task brief** (`.claude/run/<source-slug>.md`) — scratch memory for the run, not a kept artifact.
+- **Per-brief append lock** (`$BRIEF.lock`) — must not outlive the run.
+- **Working-tree write-lock** (`.claude/run/.daidalos-write.lock`) — released by `daidalos` in step 7.
+- **Temporary `.md` preparation files** created during the run (aligns with `@rules/git/general.mdc` *Cleanup*).
+
+**Memory files are NEVER deleted** — `docs/memory/PROJECT_MEMORY.md` in the target project and any user-level memory files (`~/.claude/.../memory/*.md`) are durable, not temporary; they survive every run. Hand-maintained files (`CLAUDE.md`, `.cursor/rules/project.mdc`) are also excluded from this cleanup.
+
+Scripts and shell steps that create temporary files must bind their cleanup to `trap … EXIT` (shell) or `finally` (other languages) so the cleanup runs even when the script exits with an error.
+
+`daidalos` step 7 is the **reference implementation** of this contract: it removes the shared brief (`rm -f "$BRIEF"`) and releases the write-lock (`rm -rf .claude/run/.daidalos-write.lock`) on both the final report and a `Blocked` stop.
+
 ## What Not To Do
 
 - Do not let a durable lesson live only in a commit message or a closed PR thread — promote the reusable part into the project's memory file.

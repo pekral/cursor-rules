@@ -149,3 +149,20 @@ test('compound memory writes are hooked into convergence steps (issue #626)', fu
     expect($process)->toContain('@skills/record-project-memory/SKILL.md');
     expect($daidalos)->toContain('record-project-memory');
 });
+
+test('compound-engineering rule mandates temporary-file hygiene with a hard memory-files exception (issue #694)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/compound-engineering/general.mdc');
+
+    // The section heading must exist.
+    expect($content)->toContain('## Temporary-file hygiene');
+
+    // The memory-files exception must name the canonical project memory path verbatim.
+    expect($content)->toContain('docs/memory/PROJECT_MEMORY.md');
+
+    // The exception must state that memory files are never deleted.
+    expect($content)->toContain('NEVER deleted');
+
+    // The rule must reference daidalos step 7 as the reference implementation.
+    expect($content)->toContain('daidalos');
+});

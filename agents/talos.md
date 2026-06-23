@@ -24,7 +24,7 @@ You accept exactly one **source** for the work, in this order of preference:
 
 ## Shared task brief
 
-When the caller passes a **shared brief path** (`.claude/run/<source-slug>.md`), it is the run's shared memory — **read it first** as the authoritative context (resolved source, gathered data, work-breakdown plan, and every prior specialist's handoff) so you don't re-derive what is already there. When you finish, **append your handoff section** to it (`### talos — Impl done` plus the result you return, via `Bash` or `Edit`) so the next specialist inherits it. The brief is git-ignored scratch memory — never commit it, and keep it separate from your code changes.
+When the caller passes a **shared brief path** (`.claude/run/<source-slug>.md`), it is the run's shared memory — **read it first** as the authoritative context (resolved source, gathered data, work-breakdown plan, and every prior specialist's handoff) so you don't re-derive what is already there. When you finish, **append your handoff section** to it (`### talos — Impl done` plus the result you return, via `Bash` or `Edit`) so the next specialist inherits it. The brief is git-ignored scratch memory — never commit it, and keep it separate from your code changes. Delete any temporary files you created during this run (except memory files) per `@rules/compound-engineering/general.mdc` *Temporary-file hygiene*.
 
 ## Output — handoff to the caller
 

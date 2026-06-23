@@ -90,8 +90,9 @@ test('CR skills publish through the publish helper — GitHub always-new, JIRA a
     expect($githubScriptBody)->toContain('--input -');
 
     $jiraScriptBody = (string) file_get_contents($jiraScript);
-    expect($jiraScriptBody)->toContain('MARKER_KEY="${3:-cr-comment}"');
-    expect($jiraScriptBody)->toContain('{anchor:${MARKER_KEY}-actor-${ACTOR_SLUG}}');
+    // Issue #695: no hidden anchor marker is appended to the JIRA comment body.
+    expect($jiraScriptBody)->not->toContain('{anchor:');
+    expect($jiraScriptBody)->not->toContain('ACTOR_SLUG');
     // Issue #569: the helper was written against an acli build that no longer
     // matches the installed one. Actor/site come from `acli jira auth status`
     // (no `acli jira me --json`), and comments are posted via the current
@@ -111,7 +112,9 @@ test('CR skills publish through the publish helper — GitHub always-new, JIRA a
     // failed re-list degrades gracefully (returns the plain issue URL, exit 0).
     expect($jiraScriptBody)->toContain('raw="$(acli jira workitem comment list --key "$KEY" --json --paginate 2>/dev/null)" || return 1');
     expect($jiraScriptBody)->toContain('if ! COMMENTS_JSON="$(list_comments)"; then');
-    expect($jiraScriptBody)->toMatch('/if ! grep -Fq "\$MARKER" <<<"\$BODY"; then\s+BODY="\$\{BODY\}\s+\$\{MARKER\}"/');
+    // Issue #695: the new comment is found by most-recent created timestamp, not by marker.
+    expect($jiraScriptBody)->toContain('find_latest_id');
+    expect($jiraScriptBody)->toContain('sort_by(.created');
 
     $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
     $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
@@ -123,9 +126,11 @@ test('CR skills publish through the publish helper — GitHub always-new, JIRA a
     }
 
     expect($jira)->toContain('skills/code-review-jira/scripts/upsert-comment.sh');
-    expect($jira)->toContain('{anchor:cr-comment-actor-<slug>}');
+    // Issue #695: anchor references removed from JIRA skill documentation.
+    expect($jira)->not->toContain('{anchor:cr-comment-actor-<slug>}');
     expect($prSummary)->toContain('skills/code-review-jira/scripts/upsert-comment.sh');
-    expect($prSummary)->toContain('{anchor:cr-comment-actor-<slug>}');
+    // Issue #695: anchor references removed from pr-summary skill documentation.
+    expect($prSummary)->not->toContain('{anchor:cr-comment-actor-<slug>}');
 
     foreach ([$github, $jira] as $skill) {
         expect(stripos($skill, 'always-new comment'))->not->toBeFalse();
@@ -138,7 +143,8 @@ test('CR skills publish through the publish helper — GitHub always-new, JIRA a
     expect($processCodeReview)->toContain('skills/code-review-github/scripts/upsert-comment.sh');
     expect($processCodeReview)->toContain('cr-status');
     expect($processCodeReview)->toContain('<!-- cr-status:actor=<gh-login> -->');
-    expect($processCodeReview)->toContain('{anchor:cr-status-actor-<slug>}');
+    // Issue #695: anchor references removed from process-code-review skill documentation.
+    expect($processCodeReview)->not->toContain('{anchor:cr-status-actor-<slug>}');
     expect($processCodeReview)->not->toContain('Replying to code review from');
     expect($processCodeReview)->not->toContain('Post resolved items and status updates as a new PR comment');
 

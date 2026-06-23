@@ -101,6 +101,22 @@ test('draft-PR-until-review-converges policy is wired through the rule and the P
     expect($merge)->toContain('isDraft == false');
 });
 
+test('merge-github-pr post-merge step includes conditional worktree cleanup with opt-in and used-tree guards (issue #699)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $merge = (string) file_get_contents($packageDir . '/skills/merge-github-pr/SKILL.md');
+
+    // The cleanup step must be conditional on the worktree having been explicitly created.
+    expect($merge)->toContain('opt-in');
+    // The step must reference the git rule's Worktrees / Workspaces section.
+    expect($merge)->toContain('Worktrees / Workspaces');
+    // The step must prohibit forcing removal of an active or dirty tree.
+    expect($merge)->toContain('--force');
+    // The step must include the remove command.
+    expect($merge)->toContain('git worktree remove');
+    // The step must prune leftover metadata.
+    expect($merge)->toContain('git worktree prune');
+});
+
 test('resolve-random skills are not shipped in source skills directory', function (): void {
     $packageDir = dirname(__DIR__, 2);
     expect(is_dir($packageDir . '/skills/resolve-random-github-issue'))->toBeFalse();

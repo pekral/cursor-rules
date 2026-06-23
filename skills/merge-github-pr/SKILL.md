@@ -64,6 +64,11 @@ When the merge was **not** explicitly requested, this exception does not apply �
 ### 4. Post-merge
 
 - Delete branch (if configured)
+- **Remove worktree (opt-in only)** — if an isolated git worktree was explicitly created for this work unit (per `@rules/git/general.mdc` *Worktrees / Workspaces*), remove it now that the merge is complete:
+  1. Verify the worktree is not the currently active working tree and has no uncommitted changes. If it is active or dirty, report the issue and skip removal — never pass `--force`.
+  2. `git worktree remove <path>` — removes the worktree directory and its metadata.
+  3. `git worktree prune` — cleans up any remaining stale worktree metadata.
+  If no worktree was explicitly created for this work unit (the default: agent worked in the shared tree), skip this step entirely.
 - Confirm merge success
 
 ---

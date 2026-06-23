@@ -112,3 +112,25 @@
 - Example: gh-699 run; apollon dispatch denied with "[External System Writes] ... user only asked to report back ... not to post on the issue".
 - Source:  https://github.com/pekral/cursor-rules/pull/702   Added: 2026-06-23
 - Role:    daidalos
+
+### per-tracker-claim-belongs-in-resolve-issue-and-autoresolve — A "claim before work" mechanism needs an idempotent abort-on-conflict claim AND a matching selection-exclusion filter, not a claim alone
+
+- Trigger: a task asks to mark a tracker issue "In progress" / claimed at the start of work so two AI agents do not pick the same task in parallel; the naive implementation only sets a status at work-start.
+- Rule:    A claim alone does not prevent the collision — two runs can both set the same status before either notices. The real guard is two-sided: (1) the claim step must be idempotent, apply-and-verify (re-read, never trust the write exit code — `auto-mode-external-write-blocked`), and ABORT when the issue is already claimed by another run; AND (2) the selection step that picks the next issue must EXCLUDE already-claimed issues. For GitHub that is a claim label (`Resolve_by_AI:in-progress`) + a `-label:"${CLAIM_LABEL}"` negation in the `autoresolve` QUERY; for JIRA a second sanctioned transition helper (clone of `transition-to-code-review.sh`, `progress` name guard, idempotent no-op, acli false-positive re-verify); Bugsnag stays hands-off (documented limit). Release the claim on Blocked/abort BEFORE the PR opens so the issue is pickable again; keep it on success. The cross-cutting principle lives in `rules/compound-engineering/general.mdc`; per-tracker mechanics live in `resolve-issue` step 2 + `autoresolve` selection (per `cross-cutting-rule-belongs-in-compound-engineering`).
+- Example: issue #704 / PR #706 — `rules/compound-engineering/general.mdc` gained `## Claim a tracker issue before working on it`; `skills/code-review-jira/scripts/transition-to-in-progress.sh` (new, exit 4 = already-past-In-Progress collision, exit 5 = acli false-positive); `skills/resolve-issue/SKILL.md` claim sub-step; `skills/autoresolve-oldest-github-issue/SKILL.md` QUERY negation + line-17 sanctioned-write exception. Converged argos+athena 0/0/0 in iteration 1.
+- Source:  https://github.com/pekral/cursor-rules/pull/706   Added: 2026-06-23
+- Role:    shared
+
+### second-sanctioned-jira-transition-clones-the-first — A new sanctioned JIRA transition helper should clone the existing one verbatim rather than extract a shared lib
+
+- Trigger: adding a second auto-allowed JIRA status transition (e.g. an "In Progress" claim alongside the existing "Code Review") and the implementer is tempted to extract the shared defensive logic into a sourced `lib.sh`.
+- Rule:    Keep each transition helper a self-contained standalone script that mirrors `transition-to-code-review.sh` (anchored KEY regex, name guard, idempotent no-op, acli false-positive re-verify). Do NOT extract a sourced `lib.sh`: every file under `skills/` is distributed verbatim into consumer trees by `src/Installer.php` (`skills-tree-verbatim-distribution`), and a sourced library would break the self-contained convention the sibling relies on. Also update `rules/jira/general.mdc` to enumerate BOTH sanctioned transitions ("two exceptions") — the prior "single sanctioned transition" wording is now wrong; grep for the pinned phrase in the installer content tests before rewording it.
+- Source:  https://github.com/pekral/cursor-rules/pull/706   Added: 2026-06-23
+- Role:    talos
+
+### claim-mechanism-converges-clean-when-it-mirrors-an-existing-pattern — daidalos: a feature that mirrors an already-reviewed sibling pattern converges in one CR iteration
+
+- Trigger: orchestrating a feature whose core artifact is structurally near-identical to an existing, already-reviewed artifact (here: a new JIRA transition helper cloning the existing one; a claim label mirroring the existing `ready for review` follow-up).
+- Rule:    Route through metis first when the *mechanism* is ambiguous (which signal, where the contract lives) even if the *code* is a clone — the ambiguity is in the design, not the implementation. Once metis fixes the design, the implementation is low-risk and argos+athena converge in iteration 1. Worth recording so a similar "claim / status / follow-up" request is scoped as metis-then-clone rather than treated as net-new high-risk work.
+- Source:  https://github.com/pekral/cursor-rules/pull/706   Added: 2026-06-23
+- Role:    daidalos

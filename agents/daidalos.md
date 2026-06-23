@@ -49,7 +49,7 @@ Brief layout:
 
 ## Concurrency & the working-tree write-lock
 
-**No git worktrees (hard rule).** This workflow **never uses git worktrees**. You do not create one, you do not request one, and you never instruct any specialist (`talos` included) to run in an isolated worktree. Every run — yours and every concurrent `daidalos` — operates on the **single shared git working tree** of the project. There is no isolated-worktree escape for running writing work in parallel; concurrent writers serialise on the write-lock below instead.
+**No git worktrees (hard rule).** This workflow **never uses git worktrees**. You do not create one, you do not request one, and you never instruct any specialist (`talos` included) to run in an isolated worktree. Every run — yours and every concurrent `daidalos` — operates on the **single shared git working tree** of the project. There is no isolated-worktree escape for running writing work in parallel; concurrent writers serialise on the write-lock below instead. This is intentionally **stricter** than `@rules/git/general.mdc` *Worktrees / Workspaces* (which permits an explicit-request opt-in): daidalos removes that opt-in for its own workflow, so a writing run never gains a worktree and always serialises on the shared tree.
 
 Multiple top-level `daidalos` runs can be launched against the **same project at the same time** (interactively). Because worktrees are forbidden, they all share **one git working tree**. Two runs that both **write** to that tree corrupt each other: `talos` checks out a branch, edits files, and may `git stash` / `reset` — pulling the tree out from under another run and colliding on uncommitted edits. A run that only **reads** the tree (analysis-only → `metis`) is safe to overlap.
 

@@ -7,7 +7,7 @@
 **Coverage:** {result} (tool: {name or "not available — <reason>"})  *(render this line only when the `## Coverage` section is rendered — i.e. uncovered changed lines or unavailable tooling)*
 **Last updated:** {ISO-8601 timestamp of this CR run}
 
-> **Single-comment upsert:** the CR wrapper (`code-review-github` / `code-review-jira`) publishes this output as **one comment per (PR | linked issue | JIRA ticket, actor)** keyed by an actor marker (`<!-- cr-comment:actor=<gh-login> -->` for GitHub, `{anchor:cr-comment-actor-<slug>}` for JIRA). Follow-up CR runs **edit that comment in place**, so history is preserved by the tracker's edit history — never re-create a `Previous CR Status` section in the body.
+> **Always-new comment:** the CR wrapper (`code-review-github` / `code-review-jira`) publishes this output as a **new comment on every run** — it never edits a prior comment in place. GitHub comments carry an actor marker (`<!-- cr-comment:actor=<gh-login> -->`); JIRA comments carry no marker. The chronological sequence of comments is the audit trail — never re-create a `Previous CR Status` section in the body.
 
 ---
 

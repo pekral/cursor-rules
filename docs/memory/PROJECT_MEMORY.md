@@ -97,3 +97,10 @@
 - Example: PR #700 removed `{anchor:cr-comment-actor-<slug>}` from three SKILL.md files, but `skills/code-review/templates/review-output.md` and `skills/process-code-review/SKILL.md` still referenced the anchor and the in-place-edit claim — both missed because the search covered only the named file list. Two Moderate findings in argos iteration 1 caught the drift; fixed in commit `197a442` after a full-tree grep. Pin: `not->toContain('{anchor:')` + `not->toContain('edit that comment in place')` added to `tests/Installer/CodeReviewContentTest.php`.
 - Source:  https://github.com/pekral/cursor-rules/pull/700   Added: 2026-06-23
 - Role:    talos
+
+### post-convergence-comment-publish-needs-explicit-scope — Posting the feedback comment to the source tracker is blocked when the user only asked to "report back"
+- Trigger: a full-delivery run reaches the post-convergence reporting step (step 6a) and dispatches apollon/pr-summary to publish a "Hotovo — co se změnilo a jak otestovat" comment on the source issue/PR.
+- Rule:    publishing an external comment under the user's identity is a separate consent surface from resolving+merging. When the request says "report back" (to the user) without asking to post on the tracker, the auto-mode classifier denies the publish. Fall back to the in-chat summary and re-dispatch apollon for the final scoped validation only, carrying the How-to-test summary into the final report yourself. Don't retry the publish.
+- Example: gh-699 run; apollon dispatch denied with "[External System Writes] ... user only asked to report back ... not to post on the issue".
+- Source:  https://github.com/pekral/cursor-rules/pull/702   Added: 2026-06-23
+- Role:    daidalos

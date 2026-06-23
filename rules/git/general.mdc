@@ -16,7 +16,7 @@ globs: ["*"]
 ## Worktrees / Workspaces
 - **Do not create git worktrees or separate workspaces automatically.** By default an agent works in the current branch and working tree (a feature / fix branch off the default branch is enough); never run `git worktree add`, clone into a side directory, or spin up an isolated workspace on your own initiative.
 - Create an isolated worktree **only on explicit request** — when the caller / user asks for it, or when a workflow the user explicitly opted into (e.g. parallel multi-unit orchestration) genuinely requires per-unit isolation to avoid corrupting a shared tree. Absent that explicit request, stay in the current tree.
-- When an isolated worktree *was* requested, remove it once the work unit is done (`git worktree remove`) so no orphaned trees are left behind.
+- When an isolated worktree *was* requested, remove it after the PR for the work unit has been merged (deployed) — the post-merge step of `@skills/merge-github-pr/SKILL.md` owns this. Before removing, verify the worktree is not the currently active working tree and has no uncommitted changes; never pass `--force`. Run `git worktree remove <path>` followed by `git worktree prune` to clean up metadata. This keeps git clean and leaves no orphaned trees behind.
 
 ## Pull Policy
 - Resolve the default branch by name first — it is `main` on some repos and `master` on others. Never hardcode `origin/main`; on a `master`-default repo that reference does not exist and the command fails. Derive it once: `DEFAULT_BRANCH="$(git symbolic-ref --short refs/remotes/origin/HEAD | sed 's@^origin/@@')"`.
@@ -78,6 +78,7 @@ A pull request is a **Draft** for as long as it is **not yet ready to merge and 
     - Merge into `main`
     - Close the PR
     - Delete the branch
+    - Remove the worktree if one was created for this work unit (see *Worktrees / Workspaces* above for the opt-in / safety rules; `@skills/merge-github-pr/SKILL.md` §4 owns the step)
     - Switch locally to `main`
     - Pull latest changes
 

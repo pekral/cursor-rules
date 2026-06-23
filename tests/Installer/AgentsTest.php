@@ -298,19 +298,33 @@ test('daidalos marks a cross-cutting mix of requirements as an EPIC with linked 
     expect($skill)->toContain('Part of #<parent>');
 });
 
-test('daidalos fans out analysis-only issues to metis in parallel when one request resolves multiple sources', function (): void {
+test('daidalos processes multiple resolved sources sequentially and never fans them out in parallel', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');
 
-    // The concurrency section turns analysis-only overlap-safety into an active parallel fan-out.
-    expect($content)->toContain('Parallel analysis fan-out');
-    expect($content)->toContain('dispatch their `metis` runs in parallel');
-    // Read-only analyses fan out; full-delivery still serialises on the single write-lock.
-    expect($content)->toContain('Only the read-only analyses fan out');
-    // Each parallel metis gets its own per-source brief so concurrent runs never collide.
+    // The concurrency section processes a single request's multiple sources strictly one at a time.
+    expect($content)->toContain('Sequential processing of multiple sources');
+    expect($content)->toContain('one at a time, strictly sequentially — never in parallel');
+    // The analysis-only branch dispatches metis sequentially, not as a parallel fan-out.
+    expect($content)->toContain('dispatch their `metis` runs one after another — strictly sequentially, never in parallel');
+    // No fan-out across sources in one message.
+    expect($content)->toContain('Do **not** fan work out across sources');
+    // Each source still gets its own per-source brief.
     expect($content)->toContain('own** shared brief');
     // Step 3 classifies each resolved source independently when several were resolved.
     expect($content)->toContain('classify **each one independently**');
+});
+
+test('daidalos forbids git worktrees and serialises concurrent writers on the single shared working tree', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+
+    // Explicit hard rule: no git worktrees anywhere in the workflow.
+    expect($content)->toContain('No git worktrees (hard rule)');
+    expect($content)->toContain('never uses git worktrees');
+    // Concurrent writers serialise on the single shared tree — no isolated-worktree escape.
+    expect($content)->toContain('single shared git working tree');
+    expect($content)->toContain('there is no isolated-worktree toplevel');
 });
 
 test('agents directory ships the apollon test-engineer subagent with required frontmatter', function (): void {

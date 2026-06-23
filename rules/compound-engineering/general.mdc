@@ -104,6 +104,19 @@ Scripts and shell steps that create temporary files must bind their cleanup to `
 
 `daidalos` step 7 is the **reference implementation** of this contract: it removes the shared brief (`rm -f "$BRIEF"`) and releases the write-lock (`rm -rf .claude/run/.daidalos-write.lock`) on both the final report and a `Blocked` stop.
 
+## Claim a tracker issue before working on it
+
+Any run that begins implementing a tracker issue **must claim it atomically before any code change** — immediately after the open/active state gate passes and before the first file is written. The claim signals to concurrent runs that this issue is already being worked on.
+
+- **Claim early and idempotently.** Re-read the issue (via the deterministic loader) first; if the claim signal is already present from a *different* run, **abort** — do not implement. If already claimed by *this* run (re-entry), treat it as a no-op and continue. Apply the claim, then verify it actually landed (external writes can be silently blocked in auto-mode); if it did not land, abort rather than proceed unclaimed.
+- **Abort-on-conflict is the real collision guard.** The window between the re-read and the apply is not perfectly atomic, but it collapses the race to the gap between two loader reads — adequate to stop two long-running pipelines from working the same issue in parallel.
+- **Exclude claimed issues from selection.** The autoresolve selection query must filter out already-claimed issues so the same issue is never selected by two parallel runs. Combine this with the abort-on-conflict as a backstop for genuine races after selection.
+- **Release on Blocked / abort (tracker-specific).** When a run stops `Blocked` or fails before opening a PR, it must release its own claim so the issue is pickable again. Per-tracker defaults: GitHub — release the claim label; JIRA — no auto-revert (transitions back are human-only), but the Blocked handoff names the issue for a human to reset. Document the chosen behavior inline.
+- **Claim is NOT released on success.** Once the PR opens, the existing `ready for review` label / Code Review transition becomes the active work-state signal; the in-progress claim stays and is harmless (the issue is no longer an open unclaimed candidate in the selection query).
+- **Bugsnag has no auto-claim.** Bugsnag keeps its existing stance (no auto status change at the start of work). Parallel-collision protection for Bugsnag is a known limitation — rely on the human/linked-issue workflow there.
+
+The per-tracker mechanics (claim label name, helper script call, selection query negation) live in `@skills/resolve-issue/SKILL.md` and `@skills/autoresolve-oldest-github-issue/SKILL.md`. This section owns the principle; those skills own the execution.
+
 ## What Not To Do
 
 - Do not let a durable lesson live only in a commit message or a closed PR thread — promote the reusable part into the project's memory file.

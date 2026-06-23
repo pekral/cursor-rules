@@ -150,6 +150,29 @@ test('compound memory writes are hooked into convergence steps (issue #626)', fu
     expect($daidalos)->toContain('record-project-memory');
 });
 
+test('compound-engineering rule mandates early idempotent claim before work starts (issue #704)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/compound-engineering/general.mdc');
+
+    // The section heading must exist.
+    expect($content)->toContain('## Claim a tracker issue before working on it');
+
+    // Core principle: claim early, idempotently, abort-on-conflict.
+    expect($content)->toContain('Claim early and idempotently');
+    expect($content)->toContain('Abort-on-conflict is the real collision guard');
+    expect($content)->toContain('Exclude claimed issues from selection');
+
+    // Release-on-Blocked semantics.
+    expect($content)->toContain('Release on Blocked');
+
+    // Bugsnag no-claim documented as known limitation.
+    expect($content)->toContain('Bugsnag has no auto-claim');
+
+    // Reference back to the skills that own the execution.
+    expect($content)->toContain('@skills/resolve-issue/SKILL.md');
+    expect($content)->toContain('@skills/autoresolve-oldest-github-issue/SKILL.md');
+});
+
 test('compound-engineering rule mandates temporary-file hygiene with a hard memory-files exception (issue #694)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/rules/compound-engineering/general.mdc');

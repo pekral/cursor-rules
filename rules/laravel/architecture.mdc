@@ -138,6 +138,7 @@ globs:
   - `#[MapName(...)]`
 - Never override `from()` solely to rename keys or perform trivial manual array mapping.
 - Custom named constructors such as `fromModel()`, `fromRequest()`, or `fromArray()` are valid when they perform meaningful domain-specific transformation.
+- A request → DTO named constructor (`fromRequest()`) should be invoked from the owning **FormRequest** (via a public `toDto()` method) rather than from the controller body, so the request→DTO transformation lives next to the request's validation rules (see **Controllers and Other Entry Points**).
 - DTO classes should be `final readonly` with promoted constructor properties where practical.
 - Place DTOs under `app/Dto/{Domain}` and use a `Data` suffix.
 
@@ -204,6 +205,7 @@ globs:
 ## Controllers and Other Entry Points
 - Controllers must stay slim and delegate orchestration to Actions.
 - **Every controller method that consumes request input — resource controller actions (`store`, `update`, `index`, `show`, …), single-action `__invoke()` controllers, and any custom method — must type-hint a project-owned `FormRequest` subclass. Never type-hint the generic `Illuminate\Http\Request`, never leave the parameter untyped, and never read `$request->*` off a generic `Request` instance from inside the controller.** The FormRequest is the single home for that endpoint's validation rules (`rules()`), authorization (`authorize()`), input casting / preparation (`prepareForValidation()`), and any per-request shaping; the controller body reads the already-validated payload via `$request->validated()` (or typed accessors / a DTO named constructor) and forwards it to the Action.
+- **Request → DTO transformation belongs in the FormRequest, not the controller.** When a controller needs a typed DTO built from request input, expose it as a public method on the FormRequest (canonically `toDto(): SomeData`) and call `$request->toDto()` in the controller — do **not** call `SomeData::from($request)` / `SomeData::fromRequest($request)` (or any DTO factory taking the request) directly in the controller body. The FormRequest's `toDto()` may internally delegate to the DTO named constructor (`SomeData::fromRequest($this)`, see **DTOs** / **Data Modification (DRY)**) — the named constructor stays valid, it just runs inside the FormRequest so the request→DTO shaping has one home next to the request's rules. Move the construction where a FormRequest already exists for the endpoint; when no FormRequest exists or the mapping is a one-off with no reuse, this is a recommendation, not a hard requirement.
 - **One dedicated FormRequest per request shape.** Do not reuse a single FormRequest across unrelated endpoints, do not share one FormRequest across HTTP verbs with diverging rule sets, and do not branch the rule set on `$this->method()` inside `rules()`. Each request shape gets its own class.
 - Place FormRequests under `app/Http/Requests/{Domain}/` and use the `Request` suffix (`StoreInvoiceRequest`, `UpdateUserProfileRequest`, `ListProjectsRequest`).
 - FormRequest classes must compose validation rules from reusable traits in `app/Concerns/` (see **Validation Rules (Traits)**) and must never duplicate rule arrays already published by an existing trait or custom Rule class.
@@ -292,6 +294,7 @@ globs:
   - calling Actions via `->__invoke()` instead of `$action(...)`
   - DTOs overriding `from()` only for key renaming instead of using mapping attributes
   - a public method returning a structured associative array / array shape where a typed DTO should be returned (see **DTOs** → *Public methods return typed DTOs, not associative arrays*) — excludes single scalars, homogeneous lists / Collections, and array shapes fixed by a framework / vendor contract (`toArray()`, `jsonSerialize()`, `Arrayable`, `casts()`, FormRequest `rules()`)
+  - request → DTO transformation called directly in a controller body (`SomeData::from($request)` / `SomeData::fromRequest($request)` or any DTO factory taking the request) instead of being exposed as a `toDto()` method on the endpoint's FormRequest and read via `$request->toDto()` — applies where a FormRequest already exists for the endpoint; one-off mappings with no reuse and endpoints with no FormRequest are exempt (see **Controllers and Other Entry Points**)
   - plain service classes used where an Action is the better fit
   - pass-through Action whose `__invoke()` only forwards a single Service / Facade / Model Service call with no orchestration of its own — inline the single-use method into the Action, or remove the Action and call the reused service method directly (see the **Pass-through Action rule**)
   - Data Builder class using Action pattern (`__invoke()`) instead of named public methods

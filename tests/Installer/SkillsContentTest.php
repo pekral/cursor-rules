@@ -321,6 +321,7 @@ test('new JIRA agent scripts are shipped, executable, and documented', function 
         'gather-issue-context.sh' => 'Usage: gather-issue-context.sh <KEY|URL>',
         'parse-comments.sh' => 'Usage: parse-comments.sh <KEY|URL>',
         'transition-to-code-review.sh' => 'Usage: transition-to-code-review.sh <KEY|URL> [<STATUS>]',
+        'transition-to-in-progress.sh' => 'Usage: transition-to-in-progress.sh <KEY|URL> [<STATUS>]',
     ];
 
     foreach ($scripts as $name => $usage) {
@@ -358,6 +359,54 @@ test('transition-to-code-review refuses non-review targets and re-verifies the l
     expect($content)->toContain('exit 5');
 });
 
+test('transition-to-in-progress refuses non-progress targets, is idempotent, and catches false positives (issue #704)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review-jira/scripts/transition-to-in-progress.sh');
+
+    // Guard: only a progress status is allowed.
+    expect($content)->toContain('is not an In Progress status');
+    // Idempotent no-op when already in the target status.
+    expect($content)->toContain('already in progress');
+    // Past-In-Progress guard: exit 4 when issue is already claimed/past.
+    expect($content)->toContain('exit 4');
+    expect($content)->toContain('past In Progress');
+    // Post-transition re-read so an acli false-positive "looped transition" is caught.
+    expect($content)->toContain('acli jira workitem transition --key "$KEY" --status "$TARGET" --yes');
+    expect($content)->toContain('exit 5');
+});
+
+test('resolve-issue claims the GitHub issue before implementation and releases on Blocked (issue #704)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    // Claim happens immediately after the open-state gate.
+    expect($content)->toContain('Claim the issue immediately');
+    expect($content)->toContain('Resolve_by_AI:in-progress');
+    // Abort when already claimed by another run.
+    expect($content)->toContain('already claimed');
+    // Apply-and-verify: external writes can be silently blocked.
+    expect($content)->toContain('re-read and verify');
+    // JIRA claim via the new helper.
+    expect($content)->toContain('skills/code-review-jira/scripts/transition-to-in-progress.sh');
+    // Release on Blocked/abort before PR.
+    expect($content)->toContain('Release on Blocked');
+    expect($content)->toContain('--remove-label');
+    // Bugsnag: no claim.
+    expect($content)->toContain('no claim step');
+});
+
+test('autoresolve QUERY excludes already-claimed issues via label negation (issue #704)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/autoresolve-oldest-github-issue/SKILL.md');
+
+    // QUERY must include the -label: negation to skip already-claimed issues.
+    expect($content)->toContain('-label:');
+    expect($content)->toContain('Resolve_by_AI:in-progress');
+    expect($content)->toContain('CLAIM_LABEL');
+    // Line-17 amendment: claim label is a sanctioned write owned by the delegated skill.
+    expect($content)->toContain('sanctioned write owned by the delegated skill');
+});
+
 test('JIRA context-consuming skills offer gather-issue-context.sh', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $skills = [
@@ -380,6 +429,16 @@ test('jira rule permits the single code-review transition via the helper only', 
     expect($content)->toContain('transition-to-code-review.sh');
     expect($content)->toContain('human-only');
     expect($content)->toContain('Never change JIRA issue status');
+});
+
+test('jira rule permits two sanctioned transitions and names both helpers (issue #704)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/jira/general.mdc');
+
+    expect($content)->toContain('transition-to-in-progress.sh');
+    expect($content)->toContain('transition-to-code-review.sh');
+    // Both helpers must be mentioned as sanctioned exceptions.
+    expect($content)->toContain('two exceptions');
 });
 
 test('resolve-issue moves the issue to code review via the transition helper after the PR is open', function (): void {

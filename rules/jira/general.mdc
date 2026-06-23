@@ -6,7 +6,7 @@ globs: []
 
 ## JIRA Rules
 
-- Never change JIRA issue status, with one exception: a single allowed transition to the project's Code Review status, performed only via `skills/code-review-jira/scripts/transition-to-code-review.sh`. Every other transition (To Do, In Progress, Done, Closed, …) stays human-only. The helper refuses any non-review target and re-reads the status to confirm the issue actually reached the review column before reporting success. Each project may name that column differently (e.g. "Code Review", "In Review", "Review / feedback"), so the target is resolved and validated by the helper, never hardcoded.
+- Never change JIRA issue status, with two exceptions: (1) an early transition to the project's In Progress status at the start of work, performed only via `skills/code-review-jira/scripts/transition-to-in-progress.sh`; (2) a transition to the project's Code Review status when the PR opens, performed only via `skills/code-review-jira/scripts/transition-to-code-review.sh`. Every other transition (To Do, Done, Closed, …) stays human-only. Both helpers refuse any out-of-scope target, re-read the status to confirm the issue actually reached the column before reporting success, and are idempotent (no-op when already in the target status). Each project may name these columns differently, so the target is resolved and validated by each helper, never hardcoded.
 
 ## Tooling
 - Use `acli` as the primary tool for all JIRA operations (read, comment, attachments).

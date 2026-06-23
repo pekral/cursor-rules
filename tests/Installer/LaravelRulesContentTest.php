@@ -223,6 +223,16 @@ test('laravel rules carry the parallel Shared Concerns section and Layer Respons
     expect($content)->toContain('Validation rule traits (see the **Validation** section below) are one specific worked example');
 });
 
+test('architecture rules require request->DTO transformation in the FormRequest, not the controller (issue #698)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($content)->toContain('Request → DTO transformation belongs in the FormRequest, not the controller.');
+    expect($content)->toContain('toDto()');
+    expect($content)->toContain('`$request->toDto()`');
+    expect($content)->toContain('do **not** call `SomeData::from($request)`');
+});
+
 test('laravel-security skill carries the secure-defaults reference and checklist', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/laravel-security/SKILL.md');

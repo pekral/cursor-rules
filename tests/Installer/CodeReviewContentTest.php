@@ -753,3 +753,13 @@ test('code-review wires the API rule and api-review skill into every CR run (iss
     expect($content)->toContain('@skills/api-review/SKILL.md');
     expect($content)->toContain('`@rules/php/core-standards.mdc`, `@rules/api/general.mdc`, `@rules/code-review/general.mdc`');
 });
+
+test('code-review skill flags request->DTO transformation called directly in the controller body (issue #698)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('**Request → DTO transformation belongs in the FormRequest, not the controller**');
+    expect($content)->toContain('`$request->toDto()`');
+    expect($content)->toContain('Severity: **Moderate**');
+    expect($content)->toContain('`@rules/laravel/architecture.mdc` Controllers and Other Entry Points');
+});

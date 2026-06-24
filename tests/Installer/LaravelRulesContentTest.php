@@ -242,3 +242,16 @@ test('laravel-security skill carries the secure-defaults reference and checklist
     expect($content)->toContain('@rules/security/backend.md');
     expect($content)->toContain('@skills/security-review/SKILL.md');
 });
+
+test(
+    'architecture rules require match() over an enum mode to live in a Data Validator when pekral/arch-app-services is installed (issue #708)',
+    function (): void {
+        $packageDir = dirname(__DIR__, 2);
+        $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+    
+        expect($content)->toContain('`match()` over an enum mode is domain validation and must live in a Data Validator');
+        expect($content)->toContain('only when `pekral/arch-app-services` is installed');
+        expect($content)->toContain('ContactChangeDataValidator::evaluate(ContactChangeCondition $condition, ChangeModel $change): bool');
+        expect($content)->toContain('vendor/pekral/arch-app-services');
+    },
+);

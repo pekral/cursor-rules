@@ -763,3 +763,37 @@ test('code-review skill flags request->DTO transformation called directly in the
     expect($content)->toContain('Severity: **Moderate**');
     expect($content)->toContain('`@rules/laravel/architecture.mdc` Controllers and Other Entry Points');
 });
+
+test(
+    'code-review skill enforces acceptance-criteria use-case coverage and test business logic in Assignment Conformance Gate (issue #708)',
+    function (): void {
+        $packageDir = dirname(__DIR__, 2);
+        $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    
+        // Acceptance-criteria use-case coverage bullet in the Validation section
+        expect($content)->toContain('**Acceptance-criteria use-case coverage (mandatory):**');
+        expect($content)->toContain('at least one automated test exists whose description and assertions directly target that criterion or scenario');
+        expect($content)->toContain('Any acceptance criterion without a dedicated use-case test is a **Critical** finding');
+    
+        // Testing logic verified in Requirements → changes (completeness) direction
+        expect($content)->toContain('including the **testing logic**');
+        expect($content)->toContain('tests added or modified by the diff must themselves assert the correct, assignment-required behavior');
+        expect($content)->toContain('Any unmet requirement (in production code or in test logic) is already a **Critical** finding raised there');
+    },
+);
+
+test('code-review skill flags enum-mode match() in Data Validator bullet and New storage reuse analysis (issue #708)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    // enum-mode match() added to the inline validation guards bullet
+    expect($content)->toContain('enum-mode `match()` belong in a Data Validator');
+    expect($content)->toContain('ContactChangeDataValidator::evaluate(ContactChangeCondition $condition, ChangeModel $change): bool');
+    expect($content)->toContain('Applies only when `pekral/arch-app-services` is installed');
+
+    // New storage reuse analysis bullet
+    expect($content)->toContain('**New storage reuse analysis**');
+    expect($content)->toContain('Schema::create(...)');
+    expect($content)->toContain('Can this data be stored in an existing storage without a drastic impact on performance?');
+    expect($content)->toContain('Severity: **Moderate** (see `@rules/sql/optimalize.mdc` *New storage reuse analysis*)');
+});

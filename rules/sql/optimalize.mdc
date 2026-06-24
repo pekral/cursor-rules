@@ -185,6 +185,9 @@ WITH RECURSIVE category_tree AS (
 SELECT * FROM category_tree;
 ```
 
+## New storage reuse analysis
+When a diff introduces a new storage surface — a new DB table (`Schema::create(...)` in a migration), a new cache store or Redis namespace, a new filesystem disk, or a new NoSQL / DynamoDB table — an explicit analysis must appear in the PR description or a PR comment before the change merges. The analysis must answer: *"Can this data be stored in an existing storage without a drastic impact on performance?"* It must name the candidate existing storage(s) evaluated and state the reason they were ruled out — or confirm that an existing storage is reused instead. A diff that adds a new storage surface without this documented analysis is a **Moderate** finding in code review (see `@skills/code-review/SKILL.md` *New storage reuse analysis*). Do not flag migrations that only add a column or index to an existing table — only net-new storage surfaces trigger this check.
+
 ## Caching at DB Level
 - Use query result caching for repeated expensive queries with same parameters.
 - Invalidate cache on relevant data changes.

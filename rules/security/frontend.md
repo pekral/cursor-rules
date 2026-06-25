@@ -37,6 +37,13 @@ Apply the same CONTENT / RENDER rules as `@rules/security/backend.md` *Malicious
 - **Do not trust the client-supplied MIME type.** `File.type` in the browser reflects what the OS / browser reports — it is attacker-controllable. Never use it as the sole gate for accepting or rendering a file. Always defer to the backend's server-side MIME and magic-byte validation result.
 - **Previewing file content in the browser.** When rendering a preview (text, image, PDF) before upload, use a sandboxed `<iframe sandbox>` or a Blob URL with a strict Content-Type; never inject raw file bytes into the main document's DOM.
 
+## Hidden / Invisible Characters in Stored Fields (issue #714)
+Apply the same INPUT / STORAGE rules as `@rules/security/backend.md` *Hidden / Invisible Characters in Stored Fields* — the durable defense is server-side NFC normalization and invisible / bidi / control-character stripping at the write boundary, before the value reaches the database. Client-side specifics:
+
+- **Never rely on client-side stripping as the security control.** Trimming zero-width or bidi characters in JavaScript before submit is a UX nicety only; the attacker controls the request and can submit the raw bytes directly. The authoritative sanitization is the backend write-boundary rule — defer to it.
+- **Render stored values defensively.** When a value that may contain bidirectional control characters is displayed (a username, comment, filename), isolate it with `unicode-bidi: isolate` / `<bdi>` or strip the bidi range at render so a persisted Trojan-Source override cannot spoof the surrounding UI. This is render-side defense in depth; it does not replace cleaning the stored bytes.
+- **Do not inject user-controlled strings into the DOM unescaped** (see *Output Handling* above) — hidden-character stripping is about the stored value, output escaping is a separate, still-mandatory control.
+
 ## CSS Handling
 - Sanitize all user inputs before applying them to style properties.
 - Avoid dynamic inline styles where possible.

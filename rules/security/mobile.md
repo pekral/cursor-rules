@@ -36,6 +36,13 @@ Apply the same CONTENT / RENDER rules as `@rules/security/backend.md` *Malicious
 - **Shared / opened files must be validated.** Files opened via the OS share sheet, document picker, or deep link (iOS `UIDocumentPickerViewController`, Android `Intent.ACTION_OPEN_DOCUMENT`) arrive as attacker-controlled input. Validate the file's MIME and magic bytes server-side and treat filename and metadata fields as untrusted strings — escape or sanitize before displaying in UI.
 - **Do not render filenames or metadata into HTML contexts.** If the app embeds file metadata (name, EXIF tags, PDF author) into HTML rendered inside a WebView, escape all values as HTML entities; never concatenate raw strings into HTML.
 
+## Hidden / Invisible Characters in Stored Fields (issue #714)
+Apply the same INPUT / STORAGE rules as `@rules/security/backend.md` *Hidden / Invisible Characters in Stored Fields* — the durable defense is server-side NFC normalization and invisible / bidi / control-character stripping at the write boundary, before the value reaches the database or the backend API. Mobile-specific specifics:
+
+- **Sanitize on the server, not only in the app.** Stripping zero-width / bidi / control characters in the client before the API call is a UX nicety; a tampered or repackaged app, or a direct API call, submits the raw bytes. The backend write-boundary rule is the authoritative control.
+- **Isolate bidirectional text on render.** When displaying a stored value that may carry bidi control characters (username, comment, filename) in a native label or `WKWebView` / Android `WebView`, isolate it (`<bdi>` / `unicode-bidi: isolate` in WebView, or strip the bidi range) so a persisted Trojan-Source override cannot spoof the surrounding UI.
+- **Treat shared / deep-link strings as untrusted** (see *Malicious File Upload Content* above) — filenames and metadata arriving via the share sheet or a deep link can carry the same invisible characters; normalize and strip them server-side before persisting.
+
 ## WebView Usage
 - Limit WebView access to trusted URLs, and disable JavaScript by default.
 - Enforce HTTPS in WebView to prevent loading insecure content.

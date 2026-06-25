@@ -102,6 +102,15 @@ Severity: **Critical** when the indicator maps to active RCE / MITM / persistenc
 - polyglot files served from application origin without `nosniff` / CSP
 - missing `Content-Disposition: attachment` or `X-Content-Type-Options: nosniff` on upload-serving endpoints
 
+### Hidden / Invisible Characters in Stored Fields (issue #714)
+Walk every code path the diff adds or modifies that persists a user-controlled string to the database — Eloquent `create()` / `update()` / `fill()` / `save()` / mass assignment, query-builder `insert()` / `update()`, raw column writes, and the FormRequest / Data Validator feeding them — against `@rules/security/backend.md` *Hidden / Invisible Characters in Stored Fields* (and the frontend / mobile mirrors). Raise a finding when a user-controlled string is written to a column without NFC normalization and invisible-character handling:
+- **Zero-width / invisible** — `U+200B`–`U+200D`, `U+2060`, `U+FEFF`, `U+00AD`, `U+180E` (uniqueness / search / length-check bypass, data smuggling past moderation).
+- **Bidirectional control (persisted Trojan Source)** — `U+202A`–`U+202E`, `U+2066`–`U+2069` (spoofed render of a stored name / comment / filename; the persisted analogue of CVE-2021-42574).
+- **C0 / C1 control** — `U+0000`–`U+0008`, `U+000B`, `U+000C`, `U+000E`–`U+001F`, `U+007F`–`U+009F` (`NUL` truncation; log / terminal / CRLF injection when the value is later emitted).
+- **Homoglyph / confusable / non-NFC on identity fields** — username, email local-part, slug, domain, or any uniqueness / allow-deny key (impersonation, constraint bypass).
+
+The **Suggested Fix** normalizes to **NFC** and strips / rejects the disallowed ranges at the input boundary (a reusable validation rule, a Data Validator, or a central attribute cast — never ad-hoc per call site), so the stored bytes are clean for every later consumer; identity-sensitive fields add a single-script / confusable check before the uniqueness lookup. Severity: **Critical** when the field drives a security decision (authentication identifier, authorization key, allow / deny list, identity uniqueness, financial reference); **Medium** for general user-content fields. Scope boundary — this owns the stored byte content (INPUT / STORAGE); output encoding (XSS) and file-content render (issue #680) stay with their own rules, one finding per surface.
+
 ### Dependencies & Configuration
 - vulnerable packages (`composer.lock`, `composer audit`)
 - unsafe configuration (uploads, execution, credentials)

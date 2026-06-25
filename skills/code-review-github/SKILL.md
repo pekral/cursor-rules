@@ -58,7 +58,7 @@ Every CR run is also a verification that the reviewer feedback **already on the 
 5. **Record the fulfillment verdict on the summary line:** `reviewer comments: M/N fulfilled` (M = fulfilled or rejected-with-reason, out of N actionable). When `M == N` the gate is clean; when `M < N` it has raised `N − M` Critical findings, so the run cannot converge until the next `process-code-review` round addresses them.
 
 ### 2. Pre-checks
-- **CI coverage of checks.** From the `statusCheckRollup[]` in the loaded PR JSON, identify which checks ran on the PR head commit (`headRefOid`) and their result (`state` / `conclusion`). Pass this CI check map to the Coverage gate decision in `@skills/code-review/SKILL.md` (Validation → Coverage gate → Reuse CI results) so only missing or non-green checks are run locally.
+- **CI coverage of checks.** From the `statusCheckRollup[]` in the loaded PR JSON, identify which checks ran on the PR head commit (`headRefOid`) and their result (`state` / `conclusion`). Pass this CI check map to the Coverage gate decision in `@skills/code-review/SKILL.md` (Validation → Coverage gate; the Reuse-CI-results detail now lives in `@rules/code-review/general.mdc` *Validation & Coverage Gate*) so only missing or non-green checks are run locally.
 - If PR has merge conflicts → cancel review
 
 ### 3. Run Reviews

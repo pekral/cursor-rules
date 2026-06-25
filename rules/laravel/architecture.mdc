@@ -90,6 +90,12 @@ globs:
   - `$action($payload)`
   - never `$action->__invoke($payload)`
 
+### Action scope: concrete use case, not general logic
+- **An Action is the orchestration of one concrete use case — it composes several collaborators (Model Services, Data Validators, Data Builders, other Actions) into a single business flow.** The reference shape is `pekral/arch-app-services` `examples/Actions/User/CreateUser.php`: validate the input, normalize it through a Data Builder, persist via a Model Service, then call a follow-up Action — the Action *coordinates* the steps, but each concrete step lives in the dedicated layer it belongs to.
+- **General / reusable logic must not live inside an Action.** Any logic in `__invoke()` that is not the use-case-specific coordination — a reusable validation rule, a data transformation / normalization, a single-model read or write, or a computation that another flow already reuses or could reuse — must be extracted into the layer that owns it and called from the Action: a **Model Service** for single-model domain operations, a **Data Validator** for input validation, a **Data Builder** for mapping / normalization, a **Repository** / **ModelManager** for reads / writes. The Action keeps only the orchestration specific to this one use case.
+- **The Action pattern earns its keep when the flow combines more than one collaborator.** Complex business logic that brings several Services / collaborators together in one place is exactly what an Action is for. A step that touches only a single model or a single concern is not "Action work" — it belongs in that concern's dedicated class, invoked from the Action (or, when the Action adds no orchestration of its own, called directly from the entry point — see the **Pass-through Action rule**).
+- **Test for misplaced general logic:** if a block inside `__invoke()` could be lifted verbatim into another Action without modification, it is general logic in the wrong home — move it to a Model Service / Data Validator / Data Builder and call it from both Actions instead of duplicating it.
+
 ## Model Services
 - Services that primarily work with a specific Eloquent model must extend `BaseModelService`.
 - BaseModelService implementations must define:
@@ -297,6 +303,7 @@ globs:
   - a public method returning a structured associative array / array shape where a typed DTO should be returned (see **DTOs** → *Public methods return typed DTOs, not associative arrays*) — excludes single scalars, homogeneous lists / Collections, and array shapes fixed by a framework / vendor contract (`toArray()`, `jsonSerialize()`, `Arrayable`, `casts()`, FormRequest `rules()`)
   - request → DTO transformation called directly in a controller body (`SomeData::from($request)` / `SomeData::fromRequest($request)` or any DTO factory taking the request) instead of being exposed as a `toDto()` method on the endpoint's FormRequest and read via `$request->toDto()` — applies where a FormRequest already exists for the endpoint; one-off mappings with no reuse and endpoints with no FormRequest are exempt (see **Controllers and Other Entry Points**)
   - plain service classes used where an Action is the better fit
+  - an Action carrying general / reusable logic that is not use-case-specific orchestration — a reusable computation, a single-model operation, or a step another flow already reuses (or could reuse) — that should live in a Model Service / Data Validator / Data Builder / Repository / ModelManager and be called from the Action (see **Action scope: concrete use case, not general logic**); the litmus test is whether the block could be lifted verbatim into another Action
   - pass-through Action whose `__invoke()` only forwards a single Service / Facade / Model Service call with no orchestration of its own — inline the single-use method into the Action, or remove the Action and call the reused service method directly (see the **Pass-through Action rule**)
   - Data Builder class using Action pattern (`__invoke()`) instead of named public methods
   - non-trivial or reusable validation logic written inline instead of as a custom Rule class in `app/Rules/`

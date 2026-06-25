@@ -43,6 +43,10 @@ Before reviewing code, treat the Bugsnag error as the assignment:
 3. Read every entry in `comments[]` for human-authored context (e.g. "Fixed in db", reproduction notes), plus any acceptance criteria on the linked GitHub issue.
 4. Verify the fix is covered by a regression test that fails before and passes after. Flag missing coverage as a finding.
 
+#### Reviewer Comment Fulfillment Gate (mandatory)
+
+Run the **Reviewer Comment Fulfillment Gate** defined canonically in `@skills/code-review-github/SKILL.md` against the **GitHub PR** linked to this Bugsnag error — that is where this skill publishes technical CR findings and where reviewer comments and line-anchored review threads live. After loading all PR comments, verify each actionable reviewer instruction is satisfied by the current checked-out diff (the applied change corresponds to what the reviewer asked for), raise one **Critical** finding per not-fulfilled instruction on the GitHub PR comment with the four reproducer fields, and record the `reviewer comments: M/N fulfilled` verdict on the GitHub PR comment summary line. The Bugsnag non-technical comment never carries this gate's findings.
+
 ### 2. Pre-checks
 - **CI coverage of checks.** Read `statusCheckRollup[]` from the GitHub PR JSON loaded in step 1 (via `skills/code-review-github/scripts/load-issue.sh`). Identify which checks ran on the PR head commit (`headRefOid`) and their result. Pass this CI check map to the Coverage gate decision in `@skills/code-review/SKILL.md` (Validation → Coverage gate → Reuse CI results) so only missing or non-green checks are run locally.
 - If the linked PR has conflicts → skip review for that PR.

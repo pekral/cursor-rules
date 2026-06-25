@@ -129,10 +129,10 @@ This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, 
 2. **Run the review inline.** Invoke the appropriate CR wrapper directly in this skill's context — do not dispatch as a subagent. Each iteration re-invokes the CR wrapper inline so it reloads the diff after the latest fix commit:
    - GitHub: `@skills/code-review-github/SKILL.md`
    - JIRA: `@skills/code-review-jira/SKILL.md`
-   The invocation **must** include the explicit quiet-mode instruction (see **Quiet review runs** below). The review run **must not** publish to the PR or to the issue tracker during loop iterations — capture findings in memory only.
-3. Count `criticalCount` and `moderateCount` in the latest review.
-4. If `criticalCount + moderateCount == 0` → **converged**, exit the loop.
-5. Otherwise, apply the **Suggested Fix** snippet from each Critical / Moderate finding using the **Reproducer extraction** workflow above, run pre-push quality gates on touched files, increment `iteration`, and go back to step 2.
+   The invocation **must** include the explicit quiet-mode instruction (see **Quiet review runs** below). The review run **must not** publish to the PR or to the issue tracker during loop iterations — capture findings in memory only. Each iteration's CR wrapper runs its **Reviewer Comment Fulfillment Gate** (canonically defined in `@skills/code-review-github/SKILL.md`), so the review reloads every reviewer comment / thread and re-verifies that the fixes applied in the previous iteration actually satisfy each reviewer instruction.
+3. Count `criticalCount` and `moderateCount` in the latest review, and read the `reviewer comments: M/N fulfilled` verdict the wrapper records. Let `unfulfilledCount = N − M` (the reviewer instructions still not satisfied and not rejected-with-reason). Each not-fulfilled instruction is already raised by the gate as a Critical finding, so it is included in `criticalCount` — `unfulfilledCount` is tracked separately only to make the convergence condition and the loop report explicit.
+4. If `criticalCount + moderateCount == 0` **and** `unfulfilledCount == 0` → **converged**, exit the loop. The run may **not** converge while any reviewer comment is still not fulfilled (the change does not yet correspond to what the reviewer asked for) — fulfilling every loaded reviewer instruction is a first-class convergence condition alongside the zero-Critical / zero-Moderate gate.
+5. Otherwise, apply the **Suggested Fix** snippet from each Critical / Moderate finding (including each not-fulfilled reviewer-instruction finding) using the **Reproducer extraction** workflow above, run pre-push quality gates on touched files, increment `iteration`, and go back to step 2.
 6. If `iteration > maxIterations` and the loop still has not converged, **stop and surface the remaining findings** to the user — do not push or publish a partial report. The user must triage the residual findings manually before any final report goes out.
 
 #### Quiet review runs (during the loop)
@@ -222,6 +222,7 @@ Rules:
   - PR link
   - resolved items
   - reviewer threads resolved (count) and any left unresolved with the rejection / deferral reason
+  - reviewer comments fulfilled (the final `M/N fulfilled` verdict) — every actionable reviewer instruction satisfied, or rejected/deferred with its recorded reason
   - loop iteration count and final convergence status
   - remaining blockers (if any — should be empty when convergence was reached)
 
@@ -235,4 +236,5 @@ Rules:
 - Keep changes traceable to review comments
 - Ensure every review comment is explicitly addressed
 - Treat unresolved GitHub reviewer threads as first-class checklist items; skip already-resolved threads, and resolve a thread only after its fix lands
+- Do not converge until every actionable reviewer comment is verified fulfilled — the applied change must correspond to what the reviewer asked for, not merely produce zero new Critical / Moderate findings
 - Avoid unnecessary commits or noise

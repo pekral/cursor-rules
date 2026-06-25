@@ -263,3 +263,51 @@ test('security-bounty-hunter keeps tooling optional and stays distinct from the 
     // Static tooling is triage input only, never a hard dependency the package would have to bundle.
     expect($content)->toContain('optional');
 });
+
+test('security/backend.md carries the Hidden / Invisible Characters in Stored Fields section (issue #714)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/security/backend.md');
+
+    expect($content)->toContain('## Hidden / Invisible Characters in Stored Fields (issue #714)');
+    expect($content)->toContain('**Zero-width and invisible characters.**');
+    expect($content)->toContain('**Bidirectional control characters (persisted Trojan Source).**');
+    expect($content)->toContain('**C0 / C1 control characters.**');
+    expect($content)->toContain('**Homoglyph / confusable / mixed-script identifiers and non-NFC values.**');
+    expect($content)->toContain('Normalize user-controlled strings to **NFC**');
+    expect($content)->toContain('CVE-2021-42574');
+    // Scope boundary keeps it distinct from output encoding and file-upload content.
+    expect($content)->toContain('Scope boundary — INPUT / STORAGE only.');
+    expect($content)->toContain('one finding per surface, never two for the same line');
+});
+
+test('security/frontend.md carries the Hidden / Invisible Characters mirror (issue #714)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/security/frontend.md');
+
+    expect($content)->toContain('## Hidden / Invisible Characters in Stored Fields (issue #714)');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('**Never rely on client-side stripping as the security control.**');
+    expect($content)->toContain('unicode-bidi: isolate');
+});
+
+test('security/mobile.md carries the Hidden / Invisible Characters mirror (issue #714)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/security/mobile.md');
+
+    expect($content)->toContain('## Hidden / Invisible Characters in Stored Fields (issue #714)');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('**Sanitize on the server, not only in the app.**');
+});
+
+test('security-review skill flags hidden / invisible characters in stored fields (issue #714)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/security-review/SKILL.md');
+
+    expect($content)->toContain('### Hidden / Invisible Characters in Stored Fields (issue #714)');
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('**Zero-width / invisible**');
+    expect($content)->toContain('**Bidirectional control (persisted Trojan Source)**');
+    expect($content)->toContain('**C0 / C1 control**');
+    expect($content)->toContain('**Homoglyph / confusable / non-NFC on identity fields**');
+    expect($content)->toContain('NFC');
+});

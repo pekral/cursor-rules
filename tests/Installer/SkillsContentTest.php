@@ -206,7 +206,9 @@ test('refactoring requires pre-refactor 100% coverage and unchanged tests in the
     $packageDir = dirname(__DIR__, 2);
     $rule = (string) file_get_contents($packageDir . '/rules/refactoring/general.mdc');
     $classRefactoring = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
-    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md') . "\n" . (string) file_get_contents(
+        $packageDir . '/rules/code-review/general.mdc',
+    );
 
     expect($rule)->toContain('## Test Coverage Contract (mandatory — issue #493)');
     expect($rule)->toContain('Before the refactor commit — verify 100% coverage of the target lines.');
@@ -276,7 +278,9 @@ test('core standards forbid speculative project-owned interfaces', function (): 
 
 test('code-review skill flags speculative interfaces in Core Analysis', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md') . "\n" . (string) file_get_contents(
+        $packageDir . '/rules/code-review/general.mdc',
+    );
 
     expect($content)->toContain('Speculative interfaces');
     expect($content)->toContain('neither at least two non-test consumers nor at least two non-test implementations');

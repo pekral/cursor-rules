@@ -46,7 +46,9 @@ test('security/mobile.md carries the Safe Validation & Error Messages section (i
 
 test('code-review skill enforces Safe validation & error texts on every diff (issue #540)', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md') . "\n" . (string) file_get_contents(
+        $packageDir . '/rules/code-review/general.mdc',
+    );
 
     expect($content)->toContain('**Safe validation & error texts (issue #540):**');
     expect($content)->toContain('@rules/security/backend.md');
@@ -126,7 +128,9 @@ test('security-review skill audits malicious code & supply-chain indicators (iss
 
 test('code-review skill flags malicious code & supply-chain indicators on every diff (issue #549)', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md') . "\n" . (string) file_get_contents(
+        $packageDir . '/rules/code-review/general.mdc',
+    );
 
     expect($content)->toContain('**Malicious code & supply-chain indicators (issue #549):**');
     expect($content)->toContain('@rules/security/backend.md');
@@ -187,7 +191,9 @@ test('security/mobile.md carries the Malicious File Upload Content section (issu
 
 test('code-review skill flags malicious file upload content on every diff (issue #680)', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md') . "\n" . (string) file_get_contents(
+        $packageDir . '/rules/code-review/general.mdc',
+    );
 
     expect($content)->toContain('**Malicious file upload content (issue #680):**');
     expect($content)->toContain('@rules/security/backend.md');

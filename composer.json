@@ -41,7 +41,7 @@
     "pekral/phpcs-rules": "dev-master",
     "pekral/phpstan-rules": "dev-master",
     "pekral/rector-rules": "dev-master",
-    "pestphp/pest": "^4.7.3",
+    "pestphp/pest": "^4.7.4",
     "pestphp/pest-plugin": "^4.0",
     "pestphp/pest-plugin-type-coverage": "^4.0.4",
     "phpstan/extension-installer": "^1.4.3",

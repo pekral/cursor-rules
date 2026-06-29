@@ -185,9 +185,9 @@ Resolve any **Critical** or **Moderate** finding from the security review before
 **Creating the pull request is the default, mandatory final step.** Once review and testing are clean, open the PR automatically — applying the valid git rules and PR definitions in this section — **without asking the user for confirmation**. The skill is not finished until the PR exists.
 
 **Opt-out — the user must explicitly ask to skip the PR.** Only when the user's request explicitly states that no pull request should be created (e.g. "don't open a PR", "no PR", "just implement locally", "leave it on the branch") do you skip PR creation. A silent or ambiguous request is **not** an opt-out — when in doubt, create the PR. When the user did opt out:
-- Still run the full flow through implementation, the code-quality / review loop, and the security review — only the PR creation and the post-PR follow-ups (technical report on the PR, JIRA Code-Review transition, `ready for review` label, etc.) are skipped.
+- Still run the full flow through implementation, the code-quality / review loop, and the security review — only the PR creation and **every step that depends on an open PR** are skipped: the technical report on the PR, the non-technical report on the original tracker, the JIRA Code-Review transition, the GitHub `ready for review` label, and the compound-memory step (`@skills/record-project-memory/SKILL.md`). None of them run without a PR.
 - Commit the changes on the local feature branch (do **not** push or open the PR) and leave the working tree on that branch.
-- Release the tracker claim per *Release on Blocked / abort (before PR)* in step 1 — no PR will own the claim, so a human can reset the tracker. Name the issue / key in the handoff.
+- Release the tracker claim the same way the before-PR release does (*Release on Blocked / abort (before PR)* in step 1) — this is a deliberate stop, not a failure, but no PR will own the claim, so removing the `Resolve_by_AI:in-progress` label lets a human pick the issue up. Name the issue / key in the handoff.
 - Report what was implemented, the review/security outcome, and the exact `gh pr create --draft …` command the user can run later to open the PR.
 
 Once review and testing are clean and the user has **not** opted out:
@@ -258,9 +258,9 @@ After the reviews converged (no Critical / Moderate) and the reports are posted,
 - Security review completed **before the PR was created**
 - A clean pull request is created with a summary **by default** — skipped only when the user explicitly opted out of PR creation (see *Pull request*), in which case the committed local branch and the ready-to-run `gh pr create --draft …` command are reported instead
 - Technical report posted on the GitHub PR (skipped on PR opt-out)
-- Non-technical report posted on the original issue tracker
+- Non-technical report posted on the original issue tracker (skipped on PR opt-out)
 - For JIRA issues: PR is linked back and a summary comment is posted (skipped on PR opt-out)
-- Durable lessons (if any cleared the promotion bar) were recorded into the project memory file via `@skills/record-project-memory/SKILL.md`
+- Durable lessons (if any cleared the promotion bar) were recorded into the project memory file via `@skills/record-project-memory/SKILL.md` (skipped on PR opt-out)
 
 ## Output Humanization
 - Use [blader/humanizer](https://github.com/blader/humanizer) for all skill outputs to keep the text natural and human-friendly.

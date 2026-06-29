@@ -59,6 +59,7 @@ fi
 
 [[ -z "$DEST" ]] && DEST="$(att_default_dest)/github"
 
+# stderr suppressed: gh's own diagnostics are noise; the empty-token case is handled on the next line.
 TOKEN="$(gh auth token 2>/dev/null || true)"
 if [[ -z "$TOKEN" ]]; then
   echo "${PROG}: no GitHub token from 'gh auth token'. Run 'gh auth login' first." >&2
@@ -66,6 +67,7 @@ if [[ -z "$TOKEN" ]]; then
 fi
 
 # --- load body + comments via the deterministic loader and extract attachment URLs ---
+# stderr suppressed: the loader's own diagnostics are noise; its result is validated on the next line.
 ISSUE_JSON="$("${SCRIPT_DIR}/load-issue.sh" "$REF" 2>/dev/null || true)"
 if [[ -z "$ISSUE_JSON" ]] || ! printf '%s' "$ISSUE_JSON" | jq -e . >/dev/null 2>&1; then
   echo "${PROG}: failed to load GitHub issue inventory for: $REF" >&2

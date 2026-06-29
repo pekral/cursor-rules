@@ -174,9 +174,16 @@ scan_manifest() {
     fi
 
     tmp="$(mktemp)"
-    jq --argjson i "$i" --arg s "$verdict" --arg r "$reason" --argjson sp "$safePath" \
+    # Clean up the temp file even if jq aborts mid-loop under set -e, so it is never orphaned.
+    if jq --argjson i "$i" --arg s "$verdict" --arg r "$reason" --argjson sp "$safePath" \
       '.attachments[$i].status = $s | .attachments[$i].reason = $r | .attachments[$i].safePath = $sp' \
-      "$manifest" > "$tmp" && mv "$tmp" "$manifest"
+      "$manifest" > "$tmp"; then
+      mv "$tmp" "$manifest"
+    else
+      rm -f "$tmp"
+      echo "${PROG}: failed to update manifest entry $i" >&2
+      exit 3
+    fi
     chmod 600 "$manifest"
   done
 

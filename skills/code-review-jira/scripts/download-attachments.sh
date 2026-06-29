@@ -103,6 +103,7 @@ if [[ -z "$EMAIL" ]]; then
 fi
 
 # --- load the attachment inventory via the deterministic loader (issue + subtasks) ---
+# stderr suppressed: the loader's own diagnostics are noise; its result is validated on the next line.
 ISSUE_JSON="$("${SCRIPT_DIR}/load-issue.sh" "$REF" 2>/dev/null || true)"
 if [[ -z "$ISSUE_JSON" ]] || ! printf '%s' "$ISSUE_JSON" | jq -e . >/dev/null 2>&1; then
   echo "${PROG}: failed to load JIRA issue inventory for: $REF" >&2

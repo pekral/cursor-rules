@@ -302,6 +302,31 @@ test('github load-issue script is shipped, executable, and documents the same sh
     expect($content)->toContain('"closingPullRequests"');
     expect($content)->toContain('"statusCheckRollup"');
     expect($content)->toContain('(www\.)?github\.com');
+    // Sub-issues are embedded with their full body and comments, sourced from
+    // the GraphQL subIssues connection (the gh --json projection lacks it).
+    expect($content)->toContain('"subIssues"');
+    expect($content)->toContain('subIssues(first:');
+    expect($content)->toContain('gh api graphql');
+    expect($content)->toContain('subIssues: (if $kind == "issue" then $subIssues else [] end)');
+});
+
+test('jira load-issue embeds full subtask context (description, comments, attachments)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $script = $packageDir . '/skills/code-review-jira/scripts/load-issue.sh';
+
+    expect(file_exists($script))->toBeTrue();
+    expect(is_executable($script))->toBeTrue();
+
+    $content = (string) file_get_contents($script);
+    // Each subtask is fetched individually so its description, comments, and
+    // attachments are embedded — not just the parent's shallow reference.
+    expect($content)->toContain('acli jira workitem view "$SUBTASK_KEY"');
+    expect($content)->toContain('--argjson subtaskDetails "$SUBTASK_DETAILS"');
+    expect($content)->toContain('descriptionText:');
+    expect($content)->toContain('descriptionAdf:');
+    // A failed per-subtask fetch must degrade to the shallow reference, never
+    // break the whole load.
+    expect($content)->toContain('leaving that subtask with its shallow');
 });
 
 test('github-consuming skills route context loading through load-issue.sh', function (): void {

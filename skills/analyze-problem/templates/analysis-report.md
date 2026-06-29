@@ -225,3 +225,30 @@ Without unnecessary technical detail. -->
 
 **Next step:**
 ...
+
+---
+
+## 12. Sources
+
+<!-- Every source the analysis was actually built from. Mandatory — never leave empty.
+List the issue / error and its comments and replies, linked / sub-issues, attachments,
+code files, commits, and external URLs you consulted. If the only input was the inline
+problem description with no issue-tracker source available, state that explicitly. -->
+
+### Issue Tracker
+
+<!-- Issue / PR / error URL, comment threads, linked & sub-issues, attachments. -->
+
+- ...
+
+### Codebase & Commits
+
+<!-- Files, classes, and commits inspected (file:line, commit SHAs). -->
+
+- ...
+
+### External References
+
+<!-- Documentation, advisories, or articles relied on. -->
+
+- ...

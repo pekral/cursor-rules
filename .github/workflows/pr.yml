@@ -8,7 +8,7 @@ on:
 
 jobs:
   quality-checks:
-    name: "🔍 Quality Checks (PHP 8.4)"
+    name: "🔍 Quality Checks (PHP 8.5)"
     runs-on: ubuntu-latest
 
     steps:
@@ -18,7 +18,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@2.37.1
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           extensions: pcov, dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
           coverage: pcov
 
@@ -27,9 +27,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: vendor
-          key: ${{ runner.os }}-php-8.4-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-php-8.5-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
-            ${{ runner.os }}-php-8.4-
+            ${{ runner.os }}-php-8.5-
             ${{ runner.os }}-php-
 
       - name: Install dependencies

@@ -34,9 +34,22 @@ Focus on:
 
 ## Execution
 
+### Issue-tracker context (mandatory pre-flight)
+
+Whenever the problem references an issue-tracker source (a GitHub issue / PR, a JIRA key, or a Bugsnag error — identifiable from a link, an ID, or the surrounding task context), you **must** load **all** available tracker information **before** starting the analysis. This is not optional: an analysis built on a partially-read issue is the most common source of a wrong root cause.
+
+- Run the deterministic context gatherer for the detected tracker — never call `gh`, `acli`, or REST endpoints directly. Each gatherer returns the issue / error, **all comments and replies**, **all linked / sub-issues loaded recursively**, the **attachments**, and an inventory of external URLs in one pass:
+  - **GitHub:** `skills/code-review-github/scripts/gather-issue-context.sh <NUMBER|URL>`
+  - **JIRA:** `skills/code-review-jira/scripts/gather-issue-context.sh <KEY|URL>`
+  - **Bugsnag:** `skills/code-review-bugsnag/scripts/gather-issue-context.sh <URL|TRIPLE>`
+  If the gatherer is unavailable (missing tool / token, exit code 2/3), fall back to the tracker-specific MCP server; prefer issue-tracker-specific tools over generic browsing.
+- Read the inventoried attachments and external URLs with your own tools and follow useful links recursively to a sensible depth — the gatherers inventory these but cannot fetch their content.
+- When no issue-tracker source is available (the problem is described only inline), state that explicitly in the analysis and proceed from the inline context — there is nothing to load.
+- Record every source you actually consulted; it is reported in the **Sources** section of the output (see *Output Structure*).
+
+Then continue with the analysis:
+
 - Analyze the problem and all available context.
-- If relevant, load issue, comments, and attachments using available CLI or MCP tools.
-- Prefer issue-tracker-specific tools over generic browsing.
 - Walk through the Analysis Framework below in order — do not skip steps.
 - Separate facts from assumptions and from hypotheses.
 - Identify the most probable root cause and how to validate it.
@@ -48,7 +61,7 @@ Focus on:
 
 Apply these 10 steps in order. Each step feeds the next — never jump ahead to a solution before evidence and root cause are settled.
 
-1. **Context extraction** — what we actually know from the assignment, comments, attachments, and surrounding code. First **consult the per-project compound memory** (`docs/memory/PROJECT_MEMORY.md` per `@rules/compound-engineering/general.mdc` *Compound Memory (per project)*): read it when present and reuse any entry whose `Trigger:` matches this problem instead of re-deriving a lesson the project already recorded. Apply the per-role read filter from `@rules/compound-engineering/general.mdc` *Read protocol* — load only entries where `Role: metis` or `Role: shared`; skip entries tagged for other roles.
+1. **Context extraction** — what we actually know from the assignment, comments, linked / sub-issues, attachments, and surrounding code (all loaded via the *Issue-tracker context* mandatory pre-flight above). First **consult the per-project compound memory** (`docs/memory/PROJECT_MEMORY.md` per `@rules/compound-engineering/general.mdc` *Compound Memory (per project)*): read it when present and reuse any entry whose `Trigger:` matches this problem instead of re-deriving a lesson the project already recorded. Apply the per-role read filter from `@rules/compound-engineering/general.mdc` *Read protocol* — load only entries where `Role: metis` or `Role: shared`; skip entries tagged for other roles.
 2. **Problem statement** — one precise sentence describing the real problem.
 3. **Expected vs actual behavior** — what should happen, and what is happening instead.
 4. **Evidence** — logs, screenshots, issue comments, files, reproduction steps. Verified facts only.
@@ -87,7 +100,7 @@ State where the plan artifact was written (file path or issue URL) in the analys
 
 ## Output Structure
 
-The output uses the template at `templates/analysis-report.md`. The template has 11 sections that map onto the framework above:
+The output uses the template at `templates/analysis-report.md`. The template has 12 sections that map onto the framework above:
 
 1. **Summary** — short summary (covers steps 1–2)
 2. **Problem Definition** — problem statement, expected/actual behavior, affected area, problem type (steps 2–3)
@@ -100,8 +113,11 @@ The output uses the template at `templates/analysis-report.md`. The template has
 9. **Solution Verification** — manual checks, automated tests, edge cases, regression checks (step 9)
 10. **Non-Technical Explanation** — explanation for non-technical stakeholders (step 10)
 11. **Final Recommendation** — final recommendation, priority, next step
+12. **Sources** — every issue-tracker source, attachment, codebase location, and external reference the analysis was actually built from (provenance)
 
 Fill every section. If a section has nothing to report, write a short explicit note (e.g. `No missing information.`) instead of leaving placeholders.
+
+The **Sources** section is mandatory and must always be present — list every input the analysis consulted (the issue / error and its comments and replies, linked / sub-issues, attachments, code files, commits, and external URLs). When the only input was the inline problem description with no issue-tracker source available, say so explicitly instead of leaving it empty.
 
 ---
 

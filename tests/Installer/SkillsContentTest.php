@@ -627,6 +627,36 @@ test('analyze-problem skill carries the UI Redesign Lens with one-click default 
     expect($content)->toContain('*One-click vs wizard decision*');
 });
 
+test('analyze-problem skill mandates loading all issue-tracker context before analysis (issue #719)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');
+
+    // Mandatory pre-flight that always loads the full tracker context.
+    expect($content)->toContain('### Issue-tracker context (mandatory pre-flight)');
+    expect($content)->toContain('you **must** load **all** available tracker information **before** starting the analysis');
+    expect($content)->toContain('**all comments and replies**');
+    expect($content)->toContain('**all linked / sub-issues loaded recursively**');
+
+    // The deterministic gatherers for every supported tracker.
+    expect($content)->toContain('skills/code-review-github/scripts/gather-issue-context.sh');
+    expect($content)->toContain('skills/code-review-jira/scripts/gather-issue-context.sh');
+    expect($content)->toContain('skills/code-review-bugsnag/scripts/gather-issue-context.sh');
+
+    // Sources are always reported in the output.
+    expect($content)->toContain('12. **Sources**');
+    expect($content)->toContain('The **Sources** section is mandatory and must always be present');
+});
+
+test('analyze-problem report template carries the mandatory Sources section (issue #719)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $template = (string) file_get_contents($packageDir . '/skills/analyze-problem/templates/analysis-report.md');
+
+    expect($template)->toContain('## 12. Sources');
+    expect($template)->toContain('### Issue Tracker');
+    expect($template)->toContain('### Codebase & Commits');
+    expect($template)->toContain('### External References');
+});
+
 test('api rule codifies the API-as-contract design standard (issue #552)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/rules/api/general.mdc');

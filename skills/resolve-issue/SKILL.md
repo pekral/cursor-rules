@@ -182,7 +182,15 @@ Resolve any **Critical** or **Moderate** finding from the security review before
 
 ## Pull request
 
-Once review and testing are clean:
+**Creating the pull request is the default, mandatory final step.** Once review and testing are clean, open the PR automatically — applying the valid git rules and PR definitions in this section — **without asking the user for confirmation**. The skill is not finished until the PR exists.
+
+**Opt-out — the user must explicitly ask to skip the PR.** Only when the user's request explicitly states that no pull request should be created (e.g. "don't open a PR", "no PR", "just implement locally", "leave it on the branch") do you skip PR creation. A silent or ambiguous request is **not** an opt-out — when in doubt, create the PR. When the user did opt out:
+- Still run the full flow through implementation, the code-quality / review loop, and the security review — only the PR creation and the post-PR follow-ups (technical report on the PR, JIRA Code-Review transition, `ready for review` label, etc.) are skipped.
+- Commit the changes on the local feature branch (do **not** push or open the PR) and leave the working tree on that branch.
+- Release the tracker claim per *Release on Blocked / abort (before PR)* in step 1 — no PR will own the claim, so a human can reset the tracker. Name the issue / key in the handoff.
+- Report what was implemented, the review/security outcome, and the exact `gh pr create --draft …` command the user can run later to open the PR.
+
+Once review and testing are clean and the user has **not** opted out:
 
 - Create a branch (name always in English, regardless of the assignment language) and commit changes following `@rules/git/general.mdc`
 - **Open the pull request as a Draft** (`gh pr create --draft …`) per `@rules/git/general.mdc` *Draft pull requests*. The inline review loop above is the implementer's pre-PR self-check, **not** the authoritative code review — the authoritative `code-review-github` / `process-code-review` (the `argos` / `athena` ↔ `talos` convergence loop) still runs **after** the PR exists, so at creation time the PR is not yet ready to merge and agents will keep working on it. It is promoted out of Draft (`gh pr ready`) by `@skills/process-code-review/SKILL.md` once that review converges to 0 Critical + 0 Moderate.
@@ -248,10 +256,10 @@ After the reviews converged (no Critical / Moderate) and the reports are posted,
 - No sensitive data is exposed
 - Code review loop passed with no Critical or Moderate findings **before the PR was created**
 - Security review completed **before the PR was created**
-- A clean pull request is created with a summary
-- Technical report posted on the GitHub PR
+- A clean pull request is created with a summary **by default** — skipped only when the user explicitly opted out of PR creation (see *Pull request*), in which case the committed local branch and the ready-to-run `gh pr create --draft …` command are reported instead
+- Technical report posted on the GitHub PR (skipped on PR opt-out)
 - Non-technical report posted on the original issue tracker
-- For JIRA issues: PR is linked back and a summary comment is posted
+- For JIRA issues: PR is linked back and a summary comment is posted (skipped on PR opt-out)
 - Durable lessons (if any cleared the promotion bar) were recorded into the project memory file via `@skills/record-project-memory/SKILL.md`
 
 ## Output Humanization

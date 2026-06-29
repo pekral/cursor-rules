@@ -142,3 +142,11 @@
 - Example: issue #721 / PR #723 — added `subIssues[]` (full body + comments + labels via GraphQL) to the GitHub loader and deepened JIRA `subtasks[]` with description/comments/attachments. Both reviews (argos quality + athena security) converged 0/0/0 in iteration 1; `composer build` green (315 tests, 100% coverage).
 - Source:  https://github.com/pekral/cursor-rules/pull/723   Added: 2026-06-29
 - Role:    shared
+
+### shared-skills-helper-dir-and-readme-skill-count — a non-skill helper dir under `skills/` needs the README count test to gate on SKILL.md
+
+- Trigger: adding a shared helper directory under `skills/` (e.g. `skills/_shared/` with sourced libs / standalone scripts) reused by more than one skill, instead of duplicating logic or a per-skill `_lib.sh`.
+- Rule:    Two gotchas. (1) The README skill-count test in `tests/Installer/SkillsContentTest.php` (`readme reports the current skill count …`) counted **every** directory under `skills/`, so a non-skill helper dir inflates the count and breaks the README assertions. Fix it to count only directories that ship a `SKILL.md` — that matches `skill-check`'s own definition of a skill (it reported 62 and ignored `_shared/`). (2) Cross-skill sourcing via `${SCRIPT_DIR}/../../_shared/lib.sh` resolves in consumer trees too: `src/Installer.php` copies the whole `skills/` tree verbatim (see [[skills-tree-verbatim-distribution]]), so all skills land under the same `skills/` parent and the relative path holds after install. A shared `skills/_shared/` lib is therefore compatible with verbatim distribution — the self-contained convention only applied to the JIRA transition-helper siblings.
+- Example: issue #725 / PR #726 — `skills/_shared/attachments.sh` (sourced download lib) + `skills/_shared/scan-attachments.sh` (standalone gate) reused by all three `download-attachments.sh` wrappers; auth token kept out of argv by writing it only into a 0600 curl `--config` file (`header = "Authorization: …"`), TLS pinned with `--proto`/`--proto-redir '=https'`. Scripts have no exec tests (test-isolation rule) — the fixture proof lives in `scan-attachments.sh --self-test` and its outcomes are content-pinned in Pest.
+- Source:  https://github.com/pekral/cursor-rules/pull/726   Added: 2026-06-29
+- Role:    talos

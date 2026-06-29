@@ -315,16 +315,34 @@ test('daidalos processes multiple resolved sources sequentially and never fans t
     expect($content)->toContain('classify **each one independently**');
 });
 
-test('daidalos forbids git worktrees and serialises concurrent writers on the single shared working tree', function (): void {
+test('daidalos keeps the writing path on the shared tree but lets read-only CR agents isolate in a worktree, and cleans them up', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');
 
-    // Explicit hard rule: no git worktrees anywhere in the workflow.
-    expect($content)->toContain('No git worktrees (hard rule)');
-    expect($content)->toContain('never uses git worktrees');
-    // Concurrent writers serialise on the single shared tree — no isolated-worktree escape.
+    // The writing path (talos) still never uses worktrees — concurrent writers serialise on the shared tree.
+    expect($content)->toContain('The writing path never uses git worktrees');
     expect($content)->toContain('single shared git working tree');
-    expect($content)->toContain('there is no isolated-worktree toplevel');
+    expect($content)->toContain('there is no isolated-worktree escape for the writing path');
+    // Read-only CR agents may isolate in a worktree for parallel review.
+    expect($content)->toContain('read-only code-review agents (`argos`, `athena`) may use a git worktree');
+    // Daidalos owns worktree cleanup so the repo stays clean after the run / merge.
+    expect($content)->toContain('git worktree remove');
+    expect($content)->toContain('git worktree prune');
+});
+
+test('the read-only CR agents document an optional parallel-review worktree they hand back for daidalos cleanup', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    foreach (['argos', 'athena'] as $agent) {
+        $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
+        // The CR agent may isolate its review in a read-only worktree when needed.
+        expect($content)->toContain('Parallel review worktree');
+        expect($content)->toContain('git worktree add');
+        // It hands the path back so daidalos removes it during cleanup.
+        expect($content)->toContain('Record the worktree path in your handoff');
+        // Standalone runs clean up after themselves.
+        expect($content)->toContain('git worktree remove');
+    }
 });
 
 test('agents directory ships the apollon test-engineer subagent with required frontmatter', function (): void {

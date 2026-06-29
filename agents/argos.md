@@ -36,6 +36,14 @@ You accept one **source** for the review, in this order of preference:
 
 When the caller passes a **shared brief path** (`.claude/run/<source-slug>.md`), it is the run's shared memory — **read it first** as the authoritative context (resolved source, gathered data, work-breakdown plan, and every prior specialist's handoff) so you don't re-derive what is already there. When you finish, **append your handoff section** to it via `Bash` (`cat >> "$BRIEF" <<'EOF' … EOF`: `### argos — CR done` plus the result you return) so the next specialist inherits it. Because you may run in parallel with `athena` on the same brief, **guard the append with the per-brief append lock** (`tries=0; until mkdir "$BRIEF.lock" 2>/dev/null; do sleep 0.2; tries=$((tries+1)); [ "$tries" -gt 50 ] && rm -rf "$BRIEF.lock"; done; cat >> "$BRIEF" …; rmdir "$BRIEF.lock"`) so the two handoffs never interleave and a crashed holder never deadlocks the peer — see `agents/daidalos.md` *Shared task brief* → *Parallel handoff sharing*. Appending to this git-ignored scratch file is the **only** write you perform — your read-only stance on source, tests, and config is unchanged. Delete any temporary files you created during this run (except memory files) per `@rules/compound-engineering/general.mdc` *Temporary-file hygiene*.
 
+## Parallel review worktree (optional)
+
+Because you and `athena` run as two concurrent CR passes, you **may run your review in an isolated read-only git worktree** when you need to avoid contending with the shared working tree (for example, a writing run is still touching the tree, or the two CR passes would otherwise step on each other). This is the explicit-request opt-in of `@rules/git/general.mdc` *Worktrees / Workspaces*, which `daidalos` grants to the CR pass — it is **not** a default; stay in the current tree unless isolation is genuinely needed.
+
+- Create it with `git worktree add <path> <ref>` where `<ref>` is the PR head you are reviewing. This is the only filesystem write you make beyond the shared-brief append, and it adds **no** change to tracked files, branches, or history — your read-only stance on source, tests, and config is unchanged. You **read** in the worktree; you never edit, commit, push, or merge there.
+- **Record the worktree path in your handoff** (and in the shared-brief append) so `daidalos` removes it during its cleanup (step 7 of `agents/daidalos.md`) — this is how it keeps the repository clean after the run / merge.
+- When you run **standalone** (no `daidalos` orchestrating the cleanup), remove your own worktree after the review: verify it is not the active tree and has no uncommitted changes (never `--force`), then `git worktree remove <path>` followed by `git worktree prune`.
+
 ## Output — handoff to the caller
 
 Your final message is returned to the caller as the result, so make it a clean handoff:
@@ -47,5 +55,6 @@ Your final message is returned to the caller as the result, so make it a clean h
 - **Source:** link to the originating tracker item (GitHub issue / JIRA ticket / Bugsnag error), or `none` for the no-source fallback.
 - **Counts:** Critical / Moderate / Minor.
 - **Assignment conformance:** `conformant` / `N gap(s)` / `no linked issue`.
+- **Worktree:** the path of any review worktree you created (so `daidalos` removes it in cleanup), or `none` when you reviewed in the shared tree.
 
 Hand the next agent everything it needs to act (apply fixes, merge) without re-deriving where the review lives. Stop after the handoff — applying fixes or merging is a different agent's job.

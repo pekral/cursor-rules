@@ -20,7 +20,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **61 comprehensive Agent skills** for automated workflows (v0.9.1)
+- **62 comprehensive Agent skills** for automated workflows (v0.9.1)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -122,7 +122,7 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 
 # 🎯 Skills Overview — **v0.9.1**
 
-> Current release includes 61 skills for issue resolution, planning, code review, refactoring, testing, performance benchmarking, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
+> Current release includes 62 skills for issue resolution, planning, code review, refactoring, testing, performance benchmarking, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -163,6 +163,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `api-review` | API design contract review (`@rules/api/general.mdc`) — resource-oriented REST, HTTP method/idempotence, idempotency keys, precise status codes, validation at the trust boundary. Self-scopes to API-surface diffs and runs on every CR — read-only. |
 | `security-threat-analysis` | Analyze a specific security threat from a referenced source (CVE, GHSA, advisory, blog post). Produces a human-readable remediation report with ordered, agent-actionable steps and a verification check. |
 | `laravel-security` | Condensed Laravel 11 / PHP 8.3 secure-defaults reference — authentication, authorization, Eloquent safety, CSRF/XSS, API security, file uploads, secrets, and production hardening. |
+| `laravel-authorization-review` | Laravel-native authorization / IDOR (BOLA) reviewer. Walks the authorization chain of every HTTP route (middleware → authorize/policy/gate → query scoping → API Resource output), anchors every finding to real `php artisan route:list --json` output plus a cited `file:line`, classifies by confidence, and produces a per-route coverage map — read-only / advise-only. |
 | `security-bounty-hunter` | Hunt for exploitable, remotely reachable vulnerabilities in a PHP/Laravel codebase for responsible disclosure — biases toward user-controlled attack paths and discards low-signal noise. |
 | `penetration-tester` | Authorized, methodology-driven penetration test — runs only on an explicit pentest request against an in-scope target, validates exploitability with safe proofs of concept, and delivers a risk-rated remediation report (read-only, non-destructive). |
 | `class-refactoring` | Refactor PHP classes using SOLID and Laravel best practices with testability focus. |

@@ -73,6 +73,34 @@ att_safe_name() {
   printf '%03d__%s' "$idx" "$base"
 }
 
+# att_host_block_reason <url> — echoes a block reason when the URL targets a
+# non-public host, and nothing when the host is allowed. Keeps a user-supplied URL
+# (e.g. a Bugsnag comment link) from driving an SSRF request to an internal service:
+# loopback / link-local (incl. the cloud-metadata 169.254.169.254 endpoint), RFC-1918
+# / ULA private ranges, and obviously-internal hostnames are rejected before any
+# request is made. A self-hosted tracker on a private network opts out with
+# ATT_ALLOW_PRIVATE_HOSTS=1. DNS-rebinding (a public name resolving to a private IP)
+# is out of scope — curl --resolve pinning would be the full fix; literal-IP and
+# internal-hostname checks cover the realistic attacker-supplied-URL case here.
+att_host_block_reason() {
+  local url="$1" host
+  host="$(printf '%s' "$url" | sed -nE 's#^https://([^/:]+).*#\1#p' | LC_ALL=C tr 'A-Z' 'a-z')"
+  if [[ -z "$host" ]]; then
+    printf 'non-https or unparseable URL'
+    return
+  fi
+  case "$host" in
+    localhost|*.local|*.internal|*.localdomain) printf 'internal hostname (%s)' "$host"; return;;
+    127.*|0.0.0.0|169.254.*|::1|\[::1\]) printf 'loopback/link-local host (%s)' "$host"; return;;
+  esac
+  if [[ "${ATT_ALLOW_PRIVATE_HOSTS:-0}" != "1" ]]; then
+    case "$host" in
+      10.*|192.168.*|172.1[6-9].*|172.2[0-9].*|172.3[01].*|fc*:*|fd*:*|\[fc*|\[fd*)
+        printf 'private-range host (%s); set ATT_ALLOW_PRIVATE_HOSTS=1 for a self-hosted tracker' "$host"; return;;
+    esac
+  fi
+}
+
 # att_download <url> <out> <auth_config_file> — fetch one URL to <out> with TLS on.
 att_download() {
   local url="$1" out="$2" cfg="$3"
@@ -115,10 +143,14 @@ att_run() {
 
     status="downloaded"; reason=""; localPath=""; size=0; sha=""
 
+    local hostReason
     if (( i >= ATT_MAX_COUNT )); then
       status="block"; reason="exceeds max attachment count (${ATT_MAX_COUNT})"
     elif [[ -z "$url" ]]; then
       status="block"; reason="no downloadable contentUrl in inventory"
+    elif hostReason="$(att_host_block_reason "$url")"; [[ -n "$hostReason" ]]; then
+      # SSRF guard: never issue a request to a non-public host from an inventory URL.
+      status="block"; reason="blocked host — ${hostReason}"
     else
       out="${quarantine}/$(att_safe_name "$i" "$name")"
       if att_download "$url" "$out" "$cfg"; then

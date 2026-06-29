@@ -26,6 +26,11 @@
 #
 #     # issue-only (null / [] when kind == "pr")
 #     "closingPullRequests": [ { "number", "title", "url", "state" } ],
+#     "subIssues": [ {
+#         "number", "title", "url", "state", "author", "body",
+#         "labels", "createdAt", "updatedAt", "closedAt",
+#         "comments": [ { "author", "body", "createdAt", "updatedAt", "url" } ]
+#     } ],
 #
 #     # pr-only (null / [] when kind == "issue")
 #     "baseRefName", "headRefName", "baseRefOid", "headRefOid",
@@ -55,11 +60,20 @@
 #   - `closingPullRequests` (for issues) is sourced from
 #     `closedByPullRequestsReferences` and surfaces the PRs that will close the
 #     issue when merged. `closingIssues` (for PRs) lists issues the PR closes.
+#   - `subIssues` (for issues) is sourced from the GraphQL `subIssues` connection
+#     (the `gh` CLI `--json` projection does not expose it). Each entry carries
+#     the sub-issue's full body and comments so the assignment context is
+#     complete from a single call. GitHub issues have no separate attachment
+#     field — uploaded files live as inline URLs inside the body / comments, so
+#     embedding both already covers "attachments". Sub-issues are loaded one
+#     level deep (sub-issues of sub-issues are not traversed) and capped at the
+#     first 50 sub-issues with the first 100 comments each.
 #
 # Known limitations (intentionally out of scope, fall back to GitHub MCP):
 #   - Review thread / line-anchored review comments (`gh api .../pulls/<N>/comments`)
 #   - Per-commit check runs and detailed CI logs
 #   - Attachment binary contents (only URLs and metadata are returned)
+#   - Sub-issues beyond one level / the first 50, and beyond 100 comments each
 #
 # Exit codes:
 #   1  usage error (missing or unparseable argument)
@@ -197,11 +211,46 @@ if ! printf '%s' "$PAYLOAD" | jq -e . >/dev/null 2>&1; then
   exit 3
 fi
 
+# Sub-issues are a GitHub-native relation exposed only through GraphQL (the `gh`
+# CLI `--json` projection has no `subIssues` field). Only issues carry them; for
+# PRs and on any GraphQL failure we fall back to an empty array so the script
+# never breaks on a repo without the feature enabled.
+SUBISSUES_JSON='[]'
+if [[ "$KIND" == "issue" ]]; then
+  SUBISSUES_QUERY='query($owner:String!,$repo:String!,$n:Int!){repository(owner:$owner,name:$repo){issue(number:$n){subIssues(first:50){nodes{number title url state body createdAt updatedAt closedAt author{login} labels(first:50){nodes{name}} comments(first:100){nodes{author{login} body createdAt updatedAt url}}}}}}}'
+  if RAW_SUBISSUES="$(gh api graphql -f query="$SUBISSUES_QUERY" -F owner="$OWNER" -F repo="$REPO" -F n="$NUMBER" 2>/dev/null)" && [[ -n "$RAW_SUBISSUES" ]]; then
+    SUBISSUES_JSON="$(printf '%s' "$RAW_SUBISSUES" | jq -c '
+      [ (.data.repository.issue.subIssues.nodes // [])[] | {
+          number: (.number // null),
+          title: (.title // null),
+          url: (.url // null),
+          state: (.state // null),
+          author: (.author.login // null),
+          body: (.body // ""),
+          labels: [ (.labels.nodes // [])[] | (.name // null) ],
+          createdAt: (.createdAt // null),
+          updatedAt: (.updatedAt // null),
+          closedAt: (.closedAt // null),
+          comments: [ (.comments.nodes // [])[] | {
+            author: (.author.login // null),
+            body: (.body // ""),
+            createdAt: (.createdAt // null),
+            updatedAt: (.updatedAt // null),
+            url: (.url // null)
+          } ]
+        } ]' 2>/dev/null || printf '[]')"
+  fi
+fi
+if ! printf '%s' "$SUBISSUES_JSON" | jq -e . >/dev/null 2>&1; then
+  SUBISSUES_JSON='[]'
+fi
+
 jq -n \
   --arg kind "$KIND" \
   --arg owner "$OWNER" \
   --arg repo "$REPO" \
-  --argjson payload "$PAYLOAD" '
+  --argjson payload "$PAYLOAD" \
+  --argjson subIssues "$SUBISSUES_JSON" '
 def total_reactions:
   ([ (.reactionGroups // [])[] | (.users.totalCount // .reactors.totalCount // 0) ] | add) // 0;
 
@@ -270,6 +319,7 @@ $payload as $p
     closingPullRequests: (if $kind == "issue"
       then ($p.closedByPullRequestsReferences | map_refs)
       else [] end),
+    subIssues: (if $kind == "issue" then $subIssues else [] end),
 
     baseRefName: (if $kind == "pr" then ($p.baseRefName // null) else null end),
     headRefName: (if $kind == "pr" then ($p.headRefName // null) else null end),

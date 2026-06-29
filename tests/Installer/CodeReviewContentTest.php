@@ -363,6 +363,7 @@ test('code review skills constrain refactoring lens to PR diff', function (): vo
         $packageDir . '/skills/code-review/SKILL.md',
         $packageDir . '/skills/code-review-github/SKILL.md',
         $packageDir . '/skills/code-review-jira/SKILL.md',
+        $packageDir . '/skills/code-review-bugsnag/SKILL.md',
     ];
 
     foreach ($reviewSkills as $skillFile) {
@@ -370,6 +371,33 @@ test('code review skills constrain refactoring lens to PR diff', function (): vo
         expect($content)->toContain('Refactoring & Tech Debt (DRY)');
         expect($content)->toContain('untouched code');
     }
+});
+
+test('reuse-first gate asks whether new logic is necessary before reusing existing logic (issue #722)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    // Canonical home: the rule carries the reuse-first gate so every CR skill that
+    // runs code-review inherits it.
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    expect($rule)->toContain('Reuse-first gate');
+    expect($rule)->toContain('Is new logic necessary to satisfy the assignment?');
+    expect($rule)->toContain('reuse-first gate');
+
+    // Every CR-family skill routes the reuse / DRY check through that rule section.
+    $reuseRoutingSkills = [
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+        $packageDir . '/skills/code-review-bugsnag/SKILL.md',
+    ];
+
+    foreach ($reuseRoutingSkills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('Reuse Existing Logic');
+    }
+
+    // The Bugsnag wrapper, previously the outlier, now carries the reuse-first gate explicitly.
+    $bugsnag = (string) file_get_contents($packageDir . '/skills/code-review-bugsnag/SKILL.md');
+    expect($bugsnag)->toContain('reuse-first gate');
 });
 
 test('code review templates include refactoring tech debt section', function (): void {

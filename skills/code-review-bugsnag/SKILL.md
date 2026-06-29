@@ -63,6 +63,8 @@ Run the **Reviewer Comment Fulfillment Gate** defined canonically in `@skills/co
   - run @skills/security-review/SKILL.md
   - run @skills/class-refactoring/SKILL.md **with `MODE=cr`** — read-only refactoring lens scoped to the PR diff.
 
+- **Refactoring & Tech Debt (DRY) Analysis (PR diff only — never untouched code).** Apply the **reuse-first gate** from `@rules/code-review/general.mdc` *Reuse Existing Logic* to every block of new or modified logic on the diff: first verify the new logic is necessary to satisfy the assignment at all (an existing helper / Service / Action / Data Builder / DTO / scope may already fulfil it — wiring it up is the fix, the net-new logic is the finding), then that any logic genuinely needed reuses the existing implementation instead of introducing a parallel one. Fold duplicated-logic findings into the **Refactoring (DRY / Tech Debt Reduction)** section of the GitHub PR comment; out-of-scope structural problems go to **Refactoring Proposals**.
+
 - Run conditionally (same triggers as `@skills/code-review-jira/SKILL.md`): refactoring diff → `@skills/refactor-entry-point-to-action/SKILL.md` with `MODE=cr`; database operations → `@skills/mysql-problem-solver/SKILL.md` (surface under `## Database Analysis`); shared state → `@skills/race-condition-review/SKILL.md`; third-party API changes → the Third-Party API & Service Analysis step from `@skills/code-review/SKILL.md`.
 
 ### 4. Publish Results

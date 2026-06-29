@@ -233,9 +233,14 @@ test('readme reports the current skill count and lists tester-cookbook and secur
     $readme = (string) file_get_contents($packageDir . '/README.md');
     $entries = scandir($packageDir . '/skills');
     assert($entries !== false);
+    // A skill is a directory that ships a SKILL.md (matching `skill-check`'s own
+    // definition); shared helper dirs such as `_shared/` are not skills and must not
+    // inflate the count advertised in the README.
     $skillCount = count(array_filter(
         $entries,
-        static fn (string $entry): bool => $entry !== '.' && $entry !== '..' && is_dir($packageDir . '/skills/' . $entry),
+        static fn (string $entry): bool => $entry !== '.' && $entry !== '..'
+            && is_dir($packageDir . '/skills/' . $entry)
+            && is_file($packageDir . '/skills/' . $entry . '/SKILL.md'),
     ));
 
     expect($readme)->toContain($skillCount . ' comprehensive Agent skills');
@@ -815,4 +820,130 @@ test('duplicate and unsupported ECC skills were intentionally not ported', funct
     expect(is_dir($packageDir . '/skills/security-scan'))->toBeFalse();
     // The retained equivalent still ships.
     expect(is_dir($packageDir . '/skills/test-driven-development'))->toBeTrue();
+});
+
+test('attachment download scripts are shipped, executable, and documented for all three trackers', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $scripts = [
+        '/skills/code-review-github/scripts/download-attachments.sh' => 'Usage: download-attachments.sh <NUMBER|URL> [--dest DIR]',
+        '/skills/code-review-jira/scripts/download-attachments.sh' => 'Usage: download-attachments.sh <KEY|URL> [--dest DIR]',
+        '/skills/code-review-bugsnag/scripts/download-attachments.sh' => 'Usage: download-attachments.sh <URL|ORG_SLUG/PROJECT_SLUG/ERROR_ID> [--dest DIR]',
+    ];
+
+    foreach ($scripts as $relPath => $usage) {
+        $script = $packageDir . $relPath;
+        expect(file_exists($script))->toBeTrue();
+        expect(is_executable($script))->toBeTrue();
+
+        $content = (string) file_get_contents($script);
+        expect($content)->toStartWith('#!/usr/bin/env bash');
+        expect($content)->toContain('set -euo pipefail');
+        expect($content)->toContain($usage);
+        // Each wrapper delegates the actual download + scan to the shared library.
+        expect($content)->toContain('_shared/attachments.sh');
+        expect($content)->toContain('att_run ');
+    }
+});
+
+test('shared attachment library and security scan gate are shipped and executable', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    foreach (['/skills/_shared/attachments.sh', '/skills/_shared/scan-attachments.sh'] as $relPath) {
+        $script = $packageDir . $relPath;
+        expect(file_exists($script))->toBeTrue();
+        expect(is_executable($script))->toBeTrue();
+        expect((string) file_get_contents($script))->toStartWith('#!/usr/bin/env bash');
+        expect((string) file_get_contents($script))->toContain('set -euo pipefail');
+    }
+});
+
+test('attachment scripts never disable TLS validation and keep the token out of argv', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $scripts = [
+        '/skills/_shared/attachments.sh',
+        '/skills/_shared/scan-attachments.sh',
+        '/skills/code-review-github/scripts/download-attachments.sh',
+        '/skills/code-review-jira/scripts/download-attachments.sh',
+        '/skills/code-review-bugsnag/scripts/download-attachments.sh',
+    ];
+
+    foreach ($scripts as $relPath) {
+        $content = (string) file_get_contents($packageDir . $relPath);
+        // Strip comment lines first: the security headers legitimately *name* the
+        // forbidden flags to document why they are not used. Only executable code matters.
+        $code = (string) preg_replace('/^\s*#.*$/m', '', $content);
+        // No TLS-disabling flag may appear in executable code (rules/security/* Malicious Code).
+        expect($code)->not->toContain('--insecure');
+        expect($code)->not->toContain('--no-check-certificate');
+        expect($code)->not->toContain('verify=false');
+        expect($code)->not->toContain('NODE_TLS_REJECT_UNAUTHORIZED');
+        expect($code)->not->toMatch('/curl[^\n]*\s-k(\s|$)/');
+        // No curl response is piped into an interpreter.
+        expect($code)->not->toMatch('/curl[^\n]*\|\s*(sh|bash|php|python)/');
+    }
+
+    // The download library pins HTTPS and reads auth only from a curl --config file.
+    $lib = (string) file_get_contents($packageDir . '/skills/_shared/attachments.sh');
+    expect($lib)->toContain('--proto \'=https\'');
+    expect($lib)->toContain('--config');
+
+    // Each wrapper writes the token into a 0600 config file, not an -H/argv flag.
+    foreach (['github', 'jira'] as $tracker) {
+        $content = (string) file_get_contents($packageDir . sprintf('/skills/code-review-%s/scripts/download-attachments.sh', $tracker));
+        expect($content)->toContain('chmod 600 "$CFG"');
+        expect($content)->toContain('header = "Authorization:');
+    }
+});
+
+test('scan-attachments gate blocks the dangerous categories, enforces the allowlist and limits, and self-tests', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/_shared/scan-attachments.sh');
+
+    // Dangerous categories that must be blocked.
+    expect($content)->toContain('executable binary');
+    expect($content)->toContain('archive not permitted');
+    expect($content)->toContain('script content');
+    expect($content)->toContain('HTML content (stored-XSS risk)');
+    expect($content)->toContain('SVG with active content');
+    expect($content)->toContain('polyglot');
+    expect($content)->toContain('declared/actual MIME mismatch');
+    expect($content)->toContain('exceeds max size');
+
+    // Allowlist of analysable types.
+    expect($content)->toContain('image/png|image/jpeg|image/gif|image/webp|application/pdf|text/plain|text/csv|application/json');
+
+    // Verdict model: only `pass` reaches safe/.
+    expect($content)->toContain('--self-test');
+    expect($content)->toContain('"$verdict" == "pass"');
+
+    // The per-issue count cap is enforced by the shared download library.
+    $lib = (string) file_get_contents($packageDir . '/skills/_shared/attachments.sh');
+    expect($lib)->toContain('exceeds max attachment count');
+});
+
+test('scan-attachments self-test passes (benign PNG promoted, malicious SVG/HTML/polyglot blocked)', function (): void {
+    // The script self-test is the fixture proof required by issue #725. Per the
+    // project's test-isolation rule a Pest test cannot exec a real .sh, so this guard
+    // pins the self-test's asserted outcomes in the source rather than executing it.
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/_shared/scan-attachments.sh');
+
+    expect($content)->toContain('assert_status 1 pass');
+    expect($content)->toContain('assert_status 2 block');
+    expect($content)->toContain('assert_status 3 block');
+    expect($content)->toContain('assert_status 4 block');
+    expect($content)->toContain('benign PNG was not promoted to safe/');
+    expect($content)->toContain('a blocked file leaked into safe/');
+});
+
+test('analyze-problem enforces inventory -> download -> security gate -> safe-only order', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');
+
+    expect($content)->toContain('inventory → download → security gate → analyse only `safe/`');
+    expect($content)->toContain('skills/code-review-github/scripts/download-attachments.sh');
+    expect($content)->toContain('skills/code-review-jira/scripts/download-attachments.sh');
+    expect($content)->toContain('skills/code-review-bugsnag/scripts/download-attachments.sh');
+    expect($content)->toContain('skills/_shared/scan-attachments.sh');
+    expect($content)->toContain('Read only files under `safe/`');
 });

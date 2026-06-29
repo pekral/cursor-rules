@@ -895,6 +895,19 @@ test('attachment scripts never disable TLS validation and keep the token out of 
     }
 });
 
+test('attachment library guards against SSRF to non-public hosts from inventory URLs', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $lib = (string) file_get_contents($packageDir . '/skills/_shared/attachments.sh');
+
+    // A user-supplied URL (e.g. a Bugsnag comment link) must be blocked before any
+    // request when it targets loopback / link-local / private hosts.
+    expect($lib)->toContain('att_host_block_reason');
+    expect($lib)->toContain('169.254.');
+    expect($lib)->toContain('192.168.');
+    expect($lib)->toContain('ATT_ALLOW_PRIVATE_HOSTS');
+    expect($lib)->toContain('blocked host — ');
+});
+
 test('scan-attachments gate blocks the dangerous categories, enforces the allowlist and limits, and self-tests', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/_shared/scan-attachments.sh');

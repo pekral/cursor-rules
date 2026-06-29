@@ -25,7 +25,10 @@
 #     "descriptionText": "<flattened plain text>",
 #     "descriptionMediaRefs": [ { "adfId", "altText" } ],
 #     "issueLinks":  [ { "id", "type", "direction", "verb", "linkedKey", "linkedSummary", "linkedStatus", "linkedType" } ],
-#     "subtasks":    [ { "key", "summary", "status", "type" } ],
+#     "subtasks":    [ { "key", "summary", "status", "type",
+#                        "descriptionText", "descriptionAdf",
+#                        "comments":    [ { "author", "body", "created", "visibility" } ],
+#                        "attachments": [ { "id", "name", "size", "mimeType", "contentUrl", "author", "created" } ] } ],
 #     "comments":    [ { "author", "body", "created", "visibility" } ],
 #     "attachments": [ { "id", "name", "size", "mimeType", "contentUrl", "author", "created" } ],
 #     "customFields":  { "customfield_XXXXX": <parsed value>, … },
@@ -48,6 +51,13 @@
 #     customFields[$JIRA_DEV_SUMMARY_FIELD] (default `customfield_10000`,
 #     overridable via the JIRA_DEV_SUMMARY_FIELD env var). The shape stays
 #     identical across JIRA sites because it's computed, not field-id-bound.
+#   - `subtasks[]` carries the full sub-issue context (description, comments,
+#     attachments), not just the shallow reference the parent issue embeds. Each
+#     subtask is fetched individually (one `acli ... workitem view` plus one
+#     `acli ... comment list` per subtask), so a parent with many subtasks costs
+#     proportionally more API calls. A subtask whose individual fetch fails
+#     degrades to its shallow reference (key/summary/status/type) with empty
+#     description / comments / attachments rather than breaking the whole load.
 #   - The Atlassian CLI `--paginate` flag emits a JSON stream (one document per
 #     page) instead of a single document. We slurp with `jq -s` to merge pages.
 #   - `pullRequests` are resolved via `gh search prs <KEY>` and may include PRs
@@ -154,6 +164,30 @@ fi
 
 COMMENTS_JSON="$(acli jira workitem comment list --key "$KEY" --json --paginate 2>/dev/null | jq -s '{ comments: ([ .[].comments // [] ] | add // []) }' 2>/dev/null || printf '{"comments": []}')"
 
+# Fetch the full context of every subtask (description, comments, attachments).
+# The parent issue only embeds a shallow subtask reference, so each subtask is
+# loaded individually and accumulated into an object keyed by subtask key. A
+# failed individual fetch is skipped, leaving that subtask with its shallow
+# reference only.
+SUBTASK_DETAILS='{}'
+SUBTASK_KEYS="$(printf '%s' "$VIEW_JSON" | jq -r '(.fields.subtasks // [])[] | .key // empty' 2>/dev/null || true)"
+if [[ -n "$SUBTASK_KEYS" ]]; then
+  while IFS= read -r SUBTASK_KEY; do
+    [[ -z "$SUBTASK_KEY" ]] && continue
+    SUBTASK_VIEW="$(acli jira workitem view "$SUBTASK_KEY" --fields '*all' --json 2>/dev/null || true)"
+    if [[ -z "$SUBTASK_VIEW" ]] || ! printf '%s' "$SUBTASK_VIEW" | jq -e . >/dev/null 2>&1; then
+      continue
+    fi
+    SUBTASK_COMMENTS="$(acli jira workitem comment list --key "$SUBTASK_KEY" --json --paginate 2>/dev/null | jq -s '{ comments: ([ .[].comments // [] ] | add // []) }' 2>/dev/null || printf '{"comments": []}')"
+    SUBTASK_DETAILS="$(jq -c -n \
+      --arg key "$SUBTASK_KEY" \
+      --argjson acc "$SUBTASK_DETAILS" \
+      --argjson view "$SUBTASK_VIEW" \
+      --argjson commentsResp "$SUBTASK_COMMENTS" \
+      '$acc + { ($key): { view: $view, comments: ($commentsResp.comments // []) } }' 2>/dev/null || printf '%s' "$SUBTASK_DETAILS")"
+  done <<< "$SUBTASK_KEYS"
+fi
+
 PRS_JSON='[]'
 if command -v gh >/dev/null 2>&1; then
   PRS_JSON="$(gh search prs "$KEY" \
@@ -170,6 +204,7 @@ jq -n \
   --arg devField "$DEV_FIELD" \
   --argjson view "$VIEW_JSON" \
   --argjson commentsResp "$COMMENTS_JSON" \
+  --argjson subtaskDetails "$SUBTASK_DETAILS" \
   --argjson prs "$PRS_JSON" '
 def tryParseTrimEnd:
   . as $s
@@ -270,12 +305,33 @@ def adfMedia:
           linkedStatus: (.inwardIssue.fields.status.name // null),
           linkedType: (.inwardIssue.fields.issuetype.name // null) }
       end)),
-    subtasks: ($sub | map({
-      key: .key,
-      summary: (.fields.summary // null),
-      status: (.fields.status.name // null),
-      type: (.fields.issuetype.name // null)
-    })),
+    subtasks: ($sub | map(. as $st
+      | ($subtaskDetails[$st.key] // null) as $d
+      | ($d.view.fields // null) as $sf
+      | ($sf.description // null) as $sdesc
+      | {
+          key: $st.key,
+          summary: ($st.fields.summary // null),
+          status: ($st.fields.status.name // null),
+          type: ($st.fields.issuetype.name // null),
+          descriptionAdf: $sdesc,
+          descriptionText: (if $sdesc == null then "" else ($sdesc | adfText | gsub("\n\n+"; "\n\n") | sub("\n+$"; "")) end),
+          comments: (if $d == null then [] else (($d.comments // []) | map(. as $c | {
+            author: (if ($c.author | type) == "object" then ($c.author.displayName // null) else $c.author end),
+            body: (if ($c.body | type) == "object" then ($c.body | adfText) else $c.body end),
+            created: ($c.created // null),
+            visibility: (if ($c.visibility | type) == "object" then $c.visibility.value else ($c.visibility // null) end)
+          })) end),
+          attachments: (if $sf == null then [] else (($sf.attachment // []) | map({
+            id: (.id // null),
+            name: (.filename // null),
+            size: (.size // null),
+            mimeType: (.mimeType // null),
+            contentUrl: (.content // null),
+            author: (if (.author | type) == "object" then (.author.displayName // null) else .author end),
+            created: (.created // null)
+          })) end)
+        })),
     comments: ($commentsResp.comments // [] | map(. as $c | {
       author: (if ($c.author | type) == "object" then ($c.author.displayName // null) else $c.author end),
       body: (if ($c.body | type) == "object" then ($c.body | adfText) else $c.body end),

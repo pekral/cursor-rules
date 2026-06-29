@@ -134,3 +134,11 @@
 - Rule:    Route through metis first when the *mechanism* is ambiguous (which signal, where the contract lives) even if the *code* is a clone — the ambiguity is in the design, not the implementation. Once metis fixes the design, the implementation is low-risk and argos+athena converge in iteration 1. Worth recording so a similar "claim / status / follow-up" request is scoped as metis-then-clone rather than treated as net-new high-risk work.
 - Source:  https://github.com/pekral/cursor-rules/pull/706   Added: 2026-06-23
 - Role:    daidalos
+
+### github-sub-issues-only-via-graphql — GitHub native sub-issues are reachable only through GraphQL, not `gh ... --json`
+
+- Trigger: extending `skills/code-review-github/scripts/load-issue.sh` (or any GitHub loader) to read native sub-issues / parent-child issue relations.
+- Rule:    `gh issue view --json subIssues` fails with `Unknown JSON field: "subIssues"` — the `gh` CLI projection does not expose the relation. Fetch it via `gh api graphql` against `repository.issue.subIssues` (the `subIssues(first:N){ nodes{ ... } }` connection; REST `/issues/{n}/sub_issues` also works). Bind owner/repo/number as GraphQL variables with `-F`/`-f` (no string interpolation into the query). Sub-issues exist on issues only (the GraphQL `issue(number)` is null for a PR number), so gate on `kind == "issue"` and default to `[]` on any failure. JIRA already exposes `subtasks` shallowly via `acli ... view --fields '*all'`, but full subtask body/comments/attachments need one extra `acli ... view` + `comment list` per subtask. GitHub issues have no attachment field — uploads are inline URLs in body/comments.
+- Example: issue #721 / PR #723 — added `subIssues[]` (full body + comments + labels via GraphQL) to the GitHub loader and deepened JIRA `subtasks[]` with description/comments/attachments. Both reviews (argos quality + athena security) converged 0/0/0 in iteration 1; `composer build` green (315 tests, 100% coverage).
+- Source:  https://github.com/pekral/cursor-rules/pull/723   Added: 2026-06-29
+- Role:    shared

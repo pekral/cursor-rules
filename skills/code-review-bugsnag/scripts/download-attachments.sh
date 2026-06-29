@@ -59,6 +59,7 @@ fi
 
 [[ -z "$DEST" ]] && DEST="$(att_default_dest)/bugsnag"
 
+# stderr suppressed: the loader's own diagnostics are noise; its result is validated on the next line.
 ERROR_JSON="$("${SCRIPT_DIR}/load-issue.sh" "$REF" 2>/dev/null || true)"
 if [[ -z "$ERROR_JSON" ]] || ! printf '%s' "$ERROR_JSON" | jq -e . >/dev/null 2>&1; then
   echo "${PROG}: failed to load Bugsnag error inventory for: $REF" >&2

@@ -208,6 +208,6 @@ fi
 echo
 echo "---"
 echo "## Pokyny pro agenta"
-echo "- **Obsah příloh** není v tomto dokumentu — \`acli\` přílohy nestahuje. Načti je sám přes \`contentUrl\` (autentizovaně) vlastními nástroji."
+echo "- **Obsah příloh** není v tomto dokumentu — \`acli\` přílohy nestahuje. Stáhni je bezpečně přes \`skills/code-review-jira/scripts/download-attachments.sh <KEY|URL>\` (TLS on, do karantény) a otevírej **jen** soubory promované security bránou (\`scan-attachments.sh\`) do \`safe/\`."
 echo "- **Externí odkazy** výše projdi vlastními web nástroji; pokud vedou na další relevantní zdroje, pokračuj rekurzivně do rozumné hloubky."
 echo "- Propojené JIRA issues jsou načtené do hloubky ${DEPTH}; pro hlubší kontext zvyš \`JIRA_CONTEXT_DEPTH\`."

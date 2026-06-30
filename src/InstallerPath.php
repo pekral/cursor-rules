@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pekral\CursorRules;
+namespace AgenticVibes\AgentSkills;
 
 use JsonException;
 
@@ -252,7 +252,7 @@ final class InstallerPath
     }
 
     /**
-     * Reads the editor setting from composer.json extra.cursor-rules.editor.
+     * Reads the editor setting from composer.json extra.agent-skills.editor.
      */
     public static function resolveEditorFromComposerJson(string $projectRoot): ?string
     {
@@ -268,7 +268,7 @@ final class InstallerPath
             return null;
         }
 
-        $config = $extra['cursor-rules'] ?? [];
+        $config = $extra['agent-skills'] ?? [];
 
         if (!is_array($config)) {
             return null;

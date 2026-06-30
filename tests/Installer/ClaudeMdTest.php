@@ -2,8 +2,8 @@
 
 declare(strict_types = 1);
 
-use Pekral\CursorRules\Installer;
-use Pekral\CursorRules\InstallerPath;
+use AgenticVibes\AgentSkills\Installer;
+use AgenticVibes\AgentSkills\InstallerPath;
 
 test('resolveClaudeMdSource returns path to CLAUDE.md in package', function (): void {
     $source = InstallerPath::resolveClaudeMdSource();
@@ -35,7 +35,7 @@ test('install with editor=claude copies CLAUDE.md to project root', function ():
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude']);
+        Installer::run(['agent-skills', 'install', '--editor=claude']);
         ob_end_clean();
 
         $claudeMd = $root . '/CLAUDE.md';
@@ -58,7 +58,7 @@ test('install with editor=cursor does not copy CLAUDE.md', function (): void {
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor']);
         ob_end_clean();
 
         expect(is_file($root . '/CLAUDE.md'))->toBeFalse();
@@ -87,7 +87,7 @@ test('install with editor=all copies CLAUDE.md to project root', function (): vo
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=all']);
+        Installer::run(['agent-skills', 'install', '--editor=all']);
         ob_end_clean();
 
         $claudeMd = $root . '/CLAUDE.md';
@@ -108,7 +108,7 @@ test('install does not overwrite existing CLAUDE.md without force flag', functio
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude']);
+        Installer::run(['agent-skills', 'install', '--editor=claude']);
         ob_end_clean();
 
         expect(file_get_contents($claudeMd))->toBe('my custom CLAUDE.md');
@@ -131,7 +131,7 @@ test('install never overwrites existing CLAUDE.md even with force flag', functio
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude', '--force']);
+        Installer::run(['agent-skills', 'install', '--editor=claude', '--force']);
         ob_end_clean();
 
         expect(file_get_contents($claudeMd))->toBe('my custom CLAUDE.md');

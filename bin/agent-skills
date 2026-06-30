@@ -22,4 +22,4 @@ if (!$autoloadFound) {
     exit(1);
 }
 
-Pekral\CursorRules\Installer::run($argv);
+AgenticVibes\AgentSkills\Installer::run($argv);

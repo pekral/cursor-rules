@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pekral\CursorRules;
+namespace AgenticVibes\AgentSkills;
 
 /**
  * Appends the humanizer directive to installed SKILL.md files.

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pekral\CursorRules;
+namespace AgenticVibes\AgentSkills;
 
 use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
@@ -47,7 +47,7 @@ final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
         }
 
         $editor = $this->resolveEditorFromConfig();
-        Installer::run(['cursor-rules', 'install', '--force', '--editor=' . $editor]);
+        Installer::run(['agent-skills', 'install', '--force', '--editor=' . $editor]);
     }
 
     /**
@@ -88,7 +88,7 @@ final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
         }
 
         $extra = $this->composer->getPackage()->getExtra();
-        $config = $extra['cursor-rules'] ?? [];
+        $config = $extra['agent-skills'] ?? [];
 
         return is_array($config) ? array_change_key_case($config, CASE_LOWER) : [];
     }

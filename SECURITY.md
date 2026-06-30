@@ -2,14 +2,14 @@
 
 ## Plugin trust model
 
-`pekral/cursor-rules` is a **Composer plugin** (`"type": "composer-plugin"`). Composer requires explicit opt-in before running any plugin — including this one — to guard against supply-chain attacks from unknown packages.
+`agentic-vibes/laravel-agent-skills` is a **Composer plugin** (`"type": "composer-plugin"`). Composer requires explicit opt-in before running any plugin — including this one — to guard against supply-chain attacks from unknown packages.
 
 ### `allow-plugins` in `composer.json`
 
-When you `composer require pekral/cursor-rules`, Composer may ask:
+When you `composer require agentic-vibes/laravel-agent-skills`, Composer may ask:
 
 ```
-Do you trust "pekral/cursor-rules" to execute code and wish to enable it now? (yes/no)
+Do you trust "agentic-vibes/laravel-agent-skills" to execute code and wish to enable it now? (yes/no)
 ```
 
 If you answer `yes`, Composer writes the following entry to your project's `composer.json`:
@@ -18,7 +18,7 @@ If you answer `yes`, Composer writes the following entry to your project's `comp
 {
   "config": {
     "allow-plugins": {
-      "pekral/cursor-rules": true
+      "agentic-vibes/laravel-agent-skills": true
     }
   }
 }
@@ -29,8 +29,8 @@ This is the **standard Composer plugin-trust mechanism** (`allow-plugins`). It i
 If you prefer to give a non-interactive answer (e.g. in CI), you can pass the flag explicitly:
 
 ```bash
-composer require pekral/cursor-rules --dev --no-plugins   # skip the plugin during install
-composer config allow-plugins.pekral/cursor-rules true     # then grant trust manually
+composer require agentic-vibes/laravel-agent-skills --dev --no-plugins   # skip the plugin during install
+composer config allow-plugins.agentic-vibes/laravel-agent-skills true     # then grant trust manually
 ```
 
 ### Auto-install hook
@@ -40,7 +40,7 @@ Granting `allow-plugins: true` also enables the package's Composer plugin to rea
 ```json
 {
   "extra": {
-    "cursor-rules": {
+    "agent-skills": {
       "auto-install": true,
       "editor": "claude"
     }
@@ -48,7 +48,7 @@ Granting `allow-plugins: true` also enables the package's Composer plugin to rea
 }
 ```
 
-When `auto-install` is `true`, every `composer install` or `composer update` automatically runs `Installer::run(['cursor-rules', 'install', '--force', '--editor=<editor>'])` — the same installer that you would call manually, with `--force` and without any opt-in flags (`--allow-bundled-scripts`, `--allow-subagent-writes`). **Security implication:** any package that ships a `post-install-cmd` / `post-update-cmd` hook and is trusted via `allow-plugins` can trigger code execution during a routine `composer install`. Review the `extra.cursor-rules` block in your `composer.json` before enabling `auto-install`, and treat it the same way you treat other Composer script hooks.
+When `auto-install` is `true`, every `composer install` or `composer update` automatically runs `Installer::run(['agent-skills', 'install', '--force', '--editor=<editor>'])` — the same installer that you would call manually, with `--force` and without any opt-in flags (`--allow-bundled-scripts`, `--allow-subagent-writes`). **Security implication:** any package that ships a `post-install-cmd` / `post-update-cmd` hook and is trusted via `allow-plugins` can trigger code execution during a routine `composer install`. Review the `extra.agent-skills` block in your `composer.json` before enabling `auto-install`, and treat it the same way you treat other Composer script hooks.
 
 See also: [README — Automatic Installation via Composer Plugin](README.md#automatic-installation-via-composer-plugin).
 
@@ -110,6 +110,6 @@ The installer never writes outside the project directory and the user's home dir
 
 If you discover a security issue in this package, please report it privately so it can be addressed before public disclosure.
 
-**Contact:** open a [GitHub Security Advisory](https://github.com/pekral/cursor-rules/security/advisories/new) (preferred) or email `kral.petr.88@gmail.com`.
+**Contact:** open a [GitHub Security Advisory](https://github.com/agentic-vibes/laravel-agent-skills/security/advisories/new) (preferred) or email `kral.petr.88@gmail.com`.
 
 Please include a description of the issue, reproduction steps, and the potential impact. You will receive a response within a reasonable time. Public disclosure is coordinated after a fix is available.

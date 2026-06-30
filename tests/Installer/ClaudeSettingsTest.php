@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-use Pekral\CursorRules\Installer;
-use Pekral\CursorRules\InstallerClaudeSettings;
-use Pekral\CursorRules\InstallerFailure;
+use AgenticVibes\AgentSkills\Installer;
+use AgenticVibes\AgentSkills\InstallerClaudeSettings;
+use AgenticVibes\AgentSkills\InstallerFailure;
 
 test('InstallerClaudeSettings exposes the two bundled-script permission patterns', function (): void {
     $patterns = InstallerClaudeSettings::getBundledScriptPermissions();
@@ -208,7 +208,7 @@ test('resolveProjectLocalSettingsPath joins the project root with /.claude/setti
 });
 
 test('ensureSubagentWritesEnabled writes scoped Edit/Write entries into a fresh settings.local.json', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/agent-skills-saw-' . bin2hex(random_bytes(4));
 
     try {
         $written = InstallerClaudeSettings::ensureSubagentWritesEnabled($root);
@@ -232,7 +232,7 @@ test('ensureSubagentWritesEnabled writes scoped Edit/Write entries into a fresh 
 });
 
 test('ensureSubagentWritesEnabled prepends to existing allow without dropping unrelated entries', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/agent-skills-saw-' . bin2hex(random_bytes(4));
     $settingsPath = $root . '/.claude/settings.local.json';
     installerWriteFile($settingsPath, (string) json_encode([
         'theme' => 'dark',
@@ -262,7 +262,7 @@ test('ensureSubagentWritesEnabled prepends to existing allow without dropping un
 });
 
 test('ensureSubagentWritesEnabled is idempotent when both entries are already present', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/agent-skills-saw-' . bin2hex(random_bytes(4));
     $settingsPath = $root . '/.claude/settings.local.json';
     installerWriteFile($settingsPath, (string) json_encode([
         'permissions' => ['allow' => [
@@ -280,7 +280,7 @@ test('ensureSubagentWritesEnabled is idempotent when both entries are already pr
 });
 
 test('ensureSubagentWritesEnabled adds only the missing entry when one is already present', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/agent-skills-saw-' . bin2hex(random_bytes(4));
     $settingsPath = $root . '/.claude/settings.local.json';
     installerWriteFile($settingsPath, (string) json_encode([
         'permissions' => ['allow' => [sprintf('Write(/%s/**)', $root)]],
@@ -303,7 +303,7 @@ test('ensureSubagentWritesEnabled adds only the missing entry when one is alread
 });
 
 test('ensureSubagentWritesEnabled recovers when permissions.allow is the wrong shape and drops non-strings', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/agent-skills-saw-' . bin2hex(random_bytes(4));
     $settingsPath = $root . '/.claude/settings.local.json';
     installerWriteFile($settingsPath, (string) json_encode([
         'permissions' => ['allow' => ['Bash(git status:*)', 42, null]],
@@ -327,7 +327,7 @@ test('ensureSubagentWritesEnabled recovers when permissions.allow is the wrong s
 });
 
 test('ensureSubagentWritesEnabled recovers when permissions key is the wrong shape', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/agent-skills-saw-' . bin2hex(random_bytes(4));
     $settingsPath = $root . '/.claude/settings.local.json';
     installerWriteFile($settingsPath, (string) json_encode(['permissions' => 'not-an-object']));
 
@@ -348,21 +348,21 @@ test('ensureSubagentWritesEnabled recovers when permissions key is the wrong sha
 });
 
 test('applySubagentWritesIfRequested returns false when the flag is not set', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/agent-skills-saw-' . bin2hex(random_bytes(4));
 
     expect(InstallerClaudeSettings::applySubagentWritesIfRequested(allowSubagentWrites: false, editor: 'claude', projectRoot: $root))->toBeFalse();
     expect(is_file($root . '/.claude/settings.local.json'))->toBeFalse();
 });
 
 test('applySubagentWritesIfRequested returns false for a non-claude editor', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/agent-skills-saw-' . bin2hex(random_bytes(4));
 
     expect(InstallerClaudeSettings::applySubagentWritesIfRequested(allowSubagentWrites: true, editor: 'cursor', projectRoot: $root))->toBeFalse();
     expect(is_file($root . '/.claude/settings.local.json'))->toBeFalse();
 });
 
 test('applySubagentWritesIfRequested writes the allow entries for editor=claude when requested', function (): void {
-    $root = sys_get_temp_dir() . '/cursor-rules-saw-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/agent-skills-saw-' . bin2hex(random_bytes(4));
 
     try {
         expect(InstallerClaudeSettings::applySubagentWritesIfRequested(allowSubagentWrites: true, editor: 'claude', projectRoot: $root))->toBeTrue();
@@ -406,7 +406,7 @@ test('install --editor=claude --allow-bundled-scripts writes the permissions and
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude', '--allow-bundled-scripts']);
+        Installer::run(['agent-skills', 'install', '--editor=claude', '--allow-bundled-scripts']);
         $output = (string) ob_get_clean();
 
         expect($output)->toContain('Allowed 2 bundled-script permission(s) in ~/.claude/settings.json.');
@@ -436,7 +436,7 @@ test('install --editor=all --allow-bundled-scripts writes the permissions to ~/.
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=all', '--allow-bundled-scripts']);
+        Installer::run(['agent-skills', 'install', '--editor=all', '--allow-bundled-scripts']);
         ob_end_clean();
 
         $settingsPath = $root . '/.claude/settings.json';
@@ -462,7 +462,7 @@ test('install --editor=cursor --allow-bundled-scripts does not write settings.js
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--allow-bundled-scripts']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor', '--allow-bundled-scripts']);
         $output = (string) ob_get_clean();
 
         expect($output)->not->toContain('Allowed');
@@ -488,7 +488,7 @@ test('install --editor=claude without --allow-bundled-scripts still disables AI 
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude']);
+        Installer::run(['agent-skills', 'install', '--editor=claude']);
         $output = (string) ob_get_clean();
 
         expect($output)->not->toContain('Allowed');
@@ -521,7 +521,7 @@ test('install --editor=claude --allow-subagent-writes writes the allow entries a
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude', '--allow-subagent-writes']);
+        Installer::run(['agent-skills', 'install', '--editor=claude', '--allow-subagent-writes']);
         $output = (string) ob_get_clean();
 
         expect($output)->toContain('Allowed subagent file writes (Edit/Write on the working tree) in .claude/settings.local.json.');
@@ -560,7 +560,7 @@ test('install --editor=cursor --allow-subagent-writes does not write settings.lo
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--allow-subagent-writes']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor', '--allow-subagent-writes']);
         $output = (string) ob_get_clean();
 
         expect($output)->not->toContain('Allowed subagent file writes');
@@ -586,7 +586,7 @@ test('install --editor=claude without --allow-subagent-writes does not write set
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude']);
+        Installer::run(['agent-skills', 'install', '--editor=claude']);
         $output = (string) ob_get_clean();
 
         expect($output)->not->toContain('Allowed subagent file writes');
@@ -609,7 +609,7 @@ test('install --editor=claude --allow-bundled-scripts with HOME unset is a no-op
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude', '--allow-bundled-scripts']);
+        Installer::run(['agent-skills', 'install', '--editor=claude', '--allow-bundled-scripts']);
         $output = (string) ob_get_clean();
 
         expect($output)->not->toContain('Allowed');
@@ -646,11 +646,11 @@ test('install --editor=claude --allow-bundled-scripts is idempotent across two c
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude', '--allow-bundled-scripts']);
+        Installer::run(['agent-skills', 'install', '--editor=claude', '--allow-bundled-scripts']);
         ob_end_clean();
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude', '--allow-bundled-scripts']);
+        Installer::run(['agent-skills', 'install', '--editor=claude', '--allow-bundled-scripts']);
         $secondOutput = (string) ob_get_clean();
 
         expect($secondOutput)->not->toContain('Allowed');

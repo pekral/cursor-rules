@@ -2,8 +2,8 @@
 
 declare(strict_types = 1);
 
-use Pekral\CursorRules\Installer;
-use Pekral\CursorRules\InstallerPath;
+use AgenticVibes\AgentSkills\Installer;
+use AgenticVibes\AgentSkills\InstallerPath;
 
 test('resolveAgentsSource returns the package agents directory when it exists', function (): void {
     $packageDir = dirname(__DIR__, 2);
@@ -52,7 +52,7 @@ test('install with editor=claude copies the argos agent to .claude/agents', func
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=claude']);
+        Installer::run(['agent-skills', 'install', '--editor=claude']);
         ob_end_clean();
 
         expect(is_file($root . '/.claude/agents/argos.md'))->toBeTrue();
@@ -80,7 +80,7 @@ test('install with editor=cursor does not copy agents', function (): void {
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor']);
         ob_end_clean();
 
         expect(is_dir($root . '/.cursor/agents'))->toBeFalse();

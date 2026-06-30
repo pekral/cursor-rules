@@ -146,7 +146,7 @@ test('assignment-compliance-check skill exists with required sections and writes
     expect($content)->toContain('Report **only Critical**');
     expect($content)->toContain('must not** write any output to disk');
     expect($content)->toContain('No files were created on disk');
-    expect($content)->not->toContain('.cursor-rules-reports');
+    expect($content)->not->toContain('.agent-skills-reports');
 });
 
 test('assignment-compliance-check returns markdown to the caller without publishing on its own', function (): void {

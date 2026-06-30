@@ -5,10 +5,10 @@
 # Cursor Rules for PHP and Laravel — Composer Plugin
 
 <p align="center">
-  <a href="https://packagist.org/packages/pekral/cursor-rules"><img src="https://img.shields.io/packagist/v/pekral/cursor-rules" alt="Packagist Version"></a>
-  <a href="https://packagist.org/packages/pekral/cursor-rules"><img src="https://img.shields.io/packagist/dt/pekral/cursor-rules" alt="Total Downloads"></a>
-  <a href="https://packagist.org/packages/pekral/cursor-rules"><img src="https://img.shields.io/packagist/php-v/pekral/cursor-rules" alt="PHP Version"></a>
-  <a href="https://github.com/pekral/cursor-rules/blob/master/LICENSE"><img src="https://img.shields.io/packagist/l/pekral/cursor-rules" alt="License"></a>
+  <a href="https://packagist.org/packages/agentic-vibes/laravel-agent-skills"><img src="https://img.shields.io/packagist/v/agentic-vibes/laravel-agent-skills" alt="Packagist Version"></a>
+  <a href="https://packagist.org/packages/agentic-vibes/laravel-agent-skills"><img src="https://img.shields.io/packagist/dt/agentic-vibes/laravel-agent-skills" alt="Total Downloads"></a>
+  <a href="https://packagist.org/packages/agentic-vibes/laravel-agent-skills"><img src="https://img.shields.io/packagist/php-v/agentic-vibes/laravel-agent-skills" alt="PHP Version"></a>
+  <a href="https://github.com/agentic-vibes/laravel-agent-skills/blob/master/LICENSE"><img src="https://img.shields.io/packagist/l/agentic-vibes/laravel-agent-skills" alt="License"></a>
   <a href="https://pekral.cz"><img src="https://img.shields.io/badge/by-pekral.cz-blue" alt="by pekral.cz"></a>
 </p>
 
@@ -26,8 +26,8 @@
 ## Installation
 
 ```bash
-composer require pekral/cursor-rules --dev
-vendor/bin/cursor-rules install --editor=cursor
+composer require agentic-vibes/laravel-agent-skills --dev
+vendor/bin/agent-skills install --editor=cursor
 ```
 
 The `--editor` flag is **required**. Use it to choose the target agent:
@@ -45,11 +45,11 @@ The `--editor` flag is **required**. Use it to choose the target agent:
 | Skills | ✅ | ✅ | ✅ |
 | Agents | — | ✅ | — |
 
-Agents are installed only for `--editor=claude` and `--editor=all`; they are skipped for `cursor` and `codex` because only Claude Code has a native subagent format. Codex rules support is listed as experimental / unverified — the installer copies the files into `.codex/rules`, but native rule loading by Codex has not been confirmed; report your findings in [#663](https://github.com/pekral/cursor-rules/issues/663).
+Agents are installed only for `--editor=claude` and `--editor=all`; they are skipped for `cursor` and `codex` because only Claude Code has a native subagent format. Codex rules support is listed as experimental / unverified — the installer copies the files into `.codex/rules`, but native rule loading by Codex has not been confirmed; report your findings in [#663](https://github.com/agentic-vibes/laravel-agent-skills/issues/663).
 
-When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`.
+When the package is required via Composer, sources are read from `vendor/agentic-vibes/laravel-agent-skills/rules` and `vendor/agentic-vibes/laravel-agent-skills/skills`.
 
-**Important:** By default, the installer only copies missing files and keeps existing content untouched. Use the `--force` flag to overwrite existing files: `vendor/bin/cursor-rules install --force`. This is particularly useful when you want to update rules to their latest versions or when you've made local changes that should be replaced. The file `.cursor/rules/project.mdc` and `CLAUDE.md` are never overwritten once they exist in the target project, so you can safely customize them.
+**Important:** By default, the installer only copies missing files and keeps existing content untouched. Use the `--force` flag to overwrite existing files: `vendor/bin/agent-skills install --force`. This is particularly useful when you want to update rules to their latest versions or when you've made local changes that should be replaced. The file `.cursor/rules/project.mdc` and `CLAUDE.md` are never overwritten once they exist in the target project, so you can safely customize them.
 
 ### Automatic Installation via Composer Plugin
 
@@ -58,7 +58,7 @@ By default, the Composer plugin does **not** auto-install rules on `composer ins
 ```json
 {
   "extra": {
-    "cursor-rules": {
+    "agent-skills": {
       "auto-install": true,
       "editor": "claude"
     }
@@ -71,7 +71,7 @@ By default, the Composer plugin does **not** auto-install rules on `composer ins
 | `auto-install` | Enable automatic install on `composer install/update`.   | `false`   |
 | `editor`       | Target editor for auto-install (`cursor`, `claude`, `codex`, `all`). | `cursor` |
 
-If you prefer manual control, simply call `vendor/bin/cursor-rules install` in your Composer `post-update-cmd` scripts with the desired flags.
+If you prefer manual control, simply call `vendor/bin/agent-skills install` in your Composer `post-update-cmd` scripts with the desired flags.
 
 ### Installing rules from GitHub (Cursor only)
 
@@ -80,27 +80,27 @@ You can use this repository as a **Remote Rule** in Cursor without installing th
 1. Open **Cursor Settings** → **Rules**.
 2. In the **Project Rules** section, click **Add Rule**.
 3. Select **Remote Rule (Github)**.
-4. Enter the repository URL: `https://github.com/pekral/cursor-rules`.
+4. Enter the repository URL: `https://github.com/agentic-vibes/laravel-agent-skills`.
 
 Cursor will fetch and apply the rules from the repository. Note: this method provides rules only; Agent skills are installed into your project when you use the Composer-based installation above.
 
 ### Available Commands
 
 ```bash
-vendor/bin/cursor-rules help                                  # print help
-vendor/bin/cursor-rules install --editor=cursor               # install for Cursor
-vendor/bin/cursor-rules install --editor=claude               # install for Claude
-vendor/bin/cursor-rules install --editor=codex                # install for Codex
-vendor/bin/cursor-rules install --editor=all                  # install for Cursor, Claude, and Codex
-vendor/bin/cursor-rules install --editor=cursor --force       # overwrite existing files
-vendor/bin/cursor-rules install --editor=cursor --symlink     # prefer symlinks (fallback to copy)
-vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whitelist this package's bundled scripts in ~/.claude/settings.json
+vendor/bin/agent-skills help                                  # print help
+vendor/bin/agent-skills install --editor=cursor               # install for Cursor
+vendor/bin/agent-skills install --editor=claude               # install for Claude
+vendor/bin/agent-skills install --editor=codex                # install for Codex
+vendor/bin/agent-skills install --editor=all                  # install for Cursor, Claude, and Codex
+vendor/bin/agent-skills install --editor=cursor --force       # overwrite existing files
+vendor/bin/agent-skills install --editor=cursor --symlink     # prefer symlinks (fallback to copy)
+vendor/bin/agent-skills install --editor=claude --allow-bundled-scripts   # whitelist this package's bundled scripts in ~/.claude/settings.json
 ```
 
 ### Installer Flow
 
 1. Determine the project root by walking up from the current directory until `composer.json` is found.
-2. Resolve the rules source (local `rules/` or `vendor/pekral/cursor-rules/rules`).
+2. Resolve the rules source (local `rules/` or `vendor/agentic-vibes/laravel-agent-skills/rules`).
 3. Install rules into the target directory(ies) for the chosen editor (see `--editor`).
 4. If present, resolve the skills source and install into the corresponding skill directory(ies).
 5. For `--editor=claude` or `--editor=all`: copy `CLAUDE.md` to the project root (never overwrites existing).
@@ -246,7 +246,7 @@ Agents = specialised orchestration roles over multiple skills
 1. Install for Claude Code (or every editor):
 
    ```bash
-   vendor/bin/cursor-rules install --editor=claude   # or --editor=all
+   vendor/bin/agent-skills install --editor=claude   # or --editor=all
    ```
 
    Agents land in `.claude/agents/`. They are **not** installed for `--editor=cursor` or `--editor=codex`.
@@ -351,7 +351,7 @@ All `.mdc` and `.md` files are ready for automatic injection by Cursor so every 
 ```bash
 composer check              # run full quality check (skill-check, normalize, phpcs, pint, rector, phpstan, audit, tests)
 composer fix                # run all automatic fixes (skill-check-fix, normalize, rector, pint, phpcs)
-composer build              # install (cursor-rules install --force) then fix then check
+composer build              # install (agent-skills install --force) then fix then check
 composer analyse            # run PHPStan static analysis
 composer test:coverage      # run tests with 100% coverage
 composer coverage           # alias for test:coverage

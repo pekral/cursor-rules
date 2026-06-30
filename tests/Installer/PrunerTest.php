@@ -2,8 +2,8 @@
 
 declare(strict_types = 1);
 
-use Pekral\CursorRules\Installer;
-use Pekral\CursorRules\InstallerPruner;
+use AgenticVibes\AgentSkills\Installer;
+use AgenticVibes\AgentSkills\InstallerPruner;
 
 test('install with prune removes files from target that no longer exist in source', function (): void {
     $root = installerCreateProjectRoot();
@@ -14,13 +14,13 @@ test('install with prune removes files from target that no longer exist in sourc
         chdir($root);
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor']);
         ob_end_clean();
 
         installerWriteFile($root . '/.cursor/skills/orphaned-skill/SKILL.md', 'orphaned content');
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--prune']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor', '--prune']);
         ob_end_clean();
 
         expect(is_file($root . '/.cursor/skills/code-review/SKILL.md'))->toBeTrue();
@@ -44,7 +44,7 @@ test('install without prune keeps orphaned files in target', function (): void {
     try {
         chdir($root);
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor']);
         ob_end_clean();
 
         expect(is_file($root . '/.cursor/skills/orphaned-skill/SKILL.md'))->toBeTrue();
@@ -66,13 +66,13 @@ test('install with prune also removes rules that no longer exist in source', fun
         chdir($root);
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor']);
         ob_end_clean();
 
         installerWriteFile($root . '/.cursor/rules/removed.mdc', 'removed rule');
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--prune']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor', '--prune']);
         ob_end_clean();
 
         expect(is_file($root . '/.cursor/rules/php/core-standards.mdc'))->toBeTrue();
@@ -95,13 +95,13 @@ test('install with prune reports pruned file count in output', function (): void
         chdir($root);
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor']);
         ob_end_clean();
 
         installerWriteFile($root . '/.cursor/skills/drop-skill/SKILL.md', 'drop');
 
         ob_start();
-        Installer::run(['cursor-rules', 'install', '--editor=cursor', '--prune']);
+        Installer::run(['agent-skills', 'install', '--editor=cursor', '--prune']);
         $output = (string) ob_get_clean();
 
         expect($output)->toContain('1 pruned');

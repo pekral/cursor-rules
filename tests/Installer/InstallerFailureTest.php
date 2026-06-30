@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-use Pekral\CursorRules\InstallerFailure;
+use AgenticVibes\AgentSkills\InstallerFailure;
 
 test('InstallerFailure missingSource creates exception with correct message', function (): void {
     $exception = InstallerFailure::missingSource('/dev/path', '/vendor/path');

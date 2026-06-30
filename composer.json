@@ -1,15 +1,15 @@
 {
-  "name": "pekral/cursor-rules",
+  "name": "agentic-vibes/laravel-agent-skills",
   "description": "Composer plugin for PHP and Laravel projects that installs Cursor/Claude/Codex rules and agent skills — coding standards, testing, and conventions",
   "license": "MIT",
   "type": "composer-plugin",
   "keywords": [
     "composer-plugin",
     "cursor",
-    "cursor-rules",
+    "agent-skills",
     "cursor-editor",
-    "php-cursor-rules",
-    "laravel-cursor-rules",
+    "php-agent-skills",
+    "laravel-agent-skills",
     "php",
     "laravel",
     "coding-standards",
@@ -27,9 +27,9 @@
   ],
   "homepage": "https://pekral.cz",
   "support": {
-    "issues": "https://github.com/pekral/cursor-rules/issues",
-    "source": "https://github.com/pekral/cursor-rules",
-    "docs": "https://github.com/pekral/cursor-rules#readme"
+    "issues": "https://github.com/agentic-vibes/laravel-agent-skills/issues",
+    "source": "https://github.com/agentic-vibes/laravel-agent-skills",
+    "docs": "https://github.com/agentic-vibes/laravel-agent-skills#readme"
   },
   "require": {
     "composer-plugin-api": "^2.0"
@@ -54,7 +54,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Pekral\\CursorRules\\": "src/"
+      "AgenticVibes\\AgentSkills\\": "src/"
     }
   },
   "autoload-dev": {
@@ -63,7 +63,7 @@
     }
   },
   "bin": [
-    "bin/cursor-rules"
+    "bin/agent-skills"
   ],
   "archive": {
     "exclude": [
@@ -72,15 +72,15 @@
   },
   "config": {
     "allow-plugins": {
+      "agentic-vibes/laravel-agent-skills": true,
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "ergebnis/composer-normalize": true,
-      "pekral/cursor-rules": true,
       "pestphp/pest-plugin": true,
       "phpstan/extension-installer": true
     }
   },
   "extra": {
-    "class": "Pekral\\CursorRules\\ComposerPlugin"
+    "class": "AgenticVibes\\AgentSkills\\ComposerPlugin"
   },
   "scripts": {
     "analyse": [
@@ -88,7 +88,7 @@
       "vendor/bin/phpstan analyse --memory-limit=2G"
     ],
     "build": [
-      "bin/cursor-rules install --force",
+      "bin/agent-skills install --force",
       "@fix",
       "@check"
     ],

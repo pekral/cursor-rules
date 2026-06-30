@@ -28,7 +28,7 @@ Number each finding and carry its proof through to the report. Work surface by s
    - **Claude Code config & hooks** — `.claude/settings.json`, `.claude/settings.local.json`, and any `hooks` blocks within them; project skill rules under `.claude/rules/` and `rules/`.
    - **MCP servers** — any `mcpServers` block in `.mcp.json`, `.claude/settings*.json`, or other configured JSON.
    - **Composer scripts** — the `scripts` map in `composer.json` (`build`, `check`, `fix`, `analyse`, `skill-check`, `security-audit`, `test:coverage`, normalize/pint/rector/phpcs entries).
-   - **Bundled CLI installer** — `bin/cursor-rules` and the install/sync logic it drives.
+   - **Bundled CLI installer** — `bin/agent-skills` and the install/sync logic it drives.
    - **Skills catalog** — `skills/*/SKILL.md` and their bundled `scripts/`, treated as automations themselves.
    - **Scheduler / cron** — any cron entry, Laravel scheduler definition, or `.claude/scheduled_tasks*` lock/registry.
 2. **Classify live state per item.** Assign exactly one state, each backed by proof:

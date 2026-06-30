@@ -13,7 +13,7 @@ function installerEnsureDirectory(string $directory): void
 
 function installerCreateProjectRoot(): string
 {
-    $root = sys_get_temp_dir() . '/cursor-rules-' . bin2hex(random_bytes(4));
+    $root = sys_get_temp_dir() . '/agent-skills-' . bin2hex(random_bytes(4));
     installerEnsureDirectory($root);
     file_put_contents($root . '/composer.json', '{}');
 

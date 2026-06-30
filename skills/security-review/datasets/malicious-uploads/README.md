@@ -4,7 +4,7 @@
 
 This directory contains **inert test fixtures** representing malicious file-upload payloads. **INERT** means they are data only — they must never be executed, rendered in a browser, opened in a spreadsheet application, or served by the repository itself. They are used when writing tests for file-upload security controls, to verify that application code correctly sanitizes, rejects, or safely serves user-uploaded content.
 
-These files exist as data — they are never executed, rendered, or served by the repository itself. They are distributed as part of the `cursor-rules` package so that project teams can reference them when writing security test cases.
+These files exist as data — they are never executed, rendered, or served by the repository itself. They are distributed as part of the `laravel-agent-skills` package so that project teams can reference them when writing security test cases.
 
 ## Warning
 

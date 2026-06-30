@@ -1,46 +1,46 @@
-# Project memory — cursor-rules
+# Project memory — laravel-agent-skills
 
 ### auto-mode-external-write-blocked — Post-convergence publication to linked issue silently blocked in auto-mode environments
 
 - Trigger: an agent (e.g. `argos`, `apollon`) attempts to publish a comment to a GitHub issue or JIRA ticket (the source tracker) in an environment where auto-mode write classification is active — typically when `pr-summary` or `upsert-comment.sh` targets a linked issue rather than the PR itself.
 - Rule:    In auto-mode environments the external-write classifier may block the publication silently — no error is thrown, the comment simply never appears. This affects `pr-summary` linked-issue mirrors and any post-convergence feedback step that targets the originating tracker item. Always verify that the publication step actually posted (check the tracker URL, not just the agent handoff). If blocked: publish manually, or re-run with explicit linked-issue write permission enabled. Document the outcome in the agent handoff (`Blocked: external-write blocked by auto-mode classifier`) so the next human knows a manual step is required.
 - Example: `argos` post-convergence `pr-summary` mirror on issue #629 was blocked — the handoff noted `status: failed to post on issue #629: external-write blocked by auto-mode classifier`; the comment was posted manually to the PR instead. The netechnical summary on #629 required a separate manual action.
-- Source:  https://github.com/pekral/cursor-rules/pull/636   Added: 2026-06-20
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/636   Added: 2026-06-20
 
 ### agent-file-vs-registration — Adding agents/<name>.md does not make the agent dispatchable
 
 - Trigger: a daidalos run tries to dispatch a newly documented agent (e.g. `apollon`) via the Task tool, or any orchestrator step assumes a new `agents/<name>.md` entry is immediately executable as a subagent.
 - Rule:    An `agents/<name>.md` file is documentation only. For an agent to be dispatchable in Claude tooling the agent type must also be installed/registered (the installer syncs copies into `.claude/`). Until that happens, the agent cannot be spawned and the orchestrator must fall back to available registered agents or treat the step as blocked. Document the dependency explicitly in the agent's own file and in the issue that introduces the agent.
 - Example: `agents/apollon.md` was added in #628; daidalos correctly noted "agent type `apollon` is not registered in this environment" and continued with `metis / talos / argos`. The push-level gate becomes effective only after `apollon` is installed. **Update (#654):** `apollon` has since been registered as a dispatchable agent — the registration status changed, so this premise is point-in-time, not permanent (see `verify-agent-registration-premise`).
-- Source:  https://github.com/pekral/cursor-rules/pull/633   Added: 2026-06-20
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/633   Added: 2026-06-20
 
 ### parallel-agent-publication-contract — Parallel-dispatched agents must route findings through the shared brief, not publish directly
 
 - Trigger: a new CR / security / review agent is introduced that daidalos dispatches in parallel with an existing agent (e.g. `athena` alongside `argos`); the new agent's output step uses raw `gh pr comment` / `gh issue comment` to publish its findings.
 - Rule:    Any agent dispatched in parallel must hand off findings via the shared task brief so the consolidating agent (e.g. `argos`) can merge and publish them as a single report. Direct publication is permitted only in standalone mode (no parallel dispatch), and even then must go through the canonical `upsert-comment.sh` wrapper — never raw `gh pr comment` or `gh issue comment`. Writing raw comment commands in a parallel-dispatch context breaks the consolidation contract and produces duplicate / uncoordinated comment threads.
 - Example: `agents/athena.md` step 5 originally used `gh pr comment` to publish directly; argos flagged this as Moderate in PR #638 (commit `82abc16`); fixed to hand off via shared brief when dispatched with argos, and use `upsert-comment.sh` in standalone mode.
-- Source:  https://github.com/pekral/cursor-rules/pull/638   Added: 2026-06-20
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/638   Added: 2026-06-20
 
 ### agent-new-mode-status-result-parity — Adding a new run-mode to an agent requires extending both Status and Result in the handoff section
 
 - Trigger: a new run-mode or output branch is added to an agent definition (e.g. a "Decomposition done" path that returns before a PR is opened); the author updates `Result:` with the new value but leaves the `Status:` line unchanged.
 - Rule:    Every new run-mode that produces a distinct output must appear in **both** the `Status:` line **and** the `Result:` list in the agent's *Output — handoff* section, and must be consistent with the status values defined in every cross-file peer (e.g. `daidalos.md` ↔ `metis.md`). Update all affected files atomically in the same commit; a missing `Status` value for a new mode is an incomplete contract that the CR loop will flag as Moderate.
 - Example: `agents/daidalos.md` *Output — handoff* `Status` line omitted `Decomposition done` while `agents/metis.md` defined it and issue #639 step 4 required it; argos caught this as Moderate in iteration 1 of PR #640 (fix commit `392203d`).
-- Source:  https://github.com/pekral/cursor-rules/pull/640   Added: 2026-06-20
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/640   Added: 2026-06-20
 
 ### cr-rule-severity-collision — Adding a new detection rule for an antipattern already covered by an existing (gated) rule with a different severity creates a non-deterministic severity conflict
 
 - Trigger: a PR adds a new detection bullet (e.g. Moderate) to `skills/code-review/SKILL.md` or a `rules/**` file for an antipattern that an existing bullet already covers at a different severity (e.g. Critical), typically gated on an optional package; no dedup/gating clause is present.
 - Rule:    Apply the canonical dedup/gating pattern from `skills/code-review/SKILL.md` "Inline validation guards" — "raise one finding per violation, never both". Gate the two bullets with mutually exclusive conditions (e.g. package installed → Critical; package absent → Moderate; never both). Add the gating clause to every file that carries either half of the conflicting pair so the severity is deterministic regardless of project context. **Distinguishing true collision from non-collision:** two bullets at different severities are only a collision when they can fire on the *same* code line. If the existing Critical bullet targets one antipattern (e.g. un-extracted inline mapping statements written in the controller body) and the new Moderate bullet targets a different antipattern (e.g. a misplaced but encapsulated factory call like `SomeData::from($request)` in the controller), the bullets cannot fire simultaneously on identical code — no gating clause is required. Test the collision by mentally placing a single code line under both bullets; if it does not match both, there is no collision.
 - Example: PR #646 added a Moderate bullet for inline Eloquent chains in `skills/code-review/SKILL.md` (line ~115) and a Moderate entry in `rules/laravel/architecture.mdc` (line ~279) without gating; existing Critical bullets in the same files covered the same surface. `composer build` stayed green, but argos flagged a Moderate severity-collision in iteration 1. Fix commit `2b1ebe4` added symmetric gating clauses ("without the package raise a Moderate … never both" / "when the package is installed the Critical rule applies instead … never both") to both files; re-review converged at 0 Critical + 0 Moderate. Counter-example (no collision): PR #703 added an ungated Moderate bullet for `SomeData::from($request)` called in the controller body alongside an existing arch-app-services-gated Critical "Inline data mapping" bullet — argos confirmed no collision in iteration 1 (0 fix loop iterations) because the Critical bullet targets un-extracted inline mapping logic, not a moved factory call.
-- Source:  https://github.com/pekral/cursor-rules/pull/646   Added: 2026-06-20   Updated: 2026-06-23 (PR #703)
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/646   Added: 2026-06-20   Updated: 2026-06-23 (PR #703)
 
 ### agent-rename-sync-points — Renaming an agent must atomically update its pinned InstallerTest phrases and redirect any reserved-name note
 
 - Trigger: an agent is renamed (e.g. `keryx` → `hermes`) and the author updates the obvious files (`agents/<name>.md`, `docs/agents.md`, `README.md`) but forgets one of two non-obvious sync points: the verbatim phrases pinned in `tests/InstallerTest.php`, or a reserved-name note elsewhere in `docs/agents.md` that now collides with the new name.
 - Rule:    Renaming an agent touches more than the four obvious files. (1) `git mv agents/<old>.md agents/<new>.md` to preserve history, and rewrite `name:`, prose, and handoff phrases inside. (2) `tests/InstallerTest.php` pins agent prose verbatim (delegation/handoff contract, per-agent test, shared-task-brief agent list) — every renamed phrase must stay byte-identical to the new agent file or `composer build` fails. (3) Grep the whole repo for the old slug (all case variants) and confirm 0 occurrences. (4) If `docs/agents.md` reserves the *new* name for a future agent, redirect that reservation to another free Greek name (e.g. `iris`) so the name is not both reserved and live. Do all of it in one commit; a binary avatar at `assets/agents/<new>.png` is committed and its `<img>` reference in `docs/agents.md` swapped from `placeholder.svg` per the existing per-agent pattern.
 - Example: PR #647 renamed `keryx` → `hermes` and added the avatar. The non-obvious work: pinned phrases in `tests/InstallerTest.php` rewritten in lockstep with `agents/hermes.md`, and the `hermes` reservation note (~line 95 of `docs/agents.md`, originally held for a future delivery/merge agent) redirected to `iris`. `argos` converged in iteration 1 (0/0/0); `grep -ri keryx` returned 0 outside `.claude/`.
-- Source:  https://github.com/pekral/cursor-rules/pull/647   Added: 2026-06-20
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/647   Added: 2026-06-20
 
 ### verify-agent-registration-premise — Verify an agent's registration status against the live roster before relying on a recorded premise about it
 
@@ -48,14 +48,14 @@
 - Rule:    Registration status is point-in-time, not permanent — an agent that was docs-only when a lesson was written may since have become dispatchable (or vice versa). Before implementing anything scoped to "every agent", verify the premise against the current state: `ls .claude/agents/` (and `agents/`) plus a grep of `tests/InstallerTest.php` for the agent set, and treat the live roster as source of truth rather than inheriting the claim from memory or the issue text. A stale premise produces incomplete parity that the CR loop flags as Moderate.
 - Example: issue #653 assumed `apollon` was documentation-only (per the older `agent-file-vs-registration` entry); by #654 `apollon` was a registered dispatchable agent, so the first implementation missed per-role memory parity for it. Surfaced as 2 Moderate CR findings, fixed in commit `43b6c07`.
 - Role:    shared
-- Source:  https://github.com/pekral/cursor-rules/pull/654   Added: 2026-06-21
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/654   Added: 2026-06-21
 
 ### installer-security-doc-source-of-truth — Security docs must enumerate unconditional installer writes, not only opt-in-gated ones
 
 - Trigger: writing or reviewing security / trust-model documentation (SECURITY.md, README CLI Switches, installer trust model) for a PHP Composer installer that also ships a ComposerPlugin; the author describes which files the installer writes and gates all of them behind opt-in CLI flags.
-- Rule:    The source of truth for what the installer writes is `src/Installer.php`, `src/InstallerClaudeSettings.php`, and `src/ComposerPlugin.php` — not the CLI flag list. At minimum two surfaces must be named explicitly: (1) `Installer::install()` calls `applyCoAuthoredByPreference()` unconditionally for `--editor=claude|all`, writing `includeCoAuthoredBy: false` into `~/.claude/settings.json` when the key is absent (never overwrites); (2) `allow-plugins: true` in `composer.json` unlocks the `ComposerPlugin` `post-install-cmd` / `post-update-cmd` hook which, when `extra.cursor-rules.auto-install: true` is set, runs the installer with `--force` on every `composer install` / `composer update` — a code-execution surface not gated behind any explicit user invocation. Omitting either surface lets a CR flag it as Critical (home-dir write) or Moderate (auto-install hook).
+- Rule:    The source of truth for what the installer writes is `src/Installer.php`, `src/InstallerClaudeSettings.php`, and `src/ComposerPlugin.php` — not the CLI flag list. At minimum two surfaces must be named explicitly: (1) `Installer::install()` calls `applyCoAuthoredByPreference()` unconditionally for `--editor=claude|all`, writing `includeCoAuthoredBy: false` into `~/.claude/settings.json` when the key is absent (never overwrites); (2) `allow-plugins: true` in `composer.json` unlocks the `ComposerPlugin` `post-install-cmd` / `post-update-cmd` hook which, when `extra.agent-skills.auto-install: true` is set, runs the installer with `--force` on every `composer install` / `composer update` — a code-execution surface not gated behind any explicit user invocation. Omitting either surface lets a CR flag it as Critical (home-dir write) or Moderate (auto-install hook).
 - Example: PR #672 (issue #664) introduced SECURITY.md that gated all home-dir writes behind opt-in flags; argos found the unconditional `includeCoAuthoredBy` write (Critical) and the `allow-plugins` auto-install hook (Moderate) were missing. Source references: `src/Installer.php:91`, `src/InstallerClaudeSettings.php:60-95`, `src/ComposerPlugin.php:43-69`.
-- Source:  https://github.com/pekral/cursor-rules/pull/672   Added: 2026-06-22
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/672   Added: 2026-06-22
 - Role:    shared
 
 ### skills-tree-verbatim-distribution — Any file added under skills/ is distributed verbatim into consumer trees by the installer
@@ -63,7 +63,7 @@
 - Trigger: a PR adds a non-`SKILL.md` file under `skills/` (dataset, fixture, payload, README) — in particular any file whose content could be parsed or executed by a runtime (e.g. a `.php` file with `<?php`, a `.sh` with a shebang).
 - Rule:    `src/Installer.php` copies the entire `skills/` subtree verbatim into consumer `.cursor/skills/`, `.claude/skills/`, and `~/.claude/skills/` with no extension filter. Therefore every file added under `skills/` ships to every consumer. Dataset / fixture payloads must be INERT: no `<?php` open tag, no shebang, no executable syntax — represent the payload as plain text (e.g. `[php-open-tag] echo "xss"; [php-close-tag]`). Add a regression assertion in `tests/Installer/SecurityContentTest.php` that the dataset directory contains no PHP open tags (or equivalent runtime entry point) whenever a new executable-syntax category is introduced.
 - Example: `skills/security-review/datasets/malicious-uploads/mime-double-extension/evil.php.jpg` initially contained a real `<?php … ?>` block that passed `php -l`; argos caught it as Moderate in PR #685 iteration 1. Fix commit `a940708` neutered the block to plain text and added a regression guard in `tests/Installer/SecurityContentTest.php` (`no dataset file in malicious-uploads/ contains a PHP open tag`). Source of truth for what the installer ships: `src/Installer.php`. Dataset inertness is declared in per-directory READMEs and per-file INERT headers.
-- Source:  https://github.com/pekral/cursor-rules/pull/685   Added: 2026-06-22
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/685   Added: 2026-06-22
 - Role:    shared
 
 ### os-branch-coverage-ignore-test-via-observable-api — Test OS-gated branches wrapped in @codeCoverageIgnore via observable behaviour, not by rewriting PHP_OS
@@ -71,7 +71,7 @@
 - Trigger: a new OS-conditional branch in `src/Installer.php` (or similar) is wrapped in `@codeCoverageIgnoreStart/End` because the deciding value is a PHP constant (`PHP_OS`) that cannot be overwritten in a test; the task requires a smoke test for the branch without breaking `--min=100` coverage.
 - Rule:    Do not try to rewrite `PHP_OS`, inject a fake OS parameter, or use runkit/uopz — these are brittle and break simplicity-first. Instead: (1) leave the branch `@codeCoverageIgnore` (it does not count against `--min=100`); (2) write the test against the public API (`Installer::run`) to verify observable behaviour; (3) use the existing `installerSymlinkUnsupported()` helper (`tests/Pest.php:65`) as a gate — on Windows-like hosts assert the copy-fallback hard (`is_link === false`), on other hosts assert the real symlink output (`is_link === true`). Never leave a branch-conditional test with an empty assertion — both paths must assert something concrete.
 - Example: `tests/InstallerTest.php` — "install creates regular files (copy fallback), never symlinks, when symlinks are unsupported (Windows-like)" (added in #665); `tests/Pest.php:65` `installerSymlinkUnsupported()` helper; `src/Installer.php:351-360` `canSymlink()` Windows branch with `@codeCoverageIgnoreStart/End`.
-- Source:  https://github.com/pekral/cursor-rules/pull/673   Added: 2026-06-22
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/673   Added: 2026-06-22
 - Role:    talos
 
 ### cross-cutting-rule-belongs-in-compound-engineering — A cross-cutting contract for all agents and skills belongs in rules/compound-engineering/general.mdc, not in skills/ or per-agent copy-paste
@@ -79,7 +79,7 @@
 - Trigger: a new rule or contract must apply to every agent and every skill uniformly — e.g. a cleanup obligation, a memory-files exception, a shared-brief protocol — and the implementer considers (a) adding a new file under `skills/`, (b) copy-pasting prose into each `agents/*.md`, or (c) creating a new standalone rule file.
 - Rule:    Place the rule in `rules/compound-engineering/general.mdc` (frontmatter `alwaysApply: true`, globs `*`), which is already the project's single source of truth for cross-cutting agent/skill contracts (memory lifecycle, shared task brief, draft PR, etc.). Do not add to `skills/` — `src/Installer.php` distributes every file under `skills/` verbatim to consumer trees (see `skills-tree-verbatim-distribution`), making prose rules an unintended delivery artifact. Do not copy-paste into each `agents/*.md` — a one-liner reference from each agent to the canonical rule is sufficient and keeps the source of truth in one place. Use the existing `tests/Installer/CompoundEngineeringContentTest.php` to add a pinning assertion for the new rule text so regressions are caught automatically.
 - Example: issue #694 required a temporary-file hygiene contract; adding it to `general.mdc` as `## Temporary-file hygiene (clean up on completion)` (PR #697) with a one-sentence reference from each agent and a pinning test in `CompoundEngineeringContentTest.php` converged with 0 CR findings in iteration 1.
-- Source:  https://github.com/pekral/cursor-rules/pull/697   Added: 2026-06-23
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/697   Added: 2026-06-23
 - Role:    shared
 
 ### agent-shared-task-brief-section-append-only — Adding text to Shared task brief sections in agents/*.md must not overwrite or reorder pinned phrases
@@ -87,7 +87,7 @@
 - Trigger: a task requires adding one or more sentences to the *Shared task brief* section (or any other prose section) of every `agents/*.md` file — e.g. a new cross-cutting rule reference — and the implementer edits the section freely, not knowing which exact phrases are pinned verbatim by `tests/Installer/AgentsTest.php` and/or `tests/Installer/CompoundEngineeringContentTest.php`.
 - Rule:    Before editing any section of an `agents/*.md` file, grep `tests/Installer/AgentsTest.php` and `tests/Installer/CompoundEngineeringContentTest.php` for the section heading and the surrounding prose to identify every pinned phrase. Append new sentences at the end of the section (or insert at a clearly unpinned position); never reorder existing sentences, split pinned paragraphs, or change wording of already-pinned lines. After editing, run `composer build` locally — a pinning assertion failure (`toContain`) is the precise error that surfaces a broken phrase.
 - Example: PR #697 added a one-sentence hygiene-rule reference to the *Shared task brief* section of 7 agent files; `composer build` passed (295/295, 100 % coverage) because each sentence was appended after the existing pinned prose without reordering. The guard is `tests/Installer/CompoundEngineeringContentTest.php` for `general.mdc` content and `tests/Installer/AgentsTest.php` for per-agent delegation contract phrases.
-- Source:  https://github.com/pekral/cursor-rules/pull/697   Added: 2026-06-23
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/697   Added: 2026-06-23
 - Role:    talos
 
 ### skills-tree-convention-removal-grep-full-tree — Removing or renaming a shared convention across skills/ requires grepping the full tree, not only the named files
@@ -95,7 +95,7 @@
 - Trigger: a task removes or renames a shared convention (marker text, function name, section title, or anchor pattern) that is referenced across multiple `skills/` files; the implementer updates only the explicitly named files (e.g. three SKILL.md files listed in the issue body) without searching for every reference.
 - Rule:    Before opening the PR, run `grep -r '<pattern>' skills/` across the whole `skills/` tree to find every occurrence of the convention being removed or renamed — including verbatim-distributed templates (`skills/code-review/templates/`), cross-skill SKILL.md files, and helper scripts. Any file that still mentions the old convention after the change is a live doc artifact shipped to consumer trees by `src/Installer.php` and will produce a Moderate CR finding. Pin the absence of the old pattern in `tests/Installer/CodeReviewContentTest.php` (or the relevant installer content test) with a `not->toContain(...)` assertion so regressions are caught automatically.
 - Example: PR #700 removed `{anchor:cr-comment-actor-<slug>}` from three SKILL.md files, but `skills/code-review/templates/review-output.md` and `skills/process-code-review/SKILL.md` still referenced the anchor and the in-place-edit claim — both missed because the search covered only the named file list. Two Moderate findings in argos iteration 1 caught the drift; fixed in commit `197a442` after a full-tree grep. Pin: `not->toContain('{anchor:')` + `not->toContain('edit that comment in place')` added to `tests/Installer/CodeReviewContentTest.php`.
-- Source:  https://github.com/pekral/cursor-rules/pull/700   Added: 2026-06-23
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/700   Added: 2026-06-23
 - Role:    talos
 
 ### laravel-rules-tracked-source — The canonical tracked source of Laravel rules is rules/laravel/architecture.mdc at the repo root, not .claude/rules/
@@ -103,14 +103,14 @@
 - Trigger: a task requires adding or modifying a Laravel CR rule — a new detection bullet, severity entry, or convention text — and the implementer looks for the file to edit.
 - Rule:    The canonical, git-tracked source is `rules/laravel/architecture.mdc` in the repo root. The copy at `.claude/rules/laravel/architecture.mdc` is git-ignored and generated by the installer; editing it changes nothing in the repo. Always edit the root `rules/` file. Additionally, any new phrase added to `rules/laravel/architecture.mdc` must be byte-identically reflected in a pinning assertion in `tests/Installer/LaravelRulesContentTest.php` — the test uses `toContain()` against exact strings; a one-character mismatch causes `composer build` to fail. Similarly, if a companion detection bullet is added to `skills/code-review/SKILL.md`, pin it in `tests/Installer/CodeReviewContentTest.php`. Run `composer build` before opening the PR to catch any mismatch early.
 - Example: PR #703 (issue #698) — daidalos/gather step had to explicitly confirm which file was tracked; both paths had identical content, making the distinction non-obvious. The brief recorded: "KANONICKÝ TRACKED ZDROJ: `rules/laravel/architecture.mdc` (kořen repa), NE `.claude/rules/...`". Pinning tests in `tests/Installer/LaravelRulesContentTest.php` and `tests/Installer/CodeReviewContentTest.php` required four byte-identical phrases each; all passed on the first `composer build` run.
-- Source:  https://github.com/pekral/cursor-rules/pull/703   Added: 2026-06-23
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/703   Added: 2026-06-23
 - Role:    talos
 
 ### post-convergence-comment-publish-needs-explicit-scope — Posting the feedback comment to the source tracker is blocked when the user only asked to "report back"
 - Trigger: a full-delivery run reaches the post-convergence reporting step (step 6a) and dispatches apollon/pr-summary to publish a "Hotovo — co se změnilo a jak otestovat" comment on the source issue/PR.
 - Rule:    publishing an external comment under the user's identity is a separate consent surface from resolving+merging. When the request says "report back" (to the user) without asking to post on the tracker, the auto-mode classifier denies the publish. Fall back to the in-chat summary and re-dispatch apollon for the final scoped validation only, carrying the How-to-test summary into the final report yourself. Don't retry the publish.
 - Example: gh-699 run; apollon dispatch denied with "[External System Writes] ... user only asked to report back ... not to post on the issue".
-- Source:  https://github.com/pekral/cursor-rules/pull/702   Added: 2026-06-23
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/702   Added: 2026-06-23
 - Role:    daidalos
 
 ### per-tracker-claim-belongs-in-resolve-issue-and-autoresolve — A "claim before work" mechanism needs an idempotent abort-on-conflict claim AND a matching selection-exclusion filter, not a claim alone
@@ -118,21 +118,21 @@
 - Trigger: a task asks to mark a tracker issue "In progress" / claimed at the start of work so two AI agents do not pick the same task in parallel; the naive implementation only sets a status at work-start.
 - Rule:    A claim alone does not prevent the collision — two runs can both set the same status before either notices. The real guard is two-sided: (1) the claim step must be idempotent, apply-and-verify (re-read, never trust the write exit code — `auto-mode-external-write-blocked`), and ABORT when the issue is already claimed by another run; AND (2) the selection step that picks the next issue must EXCLUDE already-claimed issues. For GitHub that is a claim label (`Resolve_by_AI:in-progress`) + a `-label:"${CLAIM_LABEL}"` negation in the `autoresolve` QUERY; for JIRA a second sanctioned transition helper (clone of `transition-to-code-review.sh`, `progress` name guard, idempotent no-op, acli false-positive re-verify); Bugsnag stays hands-off (documented limit). Release the claim on Blocked/abort BEFORE the PR opens so the issue is pickable again; keep it on success. The cross-cutting principle lives in `rules/compound-engineering/general.mdc`; per-tracker mechanics live in `resolve-issue` step 2 + `autoresolve` selection (per `cross-cutting-rule-belongs-in-compound-engineering`).
 - Example: issue #704 / PR #706 — `rules/compound-engineering/general.mdc` gained `## Claim a tracker issue before working on it`; `skills/code-review-jira/scripts/transition-to-in-progress.sh` (new, exit 4 = already-past-In-Progress collision, exit 5 = acli false-positive); `skills/resolve-issue/SKILL.md` claim sub-step; `skills/autoresolve-oldest-github-issue/SKILL.md` QUERY negation + line-17 sanctioned-write exception. Converged argos+athena 0/0/0 in iteration 1.
-- Source:  https://github.com/pekral/cursor-rules/pull/706   Added: 2026-06-23
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/706   Added: 2026-06-23
 - Role:    shared
 
 ### second-sanctioned-jira-transition-clones-the-first — A new sanctioned JIRA transition helper should clone the existing one verbatim rather than extract a shared lib
 
 - Trigger: adding a second auto-allowed JIRA status transition (e.g. an "In Progress" claim alongside the existing "Code Review") and the implementer is tempted to extract the shared defensive logic into a sourced `lib.sh`.
 - Rule:    Keep each transition helper a self-contained standalone script that mirrors `transition-to-code-review.sh` (anchored KEY regex, name guard, idempotent no-op, acli false-positive re-verify). Do NOT extract a sourced `lib.sh`: every file under `skills/` is distributed verbatim into consumer trees by `src/Installer.php` (`skills-tree-verbatim-distribution`), and a sourced library would break the self-contained convention the sibling relies on. Also update `rules/jira/general.mdc` to enumerate BOTH sanctioned transitions ("two exceptions") — the prior "single sanctioned transition" wording is now wrong; grep for the pinned phrase in the installer content tests before rewording it.
-- Source:  https://github.com/pekral/cursor-rules/pull/706   Added: 2026-06-23
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/706   Added: 2026-06-23
 - Role:    talos
 
 ### claim-mechanism-converges-clean-when-it-mirrors-an-existing-pattern — daidalos: a feature that mirrors an already-reviewed sibling pattern converges in one CR iteration
 
 - Trigger: orchestrating a feature whose core artifact is structurally near-identical to an existing, already-reviewed artifact (here: a new JIRA transition helper cloning the existing one; a claim label mirroring the existing `ready for review` follow-up).
 - Rule:    Route through metis first when the *mechanism* is ambiguous (which signal, where the contract lives) even if the *code* is a clone — the ambiguity is in the design, not the implementation. Once metis fixes the design, the implementation is low-risk and argos+athena converge in iteration 1. Worth recording so a similar "claim / status / follow-up" request is scoped as metis-then-clone rather than treated as net-new high-risk work.
-- Source:  https://github.com/pekral/cursor-rules/pull/706   Added: 2026-06-23
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/706   Added: 2026-06-23
 - Role:    daidalos
 
 ### github-sub-issues-only-via-graphql — GitHub native sub-issues are reachable only through GraphQL, not `gh ... --json`
@@ -140,7 +140,7 @@
 - Trigger: extending `skills/code-review-github/scripts/load-issue.sh` (or any GitHub loader) to read native sub-issues / parent-child issue relations.
 - Rule:    `gh issue view --json subIssues` fails with `Unknown JSON field: "subIssues"` — the `gh` CLI projection does not expose the relation. Fetch it via `gh api graphql` against `repository.issue.subIssues` (the `subIssues(first:N){ nodes{ ... } }` connection; REST `/issues/{n}/sub_issues` also works). Bind owner/repo/number as GraphQL variables with `-F`/`-f` (no string interpolation into the query). Sub-issues exist on issues only (the GraphQL `issue(number)` is null for a PR number), so gate on `kind == "issue"` and default to `[]` on any failure. JIRA already exposes `subtasks` shallowly via `acli ... view --fields '*all'`, but full subtask body/comments/attachments need one extra `acli ... view` + `comment list` per subtask. GitHub issues have no attachment field — uploads are inline URLs in body/comments.
 - Example: issue #721 / PR #723 — added `subIssues[]` (full body + comments + labels via GraphQL) to the GitHub loader and deepened JIRA `subtasks[]` with description/comments/attachments. Both reviews (argos quality + athena security) converged 0/0/0 in iteration 1; `composer build` green (315 tests, 100% coverage).
-- Source:  https://github.com/pekral/cursor-rules/pull/723   Added: 2026-06-29
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/723   Added: 2026-06-29
 - Role:    shared
 
 ### shared-skills-helper-dir-and-readme-skill-count — a non-skill helper dir under `skills/` needs the README count test to gate on SKILL.md
@@ -148,7 +148,7 @@
 - Trigger: adding a shared helper directory under `skills/` (e.g. `skills/_shared/` with sourced libs / standalone scripts) reused by more than one skill, instead of duplicating logic or a per-skill `_lib.sh`.
 - Rule:    Two gotchas. (1) The README skill-count test in `tests/Installer/SkillsContentTest.php` (`readme reports the current skill count …`) counted **every** directory under `skills/`, so a non-skill helper dir inflates the count and breaks the README assertions. Fix it to count only directories that ship a `SKILL.md` — that matches `skill-check`'s own definition of a skill (it reported 62 and ignored `_shared/`). (2) Cross-skill sourcing via `${SCRIPT_DIR}/../../_shared/lib.sh` resolves in consumer trees too: `src/Installer.php` copies the whole `skills/` tree verbatim (see [[skills-tree-verbatim-distribution]]), so all skills land under the same `skills/` parent and the relative path holds after install. A shared `skills/_shared/` lib is therefore compatible with verbatim distribution — the self-contained convention only applied to the JIRA transition-helper siblings.
 - Example: issue #725 / PR #726 — `skills/_shared/attachments.sh` (sourced download lib) + `skills/_shared/scan-attachments.sh` (standalone gate) reused by all three `download-attachments.sh` wrappers; auth token kept out of argv by writing it only into a 0600 curl `--config` file (`header = "Authorization: …"`), TLS pinned with `--proto`/`--proto-redir '=https'`. Scripts have no exec tests (test-isolation rule) — the fixture proof lives in `scan-attachments.sh --self-test` and its outcomes are content-pinned in Pest.
-- Source:  https://github.com/pekral/cursor-rules/pull/726   Added: 2026-06-29
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/726   Added: 2026-06-29
 - Role:    talos
 
 ### attachment-download-urls-need-an-ssrf-host-guard — fetching tracker-supplied URLs must block non-public hosts before the request
@@ -156,5 +156,5 @@
 - Trigger: writing or reviewing any skill/script that downloads a URL taken from issue-tracker content (attachment `contentUrl`, a URL scraped from comment/body Markdown, a webhook payload) — especially when the URL is user-controllable (e.g. a Bugsnag comment link, a GitHub issue body).
 - Rule:    TLS-on + size-cap + quarantine is not enough — an attacker-supplied URL is an SSRF vector. Block loopback / link-local (incl. the `169.254.169.254` cloud-metadata endpoint) / RFC-1918 / ULA hosts **before** issuing the request, and record the rejection in the manifest rather than fetching. Put the guard in the shared download path (`skills/_shared/attachments.sh` `att_host_block_reason`, called from `att_run`) so all trackers inherit it. Give self-hosted trackers an explicit opt-out (`ATT_ALLOW_PRIVATE_HOSTS=1`) — a blanket private-IP block would break a JIRA/GitHub-Enterprise install on an internal network. Host-pinning by regex (GitHub) or server-issued URLs (JIRA `contentUrl`) already constrain those trackers; the open surface is whichever wrapper scrapes free-text URLs (Bugsnag). DNS-rebinding (public name → private IP) needs `curl --resolve` pinning and is the residual gap to note, not silently ignore.
 - Example: issue #725 / PR #726 — CR raised the Bugsnag SSRF as Moderate; fixed with `att_host_block_reason` + a pinning Pest test. Converged 0 Critical / 0 Moderate in 2 process-code-review iterations; `composer build` green (323 tests). Pairs with the token-out-of-argv-via-curl-`--config` pattern recorded in [[shared-skills-helper-dir-and-readme-skill-count]].
-- Source:  https://github.com/pekral/cursor-rules/pull/726   Added: 2026-06-29
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/726   Added: 2026-06-29
 - Role:    shared

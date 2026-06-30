@@ -2,13 +2,13 @@
 
 declare(strict_types = 1);
 
-use Pekral\CursorRules\InstallerPath;
+use AgenticVibes\AgentSkills\InstallerPath;
 
 test('resolveEditorFromComposerJson returns editor when configured', function (): void {
     $root = installerCreateProjectRoot();
     file_put_contents($root . '/composer.json', json_encode([
         'extra' => [
-            'cursor-rules' => [
+            'agent-skills' => [
                 'editor' => 'claude',
             ],
         ],
@@ -39,7 +39,7 @@ test('resolveEditorFromComposerJson returns null for invalid editor value', func
     $root = installerCreateProjectRoot();
     file_put_contents($root . '/composer.json', json_encode([
         'extra' => [
-            'cursor-rules' => [
+            'agent-skills' => [
                 'editor' => 'invalid',
             ],
         ],
@@ -71,7 +71,7 @@ test('resolveEditorFromComposerJson is case-insensitive for editor key', functio
     $root = installerCreateProjectRoot();
     file_put_contents($root . '/composer.json', json_encode([
         'extra' => [
-            'cursor-rules' => [
+            'agent-skills' => [
                 'Editor' => 'Claude',
             ],
         ],
@@ -101,11 +101,11 @@ test('resolveEditorFromComposerJson returns null when extra is not an array', fu
     }
 });
 
-test('resolveEditorFromComposerJson returns null when cursor-rules config is not an array', function (): void {
+test('resolveEditorFromComposerJson returns null when agent-skills config is not an array', function (): void {
     $root = installerCreateProjectRoot();
     file_put_contents($root . '/composer.json', json_encode([
         'extra' => [
-            'cursor-rules' => 'not-an-array',
+            'agent-skills' => 'not-an-array',
         ],
     ]));
 

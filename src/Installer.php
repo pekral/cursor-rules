@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Pekral\CursorRules;
+namespace AgenticVibes\AgentSkills;
 
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
@@ -68,7 +68,7 @@ final class Installer
     private static function showHelp(): int
     {
         echo "Usage:\n";
-        echo "  vendor/bin/cursor-rules install --editor=EDITOR [--force] [--symlink] [--prune] [--allow-bundled-scripts] [--allow-subagent-writes]\n\n";
+        echo "  vendor/bin/agent-skills install --editor=EDITOR [--force] [--symlink] [--prune] [--allow-bundled-scripts] [--allow-subagent-writes]\n\n";
         echo "Options:\n  --editor=EDITOR         Target editor (required): cursor, claude, codex, all.\n";
         echo "  --force                 Overwrite existing files.\n";
         echo "  --symlink               Create symlinks instead of copying (falls back to copy on Windows).\n";

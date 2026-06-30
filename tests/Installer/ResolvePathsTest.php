@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-use Pekral\CursorRules\InstallerPath;
+use AgenticVibes\AgentSkills\InstallerPath;
 
 test('resolveRulesSource always uses package directory', function (): void {
     $root = installerCreateProjectRoot();

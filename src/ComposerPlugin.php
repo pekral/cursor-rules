@@ -63,14 +63,14 @@ final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
 
     private function isAutoInstallEnabled(): bool
     {
-        $config = $this->getCursorRulesConfig();
+        $config = $this->getAgentSkillsConfig();
 
         return ($config['auto-install'] ?? false) === true;
     }
 
     private function resolveEditorFromConfig(): string
     {
-        $config = $this->getCursorRulesConfig();
+        $config = $this->getAgentSkillsConfig();
         $editor = $config['editor'] ?? InstallerPath::EDITOR_CURSOR;
 
         return in_array($editor, InstallerPath::getAllowedEditors(), true)
@@ -81,7 +81,7 @@ final class ComposerPlugin implements EventSubscriberInterface, PluginInterface
     /**
      * @return array<mixed>
      */
-    private function getCursorRulesConfig(): array
+    private function getAgentSkillsConfig(): array
     {
         if ($this->composer === null) {
             return [];

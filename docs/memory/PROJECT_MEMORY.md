@@ -158,3 +158,11 @@
 - Example: issue #725 / PR #726 — CR raised the Bugsnag SSRF as Moderate; fixed with `att_host_block_reason` + a pinning Pest test. Converged 0 Critical / 0 Moderate in 2 process-code-review iterations; `composer build` green (323 tests). Pairs with the token-out-of-argv-via-curl-`--config` pattern recorded in [[shared-skills-helper-dir-and-readme-skill-count]].
 - Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/726   Added: 2026-06-29
 - Role:    shared
+
+### brand-rename-completeness-grep-all-token-forms — Brand/namespace rename completeness grep must enumerate all token forms including bare PascalCase symbols
+
+- Trigger: a task renames a brand, package, or PHP namespace across a repository and a completeness gate (`git grep`) is defined to verify zero remaining references.
+- Rule:    The grep must enumerate every token form of the old brand, not only the most visible one. For a PHP package rename, that means: (1) hyphen-slug `old/package-name`, (2) backslash-namespace `Old\Namespace`, AND (3) the bare PascalCase token `OldPascal` as it appears in PHP symbol names (method names, property names, variable names — e.g. `getOldPascalConfig()`). Omitting form (3) lets stale symbol names pass the gate while their bodies already use the new identifier. Recommended gate: `git grep -niI -e '<old-slug>' -e '<Old\Namespace>' -e '<OldPascalToken>' -- src/ bin/ tests/` → 0 occurrences.
+- Example: PR #731 — metis's completeness grep covered `pekral/cursor-rules` and `Pekral\CursorRules` but not the bare token `CursorRules`. The method `getCursorRulesConfig()` in `src/ComposerPlugin.php` passed the gate (body already reading `$extra['agent-skills']`) and surfaced as Moderate in argos iteration 1. Fix commit `6ebe8c9` renamed the method to `getAgentSkillsConfig()`.
+- Source:  https://github.com/agentic-vibes/laravel-agent-skills/pull/731   Added: 2026-06-30
+- Role:    metis

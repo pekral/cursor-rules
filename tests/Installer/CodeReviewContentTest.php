@@ -853,3 +853,37 @@ test('code-review skill flags enum-mode match() in Data Validator bullet and New
     expect($content)->toContain('Can this data be stored in an existing storage without a drastic impact on performance?');
     expect($content)->toContain('Severity: **Moderate** (see `@rules/sql/optimalize.mdc` *New storage reuse analysis*)');
 });
+
+test('every CR walks the full class-refactoring guideline set and drops no returned item', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    // Canonical home: the rule owns the walked guideline set, the per-item routing,
+    // and the no-drop contract, so every CR skill that runs code-review inherits them.
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($rule)->toContain('**Routing & no-drop contract.**');
+    expect($rule)->toContain('high-frequency subset, not the closed set');
+    expect($rule)->toContain('Every item the `MODE=cr` lens returns must reach the published report');
+
+    // The lens itself promises the complete walk and a routable guideline reference per item.
+    $classRefactoring = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+
+    expect($classRefactoring)->toContain('Completeness contract (`MODE=cr`)');
+    expect($classRefactoring)->toContain('complete guideline set of this skill');
+    expect($classRefactoring)->toContain('the caller must render every returned item in the published report');
+
+    // All four CR skills invoke the lens at full depth — none may narrow it back to a subset.
+    $reviewSkills = [
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+        $packageDir . '/skills/code-review-bugsnag/SKILL.md',
+    ];
+
+    foreach ($reviewSkills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+
+        expect($content)->toContain('complete guideline set');
+        expect($content)->toContain('Refactoring & Tech Debt (DRY) Analysis — diff-scoped detail');
+    }
+});

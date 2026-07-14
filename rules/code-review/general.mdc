@@ -116,7 +116,7 @@ The detailed walk-throughs below are applied by `@skills/code-review/SKILL.md` (
 ## Refactoring & Tech Debt (DRY) Analysis — diff-scoped detail
 
 1. List every block of changed lines (added or modified) per file.
-2. For each block, evaluate against `@skills/class-refactoring/SKILL.md` (run with `MODE=cr` — read-only):
+2. For each block, evaluate against `@skills/class-refactoring/SKILL.md` (run with `MODE=cr` — read-only). **Walk the skill's complete guideline set** — every bullet of its *Refactoring Guidelines* and *Laravel Context* sections plus the behavior-preservation clauses of its *Execution* section — against the changed lines. The list below is the **high-frequency subset, not the closed set**: a guideline defined in the skill but absent from this list is still walked and still raises an item (single responsibility, speculative interfaces, pass-through Actions, `>4` parameters → DTO, Simplicity First, business-logic-layer placement, Repository scope, query performance non-regression, intention-revealing extraction, naming, nesting depth, and so on). Never treat the enumeration here — or the one-line summary in the CR wrapper's invocation — as a permission to narrow the walk.
    - duplicated logic that already exists elsewhere in the codebase — diff-scoped pass of Core Analysis "Reuse of existing logic" (DRY); do not restate the rule, raise the finding once
    - data-shaping repeated across Actions/Services/controllers/jobs/listeners/Livewire/commands
    - oversized methods, deep nesting, mixed responsibilities introduced or amplified by the change
@@ -132,7 +132,13 @@ The detailed walk-throughs below are applied by `@skills/code-review/SKILL.md` (
    - file:line of the offending change
    - the duplicated/structural problem in one sentence
    - a concrete refactoring that *reduces* tech debt (consolidate into Data Builder / DTO / Service / Action / Repository per `@rules/laravel/architecture.mdc`)
+   - the guideline the lens matched (the bullet in `@skills/class-refactoring/SKILL.md`) plus the underlying rule reference it satisfies
 4. Refactoring proposals here are improvements that fit inside the PR scope. Out-of-scope structural problems still belong in **Refactoring Proposals** (separate issue draft).
+5. **Routing & no-drop contract.** Every item the `MODE=cr` lens returns must reach the published report — the CR routes it, it never silently drops it. Route by the guideline's underlying rule:
+   - The rule **declares a severity** (Critical / Moderate / Minor — e.g. *Speculative interfaces*, *Simplicity First*, *Method parameter count (>4 → DTO)*, *Pass-through Action*, *Repository scope*, *Read/write layer separation*, business-logic-layer placement via **Architecture conformance**, *SQL query performance non-regression*) → the item belongs in that **severity bucket** with the four reproducer fields (Faulty Example / Expected Behavior / Test Hint / Suggested Fix), **not** in the Refactoring section. A SQL performance-non-regression item goes to `## Database Analysis` per the Core Analysis bullet that owns it.
+   - The rule declares **no severity** (structural / tech-debt guidelines — DRY consolidation, data-shaping duplication, oversized methods, deep nesting, intention-revealing extraction, naming, Livewire / Blade layout splitting, `->when()` composition) → the item belongs in **Refactoring (DRY / Tech Debt Reduction)** when it fits the PR scope, or **Refactoring Proposals** when it does not.
+   - **De-duplication (raise one finding per violation, never both).** When the Core Analysis or Strict rule compliance walk already raised the same violation on the same line, keep **that** finding and drop the lens's duplicate — the lens is a second pass over the same rules, not a second finding. Routing an item into a severity bucket therefore means "this violation appears exactly once, at its declared severity", never "the same violation appears in two sections".
+   - A guideline that matched but produced no reportable item (already fixed on the diff, exempted by a documented reason) is simply not rendered — the omission is the clean signal. Never emit a "walked, 0 findings" placeholder.
 
 ## Validation & Coverage Gate
 

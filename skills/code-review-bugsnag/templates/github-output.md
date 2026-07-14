@@ -50,7 +50,7 @@
 1. **Location:** `path/to/file.php:42`
    **Problem:** one sentence.
    **Refactor:** concrete consolidation step (Data Builder / DTO / Service / Action / Repository / ModelManager).
-   **Why:** rule reference (`@rules/laravel/architecture.mdc#<section>`) plus the matched `@skills/class-refactoring/SKILL.md` guideline that produced the item.
+   **Why:** the rule reference the item satisfies (`@rules/laravel/architecture.mdc#<section>`, `@rules/code-review/general.mdc#<section>`, …); for a lens-produced item, also the matched `@skills/class-refactoring/SKILL.md` guideline.
 
 ---
 

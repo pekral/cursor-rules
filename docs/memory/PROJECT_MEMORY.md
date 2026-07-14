@@ -158,3 +158,11 @@
 - Example: issue #725 / PR #726 — CR raised the Bugsnag SSRF as Moderate; fixed with `att_host_block_reason` + a pinning Pest test. Converged 0 Critical / 0 Moderate in 2 process-code-review iterations; `composer build` green (323 tests). Pairs with the token-out-of-argv-via-curl-`--config` pattern recorded in [[shared-skills-helper-dir-and-readme-skill-count]].
 - Source:  https://github.com/pekral/cursor-rules/pull/726   Added: 2026-06-29
 - Role:    shared
+
+### content-pin-tests-are-the-contract-enforcement — normative rule/skill text is only as binding as its pin test
+
+- Trigger: adding, rewording, or consolidating normative text in `rules/**/*.mdc` or `skills/**/SKILL.md` — a new contract/gate, a reworded severity clause, or a DRY pass that removes duplicated prose.
+- Rule:    In this repo the `tests/Installer/*ContentTest.php` pins are the *only* mechanism that keeps normative prose from drifting; a contract without a pin is documentation, not a gate. Two directions to respect. (1) **Adding** a contract → ship a pin in the same PR (`CodeReviewContentTest`, `SkillsContentTest`, `SqlRulesContentTest`, … by area), asserting the phrase in the canonical rule *and* in every skill expected to inherit it. (2) **Consolidating** duplicated prose → run the pin suite *before* assuming a deletion is safe: pins are keyed to exact substrings, so collapsing a restated list can silently break an unrelated contract that depended on a phrase inside it. Prose duplicated across a rule + its skills is not automatically DRY debt — a phrase may be load-bearing for a different pin. Canonical home + reference is still the right shape; just re-run the pins to find out which phrases are load-bearing.
+- Example: issue-less PR #732 — the CR of my own diff raised a Critical for shipping the new *Completeness* / *Routing & no-drop* contracts with no pin. While fixing it I consolidated the guideline enumeration out of four CR skills into the rule and broke the `reuse-first gate (issue #722)` pin, which asserted `Reuse Existing Logic` inside the bullet list I deleted. Fix: keep an explicit reuse-first routing line in the GitHub/JIRA wrappers alongside the consolidation. Converged 0 Critical / 0 Moderate in 2 iterations; 325 tests green.
+- Source:  https://github.com/pekral/cursor-rules/pull/732   Added: 2026-07-14
+- Role:    shared

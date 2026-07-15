@@ -34,6 +34,7 @@ Split a complex assignment into multiple clear, structured issues.
 ### 3. Create Issues
 - One issue per step
 - Ensure each is independently deliverable
+- Assign the most relevant existing label to each issue (per `@rules/compound-engineering/general.mdc` *Assign the most relevant existing label when creating a tracker issue*)
 
 ### 4. Output
 - Return list of created issues with URLs

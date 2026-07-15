@@ -173,6 +173,42 @@ test('compound-engineering rule mandates early idempotent claim before work star
     expect($content)->toContain('@skills/autoresolve-oldest-github-issue/SKILL.md');
 });
 
+test('compound-engineering rule mandates assigning the most relevant existing label on issue creation (issue #734)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/compound-engineering/general.mdc');
+
+    // The section heading must exist.
+    expect($content)->toContain('## Assign the most relevant existing label when creating a tracker issue');
+    expect($content)->toContain('most relevant existing label');
+
+    // GitHub mechanics: enumerate existing labels before assigning.
+    expect($content)->toContain('gh label list --json name,description');
+
+    // No-random-label behaviour: never invent, never fall back to a random label, unlabelled is fine.
+    expect($content)->toContain('never invent');
+    expect($content)->toContain('never fall back to a random or first-available label');
+    expect($content)->toContain('create the issue unlabelled rather than force a bad fit');
+
+    // The EPIC label stays the sole sanctioned exception.
+    expect($content)->toContain('`EPIC` is the sole sanctioned exception');
+
+    // Reference the issue-creating skills that inherit this rule.
+    expect($content)->toContain('@skills/create-issue/SKILL.md');
+    expect($content)->toContain('@skills/create-issues-from-text/SKILL.md');
+    expect($content)->toContain('@skills/blueprint/SKILL.md');
+    expect($content)->toContain('@skills/product-capability/SKILL.md');
+
+    $createIssue = (string) file_get_contents($packageDir . '/skills/create-issue/SKILL.md');
+    $createIssuesFromText = (string) file_get_contents($packageDir . '/skills/create-issues-from-text/SKILL.md');
+    $blueprint = (string) file_get_contents($packageDir . '/skills/blueprint/SKILL.md');
+    $productCapability = (string) file_get_contents($packageDir . '/skills/product-capability/SKILL.md');
+
+    foreach ([$createIssue, $createIssuesFromText, $blueprint, $productCapability] as $skillContent) {
+        expect($skillContent)->toContain('Assign the most relevant existing label');
+        expect($skillContent)->toContain('@rules/compound-engineering/general.mdc');
+    }
+});
+
 test('compound-engineering rule mandates temporary-file hygiene with a hard memory-files exception (issue #694)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/rules/compound-engineering/general.mdc');

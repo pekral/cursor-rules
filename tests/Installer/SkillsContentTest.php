@@ -960,3 +960,28 @@ test('analyze-problem enforces inventory -> download -> security gate -> safe-on
     expect($content)->toContain('skills/_shared/scan-attachments.sh');
     expect($content)->toContain('Read only files under `safe/`');
 });
+
+test('every issue-creating skill carries a byte-identical reference to the most-relevant-existing-label rule (issue #734)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    $labelRuleReference = '`@rules/compound-engineering/general.mdc` *Assign the most relevant existing label when creating a tracker issue*';
+
+    $createIssue = (string) file_get_contents($packageDir . '/skills/create-issue/SKILL.md');
+    expect($createIssue)->toContain(
+        '- Assign the most relevant existing label (per ' . $labelRuleReference . ')',
+    );
+
+    $createIssuesFromText = (string) file_get_contents($packageDir . '/skills/create-issues-from-text/SKILL.md');
+    expect($createIssuesFromText)->toContain(
+        '- Assign the most relevant existing label to each issue (per ' . $labelRuleReference . ')',
+    );
+
+    $referenceSentence = 'Apply ' . $labelRuleReference
+        . ' for any tracker issue this plan creates or hands off to `@skills/create-issues-from-text/SKILL.md` to create.';
+
+    $blueprint = (string) file_get_contents($packageDir . '/skills/blueprint/SKILL.md');
+    expect($blueprint)->toContain($referenceSentence);
+
+    $productCapability = (string) file_get_contents($packageDir . '/skills/product-capability/SKILL.md');
+    expect($productCapability)->toContain($referenceSentence);
+});

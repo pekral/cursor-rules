@@ -887,3 +887,23 @@ test('every CR walks the full class-refactoring guideline set and drops no retur
         expect($content)->toContain('Refactoring & Tech Debt (DRY) Analysis — diff-scoped detail');
     }
 });
+
+test('every CR walks the self-documenting comment-hygiene lens and preserves its two exceptions (issue #733)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    // Canonical home: the rule owns the lens prose and both exceptions.
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    expect($rule)->toContain('Self-Documenting Code — Comment & Doc Hygiene');
+    expect($rule)->toContain('restates what the code already says');
+    // Exception 1 — rationale / considered alternatives / domain language (ADRs & glossaries) is never deleted.
+    expect($rule)->toContain('considered alternatives');
+    expect($rule)->toContain('ADR');
+    // glossary / glossaries
+    expect($rule)->toContain('glossar');
+    // Exception 2 — navigation pointers are never deleted.
+    expect($rule)->toContain('navigation pointer');
+
+    // The code-review engine names the lens in its Core Analysis walk; wrappers inherit it.
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    expect($codeReview)->toContain('Self-Documenting Code — Comment & Doc Hygiene');
+});

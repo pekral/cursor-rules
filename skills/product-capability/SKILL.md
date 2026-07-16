@@ -9,6 +9,7 @@ metadata:
 ## Constraints
 - Apply `@rules/laravel/architecture.mdc` — actors, surfaces, states, and data model must fit the existing layers (Action → ModelService → Repository / ModelManager), not invent new abstractions.
 - Apply `@rules/compound-engineering/general.mdc` — the plan is a durable artifact the next agent reuses, not throwaway prose.
+- Apply `@rules/compound-engineering/general.mdc` *Assign the most relevant existing label when creating a tracker issue* for any tracker issue this plan creates or hands off to `@skills/create-issues-from-text/SKILL.md` to create.
 - Do not invent product truth. Every unknown is an explicit open question, never a silent assumption.
 - Separate user-visible promises from implementation detail. Keep them in distinct sections.
 - Mark each constraint as **fixed policy**, **architectural preference**, or **open question** — never blur the three.

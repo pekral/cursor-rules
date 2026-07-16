@@ -117,6 +117,20 @@ Any run that begins implementing a tracker issue **must claim it atomically befo
 
 The per-tracker mechanics (claim label name, helper script call, selection query negation) live in `@skills/resolve-issue/SKILL.md` and `@skills/autoresolve-oldest-github-issue/SKILL.md`. This section owns the principle; those skills own the execution.
 
+## Assign the most relevant existing label when creating a tracker issue
+
+Any agent or skill that creates a tracker issue — GitHub or JIRA — must select and assign the most relevant existing label to it as part of issue creation. Creating an issue with no thought given to labelling is an incomplete creation step.
+
+- **Select from what already exists, never invent.** List the tracker's existing labels, match the issue's type (bug / feat / docs / chore / ...) and domain against that list, and assign the closest match. Never mint a new label ad hoc, and never fall back to a random or first-available label when nothing actually fits — an unrelated label is worse than none.
+- **No relevant match → create without a label.** When none of the existing labels are a genuine match, create the issue unlabelled rather than force a bad fit. This is the expected, correct outcome, not an error to work around.
+- **GitHub mechanics.** `gh label list --json name,description` to read the repository's current label set, pick the closest match by type + domain, then `gh issue create ... --label "<name>"` — the command itself enforces existing-only, since it fails on a label name that does not already exist, so there is no accidental path to minting one this way.
+- **`EPIC` is the sole sanctioned exception.** `@skills/create-issues-from-text/SKILL.md` "EPIC parent & sub-issues" deliberately creates and applies the `EPIC` label for a cross-cutting parent issue; that is a documented, intentional label, not a violation of "never invent" above.
+- **Idempotent.** Assigning a label that is already present on the issue is a no-op — never fail or duplicate over it.
+- **JIRA is a secondary path.** JIRA labels are free text rather than a fixed, enumerable set, and `acli` carries its own limits (see the project's `acli-jira-quirks` memory entry) — apply the same select-don't-invent principle wherever the tooling allows enumerating existing labels, but do not block issue creation solely because label enumeration is imperfect in JIRA.
+- **Bugsnag does not apply.** Bugsnag errors are not tracker issues an agent authors from scratch; this rule scopes to trackers where the agent creates a new issue (GitHub, JIRA).
+
+This section owns the principle; the issue-creating skills reference it and own the execution — `@skills/create-issue/SKILL.md`, `@skills/create-issues-from-text/SKILL.md`, `@skills/blueprint/SKILL.md`, `@skills/product-capability/SKILL.md`.
+
 ## What Not To Do
 
 - Do not let a durable lesson live only in a commit message or a closed PR thread — promote the reusable part into the project's memory file.

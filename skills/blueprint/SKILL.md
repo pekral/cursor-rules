@@ -11,6 +11,7 @@ metadata:
 ## Constraints
 - Apply `@rules/git/general.mdc` — branch, commit, and PR conventions below come from it.
 - Apply `@rules/compound-engineering/general.mdc` — the plan is durable memory the next agent reuses, not throwaway prose.
+- Apply `@rules/compound-engineering/general.mdc` *Assign the most relevant existing label when creating a tracker issue* for any tracker issue this plan creates or hands off to `@skills/create-issues-from-text/SKILL.md` to create.
 - Apply `@rules/laravel/architecture.mdc` when the project uses `pekral/arch-app-services`, so each step lands in the correct layer.
 - Plan only. Do not implement, commit, or push any step.
 - Output Markdown only. English only.

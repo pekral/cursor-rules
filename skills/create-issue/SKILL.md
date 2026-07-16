@@ -34,6 +34,7 @@ Create a well-formatted issue while preserving the original content exactly.
 ### 3. Create Issue
 - Use available CLI tool
 - Set title and formatted description
+- Assign the most relevant existing label (per `@rules/compound-engineering/general.mdc` *Assign the most relevant existing label when creating a tracker issue*)
 - Assign to current user
 
 ### 4. Output

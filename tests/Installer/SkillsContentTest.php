@@ -143,7 +143,7 @@ test('assignment-compliance-check skill exists with required sections and writes
     expect($content)->toContain('## Required approach');
     expect($content)->toContain('## Output Format');
     expect($content)->toContain('## Done when');
-    expect($content)->toContain('Report **only Critical**');
+    expect($content)->toContain('Report **every extracted acceptance criterion**');
     expect($content)->toContain('must not** write any output to disk');
     expect($content)->toContain('No files were created on disk');
     expect($content)->not->toContain('.cursor-rules-reports');
@@ -181,26 +181,40 @@ test('assignment-compliance-check returns markdown to the caller without publish
     expect($jira)->not->toContain('**do not duplicate** its Critical gaps inside the JIRA non-technical summary');
 });
 
-test('assignment-compliance-check omits the block on clean assignments and removes "what is satisfied" / "open questions" lists', function (): void {
-    $packageDir = dirname(__DIR__, 2);
-    $compliance = (string) file_get_contents($packageDir . '/skills/assignment-compliance-check/SKILL.md');
-    $canonical = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
-    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
-    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
-
-    expect($compliance)->toContain('no critical gaps — assignment compliance block omitted');
-    expect($compliance)->toContain('**only when at least one Critical gap exists**');
-    expect($compliance)->not->toContain('No critical gaps identified — implementation satisfies every stated requirement');
-    expect($compliance)->not->toContain('### What is satisfied');
-    expect($compliance)->not->toContain('### Open questions for the reviewer');
-    expect($compliance)->not->toContain('one bullet per requirement the PR clearly meets');
-    expect($compliance)->not->toContain('No critical gaps>');
-
-    foreach ([$canonical, $github, $jira] as $wrapper) {
-        expect($wrapper)->toContain('no critical gaps — assignment compliance block omitted');
-        expect($wrapper)->toContain('**only when a block is returned**');
-    }
-});
+test(
+    'assignment-compliance-check renders a full Met/Not-met checklist with an affirmative Goal-met verdict on every linked-tracker run (issue #737)',
+    function (): void {
+        $packageDir = dirname(__DIR__, 2);
+        $compliance = (string) file_get_contents($packageDir . '/skills/assignment-compliance-check/SKILL.md');
+        $canonical = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+        $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+        $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+        $bugsnag = (string) file_get_contents($packageDir . '/skills/code-review-bugsnag/SKILL.md');
+    
+        expect($compliance)->toContain('**Goal met:** Yes | No');
+        expect($compliance)->toContain('### Acceptance criteria');
+        expect($compliance)->toContain('rendered on **every** run that has a linked tracker');
+        expect($compliance)->toContain('including the fully affirmative report');
+        expect($compliance)->not->toContain('no critical gaps — assignment compliance block omitted');
+        expect($compliance)->not->toContain('only when at least one Critical gap exists');
+        expect($compliance)->not->toContain('No critical gaps identified — implementation satisfies every stated requirement');
+        expect($compliance)->not->toContain('### What is satisfied');
+        expect($compliance)->not->toContain('### Open questions for the reviewer');
+        expect($compliance)->not->toContain('one bullet per requirement the PR clearly meets');
+        expect($compliance)->not->toContain('No critical gaps>');
+    
+        foreach ([$canonical, $github, $jira] as $wrapper) {
+            expect($wrapper)->not->toContain('no critical gaps — assignment compliance block omitted');
+            expect($wrapper)->toContain('**only when a block is returned**');
+            expect($wrapper)->toContain('Goal met');
+        }
+    
+        foreach ([$canonical, $github, $jira, $bugsnag] as $wrapper) {
+            expect($wrapper)->not->toContain('no critical gaps — assignment compliance block omitted');
+            expect($wrapper)->toContain('Goal met');
+        }
+    },
+);
 
 test('refactoring requires pre-refactor 100% coverage and unchanged tests in the refactor commit (issue #493)', function (): void {
     $packageDir = dirname(__DIR__, 2);

@@ -929,6 +929,11 @@ test('every CR wrapper produces a two-part Technical + Functional review with th
     expect($rule)->toContain('Goal met: Yes — all N acceptance criteria satisfied');
     expect($rule)->toContain('`@skills/api-review` is a documented carve-out');
     expect($rule)->toContain('API contract matches assignment: Yes/No');
+    // Minor 2 (argos CR #738 iteration 1) — the Critical-fold clause is a distinct normative sentence, pin it too.
+    expect($rule)->toContain('is additionally a **Critical** finding folded into the Technical review');
+    // Minor 1 (argos CR #738 iteration 1) — the light verdict's render target is scoped to standalone runs.
+    expect($rule)->toContain('**Render target — standalone runs only.**');
+    expect($rule)->toContain('the light verdict line is suppressed');
 
     // code-review/SKILL.md carries only a thin reference (5000-token budget).
     $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
@@ -936,7 +941,9 @@ test('every CR wrapper produces a two-part Technical + Functional review with th
     expect($codeReview)->toContain('@rules/code-review/general.mdc` *Two-part CR output — Technical & Functional review*');
     expect(str_word_count($codeReview))->toBeLessThan(5_000);
 
-    // Every wrapper output template frames its body as the Technical review.
+    // Every wrapper output template frames its body as the Technical review and mirrors
+    // the Functional verdict onto its own Summary line (M2, argos CR #738 iteration 1 —
+    // code-review-bugsnag now carries the same slot as the other three wrappers).
     foreach ([
         $packageDir . '/skills/code-review/templates/review-output.md',
         $packageDir . '/skills/code-review-github/templates/pr-comment-output.md',
@@ -946,6 +953,7 @@ test('every CR wrapper produces a two-part Technical + Functional review with th
         $template = (string) file_get_contents($templatePath);
         expect($template)->toContain('**Technical review.**');
         expect($template)->toContain('Two-part CR output — Technical & Functional review');
+        expect($template)->toContain('assignment conformance:');
     }
 
     // api-review renders a light functional cross-check instead of the full engine.
@@ -953,4 +961,11 @@ test('every CR wrapper produces a two-part Technical + Functional review with th
     expect($apiReview)->toContain('## Functional cross-check (light — issue #737 carve-out)');
     expect($apiReview)->toContain('API contract matches assignment: Yes/No');
     expect($apiReview)->toContain('does **not** invoke the full `assignment-compliance-check`');
+    // Minor 1 (argos CR #738 iteration 1) — the light verdict suppresses itself on an inline sub-lens invocation.
+    expect($apiReview)->toContain('**Render target — standalone runs only.**');
+    expect($apiReview)->toContain('suppress the light verdict line entirely');
+
+    // M1 (argos CR #738 iteration 1) — the api-review output template row was never pinned; add it now.
+    $apiReviewTemplate = (string) file_get_contents($packageDir . '/skills/api-review/templates/review-output.md');
+    expect($apiReviewTemplate)->toContain('**API contract matches assignment:**');
 });

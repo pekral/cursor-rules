@@ -24,4 +24,4 @@
 
 > Omit any section that has no findings. Faulty Example, Expected Behavior, Test Hint, and Suggested Fix are mandatory for every Critical and Moderate finding so `@skills/process-code-review/SKILL.md` can turn each into a reproducer test and apply the fix. Minor findings may omit them when no behavior change is implied.
 
-**API contract matches assignment:** Yes | No — <one-line light functional cross-check per `@skills/api-review/SKILL.md` Functional cross-check; omit this line entirely when the diff touches no API surface>
+**API contract matches assignment:** Yes | No — <one-line light functional cross-check per `@skills/api-review/SKILL.md` Functional cross-check; omit this line entirely when the diff touches no API surface, or when this review runs inline as a sub-lens inside a full CR wrapper (that wrapper's `assignment-compliance-check` already owns the Functional review)>

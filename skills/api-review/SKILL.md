@@ -78,8 +78,13 @@ Minor findings may omit these fields when no behavior change is implied.
 
 These fields exist so `@skills/process-code-review/SKILL.md` can turn each finding into a reproducer test and apply the fix without re-deriving context.
 
+## Functional cross-check (light — issue #737 carve-out)
+`@rules/code-review/general.mdc` *Two-part CR output — Technical & Functional review* requires every CR wrapper to render a Functional review, normally built by `@skills/assignment-compliance-check/SKILL.md`. `api-review` is a documented carve-out: it does **not** invoke the full `assignment-compliance-check` — running a second full assignment-conformance engine over the same diff would duplicate the wrapper's checklist. Instead, derive a **light** functional verdict from the Core Checks walk already performed above: does the diff's API surface (routes, status codes, payload shapes, idempotency) match what the linked assignment describes for the API contract? Render one line at the end of the returned markdown — `API contract matches assignment: Yes/No` — where `No` cites whichever Core Checks finding above traces to an unmet API requirement (no duplicated detail). When the diff touches no API surface (per Scope), omit the line entirely — there is nothing to cross-check.
+
+**Render target — standalone runs only.** Render the light verdict line only when `api-review` is invoked as a **standalone** review (not wrapped by another CR skill). When invoked **inline** as a sub-lens inside a full CR wrapper (`@skills/code-review/SKILL.md` Specialized Reviews → Always run), the wrapper's own `assignment-compliance-check` already owns the Functional review for that run — suppress the light verdict line entirely so the two-part output carries exactly one functional signal, not a redundant second one that the wrapper would discard.
+
 ## Output Format
-Use the template defined in `templates/review-output.md`. Omit any severity section that has no findings; never emit `None.` / `n/a` placeholders.
+Use the template defined in `templates/review-output.md`, appended with the **Functional cross-check** verdict line above only on a standalone run that touches an API surface; suppress the line on an inline sub-lens invocation per the Render target rule above. Omit any severity section that has no findings; never emit `None.` / `n/a` placeholders.
 
 ## Done when
 - Every API-surface change on the diff has been walked against the six Core Checks.

@@ -28,21 +28,27 @@ test('CR run produces one consolidated linked-tracker comment per linked issue (
     expect($jiraTemplate)->toContain('@skills/assignment-compliance-check/SKILL.md');
 });
 
-test('pr-summary surfaces an assignment non-compliance verdict at the top of the tracker comment', function (): void {
-    $packageDir = dirname(__DIR__, 2);
-    $prSummary = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');
-    $githubTemplate = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-github.md');
-    $jiraTemplate = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-jira.md');
-
-    expect($prSummary)->toContain('Assignment non-compliance verdict (top banner)');
-    expect($prSummary)->toContain('{assignment_verdict}');
-
-    foreach ([$githubTemplate, $jiraTemplate] as $template) {
-        expect($template)->toContain('{assignment_verdict}');
-        expect($template)->toContain('do not satisfy the assignment');
-        expect($template)->toContain('omit this slot entirely');
-    }
-});
+test(
+    'pr-summary surfaces an assignment / functional verdict (affirmative + non-compliance) at the top of the tracker comment (issue #737)',
+    function (): void {
+        $packageDir = dirname(__DIR__, 2);
+        $prSummary = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');
+        $githubTemplate = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-github.md');
+        $jiraTemplate = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-jira.md');
+    
+        expect($prSummary)->toContain('Assignment / Functional verdict (top banner — affirmative exception, issue #737)');
+        expect($prSummary)->toContain('{assignment_verdict}');
+        expect($prSummary)->toContain('affirmative exception');
+    
+        foreach ([$githubTemplate, $jiraTemplate] as $template) {
+            expect($template)->toContain('{assignment_verdict}');
+            expect($template)->toContain('do not satisfy the assignment');
+            expect($template)->toContain('omit this slot entirely');
+            expect($template)->toContain('all N acceptance criteria met');
+            expect($template)->toContain('affirmative exception');
+        }
+    },
+);
 
 test('CR skills publish through the publish helper — GitHub always-new, JIRA always-new comment per CR run', function (): void {
     $packageDir = dirname(__DIR__, 2);
@@ -906,4 +912,60 @@ test('every CR walks the self-documenting comment-hygiene lens and preserves its
     // The code-review engine names the lens in its Core Analysis walk; wrappers inherit it.
     $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
     expect($codeReview)->toContain('Self-Documenting Code — Comment & Doc Hygiene');
+});
+
+test('every CR wrapper produces a two-part Technical + Functional review with the affirmative Functional exception (issue #737)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    // Canonical contract lives in the rule.
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    expect($rule)->toContain('## Two-part CR output — Technical & Functional review (issue #737)');
+    expect($rule)->toContain('**Technical review**');
+    expect($rule)->toContain('**Functional review**');
+    expect($rule)->toContain('Goal met: Yes/No');
+    expect($rule)->toContain('**Met**, **Not met**, **Partial**, or **Divergent**');
+    expect($rule)->toContain('**Affirmative exception — scoped to the Functional review only.**');
+    expect($rule)->toContain('report only what needs action; never render a positive banner; omit when clean');
+    expect($rule)->toContain('Goal met: Yes — all N acceptance criteria satisfied');
+    expect($rule)->toContain('`@skills/api-review` is a documented carve-out');
+    expect($rule)->toContain('API contract matches assignment: Yes/No');
+    // Minor 2 (argos CR #738 iteration 1) — the Critical-fold clause is a distinct normative sentence, pin it too.
+    expect($rule)->toContain('is additionally a **Critical** finding folded into the Technical review');
+    // Minor 1 (argos CR #738 iteration 1) — the light verdict's render target is scoped to standalone runs.
+    expect($rule)->toContain('**Render target — standalone runs only.**');
+    expect($rule)->toContain('the light verdict line is suppressed');
+
+    // code-review/SKILL.md carries only a thin reference (5000-token budget).
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    expect($codeReview)->toContain('**Two-part CR output (issue #737).**');
+    expect($codeReview)->toContain('@rules/code-review/general.mdc` *Two-part CR output — Technical & Functional review*');
+    expect(str_word_count($codeReview))->toBeLessThan(5_000);
+
+    // Every wrapper output template frames its body as the Technical review and mirrors
+    // the Functional verdict onto its own Summary line (M2, argos CR #738 iteration 1 —
+    // code-review-bugsnag now carries the same slot as the other three wrappers).
+    foreach ([
+        $packageDir . '/skills/code-review/templates/review-output.md',
+        $packageDir . '/skills/code-review-github/templates/pr-comment-output.md',
+        $packageDir . '/skills/code-review-jira/templates/github-output.md',
+        $packageDir . '/skills/code-review-bugsnag/templates/github-output.md',
+    ] as $templatePath) {
+        $template = (string) file_get_contents($templatePath);
+        expect($template)->toContain('**Technical review.**');
+        expect($template)->toContain('Two-part CR output — Technical & Functional review');
+        expect($template)->toContain('assignment conformance:');
+    }
+
+    // api-review renders a light functional cross-check instead of the full engine.
+    $apiReview = (string) file_get_contents($packageDir . '/skills/api-review/SKILL.md');
+    expect($apiReview)->toContain('## Functional cross-check (light — issue #737 carve-out)');
+    expect($apiReview)->toContain('API contract matches assignment: Yes/No');
+    expect($apiReview)->toContain('does **not** invoke the full `assignment-compliance-check`');
+    // Minor 1 (argos CR #738 iteration 1) — the light verdict suppresses itself on an inline sub-lens invocation.
+    expect($apiReview)->toContain('**Render target — standalone runs only.**');
+    expect($apiReview)->toContain('suppress the light verdict line entirely');
+
+    // M1 (argos CR #738 iteration 1) — the api-review output template row was never pinned; add it now.
+    $apiReviewTemplate = (string) file_get_contents($packageDir . '/skills/api-review/templates/review-output.md');
+    expect($apiReviewTemplate)->toContain('**API contract matches assignment:**');
 });

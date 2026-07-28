@@ -20,7 +20,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **62 comprehensive Agent skills** for automated workflows (v0.9.1)
+- **63 comprehensive Agent skills** for automated workflows (v0.9.1)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -122,7 +122,7 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 
 # 🎯 Skills Overview — **v0.9.1**
 
-> Current release includes 62 skills for issue resolution, planning, code review, refactoring, testing, performance benchmarking, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
+> Current release includes 63 skills for issue resolution, planning, code review, refactoring, testing, performance benchmarking, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -136,6 +136,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `resolve-issue` | Unified issue resolution for GitHub, JIRA, and Bugsnag. Detects the tracker from the provided link, runs `analyze-problem` before implementation, validates with tests, and creates a PR. |
 | `autoresolve-oldest-github-issue` | Picks the oldest open GitHub issue (optionally filtered by label, default `Resolve_by_AI`) and chains `resolve-issue` → `code-review-github` → `process-code-review` → `merge-github-pr` against the resulting PR. Stops on any documented blocker (merge conflict, failing CI, residual Critical/Moderate findings). |
 | `merge-github-pr` | Safely merge GitHub pull requests that are ready for deployment. |
+| `pr-staged-merge-plan` | Propose how to merge and deploy a large PR in safe parts instead of all at once — groups its commits into atomic, independently shippable units, orders them by dependency and rollback risk, proposes squashes for a clean history, and proposes corrected subjects for vague or inaccurate commit messages (read-only; never rewrites history or merges). |
 | `create-issue` | Create a tracker issue from provided task text while preserving original meaning and structure. |
 | `create-issues-from-text` | Batch-create issues from provided text with automatic structure detection. |
 | `pr-summary` | Summarize current PR changes for development and product teams as a short two-section comment (Summary of changes + How to test), rendered as GitHub Markdown for PR comments or JIRA Wiki Markup for JIRA issue comments. |

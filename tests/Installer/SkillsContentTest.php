@@ -999,3 +999,55 @@ test('every issue-creating skill carries a byte-identical reference to the most-
     $productCapability = (string) file_get_contents($packageDir . '/skills/product-capability/SKILL.md');
     expect($productCapability)->toContain($referenceSentence);
 });
+
+test('pr-staged-merge-plan is read-only, loads the PR through load-issue.sh, and defers merging and history mechanics (issue #740)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/pr-staged-merge-plan/SKILL.md');
+
+    expect($content)->toContain('name: pr-staged-merge-plan');
+    expect($content)->toContain('skills/code-review-github/scripts/load-issue.sh');
+    expect($content)->toContain(
+        'Never run `git rebase`, `git commit --amend`, `git cherry-pick`, `git reset`, `git push`, `gh pr merge`, or `gh pr edit`.',
+    );
+    expect($content)->toContain('Merging a unit is owned by `@skills/merge-github-pr/SKILL.md`');
+    expect($content)->toContain('are owned by `@skills/git-workflow/SKILL.md`');
+    // Every split unit is its own PR and must clear the hard code-review merge gate on its own diff.
+    expect($content)->toContain('**Every unit is its own pull request and carries its own hard code-review gate**');
+    expect($content)->toContain('0 Critical + 0 Moderate');
+    // No work may vanish in the rewrite.
+    expect($content)->toContain('must equal the current PR\'s diff exactly');
+});
+
+test('pr-staged-merge-plan gates every unit on the eight-point independent-shippability walk (issue #740)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/pr-staged-merge-plan/SKILL.md');
+
+    expect($content)->toContain('### 5. Verify each unit is independently shippable');
+    expect($content)->toContain('**Green on its own**');
+    expect($content)->toContain('**No forward reference**');
+    expect($content)->toContain('**Expand before contract**');
+    expect($content)->toContain('**Prerequisites first, inert by default**');
+    expect($content)->toContain('**Tests travel with their behavior**');
+    expect($content)->toContain('**Reversible alone**');
+    expect($content)->toContain('**Consumer contracts stay compatible for the whole rollout**');
+    expect($content)->toContain('**In-flight work survives**');
+    // Ordering contract: dependency first, then risk, then reversibility.
+    expect($content)->toContain('Order by dependency first (topological');
+    // The walk stays read-only: verdicts are read off the code, never proven by building a materialized unit branch.
+    expect($content)->toContain('**Derive each verdict by reading the code** — never materialize a unit\'s branch to test it.');
+    expect($content)->toContain('record the verdict as `unverified — <what to run>`');
+});
+
+test('pr-staged-merge-plan proposes squashes and corrected commit subjects under the git commit rules (issue #740)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/pr-staged-merge-plan/SKILL.md');
+
+    expect($content)->toContain('### 7. Propose commit subjects');
+    expect($content)->toContain('**generic**');
+    expect($content)->toContain('**malformed**');
+    expect($content)->toContain('**inaccurate**');
+    expect($content)->toContain('`@rules/git/general.mdc` *Commit Messages*');
+    expect($content)->toContain('Present every proposal as `old → new` with the one-line reason.');
+    // Repair / noise commits are squashed, never shipped as their own unit.
+    expect($content)->toContain('**repair** commits are squashed into the commit they repair and never form a unit');
+});

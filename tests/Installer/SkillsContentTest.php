@@ -1018,6 +1018,19 @@ test('pr-staged-merge-plan is read-only, loads the PR through load-issue.sh, and
     expect($content)->toContain('must equal the current PR\'s diff exactly');
 });
 
+test('pr-staged-merge-plan bounds the no-linked-issue path instead of inventing requirements (issue #740)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/pr-staged-merge-plan/SKILL.md');
+
+    expect($content)->toContain('**No linked issue.** When `closingIssues[]` is empty');
+    expect($content)->toContain('state `no linked issue — grouping by concern`');
+    expect($content)->toContain('never invent a requirement to fill the column');
+    // The dependent steps must defer to that mode rather than assuming a requirement set always exists.
+    expect($content)->toContain('With no linked issue (step 2), map one unit to one commit concern instead.');
+    expect($content)->toContain('skip this bullet entirely in the *no linked issue* mode');
+    expect($content)->toContain('omit this column in the *no linked issue* mode');
+});
+
 test('pr-staged-merge-plan gates every unit on the eight-point independent-shippability walk (issue #740)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/pr-staged-merge-plan/SKILL.md');
@@ -1031,7 +1044,6 @@ test('pr-staged-merge-plan gates every unit on the eight-point independent-shipp
     expect($content)->toContain('**Reversible alone**');
     expect($content)->toContain('**Consumer contracts stay compatible for the whole rollout**');
     expect($content)->toContain('**In-flight work survives**');
-    // Ordering contract: dependency first, then risk, then reversibility.
     expect($content)->toContain('Order by dependency first (topological');
     // The walk stays read-only: verdicts are read off the code, never proven by building a materialized unit branch.
     expect($content)->toContain('**Derive each verdict by reading the code** — never materialize a unit\'s branch to test it.');
@@ -1048,6 +1060,5 @@ test('pr-staged-merge-plan proposes squashes and corrected commit subjects under
     expect($content)->toContain('**inaccurate**');
     expect($content)->toContain('`@rules/git/general.mdc` *Commit Messages*');
     expect($content)->toContain('Present every proposal as `old → new` with the one-line reason.');
-    // Repair / noise commits are squashed, never shipped as their own unit.
     expect($content)->toContain('**repair** commits are squashed into the commit they repair and never form a unit');
 });

@@ -174,3 +174,43 @@
 - Example: issue #739 / PR #744 — the new *Service-role class does not extend `BaseModelService`* Critical bullet overlapped the pre-existing *ad-hoc class* and *services tied to one model* bullets in `rules/laravel/architecture.mdc`, and the extended **Model Services** walk item overlapped the *Only-Laravel-and-arch-layers class inventory* item in `rules/code-review/general.mdc`; separately the single-public-method trigger contradicted the *Pass-through Action rule* + *Exceptions*. Self-review caught the first, the CR caught the other two — converged 0/0 in 2 iterations, 339 tests green. Pin the precedence wording per [[content-pin-tests-are-the-contract-enforcement]] or it drifts back.
 - Source:  https://github.com/pekral/cursor-rules/pull/744   Added: 2026-07-28
 - Role:    shared
+
+### issue-premise-may-be-wrong-verify-via-clean-checkout — A bug report's claim about what generates an artifact can be wrong; verify with a clean-checkout experiment, not code inference alone
+
+- Trigger: an issue/bug report asserts that a specific tool or command (`bin/cursor-rules install --force`, `composer build`, etc.) generates a given file/directory, and the fix is scoped around that claim.
+- Rule:    Before scoping a fix around the claim, verify it empirically: extract a clean snapshot of `HEAD` (e.g. `git archive HEAD | tar -x` into a scratch dir), run the accused command there, and diff what actually appeared against the claim. Do not rely solely on reading `src/` and inferring the producer — a stale artifact left by a foreign convention or an old script can masquerade as generated. If the premise turns out false, say so explicitly in the plan and re-scope the fix to the real cause (or, if out of scope, log it as a separate finding).
+- Example: issue #742 claimed `bin/cursor-rules install --force` (and `composer build`) generate `/.agents/` and root `AGENTS.md`. Clean-checkout runs of both commands only produced `.claude/`, `.codex/`, `.cursor/`, `build/`, `.phpunit.cache/` — none of the claimed paths. The 121 staged files turned out to be a stale foreign artifact (mismatched blob hashes, mtimes in three waves), not an install output.
+- Source:  https://github.com/pekral/cursor-rules/pull/745   Added: 2026-07-28
+- Role:    metis
+
+### tracked-vs-ignored-root-file-package-source-test — Decide tracked-vs-ignored for a root file by checking whether the installer treats it as a package source, not by convention alone
+
+- Trigger: deciding whether a new or disputed root-level file/directory should be git-tracked (committed) or git-ignored.
+- Rule:    In this repo, a root file is tracked-and-legitimate only when the installer's own resolve-source/resolve-target functions name it as a package source (e.g. `resolveClaudeMdSource()` → `resolveClaudeMdTarget()` in `src/InstallerPath.php`, where package root == repo root makes install an idempotent self-copy). A root artifact with no resolver, no consumer in `src/`, and no pin test belongs in `.gitignore`, same class as already-ignored `/.claude/`, `/.cursor/`, `/.codex/`.
+- Example: issue #742 — `CLAUDE.md` is tracked because it is literally the package's own install source; `/AGENTS.md` and `/.agents/` have no such resolver/consumer, so both were added to `.gitignore` (PR #745) instead of committed, even though `/.agents/` looked at first glance like it might mirror the tracked `skills/`/`agents/` package data.
+- Source:  https://github.com/pekral/cursor-rules/pull/745   Added: 2026-07-28
+- Role:    metis
+
+### gitignore-does-not-retroactively-unstage-already-indexed-files — Adding a path to .gitignore never removes it from the index; unstage explicitly, and expect a dirty index to break git pull/rebase
+
+- Trigger: fixing a "workspace stays dirty" bug by adding a path to `.gitignore` when that path is already `git add`-ed (staged, `A` in `git status`) or already committed.
+- Rule:    `.gitignore` only prevents *future* additions; it has no effect on paths already in the index. After editing `.gitignore`, explicitly unstage with `git restore --staged -- <paths>` (already-committed paths instead need `git rm -r --cached`, which requires `-f` for newly-added ones) before committing — otherwise the fix commit itself still carries the noise. While such staged-but-uncommitted noise exists in the repo, expect it to break `git pull`/`git pull --rebase`/`git rebase` and the local half of `gh pr merge --delete-branch` (the remote merge still succeeds); commit with an explicit pathspec, check `git rev-list --count HEAD..origin/master` before rebasing, and verify a merge via `gh pr view --json state,mergeCommit` rather than trusting `gh pr merge`'s own output.
+- Example: issue #742 / PR #745 — 121 files under `.agents/**` + `AGENTS.md` were staged (never committed) before this fix; `.gitignore` alone would not have removed them from the index. `git restore --staged -- .agents AGENTS.md` unstaged them, then the fix commit (`.gitignore` + test) was made with an explicit pathspec.
+- Source:  https://github.com/pekral/cursor-rules/pull/745   Added: 2026-07-28
+- Role:    talos
+
+### composer-build-install-step-silent-noop-without-editor-flag — composer build's first step (installer --force) silently no-ops without --editor=, don't trust it to have actually installed anything
+
+- Trigger: relying on `composer build` (or any script invocation of `bin/cursor-rules install --force`) to have exercised the install pipeline, e.g. when reasoning about what files an install step produces.
+- Rule:    `composer.json`'s `build` script runs `bin/cursor-rules install --force` without the required `--editor=` flag. The installer exits with `Missing or invalid --editor value.` and installs nothing, but composer still proceeds to `@fix`/`@check` — so a green `composer build` does not prove the install step ran. If a task's reasoning depends on what `install` actually writes, invoke it explicitly with `--editor=all` (or the target editor) rather than trusting the composer script. This is a known repo debt, tracked as out-of-scope from issue #742/PR #745 — worth its own issue, not a silent fix bundled into an unrelated task.
+- Example: discovered during issue #742's clean-checkout verification — `php bin/cursor-rules install --force` (no `--editor`) inside `composer run-script build` produced only `build/` and `.phpunit.cache/`, confirming the install step itself is a no-op in the composer pipeline.
+- Source:  https://github.com/pekral/cursor-rules/pull/745   Added: 2026-07-28
+- Role:    shared
+
+### trivial-looking-bug-report-may-hide-a-decision-route-through-metis — A one-line "add X to .gitignore"-shaped bug report can hide an implicit decision requirement; route through metis before dispatching talos directly
+
+- Trigger: a bug report reads as a trivial mechanical fix (e.g. "path X is missing from .gitignore") but the report (or its context) explicitly asks for a decision between two remediation paths (track vs. ignore, fix vs. suppress) with justification.
+- Rule:    Dispatch metis for analysis even when the literal ask looks like a one-line change. The value isn't code complexity — it's that metis (a) verifies the report's premise empirically instead of accepting it, and (b) makes and justifies the requested decision, which a direct talos dispatch would either skip or guess at, risking a CR-caught scope gap.
+- Example: issue #742 read as "add /.agents/ and AGENTS.md to .gitignore", but explicitly demanded a justified track-vs-ignore decision and verification of what actually produces those paths. Routing through metis first surfaced that the issue's premise was wrong (see `issue-premise-may-be-wrong-verify-via-clean-checkout`) before talos ever touched code; argos+athena converged 0 Critical/0 Moderate in iteration 1 of PR #745.
+- Source:  https://github.com/pekral/cursor-rules/pull/745   Added: 2026-07-28
+- Role:    daidalos

@@ -255,3 +255,32 @@ test(
         expect($content)->toContain('vendor/pekral/arch-app-services');
     },
 );
+
+test('architecture rules force every Service-role class to be a BaseModelService or an Action (issue #739)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($content)->toContain('`BaseModelService` or Action — there is no third Service shape');
+    expect($content)->toContain('anything under `app/Services/`, anything carrying the `Service` suffix');
+    expect($content)->toContain('a "plain service" carve-out does not exist while the package is installed');
+    expect($content)->toContain('**Single-public-method Service → Action (mechanical trigger).**');
+    expect($content)->toContain('exactly **one** public method');
+    expect($content)->toContain('RepositoryDirectorySizeService');
+    expect($content)->toContain('sizeForProject(ProjectModel $project): ?int');
+    expect($content)->toContain('App\Actions\Projects\GetRepositoryDirectorySize');
+    expect($content)->toContain('never fires on Data Validators (single public `validate()` by design)');
+    expect($content)->toContain('A Model Service\'s public API is its own model\'s domain operations — every other public method is an Action.');
+    expect($content)->toContain('When `pekral/arch-app-services` is not installed');
+});
+
+test('architecture CR Severity Rules mark plain Service classes and single-public-method Services as Critical (issue #739)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($content)->toContain('Service-role class that does not extend `BaseModelService` while `pekral/arch-app-services` is installed');
+    expect($content)->toContain('Service-role class exposing exactly one public method with the rest private');
+    expect($content)->toContain('one finding per class, the single-public-method one takes precedence');
+    expect($content)->toContain('raise it **once**, under whichever of the three fits the class, never twice');
+    expect($content)->toContain('when the package is installed this is a requirement, not a preference');
+    expect($content)->toContain('public method on a `BaseModelService` subclass that is neither one of the three package hooks');
+});

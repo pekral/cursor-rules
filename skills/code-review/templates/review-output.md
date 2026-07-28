@@ -72,13 +72,14 @@
 >
 > Report only findings (errors) and their fix recommendations. Never include the trigger decision, an inspected `file:line` list, or an EXPLAIN / static-analysis summary — those belong to the internal investigation, not the published review.
 >
-> Every finding must carry the **concrete optimization artifact** in a fenced code block — the rewritten query in full, the exact index DDL, or the rewritten batching code. A prose description of the fix ("add an index on `user_id`", "rewrite it to be SARGable") does not satisfy this section; see `@rules/code-review/general.mdc` *Database Analysis section*. Each DB defect is rendered here exactly once and is never duplicated into `## Findings`.
+> Every finding must carry the **concrete optimization artifact** in a fenced code block — the rewritten query in full, the exact index DDL, or the rewritten batching code. A prose description of the fix ("add an index on `user_id`", "rewrite it to be SARGable") does not satisfy this section; see `@rules/code-review/general.mdc` *Database Analysis section*. Each **DB-performance** defect is rendered here exactly once and is never duplicated into `## Findings` — but a **security** finding on the same `file:line` is a different defect and always keeps its own `## Findings` entry with the full finding shape.
 
 - **Findings:**
   1. **{Critical / Moderate / Minor}** — `file:line` — one-sentence problem
      **Suggested Fix:** {one sentence naming the fix category per `@rules/sql/optimalize.mdc` — existing-index reuse, query rewrite, pagination change, batching, new index, or the documented justification for a slower query}
      ```sql
      -- Mandatory: the concrete artifact itself, never a prose description of it.
+     -- user-supplied values stay bound (?/:named) — never inlined or concatenated
      -- query rewrite / index reuse / pagination  → the rewritten query in full
      -- new index                                 → the exact DDL, e.g.
      --   ALTER TABLE orders ADD INDEX idx_user_status_created (user_id, status, created_at);

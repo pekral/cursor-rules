@@ -71,10 +71,21 @@
 > Render only when the diff touches database operations (raw SQL, Eloquent / query-builder calls, eager loads, model scopes, ModelManager / Repository methods, migrations, seeders, DynamoDB / NoSQL access) **and** at least one finding is produced by `@skills/mysql-problem-solver/SKILL.md`. Omit the entire section when no DB operations are present in the diff, or when DB ops are present but no findings result — never leave a placeholder or fold it into Coverage.
 >
 > Report only findings (errors) and their fix recommendations. Never include the trigger decision, an inspected `file:line` list, or an EXPLAIN / static-analysis summary — those belong to the internal investigation, not the published review.
+>
+> Every finding must carry the **concrete optimization artifact** in a fenced code block — the rewritten query in full, the exact index DDL, or the rewritten batching code. A prose description of the fix ("add an index on `user_id`", "rewrite it to be SARGable") does not satisfy this section; see `@rules/code-review/general.mdc` *Database Analysis section*. Each DB defect is rendered here exactly once and is never duplicated into `## Findings`.
 
 - **Findings:**
   1. **{Critical / Moderate / Minor}** — `file:line` — one-sentence problem
-     **Suggested Fix:** {query rewrite to reuse an existing index per `@rules/sql/optimalize.mdc`, batch operation per "Batch over per-row operations", or new-index proposal justified by EXPLAIN when no existing index covers the query}
+     **Suggested Fix:** {one sentence naming the fix category per `@rules/sql/optimalize.mdc` — existing-index reuse, query rewrite, pagination change, batching, new index, or the documented justification for a slower query}
+     ```sql
+     -- Mandatory: the concrete artifact itself, never a prose description of it.
+     -- query rewrite / index reuse / pagination  → the rewritten query in full
+     -- new index                                 → the exact DDL, e.g.
+     --   ALTER TABLE orders ADD INDEX idx_user_status_created (user_id, status, created_at);
+     -- application-level fix (Eloquent chain, batchUpdate / batchInsert,
+     --   whereIn(...)->delete(), keyed bulk read) → render a php-fenced block instead of this one
+     -- slower-but-justified query                → the three-part documentation block replaces this snippet
+     ```
 
 ---
 

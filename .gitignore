@@ -33,6 +33,8 @@ Thumbs.db
 /.cursor/
 /.codex/
 /.claude/
+/.agents/
+/AGENTS.md
 composer.lock
 
 

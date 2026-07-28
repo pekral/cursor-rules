@@ -989,3 +989,38 @@ test('the Model Services walk item de-duplicates against the class-inventory wal
         'this is the same defect as the **Only-Laravel-and-arch-layers class inventory** item below, so raise it **once**, never under both items',
     );
 });
+
+test('Database Analysis findings carry a concrete SQL optimization artifact (issue #743)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $template = (string) file_get_contents($packageDir . '/skills/code-review/templates/review-output.md');
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+
+    expect($rule)->toContain('Suggested Fix that renders the concrete optimization artifact');
+    expect($rule)->toContain('ALTER TABLE orders ADD INDEX idx_user_status_created (user_id, status, created_at);');
+    expect($rule)->toContain('an artifact made only of placeholders is the prose this rule forbids');
+    expect($template)->toContain('concrete optimization artifact');
+    expect($template)->toContain('the rewritten query in full');
+
+    foreach ([$github, $jira] as $skill) {
+        expect($skill)->toContain('Suggested Fix that renders the concrete optimization artifact');
+    }
+});
+
+test('Database Analysis raises each DB defect exactly once (issue #743)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $template = (string) file_get_contents($packageDir . '/skills/code-review/templates/review-output.md');
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+
+    expect($rule)->toContain('Every DB-performance defect on a line the `mysql-problem-solver` walk reached is reported **exactly once, here**.');
+    expect($rule)->toContain('raise it there once and never additionally in the `## Findings` severity buckets');
+    expect($rule)->toContain('Never render the same `file:line` in both `## Database Analysis` and `## Findings`.');
+    expect($template)->toContain('never duplicated into `## Findings`');
+
+    foreach ([$github, $jira] as $skill) {
+        expect($skill)->toContain('appears here exactly once and is never duplicated into the Critical / Moderate / Minor buckets');
+    }
+});

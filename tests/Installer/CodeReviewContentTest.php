@@ -969,3 +969,14 @@ test('every CR wrapper produces a two-part Technical + Functional review with th
     $apiReviewTemplate = (string) file_get_contents($packageDir . '/skills/api-review/templates/review-output.md');
     expect($apiReviewTemplate)->toContain('**API contract matches assignment:**');
 });
+
+test('code-review architecture walk covers the strict Service shape and the single-public-method trigger (issue #739)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md') . "\n" . (string) file_get_contents(
+        $packageDir . '/rules/code-review/general.mdc',
+    );
+
+    expect($content)->toContain('**Model Services** (`BaseModelService` extension or Action — no third Service shape');
+    expect($content)->toContain('a Service-role class with exactly one public method and the rest private is an Action wearing a Service name');
+    expect($content)->toContain('neither a package hook nor a domain operation on its own model belongs in an Action');
+});

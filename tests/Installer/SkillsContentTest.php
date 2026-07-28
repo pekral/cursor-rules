@@ -1062,3 +1062,12 @@ test('pr-staged-merge-plan proposes squashes and corrected commit subjects under
     expect($content)->toContain('Present every proposal as `old → new` with the one-line reason.');
     expect($content)->toContain('**repair** commits are squashed into the commit they repair and never form a unit');
 });
+
+test('class-refactoring skill proposes the Service to Action conversion (issue #739)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+
+    expect($content)->toContain('**Service → Action conversion (Laravel + `pekral/arch-app-services`).**');
+    expect($content)->toContain('is an Action wearing a Service name');
+    expect($content)->toContain('rename the single public method to `__invoke()`');
+});

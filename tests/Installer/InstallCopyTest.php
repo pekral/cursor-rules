@@ -21,6 +21,8 @@ test('gitignore ignores local cursor and claude directories', function (): void 
 
     expect($gitignore)->toContain('/.cursor/');
     expect($gitignore)->toContain('/.claude/');
+    expect($gitignore)->toContain('/.agents/');
+    expect($gitignore)->toContain('/AGENTS.md');
 });
 
 test('install ignores rules directory in project root and uses package source', function (): void {

@@ -35,6 +35,7 @@ metadata:
 ### 2. Load the assignment
 - Load every entry in `closingIssues[]` through the same loader (or the JIRA / Bugsnag loader when the PR links one) and extract the stated requirements and acceptance criteria.
 - Map each requirement to the commits that implement it. A requirement split across commits is the strongest signal for where a unit boundary belongs; a commit that maps to no requirement is either a pre-existing fix, noise, or scope creep — label it as such.
+- **No linked issue.** When `closingIssues[]` is empty and the PR references no JIRA / Bugsnag source, state `no linked issue — grouping by concern` and derive the units from the commits' own concerns instead of from requirements. In that mode the Output table drops the *requirement it satisfies* column and step 8's missing-requirement blocker does not apply — never invent a requirement to fill the column. Everything else (steps 3–7, the reconciliation) runs unchanged.
 
 ### 3. Classify every commit
 For each commit record: the concern it serves, the layer it touches (schema, backend, frontend, config, tests, tooling), whether it is self-contained, and its class:
@@ -45,7 +46,7 @@ For each commit record: the concern it serves, the layer it touches (schema, bac
 
 ### 4. Group commits into units
 A **unit** is one coherent outcome that can be reviewed, merged, and deployed on its own. Grouping rules:
-- One unit maps to one requirement or one infrastructural step — not to one file and not to one author's working session.
+- One unit maps to one requirement or one infrastructural step — not to one file and not to one author's working session. With no linked issue (step 2), map one unit to one commit concern instead.
 - **repair** commits are squashed into the commit they repair and never form a unit; **noise** commits fold into the nearest functional commit of the same unit.
 - **pre-existing** fixes become their own unit, ordered first — they are independent of the assignment and the cheapest thing to ship.
 - Two commits that cannot be deployed apart stay in one unit. Never split for cosmetics.
@@ -80,14 +81,14 @@ Report — and do not paper over — any of:
 - a commit that touches the same lines as a commit proposed for a *later* unit (the split will conflict on cherry-pick; name the file);
 - a unit that cannot satisfy step 5 under any ordering, with the reason;
 - a destructive migration or irreversible data change anywhere in the PR;
-- a requirement from step 2 that no commit implements, or a commit that implements nothing the assignment asked for.
+- a requirement from step 2 that no commit implements, or a commit that implements nothing the assignment asked for (skip this bullet entirely in the *no linked issue* mode — there is no requirement set to compare against).
 
 ## Output
 
 Return one markdown document, no local files:
 
 1. **Verdict** — `splittable into N units` / `single atomic change — ship as one PR` / `blocked — <reason>`.
-2. **Staged merge plan** — a table of units in merge order: `#`, unit title, branch name (English, per `@rules/git/general.mdc`), PR base, commits it contains, requirement it satisfies, reversible (yes/no).
+2. **Staged merge plan** — a table of units in merge order: `#`, unit title, branch name (English, per `@rules/git/general.mdc`), PR base, commits it contains, requirement it satisfies (omit this column in the *no linked issue* mode), reversible (yes/no).
 3. **Per unit** — the commits it carries (final subjects), the step-5 verdict, dependency edges, what to verify after deploying it, and the rollback note for an irreversible unit.
 4. **Commit history proposal** — the squash groups (which commits collapse into which) and the `old → new` subject table with reasons; explicitly list the subjects kept as-is.
 5. **Reconciliation** — confirmation that the units' union equals the PR diff, plus the file-level check that proves it.

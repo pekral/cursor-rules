@@ -284,3 +284,12 @@ test('architecture CR Severity Rules mark plain Service classes and single-publi
     expect($content)->toContain('when the package is installed this is a requirement, not a preference');
     expect($content)->toContain('public method on a `BaseModelService` subclass that is neither one of the three package hooks');
 });
+
+test('the single-public-method trigger carves out trivial pass-through Services (issue #739 CR)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($content)->toContain('**Carve-out — trivial pass-through:**');
+    expect($content)->toContain('do not mint an Action; resolve it under the **Pass-through Action rule** instead');
+    expect($content)->toContain('per the **Exceptions** section');
+});

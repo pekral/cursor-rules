@@ -980,3 +980,12 @@ test('code-review architecture walk covers the strict Service shape and the sing
     expect($content)->toContain('a Service-role class with exactly one public method and the rest private is an Action wearing a Service name');
     expect($content)->toContain('neither a package hook nor a domain operation on its own model belongs in an Action');
 });
+
+test('the Model Services walk item de-duplicates against the class-inventory walk item (issue #739 CR)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($content)->toContain(
+        'this is the same defect as the **Only-Laravel-and-arch-layers class inventory** item below, so raise it **once**, never under both items',
+    );
+});

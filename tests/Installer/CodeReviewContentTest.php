@@ -1017,10 +1017,67 @@ test('Database Analysis raises each DB defect exactly once (issue #743)', functi
 
     expect($rule)->toContain('Every DB-performance defect on a line the `mysql-problem-solver` walk reached is reported **exactly once, here**.');
     expect($rule)->toContain('raise it there once and never additionally in the `## Findings` severity buckets');
-    expect($rule)->toContain('Never render the same `file:line` in both `## Database Analysis` and `## Findings`.');
+    expect($rule)->toContain('Never render the same **DB-performance defect** in both `## Database Analysis` and `## Findings`.');
     expect($template)->toContain('never duplicated into `## Findings`');
 
     foreach ([$github, $jira] as $skill) {
         expect($skill)->toContain('appears here exactly once and is never duplicated into the Critical / Moderate / Minor buckets');
     }
+});
+
+test('Database Analysis gating never suppresses a security finding sharing the line (issue #743 CR)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $template = (string) file_get_contents($packageDir . '/skills/code-review/templates/review-output.md');
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+
+    expect($rule)->toContain('Never render the same **DB-performance defect** in both `## Database Analysis` and `## Findings`.');
+    expect($rule)->toContain('This gating is scoped to the three performance bullets named above and to nothing else');
+    expect($rule)->toContain('is a **different defect**, always keeps its own entry in `## Findings` with the full finding shape');
+    expect($rule)->toContain('the `## Findings` finding shape (Location / Rule / Impact plus the four reproducer fields)');
+    expect($rule)->not->toContain('Never render the same `file:line` in both `## Database Analysis` and `## Findings`.');
+
+    foreach ([$template, $github, $jira] as $mirror) {
+        expect($mirror)->toContain('a **security** finding on the same `file:line` is a different defect');
+    }
+});
+
+test('Database Analysis artifact enumeration is open-ended and keeps values bound (issue #743 CR)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $template = (string) file_get_contents($packageDir . '/skills/code-review/templates/review-output.md');
+
+    expect($rule)->toContain('**Any other fix category `@skills/mysql-problem-solver/SKILL.md` step 5 produces**');
+    expect($rule)->toContain('The four categories above are the common cases, not the whole set; no fix category is exempt from carrying its artifact.');
+    expect($rule)->toContain('keeps every user-supplied value as a **bound parameter**');
+    expect($rule)->toContain('A bound parameter is not a placeholder for the purposes of the rule below');
+    expect($rule)->toContain('never paste row data, sample values, or credentials into the published review');
+    expect($template)->toContain('-- user-supplied values stay bound (?/:named) — never inlined or concatenated');
+});
+
+test('the justified-slower-query carve-out is pinned on every surface that carries it (issue #743 CR)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+
+    expect($rule)->toContain('the three-part documentation block named in that bullet **is** the artifact');
+    expect($rule)->toContain('which **is** the artifact in that branch');
+
+    foreach ([$github, $jira] as $wrapper) {
+        expect($wrapper)->toContain('the three-part documentation block that **is** the artifact there');
+        expect($wrapper)->not->toContain('never a prose description of the fix');
+    }
+});
+
+test('every Core Analysis DB bullet carries the reciprocal Database Analysis routing (issue #743 CR)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect(substr_count(
+        $rule,
+        'this item is folded into `## Database Analysis`',
+    ))->toBe(2);
+    expect($rule)->toContain('with the batching rewrite rendered per that section\'s artifact requirement');
 });

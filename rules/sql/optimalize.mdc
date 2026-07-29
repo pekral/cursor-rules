@@ -84,6 +84,8 @@ SELECT * FROM users WHERE EXISTS (SELECT 1 FROM orders WHERE orders.user_id = us
 - Do not create indexes on low-cardinality columns alone.
 - Do not keep single-column indexes when a composite index already covers them.
 - Nullable columns should appear last in composite indexes.
+- Know which kind of index you are adding: a **technical** index (backing a foreign key or a uniqueness rule) exists from the first migration; a **performance** index is created from an `EXPLAIN` finding, not from a guess.
+- The primary key is implicitly appended to every secondary index — never repeat it as the trailing column.
 
 ```sql
 -- Query filters by (user_id, status) and sorts by created_at
@@ -141,12 +143,53 @@ foreach ($externalIds as $externalId) {
 
 ## Schema Design
 - Primary keys on every table.
-- Fitting data types: `INT`, `DECIMAL`, `VARCHAR(n)`, `TIMESTAMP`.
 - InnoDB engine.
 - `lower_case_snake_case` naming.
 - Normalized unless denormalization is justified by read performance.
 - Partition large tables by range where beneficial.
 - Non-blocking index creation on large tables where supported.
+
+### Strict mode is the prerequisite
+- The server must run with a strict `sql_mode`: `STRICT_TRANS_TABLES,ONLY_FULL_GROUP_BY,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION`.
+- Without it every declared domain (`NOT NULL`, column width, numeric precision, date validity) degrades to a silent truncating fallback, so none of the rules below are actually enforced. Verify it before treating a schema as validated.
+
+### Naming
+- **Table names are singular** — `post`, not `posts`. Singular maps 1:1 onto the class (`Post` → `post`) and keeps a family of tables together when sorted (`post`, `post_slug`, `post_tag`). In Laravel this means declaring `protected $table = 'post';` because Eloquent pluralizes by default.
+- Primary key is always `id`; a foreign key is `<singular_table>_id` (`author_id` → `user`); a self-reference is `parent_id`. Add a module prefix only when the flat namespace starts to hurt.
+- **Name indexes and constraints yourself** — never ship generated names like `post_ibfk_1`. Indexes carry no prefix; constraints do: `fk_post_blog`, `uq_post_slug`, `chk_post_lang_format`.
+- **Boolean columns are adjectives with positive polarity** — `published`, `visible`, `pinned`. Convert noun-shaped names (`use_avatar` → `avatar_enabled`, `hide_price` → `price_visible`); fall back to `is_` / `can_` only when no adjective fits (`is_premium`, `can_edit`). Before naming it, confirm it is genuinely a boolean and not a state timestamp (`published_at`) or a set of more than two states (a status column). Type is `tinyint(1) NOT NULL` with a domain-meaningful default.
+- **Time columns carry a suffix that matches their type** — `_at` for a moment in time (`DATETIME`): `created_at`, `published_at`, `expires_at`; `_date` for a calendar day independent of any zone (`DATE`): `birth_date`, `invoice_date`. A calendar day stored as a datetime shifts across time zones — a 15 March birth date becomes 14 March 23:00.
+
+### Nullability and defaults
+- **Nullable only when the absence of a value is a fact about the world, not a technical state.** Strings are usually `NOT NULL DEFAULT ''`; the default must be domain-meaningful at the moment the row is created (`status varchar(20) NOT NULL DEFAULT 'draft'`).
+- NULL is not free: `WHERE col <> 'x'` skips NULL rows, `NOT IN (subquery)` returns nothing when the subquery yields a NULL, and `UNIQUE` treats every NULL as a distinct value.
+
+### Types
+- **Never `TIMESTAMP`** — it dies in 2038 and silently converts by the session time zone on read and write. Use `DATETIME` and keep the whole database in one time zone. `DEFAULT CURRENT_TIMESTAMP` records the session zone, so historical rows can carry a different zone than new ones.
+- **`modified_at` and `updated_at` are two different columns.** `modified_at` records a *domain* change and is touched only when relevant columns change (a `BEFORE UPDATE` trigger comparing under a `_bin` collation so a diacritics-only edit is detected). `updated_at` is a row version protecting against concurrent edits and uses `ON UPDATE CURRENT_TIMESTAMP`. Every magically maintained column carries a `COMMENT` explaining what maintains it and why.
+- **`VARCHAR(255)` is cargo cult.** The length is a domain declaration that strict mode enforces — pick a number you can explain: `email varchar(254)` (RFC), `country char(2)` (ISO 3166-1), `slug varchar(100)` (a deliberately chosen ceiling).
+- `TEXT` holds 64 KB of **bytes**, not characters — use `MEDIUMTEXT` for HTML article bodies. `ENUM` is legitimate for a small fixed set (one byte inside indexes, `ALGORITHM=INSTANT` when appending a value).
+- **Money and every exact decimal is `DECIMAL`** — never `FLOAT` / `DOUBLE`, whose binary approximation corrupts `SUM()`. `DECIMAL(9,2)` for amounts, `(9,4)` for unit prices, `(12,6)` for exchange rates. A value inserted with higher precision is silently rounded, so round deliberately in the application; MySQL `ROUND` is half-away-from-zero. Enforce non-negativity with a `CHECK`, not `UNSIGNED` — `UNSIGNED` on `DECIMAL` / `FLOAT` / `DOUBLE` is deprecated since MySQL 8.0.17 (on integer types it stays fine).
+- **The primary key propagates** — it is physically stored in every secondary index and every referencing foreign key, so its width multiplies across the schema. Default to `INT UNSIGNED AUTO_INCREMENT`, `BIGINT UNSIGNED` for high-volume tables. `AUTO_INCREMENT` follows the maximum value ever used, not the row count; when in doubt take `BIGINT`.
+
+### Charset and collation
+- Always `utf8mb4` — the legacy `utf8` is a three-byte alias that cannot store the full range. Use a collation from the `utf8mb4_0900_*` family (UCA 9.0), not `general_ci`, legacy `unicode_ci`, or `czech_ci`.
+- **`CHECK` and `REGEXP` comparisons respect the column collation.** Under the default `_ai_ci` a format check does not distinguish case — `WHERE col REGEXP '^[a-z]{2}$'` also accepts `'CS'`. Format constraints belong on a column declared `_bin`, `ascii_bin`, or `_as_cs`.
+- **Charset follows the source of the compared values, not the stored content.** Comparing an `ascii` column against a non-ASCII literal raises `ERROR 1267` — a 500 where a missing row should have produced a 404. Publicly queried columns (slugs, codes, identifiers reachable from user input) get `utf8mb4_0900_bin`; `ascii` stays for internal columns whose values never come from a user (`lang`, `country`, `ip_address`).
+
+### Referential integrity
+- Pick `ON DELETE` from the nature of the relation — is the child *part of* the parent, or does it only *point at* it?
+  - **Composition → `CASCADE`**: `order_item` → `customer_order`.
+  - **Association → `RESTRICT`**: `post.author_id` → `user`.
+  - **Meaningful detachment → `SET NULL`**: `log.user_id` after anonymization.
+- `ON UPDATE CASCADE` as the default — inert with surrogate keys, but it protects the schema if a key is ever re-coded.
+- Cascading deletes do **not** fire triggers and do **not** apply to soft deletes — logic that depends on them must live where the delete actually happens.
+
+### CHECK constraints
+- `CHECK` enforces **domain invariants** (timeless truths about the data), never **business policy** (rules that change with a decision) — policy belongs in the application.
+- Express a conditional obligation as an implication: `CONSTRAINT chk_order_shipped_needs_date CHECK (status <> 'shipped' OR shipped_at IS NOT NULL)`.
+- Name a constraint after the **rule, not the columns** — the name is what surfaces in the error the user sees.
+- A `CHECK` cannot span rows, use non-deterministic functions, or reference an `AUTO_INCREMENT` column.
 
 ## Advanced SQL Patterns
 - Use CTEs for complex multi-step queries — prefer over nested subqueries.

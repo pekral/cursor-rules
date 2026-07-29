@@ -18,10 +18,42 @@ metadata:
 
 ## Use when
 - Adding upserts, JSON columns, full-text search, generated columns, or partitioning to a Laravel app.
+- Writing a migration that creates a new table and needs the schema standard expressed in Blueprint.
 - Setting up read/write splitting against replicas, or hardening against deadlocks and connection exhaustion.
 - Reviewing a migration that introduces any of the above on a large table.
 
 These topics complement the query-tuning rules; they are not covered there.
+
+## Schema Standard in Laravel Migrations
+
+`@rules/sql/optimalize.mdc` *Schema Design* owns the standard (singular names, `NOT NULL` defaults, `_at` / `_date` suffixes, `DATETIME` over `TIMESTAMP`, adjective booleans, justified `VARCHAR` widths, `DECIMAL` money, `ON DELETE` by relation nature, `CHECK` invariants, `utf8mb4_0900_*`, PK width). This section only maps it onto Blueprint, where several defaults contradict it.
+
+```php
+Schema::create('post', function (Blueprint $table): void {   // singular — Eloquent needs $table = 'post';
+    $table->increments('id');                                // INT UNSIGNED; ->id() would give BIGINT
+    $table->string('slug', 100)->charset('utf8mb4')->collation('utf8mb4_0900_bin');
+    $table->string('meta_title', 160)->default('');          // NOT NULL + domain default
+    $table->boolean('published')->default(false);            // adjective, positive polarity
+    $table->decimal('price', 9, 2);                          // money is never float/double
+    $table->date('invoice_date');                            // calendar day → DATE
+    $table->dateTime('published_at')->nullable();
+    $table->dateTime('created_at');
+    $table->dateTime('updated_at')->useCurrent()->useCurrentOnUpdate();
+    $table->foreignId('author_id')->constrained('user')->restrictOnDelete()->cascadeOnUpdate();
+    $table->index(['author_id', 'published_at'], 'idx_post_author_published');
+});
+```
+
+- `$table->timestamps()` emits **`TIMESTAMP`** columns — the 2038 + session-zone trap. Declare `dateTime('created_at')` / `dateTime('updated_at')` explicitly (or `$table->datetimes()` on Laravel 10+).
+- `$table->id()` is `BIGINT UNSIGNED`; use `increments()` / `foreignId()->constrained()` pairs consistently so the FK width matches the PK it references.
+- FK actions read directly off the relation: `cascadeOnDelete()` (composition), `restrictOnDelete()` (association), `nullOnDelete()` (meaningful detachment).
+- Blueprint has no DSL for `CHECK` constraints, triggers, or `COMMENT` on a magically maintained column — use `DB::statement(...)` and name the constraint after the rule:
+  ```php
+  DB::statement('ALTER TABLE `customer_order` ADD CONSTRAINT `chk_order_shipped_needs_date`
+      CHECK (`status` <> \'shipped\' OR `shipped_at` IS NOT NULL)');
+  ```
+- Set the connection charset/collation and strict mode once in `config/database.php`: `'charset' => 'utf8mb4'`, `'collation' => 'utf8mb4_0900_ai_ci'`, `'strict' => true` (or an explicit `'modes' => [...]` list). MariaDB has no `utf8mb4_0900_*` family — verify with `SELECT VERSION();` before pinning it.
+- An `updated_at` maintained by `ON UPDATE CURRENT_TIMESTAMP` and one maintained by Eloquent are two mechanisms for one column — pick one (`public $timestamps = false;` when the DB owns it) so the row version is not written twice with different values.
 
 ## Upserts
 

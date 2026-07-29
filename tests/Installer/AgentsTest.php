@@ -315,6 +315,22 @@ test('daidalos processes multiple resolved sources sequentially and never fans t
     expect($content)->toContain('classify **each one independently**');
 });
 
+test('daidalos auto-remediates a missing code review at merge time and then continues the merge flow', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+
+    // A merge that finds no (or a stale / non-converged) code review runs the CR + fix loop instead of stopping.
+    expect($content)->toContain('Missing code review is auto-remediated, not a dead end');
+    expect($content)->toContain('When it converges (0 Critical + 0 Moderate), continue the merge flow');
+    // The remediation is bounded and the other merge gates stay hard stops.
+    expect($content)->toContain('One remediation cycle per merge attempt');
+    expect($content)->toContain('The auto-remediation covers the code-review gate only');
+
+    // The merge skill points the orchestrating caller at the same remediation path without waiving the gate.
+    $skill = (string) file_get_contents($packageDir . '/skills/merge-github-pr/SKILL.md');
+    expect($skill)->toContain('may treat an unmet gate as a trigger to run that review to convergence and then re-enter this skill');
+});
+
 test('daidalos keeps the writing path on the shared tree but lets read-only CR agents isolate in a worktree, and cleans them up', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');

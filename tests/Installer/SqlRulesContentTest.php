@@ -12,3 +12,30 @@ test('sql optimalize rule carries the New storage reuse analysis section (issue 
     expect($content)->toContain('@skills/code-review/SKILL.md');
     expect($content)->toContain('Do not flag migrations that only add a column or index to an existing table');
 });
+
+test('sql optimalize rule carries the MySQL schema design standard', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/sql/optimalize.mdc');
+
+    // The standard is engine-scoped and greenfield-scoped so it cannot fight an established project convention.
+    expect($content)->toContain('**Scope of the standard below.**');
+    expect($content)->toContain('It governs **new tables and new columns**; never demand a rename or a retro-migration of an existing schema.');
+    expect($content)->toContain('@skills/postgres-patterns/SKILL.md');
+    expect($content)->toContain('### Strict mode is the prerequisite');
+    expect($content)->toContain('STRICT_TRANS_TABLES,ONLY_FULL_GROUP_BY,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION');
+    expect($content)->toContain('**Table names are singular**');
+    expect($content)->toContain('**Boolean columns are adjectives with positive polarity**');
+    expect($content)->toContain('`_at` for a moment in time (`DATETIME`)');
+    expect($content)->toContain('**Never `TIMESTAMP`**');
+    expect($content)->toContain('**`modified_at` and `updated_at` are two different columns.**');
+    expect($content)->toContain('**`VARCHAR(255)` is cargo cult.**');
+    expect($content)->toContain('**Money and every exact decimal is `DECIMAL`**');
+    expect($content)->toContain('**The primary key propagates**');
+    expect($content)->toContain('### Charset and collation');
+    expect($content)->toContain('ERROR 1267');
+    expect($content)->toContain('**Composition → `CASCADE`**');
+    expect($content)->toContain('**Association → `RESTRICT`**');
+    expect($content)->toContain('**Meaningful detachment → `SET NULL`**');
+    expect($content)->toContain('### CHECK constraints');
+    expect($content)->toContain('chk_order_shipped_needs_date');
+});

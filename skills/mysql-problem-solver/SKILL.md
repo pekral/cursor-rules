@@ -64,6 +64,8 @@ Look for:
 - N+1 behavior from application code
 - per-row queries inside loops — per-row `update()` / `create()` / `delete()` or single-row reads driven by a `foreach` (distinct from N+1 eager-loading: this is application code intentionally writing or reading row-by-row when a single batch query would suffice)
 - redundant or overlapping indexes
+- charset / collation mismatch between compared or joined columns — the implicit conversion makes the converted side non-SARGable (its index is skipped), and an `ascii` column compared against a non-ASCII value raises `ERROR 1267` instead of returning no rows
+- schema-level causes of a slow plan (see `@rules/sql/optimalize.mdc` "Schema Design"): an oversized primary key copied into every secondary index, an unjustified `VARCHAR(255)` inflating sort buffers and temporary tables, `TIMESTAMP` columns converting per row by session time zone, or `FLOAT` / `DOUBLE` where `DECIMAL` belongs
 
 ### 5. Propose Optimizations
 
@@ -81,6 +83,7 @@ Recommend only justified changes, such as:
 - batching per-row loops into a single bulk operation — ModelManager batch methods (`batchUpdate`, `batchInsert`), `whereIn(...)->delete()` for deletes, or one bulk read keyed in memory for lookups (see `@rules/sql/optimalize.mdc` "Batch over per-row operations")
 - index addition or replacement (only when the existing schema cannot cover the query and EXPLAIN confirms the gap after the rewrite alternative has been ruled out)
 - redundant index removal
+- column type / charset / collation alignment when the mismatch is what blocks the index (`@rules/sql/optimalize.mdc` "Schema Design")
 - splitting one query into smaller ones
 
 Explain trade-offs:

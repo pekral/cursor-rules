@@ -795,6 +795,9 @@ test('mysql-patterns and git-workflow defer to existing rules and skills instead
     expect($mysql)->toContain('## Schema Standard in Laravel Migrations');
     expect($mysql)->toContain('$table->timestamps()');
     expect($mysql)->toContain('chk_order_shipped_needs_date');
+    // FK width must match the referenced PK — increments() is INT UNSIGNED, foreignId() is BIGINT UNSIGNED.
+    expect($mysql)->toContain('**Pair the FK width to the PK it references.**');
+    expect($mysql)->toContain('errno 3780');
 
     $git = (string) file_get_contents($packageDir . '/skills/git-workflow/SKILL.md');
     // Conventions live in the git rule; branch cleanup and PR merging stay in their own skills.

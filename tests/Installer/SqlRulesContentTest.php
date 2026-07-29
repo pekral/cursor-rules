@@ -17,6 +17,10 @@ test('sql optimalize rule carries the MySQL schema design standard', function ()
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/rules/sql/optimalize.mdc');
 
+    // The standard is engine-scoped and greenfield-scoped so it cannot fight an established project convention.
+    expect($content)->toContain('**Scope of the standard below.**');
+    expect($content)->toContain('It governs **new tables and new columns**; never demand a rename or a retro-migration of an existing schema.');
+    expect($content)->toContain('@skills/postgres-patterns/SKILL.md');
     expect($content)->toContain('### Strict mode is the prerequisite');
     expect($content)->toContain('STRICT_TRANS_TABLES,ONLY_FULL_GROUP_BY,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION');
     expect($content)->toContain('**Table names are singular**');

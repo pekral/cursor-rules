@@ -149,9 +149,11 @@ foreach ($externalIds as $externalId) {
 - Partition large tables by range where beneficial.
 - Non-blocking index creation on large tables where supported.
 
+> **Scope of the standard below.** It is **MySQL / MariaDB**-specific (collations, `TIMESTAMP`, `tinyint(1)`, `ENUM`) — on another engine defer to that engine's skill (`@skills/postgres-patterns/SKILL.md` for Postgres, where `timestamptz` is the correct type). It governs **new tables and new columns**; never demand a rename or a retro-migration of an existing schema. Where a project already has an established convention (Laravel's plural table names, `$table->timestamps()` across every existing table), that convention wins for consistency per `@rules/php/core-standards.mdc` *Project Context* — apply the standard to greenfield schemas and to a table the project is already reshaping, and raise a deviation only there.
+
 ### Strict mode is the prerequisite
 - The server must run with a strict `sql_mode`: `STRICT_TRANS_TABLES,ONLY_FULL_GROUP_BY,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION`.
-- Without it every declared domain (`NOT NULL`, column width, numeric precision, date validity) degrades to a silent truncating fallback, so none of the rules below are actually enforced. Verify it before treating a schema as validated.
+- Without it every declared domain degrades to a silent fallback instead of an error — an over-long value is truncated, an out-of-range number is clamped, an invalid date becomes `0000-00-00`, and a `NULL` into a `NOT NULL` column is replaced by the implicit default. None of the rules below are actually enforced. Verify it before treating a schema as validated.
 
 ### Naming
 - **Table names are singular** — `post`, not `posts`. Singular maps 1:1 onto the class (`Post` → `post`) and keeps a family of tables together when sorted (`post`, `post_slug`, `post_tag`). In Laravel this means declaring `protected $table = 'post';` because Eloquent pluralizes by default.

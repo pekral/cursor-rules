@@ -39,13 +39,17 @@ Schema::create('post', function (Blueprint $table): void {   // singular — Elo
     $table->dateTime('published_at')->nullable();
     $table->dateTime('created_at');
     $table->dateTime('updated_at')->useCurrent()->useCurrentOnUpdate();
-    $table->foreignId('author_id')->constrained('user')->restrictOnDelete()->cascadeOnUpdate();
+    $table->unsignedInteger('author_id');                    // same width as user.id
+    $table->foreign('author_id', 'fk_post_author')           // name the constraint yourself
+        ->references('id')->on('user')
+        ->restrictOnDelete()->cascadeOnUpdate();
     $table->index(['author_id', 'published_at'], 'idx_post_author_published');
 });
 ```
 
-- `$table->timestamps()` emits **`TIMESTAMP`** columns — the 2038 + session-zone trap. Declare `dateTime('created_at')` / `dateTime('updated_at')` explicitly (or `$table->datetimes()` on Laravel 10+).
-- `$table->id()` is `BIGINT UNSIGNED`; use `increments()` / `foreignId()->constrained()` pairs consistently so the FK width matches the PK it references.
+- `$table->timestamps()` emits **`TIMESTAMP`** columns — the 2038 + session-zone trap. Declare `dateTime('created_at')` / `dateTime('updated_at')` explicitly.
+- **Pair the FK width to the PK it references.** `$table->id()` and `$table->foreignId()` are both `BIGINT UNSIGNED`; `increments()` is `INT UNSIGNED`. So `id()` pairs with `foreignId()->constrained()`, and `increments()` pairs with `unsignedInteger()` + `foreign()`. A mixed pair makes MySQL reject the constraint (errno 3780, incompatible column types).
+- `constrained()` / `foreign()` generate a name like `post_author_id_foreign` — pass the constraint name (`constrained(table: 'user', indexName: 'fk_post_author')`, or the second argument of `foreign()`) so the schema keeps the naming the rule requires.
 - FK actions read directly off the relation: `cascadeOnDelete()` (composition), `restrictOnDelete()` (association), `nullOnDelete()` (meaningful detachment).
 - Blueprint has no DSL for `CHECK` constraints, triggers, or `COMMENT` on a magically maintained column — use `DB::statement(...)` and name the constraint after the rule:
   ```php

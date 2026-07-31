@@ -56,7 +56,7 @@ metadata:
 
 ### 5. Process review feedback
 - **Run inline.** Invoke `@skills/process-code-review/SKILL.md` directly in this skill's context, passing the **PR URL** plus the instruction "drive the review loop on this PR to convergence (Critical + Moderate == 0) and return the iteration count, residual finding counts, and the final status comment URL". Do not dispatch as a subagent — run it sequentially in the current context.
-- This is the convergence loop: it resolves comments, applies Suggested Fix snippets, re-runs the review in quiet mode, and exits when `criticalCount + moderateCount == 0` (or after its `maxIterations` safety net). On convergence it also promotes the PR out of Draft (`gh pr ready`) per `@rules/git/general.mdc` *Draft pull requests*, so the merge step in step 6 sees a non-draft, ready PR.
+- This is the convergence loop: it resolves comments, applies Suggested Fix snippets, re-runs the review in quiet mode, and exits when `criticalCount + moderateCount == 0`, after its `maxIterations` safety net, or via its `Blocked: awaiting external input` short-circuit when every remaining finding needs a documentation link only a human can supply. On convergence it also promotes the PR out of Draft (`gh pr ready`) per `@rules/git/general.mdc` *Draft pull requests*, so the merge step in step 6 sees a non-draft, ready PR.
 - If the run reports residual Critical or Moderate findings, **stop**. Report the residual findings and the PR URL; do not attempt the merge.
 
 ### 6. Merge the PR

@@ -446,7 +446,7 @@ test(
     function (): void {
         $packageDir = dirname(__DIR__, 2);
         $content = (string) file_get_contents($packageDir . '/agents/argos.md');
-    
+
         expect($content)->toContain('## Web egress safety (issue #748)');
         expect($content)->toContain(
             'through `@skills/code-review-github/SKILL.md` / `@skills/code-review-jira/SKILL.md` reading an'

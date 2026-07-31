@@ -99,6 +99,7 @@ test('agents directory ships the argos code-review subagent with required frontm
     $content = (string) file_get_contents($agentPath);
     expect($content)->toContain('name: argos');
     expect($content)->toContain('tools: Read, Glob, Grep, Bash');
+    expect($content)->toContain('tools: Read, Glob, Grep, Bash, WebSearch, WebFetch');
     expect($content)->toContain('@skills/code-review-github/SKILL.md');
     expect($content)->toContain('@skills/code-review-jira/SKILL.md');
     expect($content)->toContain('@skills/code-review-bugsnag/SKILL.md');
@@ -130,6 +131,7 @@ test('agents directory ships the metis problem-analysis subagent with required f
     $content = (string) file_get_contents($agentPath);
     expect($content)->toContain('name: metis');
     expect($content)->toContain('tools: Read, Glob, Grep, Bash');
+    expect($content)->toContain('tools: Read, Glob, Grep, Bash, WebSearch, WebFetch');
     expect($content)->toContain('@skills/analyze-problem/SKILL.md');
 });
 
@@ -158,6 +160,7 @@ test('agents directory ships the athena security-CR subagent with required front
     $content = (string) file_get_contents($agentPath);
     expect($content)->toContain('name: athena');
     expect($content)->toContain('tools: Read, Glob, Grep, Bash');
+    expect($content)->toContain('tools: Read, Glob, Grep, Bash, WebSearch, WebFetch');
     expect($content)->toContain('model: opus');
     expect($content)->toContain('@skills/security-review/SKILL.md');
     expect($content)->toContain('@skills/laravel-security/SKILL.md');

@@ -1081,3 +1081,81 @@ test('every Core Analysis DB bullet carries the reciprocal Database Analysis rou
     ))->toBe(2);
     expect($rule)->toContain('with the batching rewrite rendered per that section\'s artifact requirement');
 });
+
+test('third-party API documentation must be verified via WebSearch/WebFetch or requested from the author (issue #748)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $skill = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($rule)->toContain('## Third-Party API & Service Documentation Verification (issue #748)');
+    expect($rule)->toContain('**Locate the official documentation with `WebSearch` / `WebFetch`.**');
+    expect($rule)->toContain('**Degrade explicitly when the tools are unavailable — never skip silently.**');
+    expect($rule)->toContain('it must proceed straight to step 3\'s request-for-link outcome instead of skipping the check.');
+    expect($rule)->toContain('**Request the link when the documentation cannot be resolved.**');
+    $requestLinkTemplate = 'Reply on this PR with the official documentation URL for <vendor> <API> <version>'
+        . ' (or add it to the PR description), so the contract can be verified.';
+    expect($rule)->toContain($requestLinkTemplate);
+    expect($rule)->toContain('**Gate — no verdict without a verified source.**');
+    $noMemoryVerdict = 'Do not render a pass/fail verdict on API correctness (endpoints, parameters, auth,'
+        . ' deprecated calls, versioning) from the model\'s memory of the vendor\'s API.';
+    expect($rule)->toContain($noMemoryVerdict);
+    $deprecatedCallsClause = '**deprecated calls** (endpoints, SDK methods, or parameters the vendor\'s current'
+        . ' documentation marks deprecated or scheduled for removal)';
+    expect($rule)->toContain($deprecatedCallsClause);
+    $versioningClause = '**API versioning** (the version pinned by the code vs. the version the vendor'
+        . ' currently documents/supports, and any breaking change between them)';
+    expect($rule)->toContain($versioningClause);
+    expect($rule)->toContain('same guard as `att_host_block_reason` in `skills/_shared/attachments.sh`');
+
+    $canonicalPointer = 'Canonical detail (conditional degradation, request-for-link template, gate, precedence,'
+        . ' SSRF guard): `@rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification'
+        . ' (issue #748)*.';
+    expect($skill)->toContain($canonicalPointer);
+    expect($skill)->toContain('Locate the official public reference for each one with `WebSearch` / `WebFetch`');
+    $degradeToMemory = 'When the web tools are unavailable or the fetch fails, do not fall back to memory'
+        . ' — go straight to step 6.';
+    expect($skill)->toContain($degradeToMemory);
+    expect($skill)->toContain('deprecated calls and API versioning (pinned version vs. the vendor\'s current documented version)');
+    expect($skill)->toContain('**Gate — no verdict without a verified source.**');
+    expect($skill)->toContain($requestLinkTemplate);
+});
+
+test('the missing-documentation finding is gated to raise exactly once across rule and skill (issue #748)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $skill = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($rule)->toContain('**Precedence — raise one finding per violation, never both.**');
+    $ruleOnceClause = 'Raise one finding per violation, never both — the missing-documentation outcome is'
+        . ' reported exactly once, through that section\'s request-for-link step, never additionally as a'
+        . ' separate contract-mismatch finding on the same call site.';
+    expect($rule)->toContain($ruleOnceClause);
+    $skillOnceClause = 'Raise one finding per violation, never both — this step is the sole terminal output'
+        . ' for the missing-documentation outcome.';
+    expect($skill)->toContain($skillOnceClause);
+});
+
+test('the third-party API walk item points at the new canonical section and carries its own precedence pointer (issue #748)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    $walkItem = '- Third-party API/service contract — when changes touch external APIs or services, verify the'
+        . ' implementation matches the public API documentation (located via `WebSearch`/`WebFetch` or supplied'
+        . ' by the author), including deprecated calls and versioning, satisfies the issue assignment, and'
+        . ' covers all relevant in-scope API use cases (see **Third-Party API & Service Documentation'
+        . ' Verification (issue #748)** section below).';
+    expect($rule)->toContain($walkItem);
+});
+
+test('every CR wrapper carries the mandatory third-party API documentation verification trigger (issue #748)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $github = (string) file_get_contents($packageDir . '/skills/code-review-github/SKILL.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+    $bugsnag = (string) file_get_contents($packageDir . '/skills/code-review-bugsnag/SKILL.md');
+
+    foreach ([$github, $jira, $bugsnag] as $wrapper) {
+        expect($wrapper)->toContain(
+            'including its mandatory documentation verification (locate the docs or request the link — never assess from memory)',
+        );
+    }
+});

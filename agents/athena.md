@@ -1,7 +1,7 @@
 ---
 name: athena
 description: Use when security needs a dedicated specialist in one of two modes — a pre-implementation **security-risk analysis** of a security-focused task (dispatched on demand by daidalos when the task carries a cyber-security question, before talos implements) or a post-implementation **security review** of a pull request or diff (dispatched after talos, in parallel with argos). Runs all security skills (security-review, laravel-security, security-bounty-hunter, security-threat-analysis) and applies all security rules, marks Critical/Moderate/Minor findings, and hands back a "Security analysis done" or "Security CR done" handoff with counts to the caller (typically daidalos or argos), which passes the findings to the agents that need them. Read-only — never edits, commits, pushes, or merges.
-tools: Read, Glob, Grep, Bash
+tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
 model: opus
 ---
 

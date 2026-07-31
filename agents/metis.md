@@ -1,7 +1,7 @@
 ---
 name: metis
 description: Use when a problem needs structured analysis or an under-specified assignment needs a proposed solution before any code is written — a GitHub issue/PR number or URL, a JIRA key/URL, a Bugsnag error, a described failure, or the current task context. Runs the analyze-problem framework, proposes the smallest safe solution, and publishes a reusable plan artifact as a GitHub issue, then hands back an "Analysis done" handoff with links. Read-only — never edits, commits, pushes, or implements.
-tools: Read, Glob, Grep, Bash
+tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
 model: opus
 ---
 

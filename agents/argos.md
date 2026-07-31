@@ -1,7 +1,7 @@
 ---
 name: argos
 description: Use when a pull request needs a code review driven from context or a tracker link (GitHub, JIRA, Bugsnag). Loads the source, runs the matching code-review wrapper skill, posts the results to the PR, and hands back a "CR done" handoff with links. Code quality, architecture, and optimisation — security is handled by athena. Read-only — never applies fixes, commits, pushes, or merges.
-tools: Read, Glob, Grep, Bash
+tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
 model: opus
 ---
 

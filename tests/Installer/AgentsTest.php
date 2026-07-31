@@ -426,3 +426,15 @@ test('every agent keeps commit messages and PR titles in English regardless of t
         expect($content)->toContain('commit messages and PR titles are always English');
     }
 });
+
+test('docs/agents.md describes WebFetch as an egress risk, not a working-tree write risk (issue #748 CR fix)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/docs/agents.md');
+
+    $toolsLine = '- **`tools`** — restrict to what the agent needs. A read-only reviewer needs `Read, Glob, Grep,'
+        . ' Bash` only; `argos`, `athena`, and `metis` additionally carry `WebSearch, WebFetch` to verify'
+        . ' third-party API documentation and research authoritative sources — read-only with respect to the'
+        . ' working tree; egress is subject to the host allow-list in `rules/code-review/general.mdc`'
+        . ' *Third-Party API & Service Documentation Verification*.';
+    expect($content)->toContain($toolsLine);
+});

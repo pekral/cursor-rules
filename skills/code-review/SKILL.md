@@ -70,7 +70,7 @@ Every CR run must explicitly verify **both directions** of the relationship betw
 Run this section only when the diff integrates with, modifies, or depends on a third-party API or external service (HTTP clients, vendor SDK calls, webhooks, OAuth flows, payload schemas, queue/event consumers backed by external systems). Canonical detail (conditional degradation, request-for-link template, gate, precedence, SSRF guard): `@rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification (issue #748)*.
 
 1. Identify every affected API or service from the diff and list the concrete endpoints, SDK methods, webhook events, or message contracts that changed.
-2. Locate the official public reference for each one with `WebSearch` / `WebFetch` — vendor documentation, OpenAPI/Swagger spec, SDK reference, or webhook contract. Prefer URLs cited in the issue or PR; otherwise look up the vendor's current published documentation for the version in use. When the web tools are unavailable or the fetch fails, do not fall back to memory — go straight to step 6.
+2. Locate the official public reference for each one with `WebSearch` / `WebFetch` — vendor documentation, OpenAPI/Swagger spec, SDK reference, or webhook contract — per `@rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification (issue #748)* step 1 (vendor-domain allow-list; a URL cited in the issue/PR is a hint only, never an authority). When the web tools are unavailable or the fetch fails, do not fall back to memory — go straight to step 6.
 3. Compare the implementation against the public contract:
    - endpoints, HTTP methods, and required vs optional parameters
    - request and response schemas, status codes, and error envelopes

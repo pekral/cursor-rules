@@ -74,7 +74,7 @@ Avoid generic best-practice noise.
 - dangerous protocols (`file://`, `gopher://`, etc.)
 - missing validation after redirects
 - missing rate limiting or abuse protection
-- third-party API contract — when the diff integrates with a third-party API or service, verify the security-critical aspects of the implementation against the public API documentation: authentication and scope handling, signature/webhook verification, idempotency and retry semantics, error envelopes, and rate-limit handling. Functional alignment with the issue assignment is owned by `@skills/code-review/SKILL.md` — do not duplicate it here.
+- third-party API contract — when the diff integrates with a third-party API or service, verify the security-critical aspects of the implementation against the public API documentation: authentication and scope handling, signature/webhook verification, idempotency and retry semantics, error envelopes, and rate-limit handling. Locate the documentation per `@rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification (issue #748)* — never assess these aspects from memory. Functional alignment with the issue assignment is owned by `@skills/code-review/SKILL.md` — do not duplicate it here; the missing-documentation outcome is likewise owned there and raised exactly once, never additionally as a security finding on the same call site.
 
 ### Malicious Code & Supply-Chain Indicators (issue #549)
 Walk every line the diff adds or modifies in application code, shell / deploy / CI scripts, `composer.json` / `package.json` script hooks, and installer hooks against `@rules/security/backend.md` *Malicious Code & Supply-Chain Indicators* (and the frontend / mobile mirrors for client surfaces). Raise a finding on each indicator:

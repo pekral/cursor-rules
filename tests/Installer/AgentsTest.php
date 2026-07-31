@@ -434,7 +434,23 @@ test('docs/agents.md describes WebFetch as an egress risk, not a working-tree wr
     $toolsLine = '- **`tools`** — restrict to what the agent needs. A read-only reviewer needs `Read, Glob, Grep,'
         . ' Bash` only; `argos`, `athena`, and `metis` additionally carry `WebSearch, WebFetch` to verify'
         . ' third-party API documentation and research authoritative sources — read-only with respect to the'
-        . ' working tree; egress is subject to the host allow-list in `rules/code-review/general.mdc`'
+        . ' working tree; egress is subject to the host allow-list each agent carries in its own'
+        . ' `## Web egress safety (issue #748)` section (`agents/argos.md`, `agents/athena.md`,'
+        . ' `agents/metis.md`), not the CR-diff-scoped guard in `rules/code-review/general.mdc`'
         . ' *Third-Party API & Service Documentation Verification*.';
     expect($content)->toContain($toolsLine);
 });
+
+test(
+    'agents directory ships the argos Web egress safety section reaching its unconditional URL-read path (issue #748 CR fix, iteration 3)',
+    function (): void {
+        $packageDir = dirname(__DIR__, 2);
+        $content = (string) file_get_contents($packageDir . '/agents/argos.md');
+    
+        expect($content)->toContain('## Web egress safety (issue #748)');
+        expect($content)->toContain(
+            'through `@skills/code-review-github/SKILL.md` / `@skills/code-review-jira/SKILL.md` reading an'
+                . ' inventoried external URL "with your own tools"',
+        );
+    },
+);

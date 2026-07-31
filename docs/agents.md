@@ -112,7 +112,7 @@ System prompt: what the agent does, which skills it orchestrates, and the handof
 
 - **`name`** — lowercase, the id used as `subagent_type` / `@name`.
 - **`description`** — drives auto-delegation; phrase it as the situation that should trigger the agent.
-- **`tools`** — restrict to what the agent needs. A read-only reviewer needs `Read, Glob, Grep, Bash` only.
+- **`tools`** — restrict to what the agent needs. A read-only reviewer needs `Read, Glob, Grep, Bash` only; `argos`, `athena`, and `metis` additionally carry `WebSearch, WebFetch` to verify third-party API documentation and research authoritative sources — read-only with respect to the working tree; egress is subject to the host allow-list each agent carries in its own `## Web egress safety (issue #748)` section (`agents/argos.md`, `agents/athena.md`, `agents/metis.md`), not the CR-diff-scoped guard in `rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification*.
 - **System prompt** — orchestration only. Delegate to skills via `@skills/<name>/SKILL.md`; **never duplicate a skill's rules** — defer to the skill as the source of truth.
 
 ## Handoff contract

@@ -35,7 +35,7 @@
 
 ### 🟠 Moderate 1. <short title>
 
-(same six fields as Critical)
+(same six fields as Critical; a request-for-link finding per `@rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification (issue #748)* step 3 is exempt from Faulty Example / Expected behavior / Test hint — the Suggested fix, the literal request-for-link template, is the whole finding)
 
 ### 🟡 Minor 1. <short title>
 

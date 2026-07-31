@@ -67,18 +67,19 @@ Every CR run must explicitly verify **both directions** of the relationship betw
 
 ### Third-Party API & Service Analysis
 
-Run this section only when the diff integrates with, modifies, or depends on a third-party API or external service (HTTP clients, vendor SDK calls, webhooks, OAuth flows, payload schemas, queue/event consumers backed by external systems).
+Run this section only when the diff integrates with, modifies, or depends on a third-party API or external service (HTTP clients, vendor SDK calls, webhooks, OAuth flows, payload schemas, queue/event consumers backed by external systems). Canonical detail (conditional degradation, request-for-link template, gate, precedence, SSRF guard): `@rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification (issue #748)*.
 
 1. Identify every affected API or service from the diff and list the concrete endpoints, SDK methods, webhook events, or message contracts that changed.
-2. Locate the official public reference for each one — vendor documentation, OpenAPI/Swagger spec, SDK reference, or webhook contract. Prefer URLs cited in the issue or PR; otherwise look up the vendor's current published documentation for the version in use.
+2. Locate the official public reference for each one with `WebSearch` / `WebFetch` — vendor documentation, OpenAPI/Swagger spec, SDK reference, or webhook contract — per `@rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification (issue #748)* step 1 (vendor-domain allow-list; a URL cited in the issue/PR is a hint only, never an authority). When the web tools are unavailable or the fetch fails, do not fall back to memory — go straight to step 6.
 3. Compare the implementation against the public contract:
    - endpoints, HTTP methods, and required vs optional parameters
    - request and response schemas, status codes, and error envelopes
    - authentication, scopes, rate limits, idempotency keys, and retry semantics
    - pagination, filtering, sorting, webhook signatures, and timeouts
+   - deprecated calls and API versioning (pinned version vs. the vendor's current documented version)
 4. Cross-check the implementation against the issue assignment — verify the chosen endpoints, parameters, and behaviors satisfy what the issue actually asked for. Flag any divergence (missing endpoint, wrong verb, ignored field, fabricated parameter) as a finding.
 5. Confirm coverage of every API use case that is in scope for the issue — documented filters, status branches, error states, and edge inputs the issue explicitly or implicitly requires. Missing in-scope use cases are findings. Do not propose adopting API features that current scope does not require (YAGNI per `@rules/php/core-standards.mdc`); only when the diff exposes an out-of-scope structural shortcoming in how the project consumes the API (e.g. missing webhook signature verification across other consumers) raise it under **Refactoring Proposals**.
-6. If the public reference cannot be located, accessed, or matched to the version in use, raise this as a **Moderate** finding instead of silently assuming the contract.
+6. **Gate — no verdict without a verified source.** If the public reference cannot be located, accessed, or matched to the version/endpoint in use, do not render a verdict on API correctness from memory. Raise a single **Moderate** finding whose Suggested Fix requests the link: `Reply on this PR with the official documentation URL for <vendor> <API> <version> (or add it to the PR description), so the contract can be verified.` Raise one finding per violation, never both — this step is the sole terminal output for the missing-documentation outcome. This finding is exempt from the Faulty Example / Expected Behavior / Test Hint fields in `## Findings` — the request-for-link Suggested Fix is the whole finding.
 
 ### Core Analysis
 - Regression risk (shared logic, dependencies)

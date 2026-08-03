@@ -104,6 +104,7 @@ name: athena
 description: When to auto-delegate to this agent (the trigger sentence).
 tools: Read, Glob, Grep, Bash
 model: opus
+effort: high
 ---
 
 System prompt: what the agent does, which skills it orchestrates, and the handoff it returns.
@@ -111,6 +112,7 @@ System prompt: what the agent does, which skills it orchestrates, and the handof
 
 - **`name`** — lowercase, the id used as `subagent_type` / `@name`.
 - **`description`** — drives auto-delegation; phrase it as the situation that should trigger the agent.
+- **`effort`** — the reasoning effort level while the agent is active, overriding the session level. **Every agent in this roster declares `effort: high`** — high is the deliberate ceiling: it buys the depth these orchestration roles need without the token cost of `max`, which produced no better result on the review and implementation work this roster does. Do not raise an agent to `xhigh` / `max`, and do not omit the field (an agent without it silently inherits whatever the session happens to run at).
 - **`tools`** — restrict to what the agent needs. A read-only reviewer needs `Read, Glob, Grep, Bash` only; `athena` and `metis` additionally carry `WebSearch, WebFetch` to verify third-party API documentation and research authoritative sources — read-only with respect to the working tree; egress is subject to the host allow-list each agent carries in its own `## Web egress safety (issue #748)` section (`agents/athena.md`, `agents/metis.md`), not the CR-diff-scoped guard in `rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification*.
 - **System prompt** — orchestration only. Delegate to skills via `@skills/<name>/SKILL.md`; **never duplicate a skill's rules** — defer to the skill as the source of truth.
 
@@ -224,7 +226,7 @@ The installer copies `agents/` to `.claude/agents/` for `--editor=claude` and `-
 ## Adding a new agent
 
 1. Pick a Greek figure whose myth matches the job; use the lowercase name.
-2. Create `agents/<name>.md` with the frontmatter + an orchestration-only system prompt that delegates to skills and returns a handoff.
+2. Create `agents/<name>.md` with the frontmatter (including `effort: high` — the roster-wide level, never `max`) + an orchestration-only system prompt that delegates to skills and returns a handoff.
 3. Add it to the README *Claude Code Subagents* table.
 4. Add a test asserting the file ships with its required frontmatter (mirror the `athena` test in `tests/Installer/AgentsTest.php`).
 5. Run `composer build` — the installer file-count tests pick up the new agent automatically.

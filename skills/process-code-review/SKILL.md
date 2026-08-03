@@ -91,7 +91,7 @@ Rules:
 
 1. **Do not silently ignore** a pre-existing issue you encountered in a file you had to read for the CR fixes — fix it in this PR.
 2. **Do not expand scope** by actively scanning unrelated files for additional pre-existing issues. Limit attention to files already touched by the CR fixes.
-3. Land each pre-existing fix in its **own separate commit**, ordered **before** the CR-fix commits:
+3. Land each pre-existing fix in its **own separate commit**, ordered **before** the CR-fix commits (a special case of `@rules/git/general.mdc` *Git Rules* — the finished history must be a logical partition of the change set; when a fix round bundled two findings into one commit or attached a fix to an unrelated commit, reshape the history before pushing rather than describing the drift in the PR):
    - Use a Conventional Commits subject per `@rules/git/general.mdc`: `fix(<scope>): pre-existing — <description>` for bugs and security, `refactor(<scope>): pre-existing — <description>` for rule violations without behavior change.
    - The `pre-existing — ` prefix is mandatory so reviewers can identify these commits at a glance.
    - **Test coverage workflow depends on the commit type:**

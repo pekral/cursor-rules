@@ -179,7 +179,7 @@ test('process-code-review enforces a convergence loop with quiet iterations and 
     $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
 
     expect($process)->toContain('### Review loop (mandatory — convergence gate)');
-    expect($process)->toContain('`maxIterations = 5`');
+    expect($process)->toContain('`maxIterations = 3`');
     expect($process)->toContain('`criticalCount + moderateCount == 0`');
     expect($process)->toContain('do not publish; return findings as in-memory markdown for this loop iteration only');
     expect($process)->toContain('### Finalization (only after Review loop converged)');
@@ -190,6 +190,26 @@ test('process-code-review enforces a convergence loop with quiet iterations and 
     expect($github)->toContain('skip the entire Post Results step');
     expect($jira)->toContain('Quiet mode (loop iterations from `@skills/process-code-review/SKILL.md`)');
     expect($jira)->toContain('skip all publishing');
+});
+
+test('the review loop is capped at three rounds on every surface that states the cap (issue #753)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $process = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+    $daidalos = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+    $docs = (string) file_get_contents($packageDir . '/docs/agents.md');
+
+    // The cap is hard, and the skill says why iterating past it cannot help.
+    expect($process)->toContain('**three review rounds is the hard cap**');
+    expect($process)->toContain('need a human decision');
+    expect($process)->not->toContain('maxIterations = 5');
+
+    // The orchestrator and the docs quote the same number, never the retired one.
+    expect($daidalos)->toContain('capped at **three review rounds** (`maxIterations = 3`');
+    expect($docs)->toContain('`maxIterations = 3`');
+    expect($docs)->toContain('maxIterations 3');
+    expect($daidalos)->not->toContain('maxIterations = 5');
+    expect($docs)->not->toContain('maxIterations = 5');
+    expect($docs)->not->toContain('maxIterations 5');
 });
 
 test('JIRA non-technical CR summary delegates to pr-summary Wiki Markup template', function (): void {

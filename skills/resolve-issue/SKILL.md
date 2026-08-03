@@ -194,6 +194,7 @@ Once review and testing are clean and the user has **not** opted out:
   - reference to the original issue
   - testing instructions
   - **Summary** — concise overview of what changed and why
+  - **Change list — one row per assignment item (mandatory)** — a table under a `## Changes` section (heading translated with the rest of the description) rendering the commit plan as it actually landed, in commit order: `item ID | what the assignment asked for | commit subject | short SHA | independent / depends on <ID>`. Every in-scope item appears exactly once — including items resolved as `no change needed — <reason>` — so the PR reads as a checklist against the assignment. Add one line below the table naming which commits cherry-pick onto the default branch on their own and which do not, so a reviewer can pick a subset without reading every diff.
   - **Pre-existing fixes** — if any pre-existing issues were fixed per *Pre-existing issue handling*, list each fix commit under a `## Pre-existing fixes` section with a one-line rationale so reviewers can review them independently of the assignment
   - **TODO list** — if any **out-of-scope (deferred)** items were identified in step 7 (or non-trivial pre-existing issues were deferred), include them under a `## TODO` section as a checklist of potential follow-up tasks
 
@@ -252,6 +253,8 @@ After the reviews converged (no Critical / Moderate) and the reports are posted,
 - No sensitive data is exposed
 - Code review loop passed with no Critical or Moderate findings **before the PR was created**
 - Security review completed **before the PR was created**
+- Every recommended fix / point extracted from the assignment landed as its **own commit**, the reconciled `git log` matches the recorded commit plan, and no commit bundles two items
+- The PR description carries the `## Changes` table mapping each assignment item to its commit and its independent / depends-on verdict
 - A clean pull request is created with a summary **by default** — skipped only when the user explicitly opted out of PR creation (see *Pull request*), in which case the committed local branch and the ready-to-run `gh pr create --draft …` command are reported instead
 - Technical report posted on the GitHub PR (skipped on PR opt-out)
 - Non-technical report posted on the original issue tracker (skipped on PR opt-out)

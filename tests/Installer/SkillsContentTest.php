@@ -1123,6 +1123,25 @@ test('resolve-issue targets cherry-pick-independent commits and reconciles the h
     expect($content)->toContain('never explain a bundled commit away in the description');
 });
 
+test('resolve-issue PR description carries the item-to-commit change list', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $skill = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+    $reference = (string) file_get_contents($packageDir . '/skills/resolve-issue/references/commit-planning.md');
+
+    expect($skill)->toContain('**Change list — one row per assignment item (mandatory)**');
+    expect($skill)->toContain('`## Changes`');
+    expect($skill)->toContain(
+        '`item ID | what the assignment asked for | commit subject | short SHA | independent / depends on <ID>`',
+    );
+    expect($skill)->toContain('so the PR reads as a checklist against the assignment');
+    // An item resolved without a code change is reported, never silently dropped.
+    expect($reference)->toContain('**An item that needs no change is never dropped silently.**');
+    expect($skill)->toContain('no change needed — <reason>');
+    // Done-when pins both halves of the contract.
+    expect($skill)->toContain('landed as its **own commit**');
+    expect($skill)->toContain('The PR description carries the `## Changes` table');
+});
+
 test('class-refactoring skill proposes the Service to Action conversion (issue #739)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');

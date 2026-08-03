@@ -289,3 +289,11 @@
 - Source:  https://github.com/pekral/cursor-rules/pull/754   Added: 2026-08-03
 - Role:    shared
 
+### ci-rector-breaks-repo-wide-from-dev-master-drift — A green local `composer build` cannot predict CI while `composer.lock` is git-ignored and an analyzer is tracked at `dev-master`
+
+- Trigger: CI's `🔍 Quality Checks` job fails at the Rector step with `[ERROR] Could not process … System error: "<SomeRector>" is deprecated` repeated once per PHP file (24 of them), while `composer build` is green locally — typically noticed while opening a PR that changed no PHP, or only one test file.
+- Rule:    This is **dependency drift, not the PR**. `composer.lock` is git-ignored (`.gitignore:38`) and `pekral/rector-rules` is required as `dev-master`, so CI resolves the analyzer stack fresh on every run while the local un-committed lock stays pinned to whatever was installed months ago. When a new Rector promotes a rule's deprecation to a hard error and the rules package still registers it, **every** file fails to process. Confirm the diagnosis before touching your own diff: `gh run rerun <master's last green run id>` — if master now fails with the identical error count, the PR is innocent and the merge gate is blocked by infrastructure. The fix belongs in `pekral/rector-rules` (drop the rule) or in pinning `rector/rector` here and committing the lock; it is never a silent patch bundled into an unrelated task.
+- Example: issue #753 / PR #754 — CI failed with 24 × `SimplifyRegexPatternRector is deprecated, as simplifying regex ranges is a personal preference that can worsen readability` across all of `src/` and `tests/`, on a branch whose only PHP change was added assertions in `tests/Installer/AgentsTest.php`. Re-running master's previously-green run 30798665239 (`60838ba`) reproduced the same 24 errors, proving the drift. Local `rector/rector` was 2.5.9, which predates the deprecation.
+- Source:  https://github.com/pekral/cursor-rules/pull/754   Added: 2026-08-03
+- Role:    shared
+

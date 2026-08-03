@@ -224,7 +224,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 
 ## Claude Code Subagents
 
-Agents are a thin orchestration layer over the existing skills — they don't replace them and they don't duplicate their prompts. The roster is named after **Greek mythology** by function (see [`docs/agents.md`](docs/agents.md)).
+Agents are a thin orchestration layer over the existing skills — they don't replace them and they don't duplicate their prompts. The roster is named after **Greek mythology** by function (see [`docs/agents.md`](docs/agents.md)). Every agent runs at `effort: high` — deep enough for orchestration work, without the token cost of `max`.
 
 ```text
 Rules  = long-lived project standards

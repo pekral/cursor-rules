@@ -362,6 +362,28 @@ test('every agent definition declares a model in frontmatter', function (): void
     }
 });
 
+test('every agent definition declares effort: high, never max (issue #753)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $globResult = glob($packageDir . '/agents/*.md');
+    $agentFiles = $globResult !== false ? $globResult : [];
+
+    expect($agentFiles)->not->toBeEmpty();
+
+    foreach ($agentFiles as $agentFile) {
+        $content = (string) file_get_contents($agentFile);
+        // Anchor to a frontmatter line so prose mentioning effort cannot satisfy the assertion.
+        expect($content)->toMatch('/^effort: high$/m');
+        // max is the level this roster deliberately does not use.
+        expect($content)->not->toMatch('/^effort: (max|xhigh)$/m');
+    }
+
+    // The anatomy section documents the field and the roster-wide level.
+    $docs = (string) file_get_contents($packageDir . '/docs/agents.md');
+    expect($docs)->toContain('**Every agent in this roster declares `effort: high`**');
+    expect($docs)->toContain('Do not raise an agent to `xhigh` / `max`');
+    expect($docs)->toContain('effort: high' . "\n" . '---');
+});
+
 test('daidalos delegates the end-to-end run by dispatching metis, talos and athena to convergence', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');

@@ -1071,6 +1071,32 @@ test('pr-staged-merge-plan proposes squashes and corrected commit subjects under
     expect($content)->toContain('**repair** commits are squashed into the commit they repair and never form a unit');
 });
 
+test('resolve-issue extracts the assignment items and maps one item to one commit', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    expect($content)->toContain('### Commit planning — one assignment item = one commit');
+    // The recommendation / to-do markers the skill must look for in the assignment.
+    expect($content)->toContain('**Extract the item list from the assignment.**');
+    expect($content)->toContain('*Doporučené opravy*');
+    expect($content)->toContain('*Body k řešení*');
+    expect($content)->toContain('*Recommended fixes*');
+    expect($content)->toContain('one item per finding');
+    // One item = exactly one commit, self-contained, never bundled.
+    expect($content)->toContain('**One item = one commit.**');
+    expect($content)->toContain('maps to exactly **one** commit, and no commit carries two items');
+    expect($content)->toContain('**Make each commit self-contained.**');
+    expect($content)->toContain('Never park two items in one commit "to be split later".');
+    // The plan is recorded before implementation and drives the implementation step.
+    expect($content)->toContain('**Record the plan before implementing**');
+    expect($content)->toContain('following the commit plan one item at a time');
+    // Neither invented items nor invented phases.
+    expect($content)->toContain('never invent an item the assignment does not ask for');
+    expect($content)->toContain('**A genuinely atomic assignment stays one commit.**');
+    // The one-phase-one-commit git rule stays the anchor.
+    expect($content)->toContain('one phase = one commit');
+});
+
 test('class-refactoring skill proposes the Service to Action conversion (issue #739)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');

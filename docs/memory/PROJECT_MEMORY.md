@@ -281,11 +281,11 @@
 - Source:  https://github.com/pekral/cursor-rules/pull/754   Added: 2026-08-03
 - Role:    shared
 
-### race-condition-review-skill-does-not-exist — The CR skills route to `@skills/race-condition-review/SKILL.md`, which the package does not ship
+### verify-a-referenced-skill-exists-before-copying-a-lens-list — A CR lens list can name a skill the package never shipped; verify against `ls skills/` before propagating it
 
-- Trigger: a task reads, copies, or extends the CR lens list in `skills/code-review/SKILL.md` (~line 129) or `skills/code-review-github/SKILL.md` (~lines 68, 80) — for example when defining which lenses an agent runs.
-- Rule:    `race-condition-review` is a **dangling reference**: it ships in neither `skills/` nor the installed `~/.claude/skills/`, so the "shared state / concurrency" routing resolves to nothing. Do not propagate the name into a new surface by copying the list; when a task needs the authoritative lens inventory, verify each entry against `ls skills/` first. Fixing the root cause means either authoring the skill or dropping the lens and folding concurrency review into `code-review` — a design decision that belongs in its own issue, not a silent fix bundled into an unrelated task.
-- Example: issue #753 / PR #754 — the retired `agents/argos.md` prose list named the skill, and copying that list verbatim into `agents/athena.md` carried the dangling reference into the new single-CR-agent definition. Caught by the pre-PR CR as Moderate; fixed by making the agent point at its own verified inventory table instead of restating the wrapper's list, and the root cause deferred to PR #754's `## TODO`.
+- Trigger: a task reads, copies, or extends a lens / skill list inside a CR skill or an agent definition — for example when defining which lenses an agent runs, or mirroring one wrapper's conditional block into another.
+- Rule:    A name in such a list is not proof the target exists. `race-condition-review` sat in the "shared state / concurrency" routing of all four CR wrappers for a long time while shipping in neither `skills/` nor an install, so the routing silently resolved to nothing — and a test pinned the dangling path as *required*, which made the gap look deliberate. Verify every entry against `ls skills/` before copying a list forward, and when a pin asserts a path exists, check the path, not just the pin. A dangling lens is resolved by a human decision (author the skill, or drop the routing) — never by silently keeping the name alive in a new surface.
+- Example: issue #753 / PR #754 copied the list into `agents/athena.md` and carried the dangling name with it; the pre-PR CR caught it as Moderate and the agent was pointed at its own verified inventory instead. The lens itself was dropped from all four wrappers afterwards on the user's decision (*„race-condition-review zahodit"*), and the pinning test was inverted to assert no skill reintroduces the path.
 - Source:  https://github.com/pekral/cursor-rules/pull/754   Added: 2026-08-03
 - Role:    shared
 

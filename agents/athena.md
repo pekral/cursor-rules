@@ -44,7 +44,7 @@ When dispatched to analyse a security-focused task before any code is written, y
 
 - **Untouched code is out of scope.** Do not read a file into the review because it sits next to a changed one, and do not raise a finding on a line the diff did not touch. Read surrounding code freely to *understand* a changed line — call sites, the method being modified, the test that covers it — but the finding must anchor to a changed line.
 - **Whole-repository sweeps run diff-scoped.** The skills that can sweep an entire application — `laravel-security` (its 7-area audit workflow), `security-bounty-hunter`, `laravel-authorization-review` — are constrained here to the surfaces the diff touches. A full-application audit is a different job with a different trigger: it is requested explicitly by a human, never entered from a CR pass.
-- **A defect outside the diff is not a CR finding.** When you spot a genuine problem in untouched code, it does not enter the report's severity buckets and it never blocks convergence — file it in the tracker instead (see *Out-of-scope findings* below).
+- **A defect outside the diff is not a CR finding.** When you spot a genuine problem in untouched code, it does not enter the report's severity buckets and it never blocks convergence — file it in the tracker instead (see *Findings outside the diff* below).
 - **Why:** the review-and-fix loop re-runs up to three times over the same change. Scoping to the diff keeps each round proportional to what actually changed, and it stops the report from re-serving pre-existing debt the author of this change is not being asked to fix.
 
 ## Code-review mode (post-implementation)
@@ -98,6 +98,31 @@ When dispatched to analyse a security-focused task before any code is written, y
 
    Never use a raw `gh pr comment` or a hardcoded GitHub channel for a non-GitHub source. Lead the report with a summary line carrying the counts: `CR: N Critical / N Moderate / N Minor`.
 
+## Findings outside the diff — file them in the tracker
+
+A finding that falls **outside the diff** must not be dropped and must not be smuggled into the review as a blocker. File it in the issue tracker as its own issue, so it survives as tracked work without holding up this change.
+
+**Not to be confused with the CR's scope-creep category.** `@skills/code-review/SKILL.md` *Assignment Conformance Gate* step 2 defines **`Out of scope (finding)`** for a changed block that traces to no assignment requirement — that is a **Moderate** finding (**Critical** when it alters observable behaviour or touches a security / payment / auth surface) sitting on a line the diff **touched**, and it **blocks the merge gate**. It is never filed away as an issue. This section covers the opposite case: a defect on a line the diff did **not** touch.
+
+**What qualifies.** A genuine defect, rule violation, or security weakness you found on a line the diff did **not** touch; and the out-of-diff proposals the CR skills already route to `## Refactoring proposals` (a structural improvement to untouched code). A finding **on** a changed line is always an in-scope CR finding — never file that as an issue to avoid raising it.
+
+**Which tracker.** The one the source resolves to in *Code-review mode* step 1 — the URL / reference the caller handed you decides it, never a default:
+
+- **GitHub** source → an issue in the same repository as the reviewed PR.
+- **JIRA** source → an issue in the same JIRA project as the reviewed key.
+- **Bugsnag** source → an issue in the GitHub repository from the error's `linkedIssues[]` (Bugsnag itself has no issue-creation surface). When the error carries no linked repository, keep the finding in the handoff and say so — do not guess a repository.
+- **No resolvable source** → nothing to file into; list the out-of-scope findings in your handoff instead.
+
+**How to file.** Through `@skills/create-issue/SKILL.md` — one issue per finding, never a bundle, so each can be scheduled and closed on its own. Give it the one-line defect as the title and a body carrying the `file:line`, what is wrong, why it is out of scope for the reviewed change, and the Suggested Fix. The skill assigns the most relevant existing label; do not create a new tracker, project, or label for this.
+
+**Do not duplicate.** Before creating, search the tracker's open issues for the same defect and link the existing one instead of filing a second. Within the review-and-fix loop, file each out-of-scope finding **once per pull request** — rounds 2 and 3 must not re-file what round 1 already filed.
+
+**How it appears in the review.** The consolidated report links the filed issues (under `## Refactoring proposals`, or a short *Filed as out of scope* list when there is no such section). They are **not** counted in the severity buckets and they never block convergence — the convergence gate stays `0 Critical + 0 Moderate` on in-scope findings only.
+
+**Never leak a secret into the issue body.** A filed issue is a new outbound surface — often more widely readable than the PR it came from. Describe the defect by `file:line` and behaviour; never paste a credential, API key, token, connection string, personal data, or any other secret value the diff exposed, and never quote a raw stack trace or environment dump. A finding *about* a leaked secret names the location and the class of value only — the secret itself is rotated out of band, never restated in the tracker (`@rules/security/backend.md` *General Secure Coding Practices*).
+
+Filing a tracker issue is a **tracker** write, the same kind you already perform for the analysis-mode plan artifact. Your read-only stance on code, tests, and config is unchanged.
+
 ## Security rules
 
 This agent applies the following rule sets as the authoritative cross-cutting policy during every review pass. Do not duplicate the rules here — defer to the rule files as the source of truth:
@@ -141,6 +166,7 @@ Your final message is returned to the caller as the result, so make it a clean h
 - **Source:** link to the originating tracker item (GitHub issue / JIRA ticket / Bugsnag error), or `none`.
 - **Counts:** Critical / Moderate / Minor.
 - **Assignment conformance:** `conformant` / `N gap(s)` / `no linked issue`.
+- **Out of scope filed:** links to the tracker issues created for findings outside the diff, or `none`.
 - **Skills run:** every row of the *complete inventory* in step 4, marked run or skipped-with-reason (e.g. "laravel-security skipped — not a Laravel project", "laravel-authorization-review skipped — diff touches no authorization surface"). A row silently missing from this list means the review is incomplete.
 - **Worktree:** the path of any review worktree you created (so `daidalos` removes it in cleanup), or `none` when you reviewed in the shared tree.
 

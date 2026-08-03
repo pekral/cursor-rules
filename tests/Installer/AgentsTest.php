@@ -217,6 +217,37 @@ test('athena reviews the diff of the current changes only (issue #753)', functio
     expect($docs)->toContain('**Scope: the current changes only.**');
 });
 
+test('athena files out-of-scope findings as tracker issues instead of blocking the change (issue #753)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/agents/athena.md');
+
+    expect($content)->toContain('## Findings outside the diff — file them in the tracker');
+    // The section must disambiguate itself from the CR's blocking scope-creep category.
+    expect($content)->toContain('Not to be confused with the CR\'s scope-creep category');
+    expect($content)->toContain('it **blocks the merge gate**. It is never filed away as an issue');
+    // Filing goes through the canonical skill, one issue per finding.
+    expect($content)->toContain('@skills/create-issue/SKILL.md');
+    expect($content)->toContain('one issue per finding, never a bundle');
+    // The tracker is the one the reviewed source resolves to — never a hardcoded default.
+    expect($content)->toContain('the URL / reference the caller handed you decides it, never a default');
+    expect($content)->toContain('the GitHub repository from the error\'s `linkedIssues[]`');
+    // A finding on a changed line stays an in-scope CR finding — filing is not an escape hatch.
+    expect($content)->toContain('never file that as an issue to avoid raising it');
+    // Loop safety and dedup: filed once per PR, and never as a duplicate of an open issue.
+    expect($content)->toContain('**Do not duplicate.**');
+    expect($content)->toContain('once per pull request');
+    // Filed issues are reported but never counted toward the convergence gate.
+    expect($content)->toContain('they never block convergence');
+    expect($content)->toContain('**Out of scope filed:**');
+    // The new outbound surface must not carry secret values out of the diff.
+    expect($content)->toContain('**Never leak a secret into the issue body.**');
+    expect($content)->toContain('the secret itself is rotated out of band, never restated in the tracker');
+
+    $docs = (string) file_get_contents($packageDir . '/docs/agents.md');
+    expect($docs)->toContain('**Findings outside the diff become tracker issues.**');
+    expect($docs)->toContain('an unrequested change *inside* the diff stays a blocking finding');
+});
+
 test('athena runs every code-review skill the project defines (issue #753)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/agents/athena.md');

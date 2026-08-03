@@ -38,13 +38,22 @@ When dispatched to analyse a security-focused task before any code is written, y
 4. **Publish the plan artifact as a GitHub issue** (via `gh`), carrying the security-risk analysis and the remediation plan, so `talos` (and a later run) can pick it up cold. Do not write files into the repository or mutate the working tree — the plan lives on the tracker, keeping you read-only with respect to code.
 5. **Hand back `Security analysis done`** with the plan link and the Critical / Moderate / Minor counts. `talos` implements next; the caller passes your analysis to the agents that need it. You do not implement.
 
+## Review scope — the diff of the current changes only
+
+**You review the diff, never the repository.** The subject of every review pass is exactly the set of lines the current change adds or modifies — the pull request's diff against its base, or the branch / working-tree diff when no PR exists. This is the scope contract for the whole pass, and it binds every lens in the inventory below:
+
+- **Untouched code is out of scope.** Do not read a file into the review because it sits next to a changed one, and do not raise a finding on a line the diff did not touch. Read surrounding code freely to *understand* a changed line — call sites, the method being modified, the test that covers it — but the finding must anchor to a changed line.
+- **Whole-repository sweeps run diff-scoped.** The skills that can sweep an entire application — `laravel-security` (its 7-area audit workflow), `security-bounty-hunter`, `laravel-authorization-review` — are constrained here to the surfaces the diff touches. A full-application audit is a different job with a different trigger: it is requested explicitly by a human, never entered from a CR pass.
+- **A defect outside the diff is not a CR finding.** When you spot a genuine problem in untouched code, it does not enter the report's severity buckets and it never blocks convergence — file it in the tracker instead (see *Out-of-scope findings* below).
+- **Why:** the review-and-fix loop re-runs up to three times over the same change. Scoping to the diff keeps each round proportional to what actually changed, and it stops the report from re-serving pre-existing debt the author of this change is not being asked to fix.
+
 ## Code-review mode (post-implementation)
 
 0. **Load per-role project memory.** Before doing any review work, read `docs/memory/PROJECT_MEMORY.md` (if present) and filter it to entries where `Role: athena` or `Role: shared` (per `@rules/compound-engineering/general.mdc` *Read protocol*). Reuse any entry whose `Trigger:` matches the current review — do not re-derive lessons the project already recorded. Skip entries tagged for other roles.
 
 1. **Detect the source** using `@skills/resolve-issue/references/source-detection.md`. Load context only through the deterministic loaders (`skills/code-review-github/scripts/load-issue.sh`, `gather-issue-context.sh`, and the JIRA / Bugsnag equivalents) — never call `gh pr view`, `acli`, or `api.bugsnag.com` directly. If a needed function is absent from an existing loader script, extend that script rather than writing an ad-hoc call.
 
-2. **Pick the code-review skill from the resolved source.** The source — the URL/reference you detected in step 1 — decides which skill runs:
+2. **Pick the code-review skill from the resolved source**, and pass it the diff scope from *Review scope* above. The source — the URL/reference you detected in step 1 — decides which skill runs:
    - **GitHub** source (PR/issue URL or `#123`, or a current context that resolves to a GitHub PR) → `@skills/code-review-github/SKILL.md`
    - **JIRA** source (key or URL) → `@skills/code-review-jira/SKILL.md`
    - **Bugsnag** source (error URL or triple) → `@skills/code-review-bugsnag/SKILL.md`
@@ -65,10 +74,10 @@ When dispatched to analyse a security-focused task before any code is written, y
    | `@skills/security-review/SKILL.md` | always — core security pass | wrapper |
    | `@skills/api-review/SKILL.md` | always — self-scoping HTTP API contract lens | wrapper |
    | `@skills/class-refactoring/SKILL.md` (`MODE=cr`) | always — diff-scoped refactoring lens | wrapper |
-   | `@skills/laravel-security/SKILL.md` | Laravel project — skip gracefully otherwise; when auditing an existing app, extend with the 7-area workflow via `@skills/laravel-security/references/audit-workflow.md` | **you** |
-   | `@skills/security-bounty-hunter/SKILL.md` | always — attacker-mindset sweep over the diff | **you** |
+   | `@skills/laravel-security/SKILL.md` | Laravel project — skip gracefully otherwise; applied to the security surfaces the diff touches (the whole-app 7-area workflow via `@skills/laravel-security/references/audit-workflow.md` belongs to an explicitly requested audit, not to a CR pass) | **you** |
+   | `@skills/security-bounty-hunter/SKILL.md` | always — attacker-mindset sweep, scoped to the attack surface the diff exposes | **you** |
    | `@skills/security-threat-analysis/SKILL.md` | always — threat-modelling and attack-surface analysis of the diff | **you** |
-   | `@skills/laravel-authorization-review/SKILL.md` | the diff touches routes, middleware, policies, gates, `authorize()` / `can()` calls, query scoping, or API Resource output on a Laravel project | **you** |
+   | `@skills/laravel-authorization-review/SKILL.md` | the diff touches routes, middleware, policies, gates, `authorize()` / `can()` calls, query scoping, or API Resource output on a Laravel project — scoped to those routes, not the full route table | **you** |
    | `@skills/refactor-entry-point-to-action/SKILL.md` (`MODE=cr`) | the diff is a behaviour-preserving refactor | wrapper |
    | `@skills/mysql-problem-solver/SKILL.md` | the diff touches SQL, Eloquent / query-builder, migrations, seeders, or factories | wrapper |
    | `@skills/pr-summary/SKILL.md` | a tracker is linked — publishes the non-technical summary | wrapper |

@@ -36,7 +36,7 @@ test('resolveAgentsTargetDirectories returns empty list for editor=codex', funct
     expect(InstallerPath::resolveAgentsTargetDirectories('/project', InstallerPath::EDITOR_CODEX))->toBe([]);
 });
 
-test('install with editor=claude copies the argos agent to .claude/agents', function (): void {
+test('install with editor=claude copies the athena agent to .claude/agents', function (): void {
     $root = installerCreateProjectRoot();
     $homeEnv = getenv('HOME');
     $homeBefore = $homeEnv !== false && $homeEnv !== '' ? $homeEnv : getenv('USERPROFILE');
@@ -55,8 +55,8 @@ test('install with editor=claude copies the argos agent to .claude/agents', func
         Installer::run(['cursor-rules', 'install', '--editor=claude']);
         ob_end_clean();
 
-        expect(is_file($root . '/.claude/agents/argos.md'))->toBeTrue();
         expect(is_file($root . '/.claude/agents/athena.md'))->toBeTrue();
+        expect(is_file($root . '/.claude/agents/argos.md'))->toBeFalse();
         expect(is_dir($root . '/.cursor/agents'))->toBeFalse();
         expect(is_dir($root . '/.codex/agents'))->toBeFalse();
     } finally {
@@ -90,23 +90,36 @@ test('install with editor=cursor does not copy agents', function (): void {
     }
 });
 
-test('agents directory ships the argos code-review subagent with required frontmatter', function (): void {
+test('athena is the single code-review agent and the retired argos definition no longer ships (issue #753)', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $agentPath = $packageDir . '/agents/argos.md';
 
-    expect(is_file($agentPath))->toBeTrue();
+    expect(is_file($packageDir . '/agents/argos.md'))->toBeFalse();
+    expect(is_file($packageDir . '/assets/agents/argos.png'))->toBeFalse();
 
-    $content = (string) file_get_contents($agentPath);
-    expect($content)->toContain('name: argos');
-    expect($content)->toContain('tools: Read, Glob, Grep, Bash');
-    expect($content)->toContain('tools: Read, Glob, Grep, Bash, WebSearch, WebFetch');
+    $content = (string) file_get_contents($packageDir . '/agents/athena.md');
+
+    // Athena absorbed the tracker-wrapper routing the retired reviewer owned.
     expect($content)->toContain('@skills/code-review-github/SKILL.md');
     expect($content)->toContain('@skills/code-review-jira/SKILL.md');
     expect($content)->toContain('@skills/code-review-bugsnag/SKILL.md');
-    expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
     // No resolvable source falls back to the base read-only code-review skill rather than a tracker wrapper.
     expect($content)->toContain('No resolvable source');
     expect($content)->toContain('fall back to the default `@skills/code-review/SKILL.md`');
+    // One agent, one pass — quality, architecture, optimisation and security share a single report.
+    expect($content)->toContain('One CR agent, one review pass');
+    expect($content)->toContain('Code-review mode (post-implementation)');
+    // The retired split-review handoff status is gone; the single CR handoff replaces it.
+    expect($content)->not->toContain('Security CR done');
+    expect($content)->toContain('`CR done` (review mode)');
+
+    // No agent definition may still reference the retired reviewer.
+    $globResult = glob($packageDir . '/agents/*.md');
+    $agentFiles = $globResult !== false ? $globResult : [];
+    expect($agentFiles)->not->toBeEmpty();
+
+    foreach ($agentFiles as $agentFile) {
+        expect((string) file_get_contents($agentFile))->not->toContain('argos');
+    }
 });
 
 test('agents directory ships the talos code-writing subagent with required frontmatter', function (): void {
@@ -175,14 +188,14 @@ test('athena also runs a pre-implementation security-analysis mode that feeds ta
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/agents/athena.md');
 
-    // Dual-mode contract: security analysis (pre-implementation) plus security review (post-implementation).
+    // Dual-mode contract: security analysis (pre-implementation) plus the code review (post-implementation).
     expect($content)->toContain('Security analysis mode (pre-implementation)');
-    expect($content)->toContain('Security review mode (post-implementation)');
+    expect($content)->toContain('Code-review mode (post-implementation)');
     // Analysis mode frames the remediation through analyze-problem so talos can implement it.
     expect($content)->toContain('@skills/analyze-problem/SKILL.md');
     // Both handoff statuses exist so the caller can route the result.
     expect($content)->toContain('Security analysis done');
-    expect($content)->toContain('Security CR done');
+    expect($content)->toContain('CR done');
 });
 
 test('athena references the laravel security audit workflow for existing-app audits', function (): void {
@@ -197,8 +210,12 @@ test('athena standalone publishing routes to the tracker-matching CR channel, no
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/agents/athena.md');
 
-    // Standalone mode must route to the tracker-specific publish channel, not always GitHub.
+    // Publishing must route to the tracker-specific channel, not always GitHub.
     expect($content)->toContain('skills/code-review-github/scripts/upsert-comment.sh');
+    // The wrapper owns publishing; athena self-publishes only under a stated, checkable condition.
+    expect($content)->toContain('the wrapper owns it; you publish only when it did not');
+    expect($content)->toContain('one CR run produces exactly **one** CR comment');
+    expect($content)->toContain('You publish yourself in exactly two cases, both checkable before you act');
     expect($content)->toContain('skills/code-review-jira/scripts/upsert-comment.sh');
     expect($content)->toContain('@skills/code-review-bugsnag/SKILL.md');
     // Must not hardcode GitHub as the only standalone publish channel.
@@ -234,7 +251,7 @@ test('laravel-security audit-workflow ships with all 7 areas, severity mapping, 
 test('every dispatched agent reads and appends to the shared task brief', function (): void {
     $packageDir = dirname(__DIR__, 2);
 
-    foreach (['metis', 'talos', 'argos', 'apollon', 'athena', 'hermes'] as $agent) {
+    foreach (['metis', 'talos', 'apollon', 'athena', 'hermes'] as $agent) {
         $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
         expect($content)->toContain('Shared task brief');
         expect($content)->toContain('.claude/run/');
@@ -256,14 +273,17 @@ test('every agent definition declares a model in frontmatter', function (): void
     }
 });
 
-test('daidalos delegates the end-to-end run by dispatching metis, talos and argos to convergence', function (): void {
+test('daidalos delegates the end-to-end run by dispatching metis, talos and athena to convergence', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/agents/daidalos.md');
 
     // True delegation: each step is dispatched as the matching specialist agent through the Task tool.
     expect($content)->toContain('dispatch `metis` through the Task tool');
     expect($content)->toContain('Dispatch `talos` through the Task tool');
-    expect($content)->toContain('Dispatch `argos` through the Task tool');
+    expect($content)->toContain('Dispatch `athena` through the Task tool');
+    // The review step dispatches exactly one CR agent — no second reviewer alongside her.
+    expect($content)->toContain('**exactly once, the single CR agent**');
+    expect($content)->toContain('Do **not** dispatch a second reviewer alongside her');
     // The implementation step still routes through resolve-issue (owned by talos), and the convergence gate is named.
     expect($content)->toContain('@skills/resolve-issue');
     expect($content)->toContain('0 Critical');
@@ -343,25 +363,23 @@ test('daidalos keeps the writing path on the shared tree but lets read-only CR a
     expect($content)->toContain('single shared git working tree');
     expect($content)->toContain('there is no isolated-worktree escape for the writing path');
     // Read-only CR agents may isolate in a worktree for parallel review.
-    expect($content)->toContain('read-only code-review agents (`argos`, `athena`) may use a git worktree');
+    expect($content)->toContain('read-only code-review agent `athena` may use a git worktree');
     // Daidalos owns worktree cleanup so the repo stays clean after the run / merge.
     expect($content)->toContain('git worktree remove');
     expect($content)->toContain('git worktree prune');
 });
 
-test('the read-only CR agents document an optional parallel-review worktree they hand back for daidalos cleanup', function (): void {
+test('the read-only CR agent documents an optional review worktree it hands back for daidalos cleanup', function (): void {
     $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/agents/athena.md');
 
-    foreach (['argos', 'athena'] as $agent) {
-        $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
-        // The CR agent may isolate its review in a read-only worktree when needed.
-        expect($content)->toContain('Parallel review worktree');
-        expect($content)->toContain('git worktree add');
-        // It hands the path back so daidalos removes it during cleanup.
-        expect($content)->toContain('Record the worktree path in your handoff');
-        // Standalone runs clean up after themselves.
-        expect($content)->toContain('git worktree remove');
-    }
+    // The CR agent may isolate its review in a read-only worktree when needed.
+    expect($content)->toContain('Review worktree (optional)');
+    expect($content)->toContain('git worktree add');
+    // It hands the path back so daidalos removes it during cleanup.
+    expect($content)->toContain('Record the worktree path in your handoff');
+    // Standalone runs clean up after themselves.
+    expect($content)->toContain('git worktree remove');
 });
 
 test('agents directory ships the apollon test-engineer subagent with required frontmatter', function (): void {
@@ -411,17 +429,15 @@ test('parallel agents share their split output through the brief under an append
     // Barrier: a peer's parallel output is only consolidated after every parallel handoff has landed in the brief.
     expect($daidalos)->toContain('Barrier before consolidation');
 
-    // The two parallel CR agents reference the append lock so their handoffs never clobber each other.
-    foreach (['argos', 'athena'] as $agent) {
-        $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
-        expect($content)->toContain('$BRIEF.lock');
-    }
+    // The CR agent references the append lock so a handoff never clobbers a parallel sibling's.
+    $athena = (string) file_get_contents($packageDir . '/agents/athena.md');
+    expect($athena)->toContain('$BRIEF.lock');
 });
 
 test('every agent keeps commit messages and PR titles in English regardless of the assignment language', function (): void {
     $packageDir = dirname(__DIR__, 2);
 
-    foreach (['daidalos', 'talos', 'argos', 'athena', 'metis', 'apollon', 'hermes'] as $agent) {
+    foreach (['daidalos', 'talos', 'athena', 'metis', 'apollon', 'hermes'] as $agent) {
         $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
         expect($content)->toContain('commit messages and PR titles are always English');
     }
@@ -432,20 +448,20 @@ test('docs/agents.md describes WebFetch as an egress risk, not a working-tree wr
     $content = (string) file_get_contents($packageDir . '/docs/agents.md');
 
     $toolsLine = '- **`tools`** — restrict to what the agent needs. A read-only reviewer needs `Read, Glob, Grep,'
-        . ' Bash` only; `argos`, `athena`, and `metis` additionally carry `WebSearch, WebFetch` to verify'
+        . ' Bash` only; `athena` and `metis` additionally carry `WebSearch, WebFetch` to verify'
         . ' third-party API documentation and research authoritative sources — read-only with respect to the'
         . ' working tree; egress is subject to the host allow-list each agent carries in its own'
-        . ' `## Web egress safety (issue #748)` section (`agents/argos.md`, `agents/athena.md`,'
-        . ' `agents/metis.md`), not the CR-diff-scoped guard in `rules/code-review/general.mdc`'
+        . ' `## Web egress safety (issue #748)` section (`agents/athena.md`, `agents/metis.md`), not the'
+        . ' CR-diff-scoped guard in `rules/code-review/general.mdc`'
         . ' *Third-Party API & Service Documentation Verification*.';
     expect($content)->toContain($toolsLine);
 });
 
 test(
-    'agents directory ships the argos Web egress safety section reaching its unconditional URL-read path (issue #748 CR fix, iteration 3)',
+    'the CR agent ships the Web egress safety section reaching its unconditional URL-read path (issue #748 CR fix, iteration 3)',
     function (): void {
         $packageDir = dirname(__DIR__, 2);
-        $content = (string) file_get_contents($packageDir . '/agents/argos.md');
+        $content = (string) file_get_contents($packageDir . '/agents/athena.md');
 
         expect($content)->toContain('## Web egress safety (issue #748)');
         expect($content)->toContain(

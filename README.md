@@ -234,15 +234,14 @@ Agents = specialised orchestration roles over multiple skills
 
 | Agent | Role | Orchestrated skills |
 |---|---|---|
-| `argos` | All-seeing code-review gatekeeper. Reviews a PR from context or a tracker link, posts the results to the PR, and hands back a CR-done handoff. Focuses on code quality, architecture, and optimisation; consolidates `athena`'s security findings. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag` |
-| `talos` | Tireless code-writing implementer. Implements an issue from context or a tracker link, runs local checks (`composer build`) and fixes their errors, opens a PR, and hands back an Impl-done handoff. Stops at the PR — never reviews (CR belongs to `argos` / `athena`) or merges. | `resolve-issue` |
+| `athena` | **The single code-review agent** — quality, architecture, optimisation **and** security in one pass. Two modes dispatched by `daidalos`: on demand a pre-implementation **security analysis** when the task carries a cyber-security question (security skills + `analyze-problem` → a remediation plan that `talos` implements, `Security analysis done`), and after `talos` the **whole code review** on the PR — the matching `code-review-*` wrapper plus the remaining security skills over the same diff, every finding deduplicated into one consolidated report, `CR done`. Dispatched exactly once, never alongside a second reviewer. Active only after installer registration — fallback: the review runs inline in `code-review-github → code-review + security-review`. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag`, `code-review`, `security-review`, `laravel-security`, `security-bounty-hunter`, `security-threat-analysis`, `analyze-problem` |
+| `talos` | Tireless code-writing implementer. Implements an issue from context or a tracker link, runs local checks (`composer build`) and fixes their errors, opens a PR, and hands back an Impl-done handoff. Stops at the PR — never reviews (the CR belongs to `athena`) or merges. | `resolve-issue` |
 | `metis` | Problem-analysis advisor. Analyses a problem or a vague assignment, proposes the smallest safe solution, and publishes a reusable plan as a GitHub issue, then hands back an Analysis-done handoff. Read-only — never implements. | `analyze-problem` |
-| `daidalos` | Engineering-workflow orchestrator. The entry point for a free-form request: resolves a concrete source, then **dispatches** `metis` (analysis, if needed; or decomposition of a broad subject into multiple structured issues — after which it reports the issues and stops, no PR), `talos` (implementation), `apollon` (fast scoped validation after each landing step), `argos` (code quality / architecture / optimisation CR) and `athena` (on-demand pre-implementation security analysis when the task carries a cyber-security question, plus a security CR parallel to `argos` after `talos`) through the Task tool. Plans dependency-aware resolve order when issues are interlinked. Read-only orchestrator. | `metis`, `talos`, `apollon`, `argos`, `athena` (dispatched) |
-| `apollon` | Test engineer and post-convergence reporter. Three modes — On-demand: designs test scenarios, writes PHPUnit/Pest tests, generates browser scenarios, verifies acceptance criteria, hunts broken flows. Fast scoped validation gate (auto): `daidalos` dispatches it after talos PR-open and after argos convergence — it runs only the tests covering the diff, verifies the relevant acceptance criteria against the diff, and uses full `composer build` only for broad changes. Hands back a `Tests done` or `Tests done (scoped)` handoff. Post-convergence reporting: `daidalos` dispatches it once more after convergence to publish a human-readable non-technical summary (what changed + how to test) to the source tracker via `pr-summary`. Write-capable for test code only — never touches application code or merges. | `create-test`, `create-missing-tests-in-pr`, `e2e-testing`, `test-like-human`, `pr-summary` |
-| `athena` | Strategic security analyst & CR sentinel. Two modes dispatched by `daidalos`: on demand a pre-implementation **security analysis** when the task carries a cyber-security question (security skills + `analyze-problem` → a remediation plan that `talos` implements, `Security analysis done`), and after `talos` a **security CR** **in parallel with `argos`** on the same PR (runs all security skills, applies all security rules, labels each finding Critical / Moderate / Minor, posts the consolidated review, `Security CR done`). Active only after installer registration — fallback: security runs inline in `code-review-github → security-review`. Read-only. | `security-review`, `laravel-security`, `security-bounty-hunter`, `security-threat-analysis`, `analyze-problem` |
+| `daidalos` | Engineering-workflow orchestrator. The entry point for a free-form request: resolves a concrete source, then **dispatches** `metis` (analysis, if needed; or decomposition of a broad subject into multiple structured issues — after which it reports the issues and stops, no PR), `talos` (implementation), `apollon` (fast scoped validation after each landing step) and `athena` (the single CR agent — on-demand pre-implementation security analysis when the task carries a cyber-security question, plus the whole code review after `talos`) through the Task tool. Plans dependency-aware resolve order when issues are interlinked. Read-only orchestrator. | `metis`, `talos`, `apollon`, `athena` (dispatched) |
+| `apollon` | Test engineer and post-convergence reporter. Three modes — On-demand: designs test scenarios, writes PHPUnit/Pest tests, generates browser scenarios, verifies acceptance criteria, hunts broken flows. Fast scoped validation gate (auto): `daidalos` dispatches it after talos PR-open and after athena convergence — it runs only the tests covering the diff, verifies the relevant acceptance criteria against the diff, and uses full `composer build` only for broad changes. Hands back a `Tests done` or `Tests done (scoped)` handoff. Post-convergence reporting: `daidalos` dispatches it once more after convergence to publish a human-readable non-technical summary (what changed + how to test) to the source tracker via `pr-summary`. Write-capable for test code only — never touches application code or merges. | `create-test`, `create-missing-tests-in-pr`, `e2e-testing`, `test-like-human`, `pr-summary` |
 | `hermes` | Release announcer / publicista. Give it a merged change or release — from context or a tracker link — and it composes announcement content: a Twitter/X tweet (≤280 chars) + thread, release notes, and a marketing summary with pekral.cz promotion. Runs post-delivery, outside the CR loop. Publishes only when explicitly asked and only through the canonical wrapper. Read-only. | `article-writing`, `resolve-issue/references/source-detection` |
 
-### How to use `argos` in practice
+### How to use `athena` in practice
 
 1. Install for Claude Code (or every editor):
 
@@ -255,18 +254,18 @@ Agents = specialised orchestration roles over multiple skills
 2. Invoke it with a **source** — a GitHub PR/issue, a JIRA key, a Bugsnag error, or just the current branch/PR:
 
    ```text
-   @argos review PR #123
-   @argos review https://your.atlassian.net/browse/PROJ-42
-   @argos review the current diff
+   @athena review PR #123
+   @athena review https://your.atlassian.net/browse/PROJ-42
+   @athena review the current diff
    ```
 
-3. `argos` detects the tracker, runs the matching `code-review-*` skill, lets it **post the review to the PR**, then returns a handoff: `CR done` + PR link + source link + Critical/Moderate/Minor counts + assignment-conformance verdict.
+3. `athena` detects the tracker, runs the matching `code-review-*` skill plus the remaining security skills over the same diff, lets the review be **posted to the PR** as one consolidated report, then returns a handoff: `CR done` + PR link + source link + Critical/Moderate/Minor counts + assignment-conformance verdict.
 
-`argos` is **read-only** — it never applies fixes, commits, pushes, or merges. Those belong to separate agents.
+`athena` is **read-only** — she never applies fixes, commits, pushes, or merges. Those belong to separate agents. She is the project's **only** CR agent: quality, architecture, optimisation and security all land in her single pass, so there is no second reviewer to invoke.
 
 ### How to use `talos` in practice
 
-1. Install for Claude Code (or every editor), exactly as for `argos` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.
+1. Install for Claude Code (or every editor), exactly as for `athena` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.
 
 2. Invoke it with a **source** — a GitHub issue/PR, a JIRA key, a Bugsnag error, or just the task you want implemented:
 
@@ -278,13 +277,13 @@ Agents = specialised orchestration roles over multiple skills
 
 3. `talos` detects the source, runs `resolve-issue` to implement the change, runs local checks (`composer build`) and fixes their errors, then opens a PR and returns a handoff: `Impl done` + PR link + source link + branch + a summary of what changed and the local-checks result.
 
-`talos` **stops at the PR** — it never reviews its own work or merges. Code quality and architecture CR belong to `argos`; security CR belongs to `athena`. Hand the PR to `argos` (and optionally `athena`) for review next.
+`talos` **stops at the PR** — it never reviews its own work or merges. The whole code review — quality, architecture, optimisation and security — belongs to `athena`. Hand the PR to `athena` for review next.
 
 > **If `talos` reports `Blocked: sandbox denied file write`:** dispatched subagents run non-interactively, so a write is denied unless the path is pre-allowed. Add scoped `Edit` / `Write` entries for the project tree to `permissions.allow` in `.claude/settings.local.json` (`"Edit(//Users/me/Projects/my-app/**)"`, `"Write(//Users/me/Projects/my-app/**)"`) — or run the installer with `--allow-subagent-writes` to add them for you — then re-run. See [`docs/agents.md`](docs/agents.md) *Troubleshooting — subagent file writes blocked*. The run correctly stops instead of silently finishing the work in the main thread.
 
 ### How to use `metis` in practice
 
-1. Install for Claude Code (or every editor), exactly as for `argos` / `talos` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.
+1. Install for Claude Code (or every editor), exactly as for `athena` / `talos` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.
 
 2. Invoke it with a **subject** — a GitHub issue/PR, a JIRA key, a Bugsnag error, or just a problem you want thought through:
 
@@ -312,7 +311,7 @@ Agents = specialised orchestration roles over multiple skills
    @daidalos implement a dark-mode toggle for the settings page
    ```
 
-3. `daidalos` resolves a concrete source, then **dispatches the matching specialist agent through the Task tool**: ambiguous / large work → `metis` (analysis → plan) → `talos`; clear work → `talos` directly; then `argos` for the review-and-fix loop to convergence. For a broad subject that bundles separable concerns → `metis` decomposes it into multiple structured issues via `create-issues-from-text` (with `## Dependencies` and planned resolve order) and reports the list of created issues — no PR on this path. It returns a handoff naming the chosen route and reason, written in the same language as your request.
+3. `daidalos` resolves a concrete source, then **dispatches the matching specialist agent through the Task tool**: ambiguous / large work → `metis` (analysis → plan) → `talos`; clear work → `talos` directly; then `athena` for the review-and-fix loop to convergence. For a broad subject that bundles separable concerns → `metis` decomposes it into multiple structured issues via `create-issues-from-text` (with `## Dependencies` and planned resolve order) and reports the list of created issues — no PR on this path. It returns a handoff naming the chosen route and reason, written in the same language as your request.
 
 `daidalos` is a **read-only orchestrator** — it never analyses, implements, or reviews itself; it delegates every step by dispatching the matching specialist agent, and (per the one-level subagent-nesting rule) it runs as the top-level agent you talk to, spending that single nesting level on the dispatch rather than being a nested subagent itself. A future top-level `zeus` will sit above it to coordinate non-engineering domains too.
 

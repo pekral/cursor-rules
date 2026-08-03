@@ -1247,15 +1247,14 @@ test('security-review carries the same locate-or-request-link obligation and pre
     expect($securityReview)->toContain($precedence);
 });
 
-test('Web egress safety is reachable from the paths metis, athena, and argos actually read (issue #748 CR fix)', function (): void {
+test('Web egress safety is reachable from the paths metis and athena actually read (issue #748 CR fix)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $metisAgent = (string) file_get_contents($packageDir . '/agents/metis.md');
     $athenaAgent = (string) file_get_contents($packageDir . '/agents/athena.md');
-    $argosAgent = (string) file_get_contents($packageDir . '/agents/argos.md');
     $analyzeProblem = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');
     $securityThreatAnalysis = (string) file_get_contents($packageDir . '/skills/security-threat-analysis/SKILL.md');
 
-    foreach ([$metisAgent, $athenaAgent, $argosAgent] as $agent) {
+    foreach ([$metisAgent, $athenaAgent] as $agent) {
         expect($agent)->toContain('## Web egress safety (issue #748)');
         expect($agent)->not->toContain('## WebFetch host safety (issue #748)');
         expect($agent)->toContain(

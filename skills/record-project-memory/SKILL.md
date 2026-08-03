@@ -24,7 +24,7 @@ Do **not** run this skill mid-task, before convergence, or for a task that produ
 ## Inputs
 - `CONVERGED_CONTEXT` — required. The converged task context: what was implemented/fixed, the review findings that recurred, the wrong turns taken, and the design decisions made. The orchestrator passes this from the shared brief; a skill passes its own run context.
 - `SOURCE_REF` — required. The PR / issue link to record in each entry's `Source:` field.
-- `AGENT_ROLE` — optional. The agent role writing this entry: `daidalos`, `metis`, `talos`, `argos`, `apollon`, or `shared`. When omitted, defaults to `shared`. Written as the `Role:` field of every entry produced in this invocation. Pass the caller's own role — do not guess.
+- `AGENT_ROLE` — optional. The agent role writing this entry: `daidalos`, `metis`, `talos`, `athena`, `apollon`, or `shared`. When omitted, defaults to `shared`. Written as the `Role:` field of every entry produced in this invocation. Pass the caller's own role — do not guess.
 
 ## Required approach
 
@@ -54,7 +54,7 @@ One entry per lesson, in the greppable format from the rule:
 - Rule:    <the decision / what to do next time>
 - Example: <a concrete pointer: file / area / symbol>
 - Source:  <PR / issue link>   Added: <YYYY-MM-DD>
-- Role:    <daidalos | metis | talos | argos | apollon | shared>
+- Role:    <daidalos | metis | talos | athena | apollon | shared>
 ```
 
 `<slug>` is kebab-case and unique within the file. `Added:` is today's date. `Role:` is the value of the `AGENT_ROLE` input (defaults to `shared` when not provided). Strip any secret / credential / token / PII before writing.

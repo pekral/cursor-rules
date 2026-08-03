@@ -1326,11 +1326,11 @@ test('every CR wrapper carries the mandatory third-party API documentation verif
     }
 });
 
-test('the CR report severity filter from iteration 3 is canonically defined in the code-review rule', function (): void {
+test('the late-iteration report scope is canonically defined in the code-review rule', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
 
-    expect($rule)->toContain('## CR report severity filter from iteration 3 (Critical & Moderate only)');
+    expect($rule)->toContain('## Late-Iteration Report Scope — Critical & Moderate Only (CR iteration > 2)');
     expect($rule)->toContain(
         'accept an optional **`iteration = <n>`** input — the current iteration of the **Review loop** in'
             . ' `@skills/process-code-review/SKILL.md`',
@@ -1342,13 +1342,15 @@ test('the CR report severity filter from iteration 3 is canonically defined in t
     expect($rule)->toContain('the whole `## Refactoring proposals` section.');
     expect($rule)->toContain('**The filter narrows the report, never the review.**');
     expect($rule)->toContain('**The convergence gate is unchanged.**');
-    expect($rule)->toContain('`report filter: critical+moderate only (iteration {n})`');
+    expect($rule)->toContain('**Counts stay real; the suppression is declared, not hidden.**');
+    expect($rule)->toContain('**Report scope:** critical+moderate only (iteration {n}) — Minor findings and refactoring sections not rendered');
+    expect($rule)->toContain('Never drop a `Counts` or `Summary` slot on a filtered run');
 });
 
-test('every CR surface routes the iteration-3 severity filter back to the canonical rule', function (): void {
+test('every CR surface routes the late-iteration report scope back to the canonical rule', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $pointer = 'Canonical: `@rules/code-review/general.mdc` *CR report severity filter from iteration 3'
-        . ' (Critical & Moderate only)*.';
+    $pointer = 'Canonical: `@rules/code-review/general.mdc` *Late-Iteration Report Scope — Critical & Moderate'
+        . ' Only (CR iteration > 2)*.';
 
     $skills = [
         '/skills/code-review/SKILL.md',
@@ -1360,7 +1362,7 @@ test('every CR surface routes the iteration-3 severity filter back to the canoni
     foreach ($skills as $skill) {
         $content = (string) file_get_contents($packageDir . $skill);
 
-        expect($content)->toContain('**Report severity filter from iteration 3.**');
+        expect($content)->toContain('**Late-iteration report scope (CR iteration > 2).**');
         expect($content)->toContain('**Critical and Moderate findings only**');
         expect($content)->toContain($pointer);
     }
@@ -1384,9 +1386,10 @@ test('every CR surface routes the iteration-3 severity filter back to the canoni
     foreach ($templates as $template) {
         $content = (string) file_get_contents($packageDir . $template);
 
-        expect($content)->toContain('> **Report severity filter from iteration 3 (`iteration > 2`).**');
-        expect($content)->toContain('`report filter: critical+moderate only (iteration {n})`');
+        expect($content)->toContain('> **Late-iteration report scope (`iteration > 2`).**');
+        expect($content)->toContain('**Report scope:** critical+moderate only (iteration {n}) — Minor findings and refactoring sections not rendered');
         expect($content)->toContain('never report it as a zero count');
+        expect($content)->toContain('**Counts:** Critical {n} · Moderate {n} · Minor {n} · Refactoring {n}');
         expect($content)->toContain($pointer);
     }
 });
@@ -1399,7 +1402,7 @@ test('the review loop passes its iteration into every CR wrapper invocation', fu
         'The invocation **must** include the explicit quiet-mode instruction (see **Quiet review runs** below)'
             . ' **and the current `iteration = <n>` value**',
     );
-    expect($processCodeReview)->toContain('#### Report severity filter (from iteration 3)');
+    expect($processCodeReview)->toContain('#### Late-iteration report scope (CR iteration > 2)');
     expect($processCodeReview)->toContain('Pass the loop\'s current `iteration` value into every CR wrapper invocation');
     expect($processCodeReview)->toContain('so the convergence condition is unaffected');
     expect($processCodeReview)->toContain('the **final publishing run inherits the same filter**');

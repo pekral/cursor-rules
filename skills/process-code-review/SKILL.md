@@ -127,7 +127,7 @@ Rules:
 
 This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, or **Completion** until the loop converges. The final report (technical and non-technical) is published only **once**, after convergence.
 
-1. Initialise `iteration = 1` and `maxIterations = 5` (safety net to avoid runaway loops).
+1. Initialise `iteration = 1` and `maxIterations = 3` — **three review rounds is the hard cap**, not a soft target. A loop that has not converged in three rounds is not converging by iterating: the residual findings need a human decision, and further rounds only re-spend tokens on the same diff. The cap pairs with the late-iteration report scope below — the third and final round reports Critical and Moderate findings only.
 2. **Run the review inline.** Invoke the appropriate CR wrapper directly in this skill's context — do not dispatch as a subagent. Each iteration re-invokes the CR wrapper inline so it reloads the diff after the latest fix commit:
    - GitHub: `@skills/code-review-github/SKILL.md`
    - JIRA: `@skills/code-review-jira/SKILL.md`

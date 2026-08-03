@@ -934,6 +934,34 @@ test('every CR walks the self-documenting comment-hygiene lens and preserves its
     expect($codeReview)->toContain('Self-Documenting Code — Comment & Doc Hygiene');
 });
 
+test('the CR prefers restructuring over documentation and blocks a stale comment on a touched line', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // Long documentation is a symptom of unreadable code — the fix restructures, it does not reword.
+    expect($rule)->toContain('over-documented block');
+    expect($rule)->toContain('primary explanation of how the code works');
+    expect($rule)->toContain('Treat the length as a **symptom, not the defect**');
+    expect($rule)->toContain('extract intention-revealing private methods');
+    expect($rule)->toContain('**Never** propose merely trimming or rewording the comment while leaving the block intact');
+
+    // A comment contradicting the code it sits on misinforms, so it blocks the merge gate.
+    expect($rule)->toContain('stale comment on a touched line');
+    expect($rule)->toContain('worse than no comment');
+    expect($rule)->toContain('**Blocking scope:**');
+    expect($rule)->toContain('Do not downgrade a stale comment to Minor to keep the dimension non-blocking');
+
+    // The engine's Core Analysis walk carries the split severity so wrappers inherit it.
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    expect($codeReview)->toContain('a **stale comment on a touched line** is **Moderate** and blocks');
+
+    // The authoring side: write code that needs no extensive documentation, and maintain what you keep.
+    $core = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
+    expect($core)->toContain('**Write the code so it needs no extensive documentation.**');
+    expect($core)->toContain('that is a signal to **restructure the block**, not to write the explanation');
+    expect($core)->toContain('**A comment you keep is a comment you maintain.**');
+});
+
 test('every CR wrapper produces a two-part Technical + Functional review with the affirmative Functional exception (issue #737)', function (): void {
     $packageDir = dirname(__DIR__, 2);
 

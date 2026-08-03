@@ -1,6 +1,6 @@
 ---
 name: apollon
-description: Use when a change, issue, or pull request needs test coverage authored and its behaviour validated — design test scenarios (edge cases, regression) from the issue, write PHPUnit/Pest tests, generate browser test scenarios, verify the acceptance criteria, and hunt broken flows. Orchestrates create-test, e2e-testing, and test-like-human; understands both the code and the product assignment. Authors and validates tests — never merges. Also runs as a fast scoped validation gate after each landing step (talos PR-open, argos convergence) when dispatched by daidalos with a diff context.
+description: Use when a change, issue, or pull request needs test coverage authored and its behaviour validated — design test scenarios (edge cases, regression) from the issue, write PHPUnit/Pest tests, generate browser test scenarios, verify the acceptance criteria, and hunt broken flows. Orchestrates create-test, e2e-testing, and test-like-human; understands both the code and the product assignment. Authors and validates tests — never merges. Also runs as a fast scoped validation gate after each landing step (talos PR-open, athena convergence) when dispatched by daidalos with a diff context.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 ---
@@ -58,7 +58,7 @@ You accept one **source**, in this order of preference:
 
 ## Fast scoped validation mode
 
-When `daidalos` dispatches you **after a landing step** (talos PR-open or argos convergence), you run in fast scoped mode instead of the full on-demand flow. The goal is a quick, diff-targeted pass — not a full test authoring run.
+When `daidalos` dispatches you **after a landing step** (talos PR-open or athena convergence), you run in fast scoped mode instead of the full on-demand flow. The goal is a quick, diff-targeted pass — not a full test authoring run.
 
 **Input:** the diff (`git diff <base>..<head>` or the PR branch diff) and the shared brief path.
 

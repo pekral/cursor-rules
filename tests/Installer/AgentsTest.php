@@ -198,6 +198,45 @@ test('athena also runs a pre-implementation security-analysis mode that feeds ta
     expect($content)->toContain('CR done');
 });
 
+test('athena runs every code-review skill the project defines (issue #753)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/agents/athena.md');
+
+    // The inventory is a named, verifiable contract, not a loose prose list.
+    expect($content)->toContain('Run every code-review skill the project defines — the complete inventory');
+    expect($content)->toContain('**no CR skill may be left unrun**');
+    expect($content)->toContain('Never skip a lens because another one might catch the same defect');
+
+    $crSkills = [
+        'prepare-issue-context',
+        'assignment-compliance-check',
+        'code-review',
+        'analyze-problem',
+        'security-review',
+        'api-review',
+        'class-refactoring',
+        'laravel-security',
+        'security-bounty-hunter',
+        'security-threat-analysis',
+        'laravel-authorization-review',
+        'refactor-entry-point-to-action',
+        'mysql-problem-solver',
+        'pr-summary',
+    ];
+
+    foreach ($crSkills as $skill) {
+        expect(is_dir($packageDir . '/skills/' . $skill))->toBeTrue('CR skill ships: ' . $skill);
+        expect($content)->toContain('@skills/' . $skill . '/SKILL.md');
+    }
+
+    // Deliberate exclusions: an offensive skill needing human authorisation, and the write-capable test authoring.
+    expect($content)->toContain('`@skills/penetration-tester/SKILL.md` runs only on an explicit human request');
+    expect($content)->toContain('belong to `apollon`');
+
+    // The handoff has to account for every inventory row.
+    expect($content)->toContain('every row of the *complete inventory* in step 4');
+});
+
 test('athena references the laravel security audit workflow for existing-app audits', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/agents/athena.md');

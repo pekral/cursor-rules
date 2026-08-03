@@ -227,5 +227,5 @@ The installer copies `agents/` to `.claude/agents/` for `--editor=claude` and `-
 1. Pick a Greek figure whose myth matches the job; use the lowercase name.
 2. Create `agents/<name>.md` with the frontmatter + an orchestration-only system prompt that delegates to skills and returns a handoff.
 3. Add it to the README *Claude Code Subagents* table.
-4. Add a test asserting the file ships with its required frontmatter (mirror the `argos` test in `tests/InstallerTest.php`).
+4. Add a test asserting the file ships with its required frontmatter (mirror the `argos` test in `tests/Installer/AgentsTest.php`).
 5. Run `composer build` — the installer file-count tests pick up the new agent automatically.

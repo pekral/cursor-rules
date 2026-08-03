@@ -1100,6 +1100,14 @@ test('resolve-issue extracts the assignment items and maps one item to one commi
     expect($content)->toContain('**A genuinely atomic assignment stays one commit.**');
     // The one-phase-one-commit git rule stays the anchor.
     expect($content)->toContain('one phase = one commit');
+    // The extracted reference resolves standalone — every cross-reference names its owning document.
+    expect($content)->toContain('the *Read, Map & Verify* pre-flight in `@skills/resolve-issue/SKILL.md`');
+    expect($content)->toContain('the scope split in `@skills/resolve-issue/SKILL.md` *Problem analysis*');
+    expect($content)->toContain('`@skills/resolve-issue/SKILL.md` *Pre-existing issue handling*');
+    expect($content)->toContain('the implementation step in `@skills/resolve-issue/SKILL.md` *Continue*');
+    expect($content)->not->toContain('pre-flight above');
+    expect($content)->not->toContain('item from step 7');
+    expect($content)->not->toContain('contract for step 11');
 });
 
 test('resolve-issue targets cherry-pick-independent commits and reconciles the history before the PR', function (): void {

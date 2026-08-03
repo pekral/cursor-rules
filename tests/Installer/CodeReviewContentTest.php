@@ -1325,3 +1325,82 @@ test('every CR wrapper carries the mandatory third-party API documentation verif
         );
     }
 });
+
+test('the CR report severity filter from iteration 3 is canonically defined in the code-review rule', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($rule)->toContain('## CR report severity filter from iteration 3 (Critical & Moderate only)');
+    expect($rule)->toContain(
+        'accept an optional **`iteration = <n>`** input — the current iteration of the **Review loop** in'
+            . ' `@skills/process-code-review/SKILL.md`',
+    );
+    expect($rule)->toContain('carries no value and is treated as `iteration = 1`');
+    expect($rule)->toContain('**Iterations 1 and 2 — full report.**');
+    expect($rule)->toContain('**Iteration 3 and above (`iteration > 2`) — Critical and Moderate findings only.**');
+    expect($rule)->toContain('the whole `## Refactoring (DRY / tech debt)` section;');
+    expect($rule)->toContain('the whole `## Refactoring proposals` section.');
+    expect($rule)->toContain('**The filter narrows the report, never the review.**');
+    expect($rule)->toContain('**The convergence gate is unchanged.**');
+    expect($rule)->toContain('`report filter: critical+moderate only (iteration {n})`');
+});
+
+test('every CR surface routes the iteration-3 severity filter back to the canonical rule', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $pointer = 'Canonical: `@rules/code-review/general.mdc` *CR report severity filter from iteration 3'
+        . ' (Critical & Moderate only)*.';
+
+    $skills = [
+        '/skills/code-review/SKILL.md',
+        '/skills/code-review-github/SKILL.md',
+        '/skills/code-review-jira/SKILL.md',
+        '/skills/code-review-bugsnag/SKILL.md',
+    ];
+
+    foreach ($skills as $skill) {
+        $content = (string) file_get_contents($packageDir . $skill);
+
+        expect($content)->toContain('**Report severity filter from iteration 3.**');
+        expect($content)->toContain('**Critical and Moderate findings only**');
+        expect($content)->toContain($pointer);
+    }
+
+    foreach (['/skills/code-review-github/SKILL.md', '/skills/code-review-jira/SKILL.md', '/skills/code-review-bugsnag/SKILL.md'] as $wrapper) {
+        $content = (string) file_get_contents($packageDir . $wrapper);
+
+        expect($content)->toContain(
+            '**Iteration input.** The same caller passes the current Review loop iteration as `iteration = <n>`;'
+                . ' a run without it is `iteration = 1`.',
+        );
+    }
+
+    $templates = [
+        '/skills/code-review/templates/review-output.md',
+        '/skills/code-review-github/templates/pr-comment-output.md',
+        '/skills/code-review-jira/templates/github-output.md',
+        '/skills/code-review-bugsnag/templates/github-output.md',
+    ];
+
+    foreach ($templates as $template) {
+        $content = (string) file_get_contents($packageDir . $template);
+
+        expect($content)->toContain('> **Report severity filter from iteration 3 (`iteration > 2`).**');
+        expect($content)->toContain('`report filter: critical+moderate only (iteration {n})`');
+        expect($content)->toContain('never report it as a zero count');
+        expect($content)->toContain($pointer);
+    }
+});
+
+test('the review loop passes its iteration into every CR wrapper invocation', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $processCodeReview = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+
+    expect($processCodeReview)->toContain(
+        'The invocation **must** include the explicit quiet-mode instruction (see **Quiet review runs** below)'
+            . ' **and the current `iteration = <n>` value**',
+    );
+    expect($processCodeReview)->toContain('#### Report severity filter (from iteration 3)');
+    expect($processCodeReview)->toContain('Pass the loop\'s current `iteration` value into every CR wrapper invocation');
+    expect($processCodeReview)->toContain('so the convergence condition is unaffected');
+    expect($processCodeReview)->toContain('the **final publishing run inherits the same filter**');
+});

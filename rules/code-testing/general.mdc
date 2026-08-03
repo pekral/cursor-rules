@@ -44,6 +44,7 @@ A flaky test fails inconsistently, is hard to reproduce, and is often "fixed" by
 
 ## Jobs
 - Dispatch jobs using `JobClass::dispatch(...)` only.
+- Assert a job was dispatched with `Queue::assertPushed(JobClass::class)` (optionally with an integer times count, `Queue::assertPushed(JobClass::class, $times)`) only — never pass a closure/callback argument (issue #756). The assertion's sole purpose is to verify the job was pushed onto the queue; a closure inspecting job properties belongs in a dedicated unit test of the job itself, not in the dispatch assertion.
 
 ## External Calls
 - Tests must not call external services.

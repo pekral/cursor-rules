@@ -1454,3 +1454,41 @@ test('the review loop passes its iteration into every CR wrapper invocation', fu
     expect($processCodeReview)->toContain('so the convergence condition is unaffected');
     expect($processCodeReview)->toContain('the **final publishing run inherits the same filter**');
 });
+
+test('code-testing rule bans a closure argument on Queue::assertPushed (issue #756)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-testing/general.mdc');
+
+    expect($content)->toContain(
+        'Assert a job was dispatched with `Queue::assertPushed(JobClass::class)` (optionally with an integer'
+            . ' times count, `Queue::assertPushed(JobClass::class, $times)`) only — never pass a closure/callback'
+            . ' argument (issue #756).',
+    );
+    expect($content)->toContain(
+        'The assertion\'s sole purpose is to verify the job was pushed onto the queue; a closure inspecting job'
+            . ' properties belongs in a dedicated unit test of the job itself, not in the dispatch assertion.',
+    );
+});
+
+test('code-review rule flags Queue::assertPushed callbacks as a Moderate finding (issue #756)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($content)->toContain('**Queue assertion specificity (issue #756)** — flag every `Queue::assertPushed(...)` call');
+    expect($content)->toContain(
+        'The assertion must verify only that the job was pushed onto the queue — `Queue::assertPushed(JobClass::class)`'
+            . ' or `Queue::assertPushed(JobClass::class, $times)` (an integer count) — never a closure inspecting job'
+            . ' properties.',
+    );
+    expect($content)->toContain(
+        'remove the closure argument and assert the job class (and, if needed, the dispatch count) only;'
+            . ' move any job-property assertion into a dedicated unit test of the job.',
+    );
+});
+
+test('code-review skill routes Queue assertion specificity into the Core Analysis walk-through (issue #756)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($content)->toContain('**Queue assertion specificity (issue #756)**');
+});

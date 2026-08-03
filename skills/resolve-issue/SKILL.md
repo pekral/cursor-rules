@@ -99,28 +99,9 @@ Only after Read, Map, and Verify are complete may commit planning and implementa
 
 ### Commit planning — one assignment item = one commit
 
-The PR's headline artifact is a readable list of changes: a reviewer opening the *Commits* tab must see **one commit per point the assignment asked for**, and nothing else. Build that plan before writing any code, applying the **one phase = one commit** rule from `@rules/git/general.mdc` *Git Rules* — a phase is simply one kind of assignment item.
+Before writing any code, extract every recommended fix / point to solve from the assignment and map **one item to one commit**, so the PR reads as a checklist of the assignment. This is where the **one phase = one commit** rule from `@rules/git/general.mdc` *Git Rules* applies — a phase is simply one kind of assignment item.
 
-1. **Extract the item list from the assignment.** Walk the issue description, the *current requirements* kept by comment analysis, and every attachment / linked source, and collect each discrete point to solve. Any of these is an item marker:
-   - an explicit recommendation block — *Doporučené opravy*, *Doporučení*, *Body k řešení*, *Recommended fixes*, *Suggested fixes*, *Action items*, *Návrh řešení*;
-   - a checklist (`- [ ]`), a numbered or bulleted list of requirements, or an acceptance-criteria block;
-   - review / audit findings carried inside the assignment — one item per finding (Critical / Moderate / Minor rows included);
-   - `Phase N` headings, numbered milestones, or a step-by-step plan written by the reporter;
-   - a requirement stated only in running prose — read the whole assignment, not just its bullets.
-
-   Record every item as a row: an ID (`A1`, `A2`, … in the order it appears in the assignment), the verbatim quote or heading anchor it came from, and the concrete files / symbols it will touch (taken from the Read, Map & Verify pre-flight above).
-2. **Normalize the list.** Merge two rows only when they are literally the same change stated twice (keep both IDs on the merged row); split a row only when one sentence names two independent changes. Never fold two distinct points into one row to shorten the plan, and never invent an item the assignment does not ask for — a finding with no assignment anchor belongs to *Pre-existing issue handling* or to the deferred `## TODO` list, never to this table.
-3. **One item = one commit.** Every in-scope item from step 7 maps to exactly **one** commit, and no commit carries two items. Phase order (when the assignment is phased) stays the commit order; otherwise assignment order is the default.
-4. **Make each commit self-contained.** A commit ships its item's production change **and** everything that item needs to be complete: its regression test (bug) or coverage (feature), plus any migration, locale entry, config key, or factory it introduces. Never defer an item's tests to a later commit.
-5. **Aim for cherry-pick independence (target, not a blocker).** A commit is independent when it applies cleanly onto the default branch on its own and leaves a green working state. Derive each verdict **by reading the code** — apply the independence checks in `@skills/pr-staged-merge-plan/SKILL.md` step 5 (green on its own, no forward reference, expand before contract, tests travel with their behavior) rather than restating them, and never materialize a branch to test it. Then:
-   - lift shared groundwork that two or more items need (a new helper, a signature change, a migration) into its **own commit ordered first**, so the item commits that follow stay independent of each other;
-   - label every planned commit `independent` or `depends on <ID>` with a one-line reason;
-   - when independence would force an artificial split or a broken intermediate state, **keep the dependency** and record it — an honest dependent chain beats a contrived split.
-6. **Order the commits:** pre-existing fixes first (per *Pre-existing issue handling*), then shared groundwork, then independent item commits in assignment order, then dependent chains after what they need.
-7. **Record the plan before implementing** as a table — `item ID | commit subject | files | independent / depends on` — with every subject in `type(scope): description` form per `@rules/git/general.mdc` *Commit Messages* (English, lowercase type/scope, no trailing period). This table is the contract for step 11.
-8. **Commit at the end of each item, not at the end of the work.** Run the pre-push fixers and the tests for that item's changes, commit it, then start the next item. Never park two items in one commit "to be split later".
-9. **Reconcile the history before opening the PR.** Read `git log --oneline <default-branch>..HEAD` and confirm: every in-scope item has exactly one commit, every commit maps to exactly one item (or is a named pre-existing / groundwork commit), and no commit bundles two items. When the history drifted from the plan, reshape it (`git rebase -i` per `@skills/git-workflow/SKILL.md`) **before** the PR exists — never explain a bundled commit away in the description.
-10. **A genuinely atomic assignment stays one commit.** When the assignment names a single point, do not invent items or artificial phases to fill a table.
+Follow `references/commit-planning.md` for the full procedure: item extraction and normalization, the one-item-one-commit mapping, self-contained commits, cherry-pick independence and commit ordering, the recorded plan table that is the contract for step 11, and the `git log` reconciliation that must pass before the PR is opened.
 
 ### Pre-existing issue handling
 
@@ -260,6 +241,7 @@ After the reviews converged (no Critical / Moderate) and the reports are posted,
 ## References
 
 - references/source-detection.md
+- references/commit-planning.md
 - references/quality-gates.md
 
 ## Done when

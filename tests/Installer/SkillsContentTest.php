@@ -1073,9 +1073,13 @@ test('pr-staged-merge-plan proposes squashes and corrected commit subjects under
 
 test('resolve-issue extracts the assignment items and maps one item to one commit', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+    $skill = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/references/commit-planning.md');
 
-    expect($content)->toContain('### Commit planning — one assignment item = one commit');
+    // The skill points at the reference procedure and keeps the git-rule anchor.
+    expect($skill)->toContain('### Commit planning — one assignment item = one commit');
+    expect($skill)->toContain('Follow `references/commit-planning.md`');
+    expect($skill)->toContain('- references/commit-planning.md');
     // The recommendation / to-do markers the skill must look for in the assignment.
     expect($content)->toContain('**Extract the item list from the assignment.**');
     expect($content)->toContain('*Doporučené opravy*');
@@ -1090,7 +1094,7 @@ test('resolve-issue extracts the assignment items and maps one item to one commi
     // The plan is recorded before implementation and drives the implementation step.
     expect($content)->toContain('**Record the plan before implementing**');
     expect($content)->toContain('`item ID | commit subject | files | independent / depends on`');
-    expect($content)->toContain('following the commit plan one item at a time');
+    expect($skill)->toContain('following the commit plan one item at a time');
     // Neither invented items nor invented phases.
     expect($content)->toContain('never invent an item the assignment does not ask for');
     expect($content)->toContain('**A genuinely atomic assignment stays one commit.**');
@@ -1100,7 +1104,7 @@ test('resolve-issue extracts the assignment items and maps one item to one commi
 
 test('resolve-issue targets cherry-pick-independent commits and reconciles the history before the PR', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/references/commit-planning.md');
 
     // Independence is the target, explicitly not a blocker.
     expect($content)->toContain('**Aim for cherry-pick independence (target, not a blocker).**');

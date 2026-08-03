@@ -198,6 +198,25 @@ test('athena also runs a pre-implementation security-analysis mode that feeds ta
     expect($content)->toContain('CR done');
 });
 
+test('athena reviews the diff of the current changes only (issue #753)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/agents/athena.md');
+
+    expect($content)->toContain('## Review scope — the diff of the current changes only');
+    expect($content)->toContain('**You review the diff, never the repository.**');
+    // A finding must anchor to a changed line, even when neighbouring code was read for understanding.
+    expect($content)->toContain('the finding must anchor to a changed line');
+    // The whole-app sweeps are explicitly constrained; a full audit is a different, human-triggered job.
+    expect($content)->toContain('**Whole-repository sweeps run diff-scoped.**');
+    expect($content)->toContain('never entered from a CR pass');
+    // The scope is handed to the wrapper, not left to it to guess.
+    expect($content)->toContain('and pass it the diff scope from *Review scope* above');
+
+    // The docs mirror the scope so a reader of the roster sees it too.
+    $docs = (string) file_get_contents($packageDir . '/docs/agents.md');
+    expect($docs)->toContain('**Scope: the current changes only.**');
+});
+
 test('athena runs every code-review skill the project defines (issue #753)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/agents/athena.md');

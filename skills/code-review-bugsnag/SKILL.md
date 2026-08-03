@@ -70,6 +70,8 @@ Run the **Reviewer Comment Fulfillment Gate** defined canonically in `@skills/co
 ### 4. Publish Results
 
 > **Quiet mode (loop iterations from `@skills/process-code-review/SKILL.md`):** when the caller requests "do not publish; return findings as in-memory markdown", **skip all publishing** below and return the assembled review markdown. Only the final (publishing) call after convergence runs Publish Results in full.
+>
+> **Iteration input.** The same caller passes the current Review loop iteration as `iteration = <n>`; a run without it is `iteration = 1`. From `iteration > 2` the assembled report — whether returned in quiet mode or published here — carries **Critical and Moderate findings only**, per `@rules/code-review/general.mdc` *Late-Iteration Report Scope — Critical & Moderate Only (CR iteration > 2)*.
 
 #### GitHub (technical findings only — always-new comment per CR run)
 - Publish via `skills/code-review-github/scripts/upsert-comment.sh <PR-NUMBER|URL> -` (body on stdin) on the linked PR. Every CR run posts a **fresh PR comment**; the helper appends the marker `<!-- cr-comment:actor=<gh-login> -->` for traceability and never edits a prior comment in place. On exit code 2/3, fall back to the GitHub MCP server's `addIssueComment` as a fresh post.
@@ -92,6 +94,7 @@ Run the **Reviewer Comment Fulfillment Gate** defined canonically in `@skills/co
 ### GitHub (technical report — only here)
 - All technical findings go exclusively to the linked GitHub PR comment: file paths, line numbers, code references, severity levels (Critical / Moderate / Minor), concrete fixes. Findings only — no praise.
 - Each Critical / Moderate finding carries the four reproducer fields (**Faulty Example**, **Expected Behavior**, **Test Hint**, **Suggested Fix**) so `@skills/process-code-review/SKILL.md` can convert each finding into a reproducer test and apply the fix. Omit empty sections and the coverage surfaces per `@skills/code-review/SKILL.md` Output Rules.
+- **Late-iteration report scope (CR iteration > 2).** When the caller passes `iteration = <n>` and `n > 2`, the posted GitHub PR comment carries **Critical and Moderate findings only** — drop every Minor finding, the whole `Refactoring (DRY / Tech Debt Reduction)` section, and the whole `Refactoring Proposals` section, and render the header line `**Report scope:** critical+moderate only (iteration {n}) — Minor findings and refactoring sections not rendered` while the Counts and summary lines keep their real, unchanged numbers. No walk or sub-review is skipped and the Critical + Moderate merge gate is unchanged. Canonical: `@rules/code-review/general.mdc` *Late-Iteration Report Scope — Critical & Moderate Only (CR iteration > 2)*.
 
 ### Bugsnag (non-technical summary — only here)
 - The non-technical Bugsnag comment is **produced and posted by `@skills/pr-summary/SKILL.md`**, not by this skill. Plain language understandable by non-developers, in two sections: *Summary of changes* and *How to test*. No file paths, line numbers, code snippets, or severity jargon.

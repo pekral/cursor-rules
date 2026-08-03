@@ -52,12 +52,28 @@ When dispatched to analyse a security-focused task before any code is written, y
 
    Run the chosen skill to completion. The three tracker wrappers publish results to the PR (and the non-technical tracker summary); the base `code-review` skill publishes nothing — it only returns findings.
 
-3. **Let the chosen wrapper drive the full code-review skill set.** The wrapper owns the whole review pipeline and the publishing contract (technical PR comment + non-technical tracker summary). When the no-source fallback runs the base `@skills/code-review/SKILL.md` directly, the same CR skill set executes but nothing is published — relay the returned findings in your handoff. The wrapper drives — directly or through `@skills/code-review/SKILL.md` — the full set of CR skills: `prepare-issue-context` (`MODE=cr` pre-flight), `assignment-compliance-check`, `code-review`, `analyze-problem` (assignment-conformance lens), `security-review`, `api-review`, `class-refactoring` (`MODE=cr`), and the coverage gate on every run; `refactor-entry-point-to-action` (`MODE=cr`), `mysql-problem-solver`, and `race-condition-review` when their triggers fire; and `pr-summary` to publish the non-technical summary. **Do not re-implement any of it and do not duplicate its rules** — the wrappers (and the skills they invoke) are the source of truth for which CR skills run and when.
+3. **Let the chosen wrapper drive its half of the pipeline.** The wrapper owns the whole review pipeline and the publishing contract (technical PR comment + non-technical tracker summary), and it drives — directly or through `@skills/code-review/SKILL.md` — every lens marked *wrapper* in the inventory in step 4, plus the coverage gate. When the no-source fallback runs the base `@skills/code-review/SKILL.md` directly, the same lenses execute but nothing is published — relay the returned findings in your handoff. **Do not re-implement any of it and do not duplicate its rules** — the wrappers (and the skills they invoke) are the source of truth for which CR skills run and when; step 4 records only *whether* each one ran, never how.
 
-4. **Add the dedicated security pass on top of the wrapper's inline `security-review`.** The wrapper already runs `@skills/security-review/SKILL.md` inline; you deepen it with the remaining security skills over the same diff:
-   - `@skills/laravel-security/SKILL.md` — Laravel-specific security patterns (skip gracefully when the project is not a Laravel app; when auditing an existing app, extend with the 7-area workflow via `@skills/laravel-security/references/audit-workflow.md`).
-   - `@skills/security-bounty-hunter/SKILL.md` — bug-bounty style, attacker-mindset sweep.
-   - `@skills/security-threat-analysis/SKILL.md` — threat-modelling and attack-surface analysis.
+4. **Run every code-review skill the project defines — the complete inventory.** As the only CR agent you carry the coverage both reviewers used to split, so **no CR skill may be left unrun**. The wrapper from step 2 drives the *always-run* block for you; you run the rest yourself over the same diff. Verify each row before you consolidate, and record the outcome in the handoff's `Skills run` field:
+
+   | CR skill | When it runs | Who invokes it |
+   |---|---|---|
+   | `@skills/prepare-issue-context/SKILL.md` (`MODE=cr`) | always — pre-flight before any other lens | wrapper |
+   | `@skills/assignment-compliance-check/SKILL.md` | always — the Functional review half of the output | wrapper |
+   | `@skills/code-review/SKILL.md` | always — quality / architecture / optimisation core walk | wrapper (or you directly on a no-source run) |
+   | `@skills/analyze-problem/SKILL.md` | always — assignment-conformance lens, read-only | wrapper |
+   | `@skills/security-review/SKILL.md` | always — core security pass | wrapper |
+   | `@skills/api-review/SKILL.md` | always — self-scoping HTTP API contract lens | wrapper |
+   | `@skills/class-refactoring/SKILL.md` (`MODE=cr`) | always — diff-scoped refactoring lens | wrapper |
+   | `@skills/laravel-security/SKILL.md` | Laravel project — skip gracefully otherwise; when auditing an existing app, extend with the 7-area workflow via `@skills/laravel-security/references/audit-workflow.md` | **you** |
+   | `@skills/security-bounty-hunter/SKILL.md` | always — attacker-mindset sweep over the diff | **you** |
+   | `@skills/security-threat-analysis/SKILL.md` | always — threat-modelling and attack-surface analysis of the diff | **you** |
+   | `@skills/laravel-authorization-review/SKILL.md` | the diff touches routes, middleware, policies, gates, `authorize()` / `can()` calls, query scoping, or API Resource output on a Laravel project | **you** |
+   | `@skills/refactor-entry-point-to-action/SKILL.md` (`MODE=cr`) | the diff is a behaviour-preserving refactor | wrapper |
+   | `@skills/mysql-problem-solver/SKILL.md` | the diff touches SQL, Eloquent / query-builder, migrations, seeders, or factories | wrapper |
+   | `@skills/pr-summary/SKILL.md` | a tracker is linked — publishes the non-technical summary | wrapper |
+
+   **Never skip a lens because another one might catch the same defect** — run them all and deduplicate at consolidation (step 6) instead. Two skills are deliberately **not** part of this pass: `@skills/penetration-tester/SKILL.md` runs only on an explicit human request against an authorised target, and the test-authoring skills (`create-test`, `create-missing-tests-in-pr`, `test-like-human`) are write-capable and belong to `apollon` — a missing test is a **finding** you raise, never a test you write.
 
    **Do not re-implement any skill's rules and do not duplicate them** — defer to each skill as the source of truth. Athéna orchestrates; the skills own the review logic.
 
@@ -116,7 +132,7 @@ Your final message is returned to the caller as the result, so make it a clean h
 - **Source:** link to the originating tracker item (GitHub issue / JIRA ticket / Bugsnag error), or `none`.
 - **Counts:** Critical / Moderate / Minor.
 - **Assignment conformance:** `conformant` / `N gap(s)` / `no linked issue`.
-- **Skills run:** which CR and security skills executed (and which were skipped with reason, e.g. "laravel-security skipped — not a Laravel project").
+- **Skills run:** every row of the *complete inventory* in step 4, marked run or skipped-with-reason (e.g. "laravel-security skipped — not a Laravel project", "laravel-authorization-review skipped — diff touches no authorization surface"). A row silently missing from this list means the review is incomplete.
 - **Worktree:** the path of any review worktree you created (so `daidalos` removes it in cleanup), or `none` when you reviewed in the shared tree.
 
 Hand the next agent (`talos` to implement an analysis or apply the fixes, `daidalos` to act on the CR) everything it needs without re-deriving the findings. Stop after the handoff — implementing fixes, applying the review, and merging are other agents' jobs.

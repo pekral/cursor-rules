@@ -95,18 +95,26 @@ Reading, mapping, and verifying come first; implementing comes last. This pre-fl
 2. **Map** — map the change's blast radius: every call site, caller, data-flow path, and existing test that the in-scope change touches, plus the conventions, helpers, Services, and Actions already in the codebase to reuse instead of reinventing.
 3. **Verify** — check your assumptions against the real code and its observed behavior (for bugs, reproduce the failure; for features, confirm the integration points exist as assumed). If reading and mapping contradict the issue framing or the scenario table, stop and surface the discrepancy instead of implementing on a wrong premise.
 
-Only after Read, Map, and Verify are complete may phase planning and implementation begin.
+Only after Read, Map, and Verify are complete may commit planning and implementation begin.
 
-### Phase planning (commit plan)
+### Commit planning — one assignment item = one commit
 
-Before writing any code, decide how the in-scope work will be split into commits within the PR, applying the **one phase = one commit** rule from `@rules/git/general.mdc` *Git Rules*.
+The PR's headline artifact is a readable list of changes: a reviewer opening the *Commits* tab must see **one commit per point the assignment asked for**, and nothing else. Build that plan before writing any code, applying the **one phase = one commit** rule from `@rules/git/general.mdc` *Git Rules* — a phase is simply one kind of assignment item.
 
-1. **Detect existing phases** in the issue description and the kept comments. Phase markers include explicit headings such as `Phase 1`, numbered milestones, ordered acceptance-criteria blocks, or a step-by-step plan written by the reporter.
-2. **If phases exist:** treat each phase as exactly **one commit**. Keep the original phase order as commit order. Do not merge, reorder, or re-scope phases.
-3. **If no phases exist but the assignment is long or covers multiple distinct concerns:** propose a phased breakdown — each phase must be independently reviewable and yield a working state — then map **one phase per commit**.
-4. **If the assignment is small and atomic:** keep it as a single commit. Do not invent artificial phases.
-5. Record the planned phases as a numbered list (one line per commit, with the intended commit message in `type(scope): description` form per `@rules/git/general.mdc`) **before** starting implementation. This list is the commit plan for step 11.
-6. During implementation, commit at the end of each phase. Run pre-push fixers and tests on the changes belonging to that phase before moving on.
+1. **Extract the item list from the assignment.** Walk the issue description, the *current requirements* kept by comment analysis, and every attachment / linked source, and collect each discrete point to solve. Any of these is an item marker:
+   - an explicit recommendation block — *Doporučené opravy*, *Doporučení*, *Body k řešení*, *Recommended fixes*, *Suggested fixes*, *Action items*, *Návrh řešení*;
+   - a checklist (`- [ ]`), a numbered or bulleted list of requirements, or an acceptance-criteria block;
+   - review / audit findings carried inside the assignment — one item per finding (Critical / Moderate / Minor rows included);
+   - `Phase N` headings, numbered milestones, or a step-by-step plan written by the reporter;
+   - a requirement stated only in running prose — read the whole assignment, not just its bullets.
+
+   Record every item as a row: an ID (`A1`, `A2`, … in the order it appears in the assignment), the verbatim quote or heading anchor it came from, and the concrete files / symbols it will touch (taken from the Read, Map & Verify pre-flight above).
+2. **Normalize the list.** Merge two rows only when they are literally the same change stated twice (keep both IDs on the merged row); split a row only when one sentence names two independent changes. Never fold two distinct points into one row to shorten the plan, and never invent an item the assignment does not ask for — a finding with no assignment anchor belongs to *Pre-existing issue handling* or to the deferred `## TODO` list, never to this table.
+3. **One item = one commit.** Every in-scope item from step 7 maps to exactly **one** commit, and no commit carries two items. Phase order (when the assignment is phased) stays the commit order; otherwise assignment order is the default.
+4. **Make each commit self-contained.** A commit ships its item's production change **and** everything that item needs to be complete: its regression test (bug) or coverage (feature), plus any migration, locale entry, config key, or factory it introduces. Never defer an item's tests to a later commit.
+5. **Record the plan before implementing** as a table — `item ID | commit subject | files` — with every subject in `type(scope): description` form per `@rules/git/general.mdc` *Commit Messages* (English, lowercase type/scope, no trailing period). This table is the contract for step 11.
+6. **Commit at the end of each item, not at the end of the work.** Run the pre-push fixers and the tests for that item's changes, commit it, then start the next item. Never park two items in one commit "to be split later".
+7. **A genuinely atomic assignment stays one commit.** When the assignment names a single point, do not invent items or artificial phases to fill a table.
 
 ### Pre-existing issue handling
 
@@ -144,7 +152,7 @@ Run `@skills/test-driven-development/SKILL.md` as the governing cycle for every 
 8. Design a minimal implementation aligned with project architecture.
 
 ### Continue
-11. Implement the solution for all **in-scope** items identified in step 7.
+11. Implement the solution for all **in-scope** items identified in step 7, following the commit plan one item at a time — implement the item, run its tests and the pre-push fixers, commit it, then move to the next.
 12. Ensure no sensitive data is exposed in error/validation messages. Apply `@rules/security/backend.md` *Safe Validation & Error Messages* (and `@rules/security/frontend.md` / `@rules/security/mobile.md` for the equivalent client surfaces) to every user-facing string the change touches, **including every locale shipped by the project** — auth, password-reset, sign-up, and account-lookup flows must return one generic message with one response shape so the wording cannot be used for identity enumeration, authorization-denied responses must not confirm the resource exists, and no stack traces / file paths / framework versions / DB or queue / cache identifiers / verbatim attacker input reach the response body.
     Apply `@rules/security/backend.md` *Malicious Code & Supply-Chain Indicators* (issue #549) to every line the change adds in application code, shell / deploy / CI scripts, and installer hooks — never introduce a silent `curl -s … | sh`, disabled TLS validation (`curl -k`, `CURLOPT_SSL_VERIFYPEER => false`, `NODE_TLS_REJECT_UNAUTHORIZED=0`), suppressed error output on a security-relevant command, or a hidden `/tmp` file paired with a detached background process; route downloads through allow-listed checksum-verified HTTPS and background work through the project's queue / scheduler.
 13. If the implementation introduced new database migrations, run them (`php artisan migrate` for Laravel projects, or the project-specific equivalent) before executing the affected tests or creating the pull request.

@@ -74,6 +74,42 @@ test('git/general.mdc mandates one commit per phase for phased issues', function
     expect($content)->toContain('exactly one commit');
 });
 
+test('git/general.mdc requires the finished history to be a logical partition and to be reshaped when it is not', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/git/general.mdc');
+
+    // The rule is about the history handed over, not the order the work happened in.
+    expect($content)->toContain('The finished history is a logical partition of the change set — reshape it until it is.');
+    expect($content)->toContain('git log --oneline <default-branch>..HEAD');
+
+    // All three reshape moves plus the missing-commit case are named.
+    expect($content)->toContain('**split it**');
+    expect($content)->toContain('**squash or fixup**');
+    expect($content)->toContain('**amend** the message');
+    expect($content)->toContain('**create the commit it deserves**');
+
+    // The PR description may never be used to excuse a bundled commit, and mechanics live in the git skill.
+    expect($content)->toContain('the description documents the history, it does not excuse it');
+    expect($content)->toContain('@skills/git-workflow/SKILL.md');
+    expect($content)->toContain('git push --force-with-lease');
+});
+
+test('the code-writing skills that create commits anchor on the logical-partition git rule', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    $refactoring = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+    expect($refactoring)->toContain('Hand over a logically partitioned history.');
+    expect($refactoring)->toContain('@rules/git/general.mdc` *Git Rules*');
+
+    $processCr = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+    expect($processCr)->toContain('the finished history must be a logical partition of the change set');
+    expect($processCr)->toContain('reshape the history before pushing');
+
+    // resolve-issue's reconciliation step is the assignment-item form of the same rule.
+    $planning = (string) file_get_contents($packageDir . '/skills/resolve-issue/references/commit-planning.md');
+    expect($planning)->toContain('the assignment-item form of the partition rule in `@rules/git/general.mdc` *Git Rules*');
+});
+
 test('resolve-issue skill anchors phase planning on the one-phase-one-commit git rule', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');

@@ -1146,6 +1146,8 @@ test('resolve-issue PR description carries the item-to-commit change list', func
         '`item ID | what the assignment asked for | commit subject | short SHA | independent / depends on <ID>`',
     );
     expect($skill)->toContain('so the PR reads as a checklist against the assignment');
+    // The heading is a stable anchor — it is never translated with the description body.
+    expect($skill)->toContain('the heading stays verbatim in English even when the rest of the description is translated');
     // An item resolved without a code change is reported, never silently dropped.
     expect($reference)->toContain('**An item that needs no change is never dropped silently.**');
     expect($skill)->toContain('no change needed — <reason>');

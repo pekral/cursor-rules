@@ -1133,6 +1133,9 @@ test('resolve-issue targets cherry-pick-independent commits and reconciles the h
     expect($content)->toContain('**Reconcile the history before opening the PR.**');
     expect($content)->toContain('git log --oneline <default-branch>..HEAD');
     expect($content)->toContain('never explain a bundled commit away in the description');
+    // Reshaping drifted history must be executable without interactive git.
+    expect($content)->toContain('an agent runtime without interactive git uses a non-interactive path');
+    expect($content)->toContain('git reset --soft <default-branch>');
 });
 
 test('resolve-issue PR description carries the item-to-commit change list', function (): void {

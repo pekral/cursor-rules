@@ -1492,3 +1492,25 @@ test('code-review skill routes Queue assertion specificity into the Core Analysi
 
     expect($content)->toContain('**Queue assertion specificity (issue #756)**');
 });
+
+test('code-review rule gates Queue assertion specificity against Strict rule compliance (issue #756)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($content)->toContain(
+        '**Gating — raise one finding per violation, never both:** when the **Strict rule compliance** walk matches'
+            . ' the same `Queue::assertPushed` line through `@rules/code-testing/general.mdc` *Jobs*, keep this'
+            . ' bullet\'s **Moderate** finding and skip that one.',
+    );
+});
+
+test('code-testing rule routes Queue::assertPushed callbacks to its own CR bullet (issue #756)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-testing/general.mdc');
+
+    expect($content)->toContain(
+        'This is a CR finding under **Queue assertion specificity (issue #756)** in'
+            . ' `@rules/code-review/general.mdc` Core Analysis Walk-through — raise it there once, never'
+            . ' additionally under Strict rule compliance.',
+    );
+});

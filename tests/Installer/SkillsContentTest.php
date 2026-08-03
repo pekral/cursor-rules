@@ -1089,12 +1089,34 @@ test('resolve-issue extracts the assignment items and maps one item to one commi
     expect($content)->toContain('Never park two items in one commit "to be split later".');
     // The plan is recorded before implementation and drives the implementation step.
     expect($content)->toContain('**Record the plan before implementing**');
+    expect($content)->toContain('`item ID | commit subject | files | independent / depends on`');
     expect($content)->toContain('following the commit plan one item at a time');
     // Neither invented items nor invented phases.
     expect($content)->toContain('never invent an item the assignment does not ask for');
     expect($content)->toContain('**A genuinely atomic assignment stays one commit.**');
     // The one-phase-one-commit git rule stays the anchor.
     expect($content)->toContain('one phase = one commit');
+});
+
+test('resolve-issue targets cherry-pick-independent commits and reconciles the history before the PR', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    // Independence is the target, explicitly not a blocker.
+    expect($content)->toContain('**Aim for cherry-pick independence (target, not a blocker).**');
+    expect($content)->toContain('applies cleanly onto the default branch on its own');
+    expect($content)->toContain('`@skills/pr-staged-merge-plan/SKILL.md` step 5');
+    expect($content)->toContain('label every planned commit `independent` or `depends on <ID>`');
+    expect($content)->toContain('**keep the dependency** and record it');
+    // Shared groundwork is lifted out so item commits stay independent of each other.
+    expect($content)->toContain('lift shared groundwork');
+    expect($content)->toContain('**own commit ordered first**');
+    // Ordering puts the cheapest, most independent commits first.
+    expect($content)->toContain('**Order the commits:** pre-existing fixes first');
+    // The landed history is reconciled against the plan before the PR exists.
+    expect($content)->toContain('**Reconcile the history before opening the PR.**');
+    expect($content)->toContain('git log --oneline <default-branch>..HEAD');
+    expect($content)->toContain('never explain a bundled commit away in the description');
 });
 
 test('class-refactoring skill proposes the Service to Action conversion (issue #739)', function (): void {

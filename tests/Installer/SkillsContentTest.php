@@ -1091,6 +1091,10 @@ test('resolve-issue extracts the assignment items and maps one item to one commi
     expect($content)->toContain('maps to exactly **one** commit, and no commit carries two items');
     expect($content)->toContain('**Make each commit self-contained.**');
     expect($content)->toContain('Never park two items in one commit "to be split later".');
+    // A refactor item defers to the refactoring Test Coverage Contract instead.
+    expect($content)->toContain('**Exception — a refactor item.**');
+    expect($content)->toContain('`@rules/refactoring/general.mdc` *Test Coverage Contract* wins');
+    expect($content)->toContain('test(<scope>): cover <area> before refactor');
     // The plan is recorded before implementation and drives the implementation step.
     expect($content)->toContain('**Record the plan before implementing**');
     expect($content)->toContain('`item ID | commit subject | files | independent / depends on`');

@@ -1559,3 +1559,26 @@ test('CR wrappers wire the clarifying-questions suppression walk (issue #758)', 
     expect($prSummary)->toContain('*Clarifying Questions — Answered-Question Suppression & Severity Gate (issue #758)*');
     expect($prSummary)->toContain('append it as received and never re-rate, re-order, or annotate it');
 });
+
+test('clarifying-questions rule intro does not undercount its own steps (issue #758 CR fix)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // The intro must not promise a step count that the numbered procedure contradicts.
+    expect($content)->not->toContain('assembles it through the three steps below');
+    expect($content)->toContain('assembles it through the steps below');
+    expect($content)->toContain('6. **Gating — raise one item per ambiguity, never both.**');
+});
+
+test('clarifying-questions Critical route defers to the assignment-conformance lenses (issue #758 CR fix)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($content)->toContain(
+        'The Critical route in step 3 is a **fallback owner only**: when'
+            . ' `@skills/assignment-compliance-check/SKILL.md` already lists the same tracker answer as a'
+            . ' **Not met** / **Partial** / **Divergent** criterion, or `@skills/analyze-problem/SKILL.md`'
+            . ' (always run in assignment-conformance scope) already raised it as an unmet requirement, keep'
+            . ' **that** finding and raise nothing here',
+    );
+});

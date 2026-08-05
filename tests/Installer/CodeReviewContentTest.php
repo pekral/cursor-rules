@@ -1514,3 +1514,71 @@ test('code-testing rule routes Queue::assertPushed callbacks to its own CR bulle
             . ' additionally under Strict rule compliance.',
     );
 });
+
+test('code-review rule suppresses clarifying questions the tracker already answered (issue #758)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($content)->toContain('## Clarifying Questions — Answered-Question Suppression & Severity Gate (issue #758)');
+
+    // The answer walk is mandatory and names a loader per tracker.
+    expect($content)->toContain('**Answer walk — read every tracker comment before asking (mandatory).**');
+    expect($content)->toContain('skills/code-review-jira/scripts/parse-comments.sh <KEY|URL>');
+    expect($content)->toContain('skills/code-review-github/scripts/parse-comments.sh <NUMBER|URL>');
+    expect($content)->toContain('skills/code-review-bugsnag/scripts/parse-comments.sh <URL|TRIPLE>');
+    expect($content)->toContain('**Never skip the walk and publish the questions unread**');
+
+    // Answered + implemented is dropped; answered + unimplemented becomes a Critical finding instead.
+    expect($content)->toContain('**Answered, and the diff implements the answer → drop the question entirely.**');
+    expect($content)->toContain('**Answered, but the diff does not implement the answer**');
+    expect($content)->toContain('raise the gap as a **Critical** finding on the technical PR comment');
+    expect($content)->toContain('**Unanswered → keep the question.**');
+});
+
+test('code-review rule renders only Critical and Moderate clarifying questions, unlabelled (issue #758)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($content)->toContain('**Severity gate — Critical and Moderate questions only.**');
+    expect($content)->toContain('**Never rendered** — drop it silently');
+    expect($content)->toContain('**The rating is an internal filter only.**');
+    expect($content)->toContain('never** the severity label, a question count, or any other technical marker');
+    expect($content)->toContain('pass **no block at all** — never an empty or "no open questions" block');
+});
+
+test('CR wrappers wire the clarifying-questions suppression walk (issue #758)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
+    $prSummary = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');
+
+    expect($jira)->toContain('*Clarifying Questions — Answered-Question Suppression & Severity Gate (issue #758)*');
+    expect($jira)->toContain('**drop every question the thread already answered and the diff implements**');
+    expect($jira)->toContain('render **only Critical and Moderate** questions');
+    expect($jira)->toContain('**no severity label and no count**');
+
+    expect($prSummary)->toContain('*Clarifying Questions — Answered-Question Suppression & Severity Gate (issue #758)*');
+    expect($prSummary)->toContain('append it as received and never re-rate, re-order, or annotate it');
+});
+
+test('clarifying-questions rule intro does not undercount its own steps (issue #758 CR fix)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // The intro must not promise a step count that the numbered procedure contradicts.
+    expect($content)->not->toContain('assembles it through the three steps below');
+    expect($content)->toContain('assembles it through the steps below');
+    expect($content)->toContain('6. **Gating — raise one item per ambiguity, never both.**');
+});
+
+test('clarifying-questions Critical route defers to the assignment-conformance lenses (issue #758 CR fix)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($content)->toContain(
+        'The Critical route in step 3 is a **fallback owner only**: when'
+            . ' `@skills/assignment-compliance-check/SKILL.md` already lists the same tracker answer as a'
+            . ' **Not met** / **Partial** / **Divergent** criterion, or `@skills/analyze-problem/SKILL.md`'
+            . ' (always run in assignment-conformance scope) already raised it as an unmet requirement, keep'
+            . ' **that** finding and raise nothing here',
+    );
+});

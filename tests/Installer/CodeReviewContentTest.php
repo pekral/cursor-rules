@@ -1582,3 +1582,75 @@ test('clarifying-questions Critical route defers to the assignment-conformance l
             . ' **that** finding and raise nothing here',
     );
 });
+
+test('process-code-review lands every CR item in its own commit', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+
+    expect($content)->toContain('#### Commit granularity — one CR item = one commit');
+    expect($content)->toContain(
+        'Every checklist item built during intake — each structured CR finding **and** each unresolved'
+            . ' reviewer thread — is resolved in **exactly one commit of its own**, and no commit carries'
+            . ' two items.',
+    );
+    expect($content)->toContain('1. **One item, one commit.**');
+    expect($content)->toContain('2. **Self-contained.**');
+    expect($content)->toContain(
+        'Never defer an item\'s test to a later commit — an item exempt from the reproducer requirement'
+            . ' (a free-form reviewer thread whose remark is naming / readability / dead code) legitimately'
+            . ' carries no test',
+    );
+    expect($content)->toContain('5. **Across loop iterations.**');
+    expect($content)->toContain('`git commit --fixup=<sha>` during the loop, `git rebase --autosquash` before the push');
+    // The fold never rewrites history an earlier run already pushed.
+    expect($content)->toContain('**Scope — unpushed commits of the current run only.**');
+    expect($content)->toContain(
+        'reviewer threads are anchored to those commits and rewriting them outdates the review. Land the'
+            . ' correction as a **new** commit for that item instead',
+    );
+    expect($content)->toContain('The one-item-one-commit guarantee therefore holds **per run**');
+    // …and the reconciliation walk is scoped the same way, so the two steps cannot contradict.
+    expect($content)->toContain(
+        'confirm that every checklist item resolved **in this run** has exactly one commit **among the'
+            . ' commits this run created**',
+    );
+    expect($content)->toContain(
+        'Commits an **earlier run** left on the branch are outside the walk (step 5 *Scope*) — they are read'
+            . ' for context, never reshaped',
+    );
+    expect($content)->toContain('6. **Reconcile before pushing — on every push path.**');
+
+    // Finalization pushes the per-item commits and reconciles the history first.
+    expect($content)->toContain(
+        '- Commit and push changes — one commit per CR item per *Commit granularity — one CR item = one'
+            . ' commit* above.',
+    );
+
+    // Every resolved item in the cr-status report names the single commit that resolved it.
+    expect($content)->toContain('  - **Commit:** {short SHA} — {commit subject}');
+    expect($content)->toContain(
+        'a resolved item that cannot name exactly one commit means the history was not reconciled — fix the'
+            . ' history, not the report',
+    );
+    expect($content)->toContain('resolved items, each with the short SHA of the single commit that resolved it');
+
+    // Both push paths reconcile the history — Finalization and the awaiting-external-input short-circuit.
+    expect($content)->toContain(
+        'This skill has **two** fix-carrying push paths and both are bound by this step: **Finalization** on'
+            . ' a converged loop, and the Review loop\'s **Awaiting-external-input short-circuit**',
+    );
+    // The intake branch-sync push carries no fix commit and is exempt.
+    expect($content)->toContain(
+        'The intake `git push --force-with-lease` that publishes the rebase in *Before processing a PR*'
+            . ' carries no fix commit and is exempt.',
+    );
+    expect($content)->toContain(
+        'That push is bound by *Commit granularity — one CR item = one commit* exactly like Finalization\'s:'
+            . ' run its step 6 reconciliation (autosquash the loop\'s `--fixup` commits, one commit per item)'
+            . ' **before** pushing.',
+    );
+    expect($content)->toContain(
+        '- Keep changes traceable to review comments — one CR item is resolved in exactly one commit, so the'
+            . ' pushed history is a one-to-one map of the resolved review points',
+    );
+});

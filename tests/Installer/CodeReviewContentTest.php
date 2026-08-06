@@ -1627,8 +1627,13 @@ test('process-code-review lands every CR item in its own commit', function (): v
 
     // Both push paths reconcile the history — Finalization and the awaiting-external-input short-circuit.
     expect($content)->toContain(
-        'This skill has **two** push paths and both are bound by this step: **Finalization** on a converged'
-            . ' loop, and the Review loop\'s **Awaiting-external-input short-circuit**',
+        'This skill has **two** fix-carrying push paths and both are bound by this step: **Finalization** on'
+            . ' a converged loop, and the Review loop\'s **Awaiting-external-input short-circuit**',
+    );
+    // The intake branch-sync push carries no fix commit and is exempt.
+    expect($content)->toContain(
+        'The intake `git push --force-with-lease` that publishes the rebase in *Before processing a PR*'
+            . ' carries no fix commit and is exempt.',
     );
     expect($content)->toContain(
         'That push is bound by *Commit granularity — one CR item = one commit* exactly like Finalization\'s:'

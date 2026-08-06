@@ -1598,7 +1598,7 @@ test('process-code-review lands every CR item in its own commit', function (): v
     expect($content)->toContain('Never defer an item\'s test to a later commit.');
     expect($content)->toContain('5. **Across loop iterations.**');
     expect($content)->toContain('`git commit --fixup=<sha>` during the loop, `git rebase --autosquash` before the push');
-    expect($content)->toContain('6. **Reconcile before pushing.**');
+    expect($content)->toContain('6. **Reconcile before pushing — on every push path.**');
 
     // Finalization pushes the per-item commits and reconciles the history first.
     expect($content)->toContain(
@@ -1613,6 +1613,17 @@ test('process-code-review lands every CR item in its own commit', function (): v
             . ' history, not the report',
     );
     expect($content)->toContain('resolved items, each with the short SHA of the single commit that resolved it');
+
+    // Both push paths reconcile the history — Finalization and the awaiting-external-input short-circuit.
+    expect($content)->toContain(
+        'This skill has **two** push paths and both are bound by this step: **Finalization** on a converged'
+            . ' loop, and the Review loop\'s **Awaiting-external-input short-circuit**',
+    );
+    expect($content)->toContain(
+        'That push is bound by *Commit granularity — one CR item = one commit* exactly like Finalization\'s:'
+            . ' run its step 6 reconciliation (autosquash the loop\'s `--fixup` commits, one commit per item)'
+            . ' **before** pushing.',
+    );
     expect($content)->toContain(
         '- Keep changes traceable to review comments — one CR item is resolved in exactly one commit, so the'
             . ' pushed history is a one-to-one map of the resolved review points',

@@ -1609,6 +1609,15 @@ test('process-code-review lands every CR item in its own commit', function (): v
             . ' correction as a **new** commit for that item instead',
     );
     expect($content)->toContain('The one-item-one-commit guarantee therefore holds **per run**');
+    // …and the reconciliation walk is scoped the same way, so the two steps cannot contradict.
+    expect($content)->toContain(
+        'confirm that every checklist item resolved **in this run** has exactly one commit **among the'
+            . ' commits this run created**',
+    );
+    expect($content)->toContain(
+        'Commits an **earlier run** left on the branch are outside the walk (step 5 *Scope*) — they are read'
+            . ' for context, never reshaped',
+    );
     expect($content)->toContain('6. **Reconcile before pushing — on every push path.**');
 
     // Finalization pushes the per-item commits and reconciles the history first.

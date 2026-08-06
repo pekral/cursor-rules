@@ -1598,6 +1598,13 @@ test('process-code-review lands every CR item in its own commit', function (): v
     expect($content)->toContain('Never defer an item\'s test to a later commit.');
     expect($content)->toContain('5. **Across loop iterations.**');
     expect($content)->toContain('`git commit --fixup=<sha>` during the loop, `git rebase --autosquash` before the push');
+    // The fold never rewrites history an earlier run already pushed.
+    expect($content)->toContain('**Scope — unpushed commits of the current run only.**');
+    expect($content)->toContain(
+        'reviewer threads are anchored to those commits and rewriting them outdates the review. Land the'
+            . ' correction as a **new** commit for that item instead',
+    );
+    expect($content)->toContain('The one-item-one-commit guarantee therefore holds **per run**');
     expect($content)->toContain('6. **Reconcile before pushing — on every push path.**');
 
     // Finalization pushes the per-item commits and reconciles the history first.

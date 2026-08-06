@@ -1595,7 +1595,11 @@ test('process-code-review lands every CR item in its own commit', function (): v
     );
     expect($content)->toContain('1. **One item, one commit.**');
     expect($content)->toContain('2. **Self-contained.**');
-    expect($content)->toContain('Never defer an item\'s test to a later commit.');
+    expect($content)->toContain(
+        'Never defer an item\'s test to a later commit — an item exempt from the reproducer requirement'
+            . ' (a free-form reviewer thread whose remark is naming / readability / dead code) legitimately'
+            . ' carries no test',
+    );
     expect($content)->toContain('5. **Across loop iterations.**');
     expect($content)->toContain('`git commit --fixup=<sha>` during the loop, `git rebase --autosquash` before the push');
     // The fold never rewrites history an earlier run already pushed.

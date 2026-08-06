@@ -111,6 +111,17 @@ Rules:
 - All production code changes must follow:
   - @skills/class-refactoring/SKILL.md
 
+#### Commit granularity — one CR item = one commit
+
+Every checklist item built during intake — each structured CR finding **and** each unresolved reviewer thread — is resolved in **exactly one commit of its own**, and no commit carries two items. This is the CR form of the logical-partition rule in `@rules/git/general.mdc` *Git Rules* (its assignment-side counterpart is `@skills/resolve-issue/references/commit-planning.md`), so a reviewer opening the PR's *Commits* tab reads the fix history as a one-to-one map of the review points.
+
+1. **One item, one commit.** Fold two checklist items into a single commit **only** when they are literally the same defect raised twice — keep both finding titles in the commit body. Split one item across two commits **only** when the finding names two independent changes. Never bundle unrelated findings to shorten the history, and never attach an item's fix to an unrelated commit.
+2. **Self-contained.** The commit ships the item's production change **and** everything that item needs to be complete: the failing test written in *Reproducer extraction* above, plus any migration, locale entry, config key, or factory it introduces. Never defer an item's test to a later commit. **Exception — a behavior-preserving refactor item:** `@rules/refactoring/general.mdc` *Test Coverage Contract* wins, exactly as in the *Pre-fix phase* above — the missing coverage lands in a dedicated `test(<scope>): cover <area> before refactor` commit ordered **before** the refactor commit, which itself modifies no pre-existing test.
+3. **Subject.** Conventional Commits per `@rules/git/general.mdc` *Commit Messages* — `fix(<scope>): …` for a behavior defect, `refactor(<scope>): …` for a behavior-preserving cleanup, `test(<scope>): …` for a coverage-only finding, `docs(<scope>): …` for a documentation-only one. The subject names the resolved finding, never the review round — `fix(auth): reject expired reset tokens`, not `fix: iteration 2 review fixes`. Identify the item in the commit body: the finding title, or the reviewer thread's `path:line` and author.
+4. **Order.** Pre-existing fix commits first (*Pre-fix phase* above), then the CR-item commits in checklist order — Critical, then Moderate, then Minor, with reviewer threads in the order the intake query returned them.
+5. **Across loop iterations.** Every Review-loop iteration commits its items the same way, and nothing is pushed until **Finalization**, so the history stays reshapable for the whole loop. When a later iteration re-raises an item that an earlier iteration already committed (an unfulfilled reviewer instruction, or a fix the CR rejected), fold the corrective change **into that item's commit** — `git commit --fixup=<sha>` during the loop, `git rebase --autosquash` before the push — instead of adding a second commit for the same item. Never squash distinct items together to compensate.
+6. **Reconcile before pushing.** In **Finalization**, read `git log --oneline "origin/$DEFAULT_BRANCH"..HEAD` and confirm that every resolved checklist item has exactly one commit, every commit maps to exactly one item (or is a named pre-existing / coverage commit), and no commit bundles two items. Reshape a drifted history before the push — never describe the drift in the `cr-status` comment instead of fixing it.
+
 ---
 
 ### Testing
@@ -163,7 +174,7 @@ This is a **blocking loop**. Do not advance to **Finalization**, **PR update**, 
 **Precondition:** the Review loop above must have exited with `criticalCount + moderateCount == 0`. If the loop hit `maxIterations` without converging, do not proceed — return the remaining findings to the user for manual triage instead.
 
 - Do **not** auto-invoke `@skills/test-like-human/SKILL.md`. The user-perspective testing skill runs **on demand only** — leave it for the user to trigger via `/test-like-human` after the PR is updated.
-- Commit and push changes
+- Commit and push changes — one commit per CR item per *Commit granularity — one CR item = one commit* above. Run that section's reconciliation step (`git log --oneline "origin/$DEFAULT_BRANCH"..HEAD`) **before** the push, autosquash any `--fixup` commits the loop produced, and reshape a drifted history rather than pushing it
 - If PR does not exist, create it according to @rules/git/general.mdc — as a **Draft** (`gh pr create --draft`) per *Draft pull requests*; the **Promote the PR out of Draft** step below marks it ready once this converged run is published
   - Title in English (per `@rules/git/general.mdc`)
   - Body in the assignment language (per `@rules/reports/general.mdc`)
@@ -210,11 +221,13 @@ Every resolved review point in the PR comment **must** include a brief justifica
   - **Why:** {what was wrong / what the reviewer asked for}
   - **Reason:** {root cause or rule that was violated}
   - **Solution:** {what was changed and why this is the best fit}
+  - **Commit:** {short SHA} — {commit subject}
 ```
 
 Rules:
 - Keep each line **one sentence max**.
-- Skip the section only if a point was rejected or deferred — in that case state the rejection reason instead.
+- **Commit** names the single commit that resolved this item (*Commit granularity — one CR item = one commit* above); a resolved item that cannot name exactly one commit means the history was not reconciled — fix the history, not the report.
+- Skip the section only if a point was rejected or deferred — in that case state the rejection reason instead; a rejected or deferred point has no commit, so it carries no **Commit** line.
 - Do not pad with filler, restate the obvious, or paraphrase the diff.
 
 ---
@@ -229,7 +242,7 @@ Rules:
 - **Record durable lessons.** After the final publish, run `@skills/record-project-memory/SKILL.md` with the converged CR context and the PR link. It appends to `docs/memory/PROJECT_MEMORY.md` only the lessons that clear the promotion bar in `@rules/compound-engineering/general.mdc` *Compound Memory (per project)* (a recurring CR finding is the canonical input); a CR that surfaced nothing durable records nothing.
 - Share a concise completion report (in-conversation, not on the tracker):
   - PR link
-  - resolved items
+  - resolved items, each with the short SHA of the single commit that resolved it
   - reviewer threads resolved (count) and any left unresolved with the rejection / deferral reason
   - reviewer comments fulfilled (the final `M/N fulfilled` verdict) — every actionable reviewer instruction satisfied, or rejected/deferred with its recorded reason
   - loop iteration count and final convergence status
@@ -242,7 +255,7 @@ Rules:
 - Resolve review feedback, do not expand scope
 - Prefer minimal changes over unnecessary refactoring
 - Do not introduce new bugs while fixing existing ones
-- Keep changes traceable to review comments
+- Keep changes traceable to review comments — one CR item is resolved in exactly one commit, so the pushed history is a one-to-one map of the resolved review points
 - Ensure every review comment is explicitly addressed
 - Treat unresolved GitHub reviewer threads as first-class checklist items; skip already-resolved threads, and resolve a thread only after its fix lands
 - Do not converge until every actionable reviewer comment is verified fulfilled — the applied change must correspond to what the reviewer asked for, not merely produce zero new Critical / Moderate findings

@@ -113,13 +113,7 @@ test('athena is the single code-review agent and the retired argos definition no
     expect($content)->toContain('`CR done` (review mode)');
 
     // No agent definition may still reference the retired reviewer.
-    $globResult = glob($packageDir . '/agents/*.md');
-    $agentFiles = $globResult !== false ? $globResult : [];
-    expect($agentFiles)->not->toBeEmpty();
-
-    foreach ($agentFiles as $agentFile) {
-        expect((string) file_get_contents($agentFile))->not->toContain('argos');
-    }
+    installerExpectNoAgentFileMentions('argos');
 });
 
 test('agents directory ships the talos code-writing subagent with required frontmatter', function (): void {
@@ -513,13 +507,7 @@ test('the retired apollon agent ships nowhere and its test authoring moved to ta
     expect($docs)->toContain('Retired: `apollon`');
 
     // No agent definition may still reference the retired agent.
-    $globResult = glob($packageDir . '/agents/*.md');
-    $agentFiles = $globResult !== false ? $globResult : [];
-    expect($agentFiles)->not->toBeEmpty();
-
-    foreach ($agentFiles as $agentFile) {
-        expect((string) file_get_contents($agentFile))->not->toContain('apollon');
-    }
+    installerExpectNoAgentFileMentions('apollon');
 });
 
 test('hermes owns the post-convergence reporting step dispatched by daidalos', function (): void {

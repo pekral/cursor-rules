@@ -256,7 +256,7 @@
 - Rule:    A static comparison of the assertion string against the target file only proves the string exists somewhere in the file, not that the assertion targets the right file or would actually catch a regression. Spot-check the highest-risk new pins with a mutate-and-revert: temporarily alter the pinned phrase in the source file, run the specific pin test and confirm it goes red with the expected diagnostic, then revert and confirm `git status` is clean again. Do this for a handful of the riskiest new pins (cross-file pointers, security guards), not every single one.
 - Example: PR #749 (issue #748) — apollon ran 3 mutate-and-revert spot checks (a rule-guard phrase, a skill cross-pointer, an agent `tools:` entry) and confirmed each corresponding pin test failed red with the exact expected diagnostic before reverting, ruling out false-green pins.
 - Source:  https://github.com/pekral/cursor-rules/pull/749   Added: 2026-07-31
-- Role:    apollon
+- Role:    talos   (retagged from the retired `apollon` role, which no longer exists in the enum)
 
 ### argos-no-task-tool-orchestrator-drives-fix-loop — argos cannot self-manage the CR fix loop; the orchestrator must dispatch talos after every iteration and budget iterations generously for contract-changing PRs
 

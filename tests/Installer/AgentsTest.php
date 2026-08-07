@@ -281,7 +281,7 @@ test('athena runs every code-review skill the project defines (issue #753)', fun
 
     // Deliberate exclusions: an offensive skill needing human authorisation, and the write-capable test authoring.
     expect($content)->toContain('`@skills/penetration-tester/SKILL.md` runs only on an explicit human request');
-    expect($content)->toContain('belong to `apollon`');
+    expect($content)->toContain('belong to `talos`');
 
     // The handoff has to account for every inventory row.
     expect($content)->toContain('every row of the *complete inventory* in step 4');
@@ -340,7 +340,7 @@ test('laravel-security audit-workflow ships with all 7 areas, severity mapping, 
 test('every dispatched agent reads and appends to the shared task brief', function (): void {
     $packageDir = dirname(__DIR__, 2);
 
-    foreach (['metis', 'talos', 'apollon', 'athena', 'hermes'] as $agent) {
+    foreach (['metis', 'talos', 'athena', 'hermes'] as $agent) {
         $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
         expect($content)->toContain('Shared task brief');
         expect($content)->toContain('.claude/run/');
@@ -493,21 +493,50 @@ test('the read-only CR agent documents an optional review worktree it hands back
     expect($content)->toContain('git worktree remove');
 });
 
-test('agents directory ships the apollon test-engineer subagent with required frontmatter', function (): void {
+test('the retired apollon agent ships nowhere and its test authoring moved to talos', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $agentPath = $packageDir . '/agents/apollon.md';
 
-    expect(is_file($agentPath))->toBeTrue();
+    // The agent and its avatar are gone.
+    expect(is_file($packageDir . '/agents/apollon.md'))->toBeFalse();
+    expect(is_file($packageDir . '/assets/agents/apollon.png'))->toBeFalse();
 
-    $content = (string) file_get_contents($agentPath);
-    expect($content)->toContain('name: apollon');
-    // Write-capable test engineer: authors PHPUnit/Pest tests, so the tools line grants Write and Edit.
-    expect($content)->toContain('tools: Read, Write, Edit, Glob, Grep, Bash');
-    expect($content)->toContain('model: sonnet');
-    expect($content)->toContain('@skills/create-test/SKILL.md');
-    expect($content)->toContain('@skills/test-like-human/SKILL.md');
-    expect($content)->toContain('@skills/e2e-testing/SKILL.md');
-    expect($content)->toContain('@skills/resolve-issue/references/source-detection.md');
+    // talos absorbed every write-capable test skill apollon used to own.
+    $talos = (string) file_get_contents($packageDir . '/agents/talos.md');
+    expect($talos)->toContain('## Test authoring (you own the write-capable test skills)');
+    expect($talos)->toContain('@skills/create-test/SKILL.md');
+    expect($talos)->toContain('@skills/create-missing-tests-in-pr/SKILL.md');
+    expect($talos)->toContain('@skills/e2e-testing/SKILL.md');
+    expect($talos)->toContain('@skills/test-like-human/SKILL.md');
+
+    // The retirement is recorded for humans in the naming section.
+    $docs = (string) file_get_contents($packageDir . '/docs/agents.md');
+    expect($docs)->toContain('Retired: `apollon`');
+
+    // No agent definition may still reference the retired agent.
+    $globResult = glob($packageDir . '/agents/*.md');
+    $agentFiles = $globResult !== false ? $globResult : [];
+    expect($agentFiles)->not->toBeEmpty();
+
+    foreach ($agentFiles as $agentFile) {
+        expect((string) file_get_contents($agentFile))->not->toContain('apollon');
+    }
+});
+
+test('hermes owns the post-convergence reporting step dispatched by daidalos', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    $hermes = (string) file_get_contents($packageDir . '/agents/hermes.md');
+    expect($hermes)->toContain('## Post-convergence reporting mode');
+    expect($hermes)->toContain('@skills/pr-summary/SKILL.md');
+    expect($hermes)->toContain('Reporting done (no tracker)');
+    // Read-only in this mode: it designs the How-to-test steps but never authors or runs tests.
+    expect($hermes)->toContain('you write no tests, run no build, and touch no code');
+    // The brief handoff header carries the mode's own status, not a hardcoded announcement one.
+    expect($hermes)->toContain('### hermes — <status>');
+
+    // daidalos dispatches hermes as the reporting step.
+    $daidalos = (string) file_get_contents($packageDir . '/agents/daidalos.md');
+    expect($daidalos)->toContain('dispatchneš `hermes` přes Task tool');
 });
 
 test('agents directory ships the hermes release-announcer subagent with required frontmatter', function (): void {
@@ -548,7 +577,7 @@ test('parallel agents share their split output through the brief under an append
 test('every agent keeps commit messages and PR titles in English regardless of the assignment language', function (): void {
     $packageDir = dirname(__DIR__, 2);
 
-    foreach (['daidalos', 'talos', 'athena', 'metis', 'apollon', 'hermes'] as $agent) {
+    foreach (['daidalos', 'talos', 'athena', 'metis', 'hermes'] as $agent) {
         $content = (string) file_get_contents($packageDir . '/agents/' . $agent . '.md');
         expect($content)->toContain('commit messages and PR titles are always English');
     }

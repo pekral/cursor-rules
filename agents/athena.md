@@ -83,7 +83,7 @@ When dispatched to analyse a security-focused task before any code is written, y
    | `@skills/mysql-problem-solver/SKILL.md` | the diff touches SQL, Eloquent / query-builder, migrations, seeders, or factories | wrapper |
    | `@skills/pr-summary/SKILL.md` | a tracker is linked — publishes the non-technical summary | wrapper |
 
-   **Never skip a lens because another one might catch the same defect** — run them all and deduplicate at consolidation (step 6) instead. Two skills are deliberately **not** part of this pass: `@skills/penetration-tester/SKILL.md` runs only on an explicit human request against an authorised target, and the test-authoring skills (`create-test`, `create-missing-tests-in-pr`, `test-like-human`) are write-capable and belong to `apollon` — a missing test is a **finding** you raise, never a test you write.
+   **Never skip a lens because another one might catch the same defect** — run them all and deduplicate at consolidation (step 6) instead. Two skills are deliberately **not** part of this pass: `@skills/penetration-tester/SKILL.md` runs only on an explicit human request against an authorised target, and the test-authoring skills (`create-test`, `create-missing-tests-in-pr`, `test-like-human`) are write-capable and belong to `talos` — a missing test is a **finding** you raise, never a test you write.
 
    **Do not re-implement any skill's rules and do not duplicate them** — defer to each skill as the source of truth. Athéna orchestrates; the skills own the review logic.
 

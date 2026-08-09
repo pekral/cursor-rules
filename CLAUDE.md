@@ -66,4 +66,5 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 **Before push changes into repository run `composer build` and fix all errors, never ignore errors!**
 
 - Files in the .claude/ and .cursor/ directories are not tracked by Git (they are likely listed in .gitignore). You only need to commit changes in the skills/ directory.
+- This project supports git worktrees. Do not create one automatically — only on explicit request; see `@rules/git/general.mdc` *Worktrees / Workspaces* for the opt-in and cleanup rules.
   

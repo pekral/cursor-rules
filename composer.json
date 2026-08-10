@@ -37,7 +37,7 @@
   "require-dev": {
     "composer/composer": "^2.10.2",
     "ergebnis/composer-normalize": "^2.52.0",
-    "laravel/pint": "^1.30.3",
+    "laravel/pint": "^1.30.4",
     "pekral/phpcs-rules": "dev-master",
     "pekral/phpstan-rules": "dev-master",
     "pekral/rector-rules": "dev-master",
@@ -50,7 +50,7 @@
     "phpstan/phpstan-mockery": "^2.0",
     "phpstan/phpstan-phpunit": "^2.0.18",
     "roave/security-advisories": "dev-latest",
-    "squizlabs/php_codesniffer": "^4.0.1"
+    "squizlabs/php_codesniffer": "^4.0.4"
   },
   "autoload": {
     "psr-4": {

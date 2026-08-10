@@ -90,21 +90,7 @@ Run this section only when the diff integrates with, modifies, or depends on a t
 - **Full Core Analysis walk-through (canonical detail in `@rules/code-review/general.mdc` *Core Analysis Walk-through*).** Apply every bullet there to the diff and raise one finding per violation at the severity it declares: Reuse of existing logic, Action scope, Speculative interfaces, **Simplicity First**, method-parameter-count (>4 → DTO), public-method raw-array-vs-DTO, new static-analysis / linter suppression, **Strict rule compliance (mandatory walk-through)**, **Architecture conformance (Laravel)** (issue #530), **Test organization (issue #528)**, **Queue assertion specificity (issue #756)**, per-row DB operations in loops, **batch-first processing & performance at scale**, variable ordering / lazy evaluation, object caching, new storage reuse analysis, SQL index reuse / performance non-regression, refactoring quality + test-coverage contract, data-validation encapsulation, pass-through Action, repository scope, inline Eloquent / read-write layer separation, Action-returns-HTTP-response, inline data mapping → Data Builder, inline validation guards / `throw_if` / `throw_unless` / enum-mode `match()` → Data Validator, only-Laravel-and-arch-layers class inventory, **Request → DTO transformation belongs in the FormRequest, not the controller**, Data Modification (DRY), **Entry-point error handling for known failures (Laravel)**, and **Self-Documenting Code — Comment & Doc Hygiene** (a **stale comment on a touched line** is **Moderate** and blocks; its other findings stay Minor).
 ### Highest-Priority Fast Track
 
-Apply this subsection only when the source issue is flagged as **highest priority**, so the bug fix can deploy as fast as possible without sacrificing the Critical / Moderate gate.
-
-1. **Detect highest priority** from the issue context already loaded under **Issue Context Analysis**:
-   - **GitHub:** any label whose name matches (case-insensitively) `priority: highest`, `priority/highest`, `priority-highest`, `p0`, `urgent`, or `blocker`.
-   - **JIRA:** the native `priority` field equals `Highest` or `Blocker`.
-   - **Bugsnag:** the linked GitHub issue carries one of the GitHub labels above.
-   If no signal matches, skip the rest of this subsection and run the review normally.
-2. **Narrow the review scope** to whatever directly affects the bug fix and its safe deployment. Out-of-scope improvements that the diff merely happens to sit near must be moved to **Refactoring Proposals** as follow-up items, never blockers.
-3. **Keep the resolution gate at Critical and Moderate.** No widening, no narrowing — those two severities still block the merge, exactly as in the default flow. State this explicitly in the review header so the caller does not have to infer it.
-4. **Demote non-blocking sections to follow-up only.** Still emit them so nothing is lost, but mark each entry as *follow-up; does not block merge*:
-   - **Minor** findings (naming, dead code, wording nits without a binding rule).
-   - **Refactoring & Tech Debt (DRY) Analysis** entries that propose changes beyond the literal bug fix.
-   - **Refactoring Proposals** drafted for separate issues.
-   Critical and Moderate findings, the **Strict rule compliance** walk-through, the **Coverage gate**, the **Database Analysis** section, and every **Specialized Review** that the diff triggers stay mandatory and blocking — fast-track never skips them.
-5. **Record the fast-track decision** in the review output: the matched signal (label name or JIRA priority value), the deferred sections, and a one-line reminder that the gate remained Critical + Moderate.
+When the source issue is flagged **highest priority** (GitHub `priority: highest` / `p0` / `urgent` / `blocker`, JIRA `Highest` / `Blocker`), narrow the review to the bug fix and its safe deployment and demote Minor findings and both refactoring sections to *follow-up; does not block merge*. The Critical + Moderate gate never moves. Canonical: `@rules/code-review/general.mdc` *Highest-Priority Fast Track — canonical detail*.
 
 ### Named Arguments Review
 - Would positional arguments be ambiguous?

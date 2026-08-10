@@ -57,6 +57,10 @@ test('sql optimalize rule carries the bulk and streaming processing standard for
     expect($content)->toContain('resumable and idempotent');
     expect($content)->toContain('**Batch the side effects too.**');
     expect($content)->toContain('Bus::batch()');
+    // The example dispatches one job per chunk directly — a batch of exactly one job
+    // pays the job_batches bookkeeping for no fan-out, so it must not be the canonical snippet.
+    expect($content)->toContain('ProcessOrders::dispatch($orders->modelKeys());');
+    expect($content)->not->toContain('Bus::batch([new ProcessOrders');
     expect($content)->toContain('Cache::putMany()');
     expect($content)->toContain('**Aggregate, filter, and sort in SQL, not in PHP.**');
     expect($content)->toContain('**Imports and exports stream.**');

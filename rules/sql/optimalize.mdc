@@ -158,7 +158,7 @@ Order::query()
     ->where('status', 'pending')
     ->chunkById(self::BATCH_SIZE, function (Collection $orders): void {
         $this->orderModelManager->batchUpdate(Order::class, $this->orderDataBuilder->buildProcessedRows($orders), 'id');
-        Bus::batch([new ProcessOrders($orders->modelKeys())])->dispatch();
+        ProcessOrders::dispatch($orders->modelKeys());
         $this->client->post('/orders/sync', ['ids' => $orders->modelKeys()]);
     });
 

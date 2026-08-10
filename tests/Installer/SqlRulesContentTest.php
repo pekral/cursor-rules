@@ -39,3 +39,32 @@ test('sql optimalize rule carries the MySQL schema design standard', function ()
     expect($content)->toContain('### CHECK constraints');
     expect($content)->toContain('chk_order_shipped_needs_date');
 });
+
+test('sql optimalize rule carries the bulk and streaming processing standard for large datasets', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/sql/optimalize.mdc');
+
+    expect($content)->toContain('## Bulk and streaming processing of large datasets');
+    // A "large dataset" is defined by data-driven cardinality, not by a constant in the code.
+    expect($content)->toContain('never by a fixed constant written in the code');
+    expect($content)->toContain('Code that is correct for ten rows and unusable for a million is a defect');
+    expect($content)->toContain('**Never materialize an unbounded result set.**');
+    expect($content)->toContain('chunkById(1000, ...)');
+    expect($content)->toContain('**`chunkById()` over `chunk()` whenever the loop writes.**');
+    expect($content)->toContain('**Size the batch explicitly.**');
+    expect($content)->toContain('500–1000 rows per statement');
+    expect($content)->toContain('**One short transaction per batch**');
+    expect($content)->toContain('resumable and idempotent');
+    expect($content)->toContain('**Batch the side effects too.**');
+    expect($content)->toContain('Bus::batch()');
+    // The example dispatches one job per chunk directly — a batch of exactly one job
+    // pays the job_batches bookkeeping for no fan-out, so it must not be the canonical snippet.
+    expect($content)->toContain('ProcessOrders::dispatch($orders->modelKeys());');
+    expect($content)->not->toContain('Bus::batch([new ProcessOrders');
+    expect($content)->toContain('Cache::putMany()');
+    expect($content)->toContain('**The pushdown rule applies to an already-loaded collection too.**');
+    expect($content)->toContain('**Imports and exports stream.**');
+    expect($content)->toContain('**Move a large run off the request.**');
+    // The severity / detection detail is owned by the CR rule, not duplicated here.
+    expect($content)->toContain('@rules/code-review/general.mdc` *Batch-First Processing & Performance at Scale*');
+});

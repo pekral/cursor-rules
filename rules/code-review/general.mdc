@@ -133,7 +133,7 @@ Canonical detail for the Core Analysis bullet **Batch-first processing & perform
 
 **Scope — the unbounded working set.** A working set is **unbounded** when its cardinality is driven by data rather than by a constant written in the code: rows returned by a query with no `LIMIT` and no bounded filter, lines of an uploaded or imported file, items behind a paginated API loop, IDs in a client-supplied payload, keys in a cache namespace, files in a storage directory, or the members of an Eloquent relation. A set fixed by the code — a literal array of three currencies, an enum's cases, a config list — is **bounded** and out of scope. Every pattern below is a finding only when the set it processes is unbounded.
 
-**Detection checklist** — walk every item against the diff and raise one finding per match:
+**Detection checklist** — walk every item against the diff and raise one finding per match, except where an item defers to another bullet (see *Gating* below):
 
 1. **Unbounded materialization.** `->get()`, `->all()`, `->pluck()`, `->toArray()`, `iterator_to_array()`, or `collect(...)` over an unbounded query, pulling the whole set into memory before the first row is used. **Fix:** `chunkById(<n>, ...)` / `lazyById(<n>)` / `cursor()`, with the batch size in a named constant.
 2. **Per-row database work inside a loop.** Owned by the **Per-row DB operations in loops** bullet — listed here so the walk is complete; see *Gating* below and do not raise it twice.

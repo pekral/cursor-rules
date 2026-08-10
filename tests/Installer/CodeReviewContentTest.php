@@ -1673,6 +1673,7 @@ test('code review treats performance and batch-first processing as a first-class
     expect($rule)->toContain('**Scope — the unbounded working set.**');
     expect($rule)->toContain('A set fixed by the code');
     expect($rule)->toContain('**Detection checklist**');
+    expect($rule)->toContain('except where an item defers to another bullet');
     expect($rule)->toContain('1. **Unbounded materialization.**');
     expect($rule)->toContain('3. **Per-row side effects inside a loop.**');
     expect($rule)->toContain('4. **In-PHP aggregation, filtering, sorting, or de-duplication**');

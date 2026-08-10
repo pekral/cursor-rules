@@ -209,6 +209,36 @@ test('architecture CR Severity Rules cover app/Concerns misuse in both direction
     expect($content)->toContain('per **Shared Concerns (Traits)**');
 });
 
+test('every validation rule set lives as a trait in app/Concerns, including a FormRequest rules()', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $architecture = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($architecture)->toContain(
+        '**Every validation rule set in the application lives as a reusable trait in `app/Concerns/` — without exception.**',
+    );
+    expect($architecture)->toContain('it is published by a trait under `app/Concerns/`');
+    expect($architecture)->toContain('never declares a rule array literal of its own');
+    expect($architecture)->toContain('which are always extracted regardless of how many consumers they currently have');
+    // The Shared Concerns placement gate must not contradict the always-extract rule in any of its three conditions.
+    expect($architecture)->toContain('**validation rule traits are exempt from all three**');
+    expect($architecture)->toContain('**Validation rule traits are exempt**');
+    expect($architecture)->toContain('a rule set is a declarative input contract, not the business logic that acts on it');
+    // A mandated trait must never be the domain-specific-code finding.
+    expect($architecture)->toContain('a **validation rule trait is never this finding**, whatever aggregate it names');
+    // CR severity covers every inline rule set, not only the Data Validator one.
+    expect($architecture)->toContain('a validation rule array declared inline anywhere outside a trait in `app/Concerns/`');
+    expect($architecture)->toContain('the trait is extracted even for a single current consumer');
+
+    $laravel = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+    expect($laravel)->toContain('a rule array is never written inline at its point of use');
+    expect($laravel)->toContain('Extract the trait even when only one class consumes it today');
+    expect($laravel)->toContain('**Validation rule traits are exempt from all three**');
+    expect($laravel)->toContain('A validation rule trait named for the aggregate it validates is the sanctioned exception');
+
+    $refactor = (string) file_get_contents($packageDir . '/skills/refactor-entry-point-to-action/SKILL.md');
+    expect($refactor)->toContain('**Every validation rule set the refactor touches lives as a reusable trait in `app/Concerns/`**');
+});
+
 test('laravel rules carry the parallel Shared Concerns section and Layer Responsibilities bullet (issue #531)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');

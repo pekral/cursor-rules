@@ -73,7 +73,7 @@ Use these to write a failing test **before** applying the fix:
 
 If a **CR-skill finding** lacks Faulty Example, Expected Behavior, or Test Hint, request a CR rerun rather than guessing. Suggested Fix may legitimately be `n/a` per the CR rules.
 
-**Commit-split findings are exempt from the reproducer requirement (issue #763).** A `## Commit Split Proposal` finding reports the shape of the history, not a code defect: no CR rerun, no reproducer test. Resolve it by reshaping the branch per its Suggested Fix (`git rebase -i <base>`; mechanics in `@skills/git-workflow/SKILL.md`), confirm `git diff <old-head> HEAD` is empty, and publish with `git push --force-with-lease`.
+**Commit-split findings (issue #763)** report the shape of the history, not a code defect, so they are exempt from the reproducer requirement, from *Commit granularity*, and from the `Commit:` line. Resolve and report them per `@rules/code-review/general.mdc` *Commit Split & Atomic Deployability Proposal* (**Rewrite safety**, **Resolution contract**).
 
 **"Awaiting external input" findings are exempt from the reproducer requirement.** A finding whose Suggested Fix is the literal request-for-link template from `@rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification (issue #748)* step 3 has no Faulty Example / Expected Behavior / Test Hint by nature — there is no code bug to reproduce, only a missing external source. Do **not** request a CR rerun for it and do **not** attempt a code fix for it — the only remedy is the author supplying the documentation link. It still **counts toward `criticalCount + moderateCount`** per that rule's step 6, so it is not simply waved through: it triggers the Review loop's dedicated **Awaiting-external-input short-circuit** below instead of a normal fix-and-retry iteration. The request is never posted as a separate PR reply — that rule's step 3 publishes the request-for-link Suggested Fix exclusively through the CR skill's `## Findings` block, and this exemption creates no second channel for it.
 
@@ -228,7 +228,7 @@ Every resolved review point in the PR comment **must** include a brief justifica
 
 Rules:
 - Keep each line **one sentence max**.
-- **Commit** names the single commit that resolved this item (*Commit granularity — one CR item = one commit* above); a resolved item that cannot name exactly one commit means the history was not reconciled — fix the history, not the report.
+- **Commit** names the single commit that resolved this item (*Commit granularity — one CR item = one commit* above); a resolved item that cannot name exactly one commit means the history was not reconciled — fix the history, not the report. A **commit-split item** renders `**History:**` instead (issue #763).
 - Skip the section only if a point was rejected or deferred — in that case state the rejection reason instead; a rejected or deferred point has no commit, so it carries no **Commit** line.
 - Do not pad with filler, restate the obvious, or paraphrase the diff.
 

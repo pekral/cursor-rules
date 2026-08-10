@@ -203,7 +203,7 @@ Apply this subsection only when the source issue is flagged as **highest priorit
    - **Minor** findings (naming, dead code, wording nits without a binding rule).
    - **Refactoring & Tech Debt (DRY) Analysis** entries that propose changes beyond the literal bug fix.
    - **Refactoring Proposals** drafted for separate issues.
-   Critical and Moderate findings, the **Strict rule compliance** walk-through, the **Coverage gate**, the **Database Analysis** section, and every **Specialized Review** that the diff triggers stay mandatory and blocking — fast-track never skips them.
+   Critical and Moderate findings, the **Strict rule compliance** walk-through, the **Commit Split & Atomic Deployability Gate**, the **Coverage gate**, the **Database Analysis** section, and every **Specialized Review** that the diff triggers stay mandatory and blocking — fast-track never skips them. A fast-tracked fix still has to be cherry-pickable on its own; that is precisely what makes it fast to deploy.
 5. **Record the fast-track decision** in the review output: the matched signal (label name or JIRA priority value), the deferred sections, and a one-line reminder that the gate remained Critical + Moderate.
 
 ## Commit Split & Atomic Deployability Proposal — canonical walk-through (issue #763)

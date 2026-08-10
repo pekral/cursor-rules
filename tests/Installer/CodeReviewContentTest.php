@@ -1730,7 +1730,7 @@ test('CR proposes an atomically deployable commit split as a Critical finding (i
     expect($rule)->toContain('Never propose dropping or deferring work.');
 
     // Atomic deployability — each commit ships, reverts, and cherry-picks on its own.
-    expect($rule)->toContain('**A commit cannot be cherry-picked onto the default branch on its own**');
+    expect($rule)->toContain('**A commit forward-references work that lands later in the same range**');
     expect($rule)->toContain('**Expand-before-contract violated inside one commit**');
 
     // Severity is fixed at Critical and survives every downgrade path.
@@ -1810,9 +1810,8 @@ test('the fix loop reshapes history instead of writing a reproducer for a commit
     $packageDir = dirname(__DIR__, 2);
     $processCr = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
 
-    expect($processCr)->toContain('**Commit-split findings are exempt from the reproducer requirement (issue #763).**');
-    expect($processCr)->toContain('no CR rerun, no reproducer test');
-    expect($processCr)->toContain('confirm `git diff <old-head> HEAD` is empty');
+    expect($processCr)->toContain('**Commit-split findings (issue #763)**');
+    expect($processCr)->toContain('exempt from the reproducer requirement, from *Commit granularity*, and from the `Commit:` line');
 });
 
 test('the git rule and the staged-merge planner defer to the CR commit split gate (issue #763)', function (): void {
@@ -1867,4 +1866,48 @@ test('CR reviews every new PHP file against the defined architecture at Moderate
     expect($codeReview)->toContain('### New PHP File Architecture Gate (mandatory)');
     expect($codeReview)->toContain('**New PHP file — architecture & design conformance** (issue #763)');
     expect(str_word_count($codeReview))->toBeLessThan(5_000);
+});
+
+test('the commit-split proposal never orphans an anchored review and stays resolvable (issue #763)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $processCr = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+
+    // Rewrite safety: a commit carrying an anchored review thread is frozen, not rewritten.
+    expect($rule)->toContain('**Rewrite safety — the proposal never orphans a review.**');
+    expect($rule)->toContain('is **frozen**');
+    expect($rule)->toContain('Never raise a Critical whose only remedy the implementer is contractually barred from performing');
+
+    // Both Suggested Fix branches exist, so the finding is always actionable.
+    expect($rule)->toContain('**Reshapable history**');
+    expect($rule)->toContain('**Frozen history**');
+    expect($rule)->toContain('carry the split into follow-up PRs via `@skills/pr-staged-merge-plan/SKILL.md`');
+
+    // The fix loop has a report shape for an item that produces no commit.
+    expect($rule)->toContain('**Resolution contract for `@skills/process-code-review/SKILL.md`.**');
+    expect($rule)->toContain('`**History:** <old-head> → <new-head>` **in place of** the `**Commit:**` line');
+    expect($processCr)->toContain('exempt from the reproducer requirement, from *Commit granularity*, and from the `Commit:` line');
+    expect($processCr)->toContain('A **commit-split item** renders `**History:**` instead (issue #763)');
+
+    // The cherry-pick trigger fires on forward references only — a stacked split is not a finding.
+    expect($rule)->toContain('**A commit forward-references work that lands later in the same range**');
+    expect($rule)->toContain('A commit that depends on an **earlier** commit of the same range is **not** this trigger');
+
+    // Wrapper ordering lines and the Critical template block agree with the templates.
+    foreach (['code-review-github', 'code-review-jira', 'code-review-bugsnag'] as $wrapper) {
+        $content = (string) file_get_contents($packageDir . '/skills/' . $wrapper . '/SKILL.md');
+        expect($content)->toContain('Critical → Moderate → Minor → Commit Split Proposal → Refactoring (DRY / Tech Debt Reduction)');
+    }
+
+    $templates = [
+        $packageDir . '/skills/code-review/templates/review-output.md',
+        $packageDir . '/skills/code-review-github/templates/pr-comment-output.md',
+        $packageDir . '/skills/code-review-jira/templates/github-output.md',
+        $packageDir . '/skills/code-review-bugsnag/templates/github-output.md',
+    ];
+
+    foreach ($templates as $templateFile) {
+        expect((string) file_get_contents($templateFile))
+            ->toContain('is listed here by title only and is exempt from Faulty Example / Expected behavior / Test hint');
+    }
 });

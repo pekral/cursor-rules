@@ -1709,7 +1709,7 @@ test('code review treats performance and batch-first processing as a first-class
             . ' large datasets*',
     );
 
+    // The 5000-word gate on the skill body is asserted once, by the issue-#737 test above.
     $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
     expect($codeReview)->toContain('**batch-first processing & performance at scale**');
-    expect(str_word_count($codeReview))->toBeLessThan(5_000);
 });

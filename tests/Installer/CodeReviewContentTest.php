@@ -1713,3 +1713,158 @@ test('code review treats performance and batch-first processing as a first-class
     $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
     expect($codeReview)->toContain('**batch-first processing & performance at scale**');
 });
+
+test('CR proposes an atomically deployable commit split as a Critical finding (issue #763)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // The dimension is declared up front and the canonical walk-through owns the detail.
+    expect($rule)->toContain('## Commit Split & Atomic Deployability — a first-class review dimension (issue #763)');
+    expect($rule)->toContain('## Commit Split & Atomic Deployability Proposal — canonical walk-through (issue #763)');
+    expect($rule)->toContain('**The proposal never changes behavior.**');
+
+    // Behavior preservation is the invariant: a repartition of the existing diff and nothing else.
+    expect($rule)->toContain('**Behavior-preservation invariant (mandatory, stated in the section).**');
+    expect($rule)->toContain('same files, same net content, byte for byte');
+    expect($rule)->toContain('`git diff <old-head> HEAD` must be empty');
+    expect($rule)->toContain('Never propose dropping or deferring work.');
+
+    // Atomic deployability — each commit ships, reverts, and cherry-picks on its own.
+    expect($rule)->toContain('**A commit cannot be cherry-picked onto the default branch on its own**');
+    expect($rule)->toContain('**Expand-before-contract violated inside one commit**');
+
+    // Severity is fixed at Critical and survives every downgrade path.
+    expect($rule)->toContain('**Severity — Critical, always.**');
+    expect($rule)->toContain('It may **never** be downgraded to Moderate or Minor');
+    expect($rule)->toContain('**Exempt from Critical Findings Verification (issue #537).**');
+
+    // Clean histories render nothing — the omit-when-clean convention is unchanged.
+    expect($rule)->toContain('**What is NOT a finding (do not raise noise):**');
+    expect($rule)->toContain('Never invent artificial commits to hit a number.');
+
+    // One finding per violation against the neighbouring gates and the multi-PR planner.
+    expect($rule)->toContain('**`@skills/pr-staged-merge-plan/SKILL.md`** owns the deeper, on-demand plan');
+
+    // Literal Suggested Fix template so process-code-review extracts it deterministically.
+    expect($rule)->toContain('Repartition `<base>..<head>` into <N> commits');
+    expect($rule)->toContain('`git push --force-with-lease`');
+});
+
+test('every CR surface renders the commit split proposal and its summary slot (issue #763)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    $skills = [
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+        $packageDir . '/skills/code-review-bugsnag/SKILL.md',
+    ];
+
+    foreach ($skills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('`## Commit Split Proposal` section (issue #763)');
+        expect($content)->toContain('commit split: N commit(s) proposed');
+    }
+
+    // The canonical skill also carries the gate itself, not only the output rule.
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    expect($codeReview)->toContain('### Commit Split & Atomic Deployability Gate (mandatory)');
+    expect($codeReview)->toContain('**Commit split & atomic deployability** (issue #763)');
+
+    $templates = [
+        $packageDir . '/skills/code-review/templates/review-output.md',
+        $packageDir . '/skills/code-review-github/templates/pr-comment-output.md',
+        $packageDir . '/skills/code-review-jira/templates/github-output.md',
+        $packageDir . '/skills/code-review-bugsnag/templates/github-output.md',
+    ];
+
+    foreach ($templates as $templateFile) {
+        $content = (string) file_get_contents($templateFile);
+
+        expect($content)->toContain('## Commit Split Proposal');
+        expect($content)->toContain('**Render only when the Commit Split & Atomic Deployability Gate fires**');
+        expect($content)->toContain('**Behavior-preservation invariant:**');
+        expect($content)->toContain('| # | Proposed subject | Contains | Assembled from | Assignment item | Cherry-pick | Reversible |');
+        expect($content)->toContain('- **Reconciliation:**');
+        expect($content)->toContain(' · commit split: {n} commit(s) proposed`');
+
+        // Critical findings are never filtered on a late-iteration run.
+        expect($content)->toContain('The `## Commit Split Proposal` section is **Critical** and is **never** dropped');
+
+        // The proposal sits between the findings and the refactoring sections.
+        $findings = strpos($content, "\n## Findings");
+        $split = strpos($content, "\n## Commit Split Proposal");
+        $refactoring = strpos($content, "\n## Refactoring (DRY / tech debt)");
+        expect($findings)->not->toBeFalse();
+        expect($split)->not->toBeFalse();
+        expect($refactoring)->not->toBeFalse();
+        assert($findings !== false);
+        assert($split !== false);
+        assert($refactoring !== false);
+        expect($findings)->toBeLessThan($split);
+        expect($split)->toBeLessThan($refactoring);
+    }
+});
+
+test('the fix loop reshapes history instead of writing a reproducer for a commit split finding (issue #763)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $processCr = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
+
+    expect($processCr)->toContain('**Commit-split findings are exempt from the reproducer requirement (issue #763).**');
+    expect($processCr)->toContain('no CR rerun, no reproducer test');
+    expect($processCr)->toContain('confirm `git diff <old-head> HEAD` is empty');
+});
+
+test('the git rule and the staged-merge planner defer to the CR commit split gate (issue #763)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $gitRule = (string) file_get_contents($packageDir . '/rules/git/general.mdc');
+    $stagedPlan = (string) file_get_contents($packageDir . '/skills/pr-staged-merge-plan/SKILL.md');
+
+    expect($gitRule)->toContain('**Code review verifies this property.**');
+    expect($gitRule)->toContain('raises it as a **Critical** finding, so the merge gate stays closed until the history is reshaped');
+
+    expect($stagedPlan)->toContain('**Commit-level splitting inside one PR is owned by the CR gate, not by this skill.**');
+    expect($stagedPlan)->toContain('Raise one plan per PR, never both');
+});
+
+test('CR reviews every new PHP file against the defined architecture at Moderate (issue #763)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($rule)->toContain('## New PHP File — Architecture & Design Conformance (issue #763)');
+
+    // Scope: new production PHP files only — modified files and test files stay elsewhere.
+    expect($rule)->toContain('Every file with status `A` in `git diff --name-status <base>..<head>` whose path ends in `.php`');
+    expect($rule)->toContain('A file the diff **modifies** is out of scope');
+    expect($rule)->toContain('Test files are out of scope here and stay with **Test organization (issue #528)**');
+
+    // The nine design checks the walk applies.
+    expect($rule)->toContain('**The file has a defined home.**');
+    expect($rule)->toContain('**Namespace, path, and class name agree.**');
+    expect($rule)->toContain('**The class has the shape its layer requires.**');
+    expect($rule)->toContain('**The name states the domain role.**');
+    expect($rule)->toContain('**One reason to change.**');
+    expect($rule)->toContain('**Dependency direction holds.**');
+    expect($rule)->toContain('**Declared strictness and typed boundaries.**');
+    expect($rule)->toContain('**It is not a duplicate.**');
+    expect($rule)->toContain('**It is wired up.**');
+
+    // Severity is fixed at Moderate in both directions.
+    expect($rule)->toContain('**Severity — Moderate.**');
+    expect($rule)->toContain('Do not downgrade a match to Minor, and do not escalate one to Critical from inside this walk');
+
+    // Runs on non-Laravel projects too, and defers to the Laravel walk on shared ground.
+    expect($rule)->toContain('the **only** architecture walk that runs on a **non-Laravel** PHP project');
+
+    // Literal Suggested Fix templates for deterministic extraction.
+    expect($rule)->toContain('**Wrong home / wrong name** —');
+    expect($rule)->toContain('**Wrong shape** —');
+    expect($rule)->toContain('**Duplicate** —');
+    expect($rule)->toContain('**Not wired** —');
+
+    // The skill carries the gate plus the Core Analysis entry (thin pointer, 5000-word budget).
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    expect($codeReview)->toContain('### New PHP File Architecture Gate (mandatory)');
+    expect($codeReview)->toContain('**New PHP file — architecture & design conformance** (issue #763)');
+    expect(str_word_count($codeReview))->toBeLessThan(5_000);
+});

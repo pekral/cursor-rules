@@ -253,6 +253,29 @@ test('laravel rules carry the parallel Shared Concerns section and Layer Respons
     expect($content)->toContain('Validation rule traits (see the **Validation** section below) are one specific worked example');
 });
 
+test('an Action returns a typed DTO for any structured result and never a raw array', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $architecture = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($architecture)->toContain('### Action return contract: a DTO, never an array');
+    expect($architecture)->toContain('**An Action never returns an array for a complex result — it returns a typed DTO.**');
+    expect($architecture)->toContain('**Allowed Action return types:**');
+    expect($architecture)->toContain('**No exemption applies to an Action.**');
+    expect($architecture)->toContain('**return a raw array for a structured result**');
+
+    // Critical severity on the Action, gated against the Moderate public-method bullet.
+    expect($architecture)->toContain('an Action whose `__invoke()` returns a raw array for a structured result');
+    expect($architecture)->toContain('raise it **here**, at Critical, and never additionally under that bullet');
+    expect($architecture)->toContain('on an Action\'s `__invoke()` the Critical bullet above owns the finding instead');
+
+    $laravel = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+    expect($laravel)->toContain('An Action never returns a raw array for a structured result');
+
+    $refactor = (string) file_get_contents($packageDir . '/skills/refactor-entry-point-to-action/SKILL.md');
+    expect($refactor)->toContain('**The Action returns a typed DTO for any structured result, never a raw array.**');
+    expect($refactor)->toContain('the array does not survive the refactor');
+});
+
 test('architecture rules require request->DTO transformation in the FormRequest, not the controller (issue #698)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');

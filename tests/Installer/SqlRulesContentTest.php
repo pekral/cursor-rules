@@ -62,7 +62,7 @@ test('sql optimalize rule carries the bulk and streaming processing standard for
     expect($content)->toContain('ProcessOrders::dispatch($orders->modelKeys());');
     expect($content)->not->toContain('Bus::batch([new ProcessOrders');
     expect($content)->toContain('Cache::putMany()');
-    expect($content)->toContain('**Aggregate, filter, and sort in SQL, not in PHP.**');
+    expect($content)->toContain('**The pushdown rule applies to an already-loaded collection too.**');
     expect($content)->toContain('**Imports and exports stream.**');
     expect($content)->toContain('**Move a large run off the request.**');
     // The severity / detection detail is owned by the CR rule, not duplicated here.

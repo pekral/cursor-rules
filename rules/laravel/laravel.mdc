@@ -44,6 +44,7 @@ globs:
 
 ## DTOs
 - Prefer typed DTOs over raw arrays across layer boundaries.
+- An Action never returns a raw array for a structured result — whenever `__invoke()` produces more than one value, its return type is a typed DTO. Scalars, `void`, an Eloquent model, and homogeneous lists / Collections of one type stay as they are. See `@rules/laravel/architecture.mdc` *Action return contract: a DTO, never an array*.
 - Use Spatie Laravel Data when the project already uses it.
 - Prefer attribute-based mapping over overriding `from()` only for key renaming.
 - DTOs should be simple, explicit, and immutable where practical.

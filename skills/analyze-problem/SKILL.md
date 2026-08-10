@@ -105,9 +105,49 @@ State where the plan artifact was written (file path or issue URL) in the analys
 
 ---
 
+## Large-Task Decomposition Proposal
+
+An analysis that ends in a single recommended solution is only useful when that solution fits one change. When it does not, the analysis must say so **and propose the split** — otherwise the next agent starts an unbounded task, the work lands as one sprawling pull request, and nothing can be reviewed, tested, or shipped in parts.
+
+### When it fires
+
+Render the proposal when **any** of these hold for the *Recommended Solution* (step 7) and *Implementation Outline* (step 8):
+
+- The work spans more than one application area (backend + frontend, schema + API + UI, web + mobile) or more than one business-logic layer that could ship separately.
+- The Implementation Outline lists steps that are individually reviewable and could merge on their own — the outline is already a list of pull requests, not a list of edits.
+- The work exceeds what one agent session or one pull request can carry to a green build, or the assignment itself is written as several numbered requirements.
+- Parts of the work are blocked on an external answer, a migration window, or a dependency the rest does not need — so bundling them would stall the parts that are ready.
+
+When none of these hold, **omit the section entirely** — a single-change fix must not be inflated into a tracker tree. Never render a "no split needed" placeholder; the omission is the verdict.
+
+### How to split
+
+- **One part = one independently deliverable, independently reviewable unit.** Each part must be mergeable on its own without breaking `master`; a part that only makes sense together with another part is not a part — merge the two.
+- **Split by deliverable, never by activity.** *"Add the invoice export endpoint"* is a part; *"write the tests"*, *"do the refactoring"*, or *"backend work"* are not.
+- **Order by dependency and state it explicitly.** Every part names the parts it depends on, so a resolving run can pick a dependency-aware order and see what may run in parallel.
+- **Expand before contract.** When the split touches a shared schema or contract, the additive part ships before the part that removes the old shape, and the proposal says which is which.
+- Keep the split between **2 and 8 parts**. One part means it was not a large task after all — drop the section.
+- **Boundary against `@skills/blueprint/SKILL.md` — decide by deliverable, not by size.** The two skills share a trigger (work that outgrows one pull request), so the owner is decided by what the reader actually needs. This section produces a **tracker-shaped split** as a by-product of an analysis that has already found the root cause: parts, their dependencies, and the parent they hang under — issues ready to file. `blueprint` produces a **sequenced construction plan** — 3–12 one-PR steps, each with a cold-start context brief and exit criteria, registered as a durable Markdown artifact for work spanning sessions or agents. When the reader needs issues to file, this section owns it; when they need a resumable plan a fresh agent can execute cold, hand off to `@skills/blueprint/SKILL.md` and reference the handoff instead of listing the parts here. An objective needing **more than eight parts** is always `@skills/blueprint/SKILL.md`'s, whatever the reader asked for — it is too broad to plan inside an analysis.
+
+### Tracker shape
+
+Render the proposal in the vocabulary of the tracker the analyzed task actually lives in:
+
+- **GitHub** — an **EPIC parent + one child issue per part**. The parent carries the original assignment and a checkable `## Sub-issues` task list; each child is independently deliverable and references the parent with `Part of #<parent>`. Do **not** restate the mechanics here — `@skills/create-issues-from-text/SKILL.md` *EPIC parent & sub-issues* owns them (the `EPIC` label, both-direction linking, and the `## Dependencies` ordering), and this proposal is the input that skill consumes.
+- **JIRA** — the analyzed issue becomes the **parent** and each part becomes a **sub-task** under it. Name the parent key, and give every proposed sub-task a summary, a one-paragraph description, and its dependency list, so a human (or `acli`) can create the set without re-deriving the split. Follow `@rules/jira/general.mdc` for wording and formatting of anything published to JIRA.
+- **Bugsnag** — Bugsnag carries no issue hierarchy. Propose the split against the mirrored GitHub issue from `linkedIssues[]` using the GitHub shape above; when no linked issue exists, say so and propose the parent that would have to be created first.
+
+### This skill proposes the split; it never creates it
+
+The proposal is **analysis output only**. This skill does not create, link, label, or transition **the proposed parent or any of its children** — creation on GitHub belongs to `@skills/create-issues-from-text/SKILL.md`, and JIRA sub-task creation stays with a human until a skill owns it. This does **not** restrict the single plan artifact that *Plan artifact (the deliverable)* above already permits: publishing that one analysis issue stays allowed, and it is what `agents/metis.md` hands back. State the handoff explicitly at the end of the section so the reader knows the next command to run.
+
+> **Read-only invocation (CR runs):** when `@skills/code-review/SKILL.md` invokes this skill for assignment conformance, **skip this section entirely**, exactly as the *Plan artifact* step is skipped. A code review reports on the change in front of it; it never proposes restructuring the tracker.
+
+---
+
 ## Output Structure
 
-The output uses the template at `templates/analysis-report.md`. The template has 12 sections that map onto the framework above:
+The output uses the template at `templates/analysis-report.md`. The template has 13 sections that map onto the framework above:
 
 1. **Summary** — short summary (covers steps 1–2)
 2. **Problem Definition** — problem statement, expected/actual behavior, affected area, problem type (steps 2–3)
@@ -117,12 +157,13 @@ The output uses the template at `templates/analysis-report.md`. The template has
 6. **Problem Impact** — user/business impact, technical impact, risk areas (step 6)
 7. **Recommended Solution** — recommended solution, things to avoid, side effects (steps 7–8)
 8. **Implementation Outline** — likely change locations, recommended steps, architecture notes (step 7)
-9. **Solution Verification** — manual checks, automated tests, edge cases, regression checks (step 9)
-10. **Non-Technical Explanation** — explanation for non-technical stakeholders (step 10)
-11. **Final Recommendation** — final recommendation, priority, next step
-12. **Sources** — every issue-tracker source, attachment, codebase location, and external reference the analysis was actually built from (provenance)
+9. **Task Decomposition** — the EPIC / sub-issue split of a solution too large for one change (see **Large-Task Decomposition Proposal**)
+10. **Solution Verification** — manual checks, automated tests, edge cases, regression checks (step 9)
+11. **Non-Technical Explanation** — explanation for non-technical stakeholders (step 10)
+12. **Final Recommendation** — final recommendation, priority, next step
+13. **Sources** — every issue-tracker source, attachment, codebase location, and external reference the analysis was actually built from (provenance)
 
-Fill every section. If a section has nothing to report, write a short explicit note (e.g. `No missing information.`) instead of leaving placeholders.
+Fill every section. If a section has nothing to report, write a short explicit note (e.g. `No missing information.`) instead of leaving placeholders. **Task Decomposition is the one exception** — it is omitted entirely when the recommended solution fits a single change, per its own trigger rules; never render it with a "no split needed" note.
 
 The **Sources** section is mandatory and must always be present — list every input the analysis consulted (the issue / error and its comments and replies, linked / sub-issues, attachments, code files, commits, and external URLs). When the only input was the inline problem description with no issue-tracker source available, say so explicitly instead of leaving it empty.
 

@@ -672,7 +672,7 @@ test('analyze-problem skill mandates loading all issue-tracker context before an
     expect($content)->toContain('skills/code-review-bugsnag/scripts/gather-issue-context.sh');
 
     // Sources are always reported in the output.
-    expect($content)->toContain('12. **Sources**');
+    expect($content)->toContain('13. **Sources**');
     expect($content)->toContain('The **Sources** section is mandatory and must always be present');
 });
 
@@ -680,10 +680,49 @@ test('analyze-problem report template carries the mandatory Sources section (iss
     $packageDir = dirname(__DIR__, 2);
     $template = (string) file_get_contents($packageDir . '/skills/analyze-problem/templates/analysis-report.md');
 
-    expect($template)->toContain('## 12. Sources');
+    expect($template)->toContain('## 13. Sources');
     expect($template)->toContain('### Issue Tracker');
     expect($template)->toContain('### Codebase & Commits');
     expect($template)->toContain('### External References');
+});
+
+test('analyze-problem proposes an EPIC / sub-task split when the solution outgrows one change', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $skill = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');
+
+    expect($skill)->toContain('## Large-Task Decomposition Proposal');
+    expect($skill)->toContain('### When it fires');
+    expect($skill)->toContain('### How to split');
+    // One part = one shippable unit, split by deliverable and ordered by dependency.
+    expect($skill)->toContain('**One part = one independently deliverable, independently reviewable unit.**');
+    expect($skill)->toContain('**Split by deliverable, never by activity.**');
+    expect($skill)->toContain('**Order by dependency and state it explicitly.**');
+    expect($skill)->toContain('Keep the split between **2 and 8 parts**');
+    // Each tracker gets its own shape.
+    expect($skill)->toContain('an **EPIC parent + one child issue per part**');
+    expect($skill)->toContain('the analyzed issue becomes the **parent** and each part becomes a **sub-task** under it');
+    expect($skill)->toContain('Bugsnag carries no issue hierarchy');
+    // Boundaries: creation belongs elsewhere, oversized objectives go to blueprint, CR runs skip it.
+    expect($skill)->toContain('### This skill proposes the split; it never creates it');
+    // The prohibition covers the proposed tree only — the plan artifact metis publishes stays allowed.
+    expect($skill)->toContain('**the proposed parent or any of its children**');
+    expect($skill)->toContain('publishing that one analysis issue stays allowed');
+    expect($skill)->toContain('`@skills/create-issues-from-text/SKILL.md` *EPIC parent & sub-issues* owns them');
+    // The blueprint boundary is decided by the deliverable, not by the number of parts.
+    expect($skill)->toContain('**Boundary against `@skills/blueprint/SKILL.md` — decide by deliverable, not by size.**');
+    expect($skill)->toContain('When the reader needs issues to file, this section owns it');
+    expect($skill)->toContain('hand off to `@skills/blueprint/SKILL.md` and reference the handoff');
+    expect($skill)->toContain('more than eight parts** is always `@skills/blueprint/SKILL.md`\'s');
+    expect($skill)->toContain('**skip this section entirely**');
+    // A single-change fix must never be inflated into a tracker tree.
+    expect($skill)->toContain('**omit the section entirely**');
+    expect($skill)->toContain('never render it with a "no split needed" note');
+
+    $template = (string) file_get_contents($packageDir . '/skills/analyze-problem/templates/analysis-report.md');
+    expect($template)->toContain('## 9. Task Decomposition');
+    expect($template)->toContain('### Proposed parts');
+    expect($template)->toContain('**Order and parallelism:**');
+    expect($template)->toContain('**Handoff:**');
 });
 
 test('api rule codifies the API-as-contract design standard (issue #552)', function (): void {

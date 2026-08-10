@@ -92,7 +92,7 @@ Run the **Reviewer Comment Fulfillment Gate** defined canonically in `@skills/co
 - Publish via `skills/code-review-github/scripts/upsert-comment.sh <PR-NUMBER|URL> -` (body on stdin). The helper detects the current actor (`gh api user --jq .login`), appends the marker, and POSTs a new comment. The published URL is emitted on stdout; the action (`created`) on stderr — log it in the PR comment summary line.
 - If the helper exits with code 2 (missing tool) or 3 (API failure), fall back to the GitHub MCP server's `addIssueComment` — also as a fresh post. Never call `updateIssueComment` to edit a prior CR comment and never quote / reply to one; the always-new-comment convention replaces the previous in-place edit flow.
 - Format inside the comment body:
-  - Critical → Moderate → Minor → Refactoring (DRY / Tech Debt Reduction)
+  - Critical → Moderate → Minor → Commit Split Proposal → Refactoring (DRY / Tech Debt Reduction)
   - file + line
   - actionable fix
 - Post all technical findings inside the single PR comment — never as line-anchored review comments. Include the `file:line` reference in the body of each finding instead.

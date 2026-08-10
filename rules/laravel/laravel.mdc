@@ -28,13 +28,14 @@ globs:
 
 ## Shared Concerns
 - `app/Concerns/` is the canonical home for all globally shared and reusable logic in the application — typically traits, but also small reusable helpers and value objects that exist purely to be consumed across unrelated domains.
-- Place a trait or helper in `app/Concerns/` only when it is **globally applicable** (consumed across two or more unrelated domains, layers, or entry points), **domain-agnostic** (no knowledge of a concrete model, aggregate, feature flow, or business rule), and **reusable as-is** (consumers use it without further specialization).
-- Never put domain-specific logic in `app/Concerns/` — anything tied to a concrete model, feature flow, or business rule must live in the relevant business-logic layer under `app/{Domain}/`.
+- Place a trait or helper in `app/Concerns/` only when it is **globally applicable** (consumed across two or more unrelated domains, layers, or entry points), **domain-agnostic** (no knowledge of a concrete model, aggregate, feature flow, or business rule), and **reusable as-is** (consumers use it without further specialization). **Validation rule traits are exempt from all three** — the **Validation** section below mandates a trait here for every rule set regardless of consumer count or domain scope.
+- Never put domain-specific logic in `app/Concerns/` — anything tied to a concrete model, feature flow, or business rule must live in the relevant business-logic layer under `app/{Domain}/`. A validation rule trait named for the aggregate it validates is the sanctioned exception: a rule set is a declarative input contract, not business logic.
 - Validation rule traits (see the **Validation** section below) are one specific worked example of this rule, not the only allowed category.
 
 ## Validation
 - Use FormRequest classes for controller input validation.
-- Store all validation rules as reusable traits in `app/Concerns/` (e.g. `GitHubIssueNumbersValidationRules`, `JiraIssueKeysValidationRules`). Keep this approach consistent across the entire application.
+- Store all validation rules as reusable traits in `app/Concerns/` (e.g. `GitHubIssueNumbersValidationRules`, `JiraIssueKeysValidationRules`). Keep this approach consistent across the entire application — a rule array is never written inline at its point of use, and this holds for every consumer: FormRequest `rules()`, Data Validators, Livewire validation, Artisan-command input validation, and nested rule sets inside custom `Rule` classes. Extract the trait even when only one class consumes it today.
+- A FormRequest's `rules()` composes the traits it uses and never declares a rule array literal of its own.
 - All non-FormRequest validation logic must be encapsulated in dedicated Data Validator classes (default location `app/DataValidators/{Domain}/`, but follow the project's existing convention). Data Validators must use validation rules from traits in `app/Concerns/` — never define rule arrays inline.
 - Use custom Rule classes in `app/Rules/` for complex or reusable validation.
 - Before adding validation logic, check `app/Rules/` for an existing custom Rule. If none exists and the logic is non-trivial or reusable, create a new custom Rule class and use it.

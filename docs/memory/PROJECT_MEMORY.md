@@ -314,3 +314,11 @@
 - Example: PR #761 — the self-check raised 3 Moderate findings against the first of three commits. `git commit --fixup=<A1>` + `GIT_SEQUENCE_EDITOR=true git rebase --autosquash origin/master` produced a clean 3-commit history; `composer build` was re-run on the rebased head before the push.
 - Source:  https://github.com/pekral/cursor-rules/pull/761   Added: 2026-08-07
 - Role:    talos
+
+### code-review-skill-word-budget-ceiling — `skills/code-review/SKILL.md` is at its word ceiling; every new CR walk must first extract an old one into the rule
+
+- Trigger: adding any new walk, gate, or Output-Rules bullet to `@skills/code-review/SKILL.md` (or to `@skills/process-code-review/SKILL.md`, which sits equally close to its own ceiling).
+- Rule:    Two independent gates guard that file at the same number and both must pass: `skill-check`'s `body.max_tokens` limit of 5000 (whitespace-split estimate, roughly `str_word_count` minus ~20) and the Pest assertion `expect(str_word_count($codeReview))->toBeLessThan(5_000)` in `tests/Installer/CodeReviewContentTest.php`. The file was at **4995 of 5000** before this change, so even a two-sentence addition breaks the build. Do not shrink the new contract to fit — write it properly in `@rules/code-review/general.mdc` (which has no cap) and move an **existing** walk-through out of the skill verbatim, leaving a pointer, exactly as the rule file's own header documents. Most `CodeReviewContentTest` assertions read `skill . "\n" . rule` concatenated, so a verbatim move keeps them green; check first whether the block you are moving is pinned by a **skill-only** assertion (`expect($codeReview)->toContain(...)` / `expect($skill)->toContain(...)`) — if it is, the move also has to reroute that test, which is a real cost when choosing what to extract.
+- Example: PR #764 (issue #763) added two mandatory walks (commit-split proposal, new-PHP-file architecture check) worth ~420 words. *Highest-Priority Fast Track* and *Assignment Conformance Gate* were moved verbatim into `@rules/code-review/general.mdc` as canonical-detail sections, bringing the skill to 4764 words. An attempted extraction of *Third-Party API & Service Analysis* was reverted instead — three tests pinned its steps against the skill alone.
+- Source:  https://github.com/pekral/cursor-rules/pull/764   Added: 2026-08-10
+- Role:    talos

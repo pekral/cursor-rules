@@ -962,6 +962,40 @@ test('the CR prefers restructuring over documentation and blocks a stale comment
     expect($core)->toContain('**A comment you keep is a comment you maintain.**');
 });
 
+test('a comment is the exception and only genuinely complex logic earns one', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    // Authoring side: the comment budget lives with the PHP standards.
+    $core = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
+    expect($core)->toContain('**A comment is the exception, not the default.**');
+    expect($core)->toContain('A comment is warranted only when it clears one of two bars');
+    expect($core)->toContain('**carries knowledge the code cannot express**');
+    expect($core)->toContain('that complexity cannot be removed by writing the code more clearly');
+    expect($core)->toContain('A comment that clears neither bar describes the *what* and must not be written.');
+    expect($core)->toContain('**Clean, readable code always beats a comment**');
+    expect($core)->toContain('quietly decays into a lie the next reader acts on');
+    expect($core)->toContain(
+        'Document only what the code cannot state for itself: public API contracts, genuinely complex business rules',
+    );
+
+    // Review side: necessity, not accuracy, is what keeps a comment alive.
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    expect($rule)->toContain('**Bar for keeping a comment (governs every finding below):**');
+    expect($rule)->toContain('survives the review only when it clears **one of two bars**');
+    expect($rule)->toContain('the logic it explains is genuinely complex');
+    expect($rule)->toContain('**accuracy is not the bar, necessity is**');
+    expect($rule)->toContain('a comment that survives must be a comment the code could not have replaced');
+    // The bar decides whether, never how severe — a stale comment must keep its Moderate severity.
+    expect($rule)->toContain('**This bar carries no severity of its own**');
+    expect($rule)->toContain('**Moderate** for a stale comment on a touched line per *Blocking scope*');
+    expect($rule)->toContain('never lowers that finding\'s declared severity');
+
+    // Refactoring side: a needed comment means the code, not the prose, must change.
+    $refactoring = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+    expect($refactoring)->toContain('**A comment is a refactoring signal, not a deliverable.**');
+    expect($refactoring)->toContain('never add a comment as the fix for code you could have made clearer');
+});
+
 test('every CR wrapper produces a two-part Technical + Functional review with the affirmative Functional exception (issue #737)', function (): void {
     $packageDir = dirname(__DIR__, 2);
 

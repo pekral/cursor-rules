@@ -1654,3 +1654,61 @@ test('process-code-review lands every CR item in its own commit', function (): v
             . ' pushed history is a one-to-one map of the resolved review points',
     );
 });
+
+test('code review treats performance and batch-first processing as a first-class review dimension', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // Performance is reviewed on every run, at the same weight as correctness and architecture.
+    expect($rule)->toContain('## Performance & Scale — a first-class review dimension');
+    expect($rule)->toContain('never deferred to "we\'ll optimize later"');
+    expect($rule)->toContain('**what happens when the input grows?**');
+    expect($rule)->toContain('**Batch-first is the default expectation.**');
+    expect($rule)->toContain(
+        'the burden of justification sits on the per-row implementation, never on the batching one',
+    );
+
+    // The canonical walk-through: scope, detection checklist, exemptions, severity, templates, gating.
+    expect($rule)->toContain('## Batch-First Processing & Performance at Scale');
+    expect($rule)->toContain('**Scope — the unbounded working set.**');
+    expect($rule)->toContain('A set fixed by the code');
+    expect($rule)->toContain('**Detection checklist**');
+    expect($rule)->toContain('1. **Unbounded materialization.**');
+    expect($rule)->toContain('3. **Per-row side effects inside a loop.**');
+    expect($rule)->toContain('4. **In-PHP aggregation, filtering, sorting, or de-duplication**');
+    expect($rule)->toContain('5. **Unstreamed import or export.**');
+    expect($rule)->toContain('6. **Unbounded work left on the synchronous request.**');
+    expect($rule)->toContain('7. **Chunked loop that mutates its own filter.**');
+    expect($rule)->toContain('8. **Unbounded batch transaction or non-resumable run.**');
+    expect($rule)->toContain('9. **Missing or magic batch size.**');
+    expect($rule)->toContain('10. **N+1 relation access inside the loop.**');
+    expect($rule)->toContain('**What is NOT a finding (do not raise noise):**');
+
+    // Severity may never be downgraded because today's data volume happens to be small.
+    expect($rule)->toContain('**Never downgrade a finding solely because the current data volume is small.**');
+    expect($rule)->toContain('"it\'s only 200 rows today" is not an exemption, it is the reason the finding exists');
+
+    // Literal fix templates so process-code-review can extract them deterministically.
+    expect($rule)->toContain('**Chunked read** —');
+    expect($rule)->toContain('**Batched write** —');
+    expect($rule)->toContain('**Batched side effect** —');
+    expect($rule)->toContain('**Pushdown** —');
+    expect($rule)->toContain('**Off-request** —');
+    expect($rule)->toContain('**Test Hint default.**');
+
+    // One finding per violation — the walk never double-reports with its neighbours.
+    expect($rule)->toContain('**Gating — raise one finding per violation, never both.**');
+    expect($rule)->toContain('**Simplicity First** never suppresses a scale finding');
+    expect($rule)->toContain('never render a "performance walked, 0 findings" line');
+
+    // The Core Analysis walk-through lists the item, and the skill carries the thin pointer (5000-word budget).
+    expect($rule)->toContain('- **Batch-first processing & performance at scale** — mandatory walk-through on every CR run.');
+    expect($rule)->toContain(
+        '@rules/sql/optimalize.mdc` *Batch over per-row operations* and *Bulk and streaming processing of'
+            . ' large datasets*',
+    );
+
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    expect($codeReview)->toContain('**batch-first processing & performance at scale**');
+    expect(str_word_count($codeReview))->toBeLessThan(5_000);
+});

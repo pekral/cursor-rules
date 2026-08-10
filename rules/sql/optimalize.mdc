@@ -133,6 +133,44 @@ foreach ($externalIds as $externalId) {
 }
 ```
 
+## Bulk and streaming processing of large datasets
+Batching is not only a write-side concern. Any code path whose working set grows with production data must be **batch-first and memory-bounded**. A *large dataset* is any collection whose cardinality is driven by data — rows in a table, lines in an uploaded file, items behind a paginated API — never by a fixed constant written in the code. Code that is correct for ten rows and unusable for a million is a defect, not a trade-off.
+
+- **Never materialize an unbounded result set.** `->get()`, `->all()`, `->pluck()`, `->toArray()`, and `iterator_to_array()` over a query with no `LIMIT` and no bounded filter load the whole table into PHP memory. Stream instead: `chunkById(1000, ...)`, `lazyById(1000)`, or `cursor()` for reads, and a `LazyCollection` for the pipeline built on top of them.
+- **`chunkById()` over `chunk()` whenever the loop writes.** `chunk()` paginates with `OFFSET`, so a loop that updates the column the query filters on shifts the window under itself and silently skips rows. Every chunked loop that mutates the filtered set uses `chunkById()` / `lazyById()`.
+- **Size the batch explicitly.** Neither one row at a time nor one statement for everything: 500–1000 rows per statement is the working default, bounded by the number of placeholders and `max_allowed_packet`. The size lives in a named constant, never as a magic literal repeated across call sites, and is tuned from measurement rather than guessed.
+- **One short transaction per batch**, never a single transaction wrapping the whole run — a long transaction holds locks for the entire duration, inflates the undo log, and turns one failure into a full rollback. A batch run is **resumable and idempotent**: it checkpoints its cursor so a mid-run failure restarts from the last committed batch instead of from the beginning.
+- **Batch the side effects too.** A loop body that dispatches a job, sends an HTTP request, sends a mail, or writes a cache key per row multiplies latency by the row count. Dispatch one job per chunk (`Bus::batch()` for a chunked fan-out), send one bulk request per chunk where the vendor's API supports it, and use `Cache::putMany()` / `Redis::pipeline()` instead of per-key round trips.
+- **Aggregate, filter, and sort in SQL, not in PHP.** `count()`, `sum()`, `max()`, grouping, sorting, and de-duplication applied to an already-loaded collection re-implement the database in application memory. Push them into the query (`->count()`, `->sum()`, `->groupBy()`, `->exists()`) so only the result crosses the wire.
+- **Imports and exports stream.** Generate the payload row by row through a generator / `LazyCollection` written straight to an open stream (`fputcsv`, a streamed response, a disk writer); never assemble the full array or the full string in memory first.
+- **Move a large run off the request.** A synchronous HTTP request must not iterate an unbounded set — it blocks the worker, hits `max_execution_time` and the memory limit, and cannot be retried. Queue the work as chunked jobs and report progress back to the user.
+
+```php
+// Bad — the whole table in memory, per-row write, per-row job, per-row HTTP call
+foreach (Order::query()->where('status', 'pending')->get() as $order) {
+    $order->update(['status' => 'processed']);
+    ProcessOrder::dispatch($order->id);
+    $this->client->post('/orders/sync', ['id' => $order->id]);
+}
+
+// Good — bounded memory, one write / one job / one request per chunk
+Order::query()
+    ->where('status', 'pending')
+    ->chunkById(self::BATCH_SIZE, function (Collection $orders): void {
+        $this->orderModelManager->batchUpdate(Order::class, $this->orderDataBuilder->buildProcessedRows($orders), 'id');
+        Bus::batch([new ProcessOrders($orders->modelKeys())])->dispatch();
+        $this->client->post('/orders/sync', ['ids' => $orders->modelKeys()]);
+    });
+
+// Bad — counting and filtering a materialized collection in PHP
+$total = Order::query()->get()->where('total', '>', 1000)->count();
+
+// Good — the database does the work
+$total = Order::query()->where('total', '>', 1000)->count();
+```
+
+Code review treats every violation of this section as a finding; the detection patterns, severities, and fix templates live in `@rules/code-review/general.mdc` *Batch-First Processing & Performance at Scale*.
+
 ## Transactions and Locking
 - Keep transactions short — no external calls or heavy logic inside.
 - Batch related writes in a single transaction.

@@ -98,7 +98,7 @@ Every CR run is also a verification that the reviewer feedback **already on the 
 - If the helper exits with code 2 (missing tool) or 3 (API failure), fall back to the GitHub MCP server's `addIssueComment` — also as a fresh post. Never quote / reply to an earlier CR comment and never call `updateIssueComment` to edit one in place; the always-new-comment convention replaces the previous in-place edit flow.
 
 #### Format
-- Critical → Moderate → Minor → Refactoring (DRY / Tech Debt Reduction)
+- Critical → Moderate → Minor → Commit Split Proposal → Refactoring (DRY / Tech Debt Reduction)
 - Include file + line in the finding body
 - Include actionable fix
 - Post all findings inside the single PR comment — never as line-anchored review comments.

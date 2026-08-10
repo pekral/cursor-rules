@@ -23,6 +23,8 @@
 
 ### 🔴 Critical 1. <short title>
 
+(the commit-split finding per `@rules/code-review/general.mdc` *Commit Split & Atomic Deployability Proposal — canonical walk-through* is listed here by title only and is exempt from Faulty Example / Expected behavior / Test hint — its body is the `## Commit Split Proposal` section below)
+
 - **Location:** `path/to/file.php:42`
 - **Rule:** `@rules/<area>/<file>.mdc#<section>`
 - **Impact:** one sentence — what breaks or what risk this introduces.

@@ -75,6 +75,15 @@ Only after green:
 ### 6. REPEAT
 Move to the next behavior and repeat the cycle.
 
+## Commit boundary — the RED step is never its own commit
+
+RED is a state of the **working tree**, never a state of the published history. The cycle above runs entirely before anything is committed: the failing test from step 1, the production change from step 3 that makes it pass, and the refactor from step 5 land together as **one** commit, made only once step 4 is green.
+
+- **Never commit a failing test.** A committed RED step is a commit that cannot be deployed or cherry-picked, and `git bisect` will blame it for a regression it does not carry (`@rules/git/general.mdc` *Git Rules* — *Every commit is green*).
+- **Never simulate a failure in a committed test** to represent work still to come — no `->skip()` / `->todo()` / `markTestIncomplete()`, no assertion inverted "for now", no commented-out assertion, no fixture pinned to the buggy output. If the behavior is not fixed yet, the test does not get committed yet.
+- **Several cycles, one commit each.** When an item needs more than one RED → GREEN cycle, either commit each completed cycle (green at every step) or commit the whole item at the end — never a commit that stops between RED and GREEN.
+- **Repair in place.** If a commit turns out red after a rebase or reshape, amend that commit; never append a repair commit at the tip (`@skills/git-workflow/SKILL.md`).
+
 ## Bug-fix rule
 Never fix a bug without first writing or updating a test that reproduces it.
 
@@ -91,7 +100,7 @@ Never fix a bug without first writing or updating a test that reproduces it.
 
 ## Done when
 - Every implemented behavior is backed by a test
-- Each new test was observed failing before implementation
+- Each new test was observed failing before implementation, and no failing or simulated-failing test was committed
 - Production code was added only to satisfy failing tests
 - Changed behavior, edge cases, and failure paths are covered
 - Relevant tests pass

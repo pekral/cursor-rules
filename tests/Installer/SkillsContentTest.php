@@ -1095,6 +1095,31 @@ test('pr-staged-merge-plan proposes squashes and corrected commit subjects under
     expect($content)->toContain('**repair** commits are squashed into the commit they repair and never form a unit');
 });
 
+test('test-driven-development keeps the RED step out of the published history', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/test-driven-development/SKILL.md');
+
+    expect($content)->toContain('## Commit boundary — the RED step is never its own commit');
+    expect($content)->toContain('RED is a state of the **working tree**, never a state of the published history.');
+    expect($content)->toContain('land together as **one** commit, made only once step 4 is green');
+
+    // Neither a real nor a simulated failure may be committed.
+    expect($content)->toContain('**Never commit a failing test.**');
+    expect($content)->toContain('**Never simulate a failure in a committed test**');
+    expect($content)->toContain('no `->skip()` / `->todo()` / `markTestIncomplete()`');
+    expect($content)->toContain('If the behavior is not fixed yet, the test does not get committed yet.');
+
+    // Multi-cycle items and post-rebase repairs stay green.
+    expect($content)->toContain('never a commit that stops between RED and GREEN');
+    expect($content)->toContain('**Repair in place.**');
+
+    // The canonical invariant stays in the git rule.
+    expect($content)->toContain('`@rules/git/general.mdc` *Git Rules* — *Every commit is green*');
+
+    // Done when gates on it.
+    expect($content)->toContain('no failing or simulated-failing test was committed');
+});
+
 test('resolve-issue extracts the assignment items and maps one item to one commit', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $skill = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');

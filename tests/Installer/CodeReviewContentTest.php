@@ -1860,6 +1860,48 @@ test('the git rule and the staged-merge planner defer to the CR commit split gat
     expect($stagedPlan)->toContain('Raise one plan per PR, never both');
 });
 
+test('the commit split gate flags a red commit and never proposes a red intermediate one', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // A red commit anywhere in the reviewed range is its own trigger.
+    expect($rule)->toContain('**A commit in the range is red — it does not build, its tests fail, or it fakes a failure.**');
+    expect($rule)->toContain('a TDD RED step landed as its own commit, an assertion inverted "for now", a fixture pinned to the buggy output');
+    expect($rule)->toContain('`->skip()` / `->todo()` / `markTestIncomplete()` / commented-out assertion standing in for behavior a *later* commit fixes');
+    expect($rule)->toContain('@rules/git/general.mdc` *Git Rules* — *Every commit is green*');
+
+    // The proposal itself may never produce a red commit.
+    expect($rule)->toContain('**Green-commit invariant (mandatory, applies to every proposed commit).**');
+    expect($rule)->toContain('they stay in **one** proposed commit and the reason is recorded');
+    expect($rule)->toContain('an honest larger commit beats a split that does not deploy');
+
+    // The report row and the reconciliation carry the green verdict and its proof.
+    expect($rule)->toContain('a proposed commit is never rendered with `green: no`');
+    expect($rule)->toContain('the `git rebase --exec` per-commit verification that proves no commit of the rewritten range is red');
+
+    // The literal Suggested Fix template ends in the per-commit replay, not a tip check.
+    expect($rule)->toContain(
+        'verify every commit of the new range is green: `git rebase --exec \'<gate command>\' <base>` must replay the whole range without stopping',
+    );
+
+    // The Core Analysis bullet lists the red-commit trigger and both invariants.
+    expect($rule)->toContain('a commit is red at its point of the history');
+    expect($rule)->toContain('**green-commit invariant**');
+
+    // A frozen review thread never buys a red commit a pass into master.
+    expect($rule)->toContain('**Carve-out — a red commit is never left in place.**');
+    expect($rule)->toContain('resolves a **partitioning** defect only');
+    expect($rule)->toContain('never outranks a commit that cannot be built, cherry-picked, or bisected');
+    expect($rule)->toContain('once a red commit is merged no follow-up PR can repair it');
+    expect($rule)->toContain('Never route a red commit into the multi-PR template.');
+
+    // The skill's gate carries the same contract (thin pointer, 5000-token budget).
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    expect($codeReview)->toContain('It is also a **green** partition');
+    expect($codeReview)->toContain('no proposed commit may be red');
+    expect($codeReview)->toContain('verified per commit with `git rebase --exec`, never at the tip alone');
+});
+
 test('CR reviews every new PHP file against the defined architecture at Moderate (issue #763)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');

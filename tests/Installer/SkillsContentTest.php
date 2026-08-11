@@ -1162,6 +1162,32 @@ test('resolve-issue targets cherry-pick-independent commits and reconciles the h
     expect($content)->toContain('git reset --soft <default-branch>');
 });
 
+test('resolve-issue plans only green commits and verifies each one before the PR', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/references/commit-planning.md');
+    $skill = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    // Green is a blocker, unlike cherry-pick independence which stays a target.
+    expect($content)->toContain('**Every commit is green — this one is a blocker.**');
+    expect($content)->toContain('`@rules/git/general.mdc` *Git Rules* (*Every commit is green*)');
+    expect($content)->toContain('an item\'s test and the production change that makes it pass are planned into the **same** commit');
+    expect($content)->toContain('When the split cannot avoid a red intermediate commit, **do not split**');
+
+    // A red working tree is never committed to be repaired by the next commit.
+    expect($content)->toContain('A red working tree is never committed "to be fixed in the next commit"');
+
+    // The reshaped history is replayed commit by commit before the PR is opened.
+    expect($content)->toContain('**Verify the reconciled history commit by commit before the PR exists.**');
+    expect($content)->toContain('git rebase --exec \'<gate command>\' <default-branch>');
+    expect($content)->toContain('repair a failing commit **in place**');
+    expect($content)->toContain('every commit in it cherry-picks onto the default branch and deploys without errors');
+
+    // The skill carries the same contract and gates its Done when on it.
+    expect($skill)->toContain('Every commit the plan produces must be green on its own');
+    expect($skill)->toContain('land in the **same** commit');
+    expect($skill)->toContain('Every commit in the branch passes the project\'s gate on its own');
+});
+
 test('resolve-issue PR description carries the item-to-commit change list', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $skill = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');

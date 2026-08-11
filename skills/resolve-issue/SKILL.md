@@ -103,6 +103,8 @@ Before writing any code, extract every recommended fix / point to solve from the
 
 Follow `references/commit-planning.md` for the full procedure: item extraction and normalization, the one-item-one-commit mapping, self-contained commits, cherry-pick independence and commit ordering, the recorded plan table that is the contract for step 11, and the `git log` reconciliation that must pass before the PR is opened.
 
+Every commit the plan produces must be green on its own per `@rules/git/general.mdc` *Git Rules* (*Every commit is green*): an item's test and the change that makes it pass land in the **same** commit, no failing or simulated-failing test is ever committed, and a reshaped history is re-verified with `git rebase --exec` before the PR is opened.
+
 ### Pre-existing issue handling
 
 While reading and modifying the files required for the in-scope work, you may encounter problems that are **unrelated to the current assignment** but were already present in those files. The following categories qualify as pre-existing issues that must be fixed in this PR:
@@ -254,6 +256,7 @@ After the reviews converged (no Critical / Moderate) and the reports are posted,
 - Code review loop passed with no Critical or Moderate findings **before the PR was created**
 - Security review completed **before the PR was created**
 - Every recommended fix / point extracted from the assignment landed as its **own commit**, the reconciled `git log` matches the recorded commit plan, and no commit bundles two items
+- Every commit in the branch passes the project's gate on its own — the `git rebase --exec` replay finished without stopping — and no commit carries a failing or simulated-failing test
 - The PR description carries the `## Changes` table mapping each assignment item to its commit and its independent / depends-on verdict
 - A clean pull request is created with a summary **by default** — skipped only when the user explicitly opted out of PR creation (see *Pull request*), in which case the committed local branch and the ready-to-run `gh pr create --draft …` command are reported instead
 - Technical report posted on the GitHub PR (skipped on PR opt-out)

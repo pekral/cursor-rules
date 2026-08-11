@@ -831,6 +831,37 @@ test('mysql-patterns and git-workflow defer to existing rules and skills instead
     expect($git)->toContain('Defer to');
 });
 
+test('git-workflow verifies a rewritten range commit by commit', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/git-workflow/SKILL.md');
+
+    expect($content)->toContain('### Verify a rewritten range commit by commit');
+    expect($content)->toContain('`@rules/git/general.mdc` *Git Rules* (*Every commit is green*)');
+    expect($content)->toContain('a green tip proves nothing about the commits underneath it');
+
+    // The gate command is the non-mutating half — a fixer inside --exec halts the rebase.
+    expect($content)->toContain('**The `--exec` command must not modify the working tree.**');
+    expect($content)->not->toContain('git rebase --exec \'composer build\'');
+
+    // The mechanic and the in-place repair.
+    expect($content)->toContain('git rebase --exec \'composer check\' "origin/$DEFAULT_BRANCH"');
+    expect($content)->toContain('git commit --amend --no-edit');
+    expect($content)->toContain('never `git rebase --skip` past it and never append a repair commit at the tip');
+    expect($content)->toContain('fold it into the commit it depends on');
+
+    // The pull-policy snippet gained the verification step before the force-push.
+    expect($content)->toContain('# 3) verify every commit, not just the tip');
+    expect($content)->toContain('# 4) publish; do NOT git pull again');
+
+    // The faster-subset command resolves to a real runnable, and the false-red trap is named.
+    expect($content)->toContain('git rebase --exec \'vendor/bin/pest tests\'');
+    expect($content)->toContain('rather than assuming a `composer test` exists');
+    expect($content)->toContain('a non-zero exec stops the replay at the first commit');
+
+    // Done when gates on it.
+    expect($content)->toContain('Every commit of a rewritten range was verified green with `git rebase --exec`');
+});
+
 test('e2e-testing skill is gated on Playwright already being present', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/e2e-testing/SKILL.md');

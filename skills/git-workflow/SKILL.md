@@ -71,13 +71,30 @@ git fetch origin
 git pull --rebase                     # 1) take the branch's own remote first
 git rebase "origin/$DEFAULT_BRANCH"   # 2) bring the latest default branch in
 # resolve conflicts if any, then: git rebase --continue
-git push --force-with-lease           # 3) publish; do NOT git pull again — it would undo the rebase
+git rebase --exec 'composer check' "origin/$DEFAULT_BRANCH"   # 3) verify every commit, not just the tip
+git push --force-with-lease           # 4) publish; do NOT git pull again — it would undo the rebase
 ```
 If the rebase changed `composer.lock` (the default branch updated dependencies), reinstall before continuing so the installed packages match the new lockfile:
 ```bash
 composer install                      # run only when composer.lock actually changed
 ```
 The default branch itself is exempt — pull it directly with `git pull`. Read-only review skills are exempt too: they `git pull` only to read the diff and never rebase.
+
+### Verify a rewritten range commit by commit
+`@rules/git/general.mdc` *Git Rules* (*Every commit is green*) requires every commit in the branch to pass the project's gate **on its own**, so that each one cherry-picks onto the default branch and deploys without errors. A rebase, squash, split, or reorder replays every commit onto a new base, so a green tip proves nothing about the commits underneath it — a conflict resolved in the wrong commit or a dependency that moved leaves an intermediate commit red while `HEAD` builds fine.
+
+**The `--exec` command must not modify the working tree.** Pass the *checking* half of the gate (`composer check`), never the fix-and-check `composer build`: its `@fix` step rewrites tracked files, and an exec that exits 0 but leaves the tree dirty stops the rebase with `execution succeeded … but left changes to the index and/or the working tree`. That is a git plumbing error, not a verdict — the operator loses the signal about which commit is actually red. Run the fixers before you start the replay, not inside it.
+
+`--exec` runs the gate after each replayed commit and stops at the first failure:
+```bash
+git rebase --exec 'composer check' "origin/$DEFAULT_BRANCH"   # replay + verify each commit
+# on a stop: fix the working tree, then
+git add -A && git commit --amend --no-edit                    # repair THIS commit in place
+git rebase --continue                                         # carry on down the range
+```
+Repair the failing commit **in place** — never `git rebase --skip` past it and never append a repair commit at the tip: a repair at the tip leaves the broken commit permanently unshippable and re-creates the scattered-concern violation the reshape was meant to fix. When a commit cannot be made green alone, fold it into the commit it depends on (`git rebase -i`, mark it `fixup`) instead of publishing a red step.
+
+Use `git rebase --exec 'vendor/bin/pest tests'` (or whatever faster subset the project actually defines — check `composer.json` `scripts` rather than assuming a `composer test` exists) while iterating, but run the full gate once before the force-push. A command that is not defined exits non-zero, and a non-zero exec stops the replay at the first commit — reporting a red history on a green range.
 
 ### Never rebase shared/public history
 Do NOT rebase a branch that has been pushed and that others may have based work on, nor any protected branch (`main`, `develop`), nor already-merged history. Rebase rewrites commits and breaks everyone downstream. For published branches, fix forward with `git revert` instead.
@@ -176,6 +193,7 @@ If you wire a pre-commit or pre-push hook, run the project's own checks (the `co
 - A branching strategy is chosen with a stated reason.
 - Merge vs rebase is applied correctly and no shared/public history was rebased.
 - A non-default branch was synced (own remote pulled, then the resolved default branch rebased in, then force-pushed — never hardcoding `origin/main`), and `composer install` was re-run whenever that rebase changed `composer.lock`.
+- Every commit of a rewritten range was verified green with `git rebase --exec`, and any failing commit was repaired in place rather than by a repair commit at the tip.
 - Conflicts are resolved with markers removed and project checks re-run.
 - Any undo used the right tool for whether the commit was pushed.
 - Releases are tagged with annotated semver tags pushed to origin.

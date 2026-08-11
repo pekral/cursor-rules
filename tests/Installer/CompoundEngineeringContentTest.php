@@ -94,6 +94,49 @@ test('git/general.mdc requires the finished history to be a logical partition an
     expect($content)->toContain('git push --force-with-lease');
 });
 
+test('git/general.mdc requires every commit in the branch to be green on its own', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/git/general.mdc');
+
+    // The invariant is per-commit, not per-branch-tip, and it is what makes cherry-pick safe.
+    expect($content)->toContain('Every commit is green — a red commit never reaches the pull request.');
+    expect($content)->toContain('**on its own**, not merely at the branch tip');
+    expect($content)->toContain('cherry-picked onto the default branch and deployed without dragging the rest of the branch along');
+
+    // A red or simulated-red test may never be committed.
+    expect($content)->toContain('Never commit a failing test, and never simulate a failure in one.');
+    expect($content)->toContain('the TDD RED step landed as a commit of its own');
+    expect($content)->toContain('`->skip()` / `->todo()` / `markTestIncomplete()`');
+    expect($content)->toContain('belong to the **same** commit');
+
+    // A required rebase is verified commit by commit, and a failing commit is repaired in place.
+    expect($content)->toContain('A rebase or reshape is finished only when every commit has been verified green, one at a time.');
+    expect($content)->toContain('git rebase --exec \'<gate command>\' <base>');
+    expect($content)->toContain('never append a repair commit at the tip');
+
+    // No commit may stay red with an explanation in the PR description.
+    expect($content)->toContain('A commit that cannot be made green alone is not a commit.');
+});
+
+test('git/general.mdc pull policy verifies the rebased range commit by commit', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/git/general.mdc');
+
+    expect($content)->toContain('Verify the rebased range commit by commit');
+    expect($content)->toContain('git rebase --exec \'composer check\' "origin/$DEFAULT_BRANCH"');
+    expect($content)->toContain('leave an intermediate commit red while the tip stays green');
+});
+
+test('git/general.mdc requires the per-commit gate command to be non-mutating', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/git/general.mdc');
+
+    // A fixer inside --exec dirties the tree and halts the rebase instead of reporting a verdict.
+    expect($content)->toContain('must be the project\'s **non-mutating** checking half');
+    expect($content)->toContain('never the fix-and-check `composer build`');
+    expect($content)->toContain('stops the rebase with a dirty-tree error instead of a verdict');
+});
+
 test('the code-writing skills that create commits anchor on the logical-partition git rule', function (): void {
     $packageDir = dirname(__DIR__, 2);
 

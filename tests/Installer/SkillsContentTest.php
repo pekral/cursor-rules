@@ -1310,4 +1310,10 @@ test('pr-summary leads both targets with a TL;DR', function (): void {
     expect($skill)->toContain('above `TL;DR` on both targets');
     expect($github)->toContain('so the comment begins at `## TL;DR`');
     expect($jira)->toContain('so the comment begins at {{h2. TL;DR}}');
+
+    // Every consumer that enumerates the contract must name TL;DR — a stale
+    // "only How to test" tells the next agent to render a shape the template dropped.
+    foreach (['rules/reports/general.mdc', 'skills/prepare-issue-context/SKILL.md'] as $consumer) {
+        expect((string) file_get_contents($packageDir . '/' . $consumer))->not->toContain('only How to test');
+    }
 });

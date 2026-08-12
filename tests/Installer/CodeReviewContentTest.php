@@ -234,12 +234,12 @@ test('JIRA non-technical CR summary delegates to pr-summary Wiki Markup template
     expect($skill)->toContain('@skills/pr-summary/templates/pr-summary-jira.md');
     expect(is_file($packageDir . '/skills/code-review-jira/templates/jira-output.md'))->toBeFalse();
 
-    // JIRA report = how to test only, plus conditional clarifying questions / assignment discrepancies / critical.
+    // JIRA report = TL;DR + how to test, plus conditional clarifying questions / assignment discrepancies / critical.
     $prSummary = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');
-    expect($prSummary)->toContain('output **only `How to test`**');
+    expect($prSummary)->toContain('output **only `TL;DR` and `How to test`**');
     expect($prSummary)->toContain('No leaked markup on JIRA');
     expect($skill)->toContain('Clarifying questions block (conditional)');
-    expect($skill)->toContain('only `How to test`');
+    expect($skill)->toContain('only `TL;DR` and `How to test`');
     expect($skill)->toContain('no leaked Markdown');
     expect($template)->toContain('h2. Clarifying questions');
 });

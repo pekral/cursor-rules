@@ -2064,3 +2064,18 @@ test('the commit-split proposal never orphans an anchored review and stays resol
             ->toContain('is listed here by title only and is exempt from Faulty Example / Expected behavior / Test hint');
     }
 });
+
+test('code review flags a new application Facade without touching framework facade calls', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($content)->toContain('**New application Facade (service-layer ceiling)**');
+    expect($content)->toContain('**Scope — declaration, not call:**');
+    expect($content)->toContain('is **never** this finding; only the application *declaring* a Facade of its own is');
+    expect($content)->toContain('an architecture test asserting no class in `app/` extends `Illuminate\Support\Facades\Facade`');
+    expect($content)->toContain('Severity: **Critical** (declared in `@rules/laravel/architecture.mdc` CR Severity Rules)');
+
+    // The pass-through item must no longer prescribe delegating to a Facade.
+    expect($content)->toContain('the **Single-use Service method rule**');
+    expect($content)->not->toContain('Single-use Service/Facade method rule');
+});

@@ -57,18 +57,20 @@
 > The finding is **Critical**, always: it is listed by title in the `## Findings` Critical bucket with this section as its body, it counts toward the Counts line, it may never be downgraded, and it is **never** dropped by the late-iteration filter. It is exempt from the Faulty Example / Expected behavior / Test hint fields — the proposal below plus the Suggested fix is the whole finding.
 >
 > **Behavior-preservation invariant:** this is a repartition of the existing change set and nothing else. The union of the proposed commits equals the current diff byte for byte; no line of production code is added, removed, or rewritten, and no work is deferred.
+>
+> **Green- and live-commit invariants:** every proposed commit passes the project's gate at its own point of the history, and everything it adds is already reached there — the callee travels with its call site and its coverage. A commit that ships dead code (a symbol, route, config key, or asset whose first use lands in a later commit) is itself a trigger; hunks that cannot be separated without leaving an intermediate commit red or dead stay in one commit. The `Green` column always carries `yes`, and the `Live` column carries `yes` or `inert prerequisite — consumed by #k` for the single declared exception (config key, off-by-default flag, additive expand migration) — a proposed commit is never rendered with `green: no` or `live: no`.
 
 - **Verdict:** {splittable into N commits | blocked — <reason>}
 
-| # | Proposed subject | Contains | Assembled from | Assignment item | Cherry-pick | Reversible |
-|---|------------------|----------|----------------|-----------------|-------------|------------|
-| 1 | `type(scope): short description` | one sentence | `<sha>` hunks in `path/to/file.php` | item ID / `pre-existing` / `support` / `noise` | independent | yes |
-| 2 | `type(scope): short description` | one sentence | `<sha>`, `<sha>` | item ID | depends on #1 | no |
+| # | Proposed subject | Contains | Assembled from | Assignment item | Cherry-pick | Green | Live | Reversible |
+|---|------------------|----------|----------------|-----------------|-------------|-------|------|------------|
+| 1 | `type(scope): short description` | one sentence | `<sha>` hunks in `path/to/file.php` | item ID / `pre-existing` / `support` / `noise` | independent | yes | yes | yes |
+| 2 | `type(scope): short description` | one sentence | `<sha>`, `<sha>` | item ID | depends on #1 | yes | yes | no |
 
 - **Rollback notes:** one line per commit marked `reversible: no` — what must be done to undo it. Omit when every commit is reversible.
-- **Reconciliation:** the union of the proposed commits equals `<base>..<head>`; verify with `git diff <old-head> HEAD` (must be empty after the rewrite).
+- **Reconciliation:** the union of the proposed commits equals `<base>..<head>`; verify with `git diff <old-head> HEAD` (must be empty after the rewrite), replay the range with `git rebase --exec '<gate command>' <base>` (no commit is red), and check reachability per commit with `git grep -n '<symbol>' <sha>` for every symbol a commit adds (no commit is dead).
 - **Blockers:** commits that cannot be split under any ordering, files two proposed commits both touch (the split will conflict on cherry-pick — name the file), destructive migrations — or `none`.
-- **Suggested fix:** ``Repartition `<base>..<head>` into <N> commits — <1. `type(scope): subject`; 2. `type(scope): subject`; …> — with `git rebase -i <base>` (split a bundled commit via `git reset HEAD^` and re-commit the hunks separately; fold a repair commit into its target with `fixup`), then verify the repartition changed nothing: `git diff <old-head> HEAD` must be empty. Publish with `git push --force-with-lease`.``
+- **Suggested fix:** ``Repartition `<base>..<head>` into <N> commits — <1. `type(scope): subject`; 2. `type(scope): subject`; …> — with `git rebase -i <base>` (split a bundled commit via `git reset HEAD^` and re-commit the hunks separately; fold a repair commit into its target with `fixup`), then verify the repartition changed nothing: `git diff <old-head> HEAD` must be empty, verify every commit of the new range is green: `git rebase --exec '<gate command>' <base>` must replay the whole range without stopping, and verify every commit is live: for each symbol a commit adds, `git grep -n '<symbol>' <sha>` must return a use outside its own declaration. Publish with `git push --force-with-lease`.``
 
 ---
 

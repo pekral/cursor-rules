@@ -1818,7 +1818,7 @@ test('every CR surface renders the commit split proposal and its summary slot (i
         expect($content)->toContain('## Commit Split Proposal');
         expect($content)->toContain('**Render only when the Commit Split & Atomic Deployability Gate fires**');
         expect($content)->toContain('**Behavior-preservation invariant:**');
-        expect($content)->toContain('| # | Proposed subject | Contains | Assembled from | Assignment item | Cherry-pick | Reversible |');
+        expect($content)->toContain('| # | Proposed subject | Contains | Assembled from | Assignment item | Cherry-pick | Green | Live | Reversible |');
         expect($content)->toContain('- **Reconciliation:**');
         expect($content)->toContain(' · commit split: {n} commit(s) proposed`');
 
@@ -1900,6 +1900,83 @@ test('the commit split gate flags a red commit and never proposes a red intermed
     expect($codeReview)->toContain('It is also a **green** partition');
     expect($codeReview)->toContain('no proposed commit may be red');
     expect($codeReview)->toContain('verified per commit with `git rebase --exec`, never at the tip alone');
+});
+
+test('the commit split gate flags a commit that ships dead code and never proposes one', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // Dead code at an intermediate commit is its own trigger, mirroring the forward reference.
+    expect($rule)->toContain('**A commit ships dead code — code nothing reaches at that point of the history.**');
+    expect($rule)->toContain('a forward reference **uses** what does not exist yet, dead code **defines** what nothing uses yet');
+    expect($rule)->toContain('horizontally by layer** (`add the action` → `wire it up`)');
+    expect($rule)->toContain('`git grep -n \'<symbol>\' <sha>` at that commit must return a use outside its own declaration');
+
+    // The proposal itself may never produce a dead commit.
+    expect($rule)->toContain('**Live-commit invariant (mandatory, applies to every proposed commit).**');
+    expect($rule)->toContain('an honest larger commit beats a split that ships dead code');
+    expect($rule)->toContain('a proposed commit is never rendered with `live: no`');
+
+    // Registration, a declared inert prerequisite, and a published public API are not findings.
+    expect($rule)->toContain('**Code reachable by registration rather than by a call** (trigger 10 only)');
+    expect($rule)->toContain('**A declared inert prerequisite** (trigger 10 only)');
+    expect($rule)->toContain('`live: inert prerequisite — consumed by #k`');
+
+    // Code still unreached at head is another walk's finding, never a repartition.
+    expect($rule)->toContain('**Code that is still unreached at `<head>`**');
+    expect($rule)->toContain('**Unreached code at `<head>` belongs to another walk.**');
+    expect($rule)->toContain('never propose a repartition as the remedy for code that should simply be deleted');
+
+    // The report row, the reconciliation, and the Suggested Fix all carry the reachability proof.
+    expect($rule)->toContain('`live: yes` (everything the commit adds is reached at that point');
+    expect($rule)->toContain('plus the per-commit reachability check that proves none of them ships dead code');
+    expect($rule)->toContain(
+        'verify every commit is live: for each symbol a commit adds, `git grep -n \'<symbol>\' <sha>` must return a use outside its own declaration',
+    );
+
+    // The Core Analysis bullet lists the trigger and the invariant.
+    expect($rule)->toContain('a commit ships dead code (a symbol, route, config key, or asset whose first use lands in a later commit');
+    expect($rule)->toContain('**live-commit invariant**');
+});
+
+test('every CR surface renders the live verdict of the proposed commits', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    $skills = [
+        $packageDir . '/skills/code-review/SKILL.md',
+        $packageDir . '/skills/code-review-github/SKILL.md',
+        $packageDir . '/skills/code-review-jira/SKILL.md',
+        $packageDir . '/skills/code-review-bugsnag/SKILL.md',
+    ];
+
+    foreach ($skills as $skillFile) {
+        $content = (string) file_get_contents($skillFile);
+        expect($content)->toContain('whose first use lands in a *later* commit');
+        expect($content)->toContain('only a declared inert prerequisite');
+    }
+
+    // The canonical skill states the live half of the partition next to the green one.
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    expect($codeReview)->toContain('It is also a **live** partition');
+    expect($codeReview)->toContain('the callee travels with its call site and its coverage');
+
+    $templates = [
+        $packageDir . '/skills/code-review/templates/review-output.md',
+        $packageDir . '/skills/code-review-github/templates/pr-comment-output.md',
+        $packageDir . '/skills/code-review-jira/templates/github-output.md',
+        $packageDir . '/skills/code-review-bugsnag/templates/github-output.md',
+    ];
+
+    foreach ($templates as $templateFile) {
+        $content = (string) file_get_contents($templateFile);
+
+        expect($content)->toContain('**Green- and live-commit invariants:**');
+        expect($content)->toContain(
+            'The `Green` column always carries `yes`, and the `Live` column carries `yes` or `inert prerequisite — consumed by #k`',
+        );
+        expect($content)->toContain('check reachability per commit with `git grep -n \'<symbol>\' <sha>`');
+        expect($content)->toContain('verify every commit is live');
+    }
 });
 
 test('CR reviews every new PHP file against the defined architecture at Moderate (issue #763)', function (): void {

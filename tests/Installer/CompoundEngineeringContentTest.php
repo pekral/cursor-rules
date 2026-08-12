@@ -118,6 +118,32 @@ test('git/general.mdc requires every commit in the branch to be green on its own
     expect($content)->toContain('A commit that cannot be made green alone is not a commit.');
 });
 
+test('git/general.mdc forbids a commit that ships code nothing reaches yet', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/git/general.mdc');
+
+    // Green says the commit builds; live says its code is reached at that point of the history.
+    expect($content)->toContain('Every commit is live — no commit ships dead code.');
+    expect($content)->toContain('the callee travels with its call site and with the test that exercises it');
+    expect($content)->toContain('one commit *uses* what does not exist yet, the other *defines* what nothing uses yet');
+
+    // The vertical slice is the partition, not the layer.
+    expect($content)->toContain('Split vertically by concern, never horizontally by layer.');
+    expect($content)->toContain('an honest larger commit beats a split that ships unreachable code');
+
+    // Only an inert prerequisite may precede its consumer, and registration counts as reach.
+    expect($content)->toContain('The only code that may precede its consumer is an inert prerequisite');
+    expect($content)->toContain('is never an inert prerequisite');
+    expect($content)->toContain('Code reachable by registration is live.');
+
+    // Permanently unreached code is deleted, not shuffled between commits.
+    expect($content)->toContain('Code nothing in the branch ever reaches is a different defect.');
+
+    // The check is per commit and repaired by folding, not by a later wiring commit.
+    expect($content)->toContain('git grep -n \'<symbol>\' <sha>');
+    expect($content)->toContain('never by appending the call site as a later commit');
+});
+
 test('git/general.mdc pull policy verifies the rebased range commit by commit', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/rules/git/general.mdc');

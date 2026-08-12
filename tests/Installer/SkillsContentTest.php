@@ -1280,3 +1280,14 @@ test('class-refactoring skill proposes the Service to Action conversion (issue #
     expect($content)->toContain('is an Action wearing a Service name');
     expect($content)->toContain('rename the single public method to `__invoke()`');
 });
+
+test('analyze-problem never proposes an application Facade in the recommended solution', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');
+
+    expect($content)->toContain('### Layer ceiling — never propose an application Facade');
+    expect($content)->toContain('**Never propose an application-owned Facade**');
+    expect($content)->toContain('**The ceiling is a Model Service**');
+    expect($content)->toContain('This governs Facades the application would define, not the ones Laravel ships');
+    expect($content)->toContain('record it under **Assumptions and Missing Information** as an open architectural question');
+});

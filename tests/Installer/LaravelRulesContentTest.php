@@ -358,3 +358,19 @@ test('architecture forbids application Facades and caps the service layer at Bas
     expect($content)->toContain('Never raise a finding against a framework facade *call* under this rule');
     expect($content)->toContain('a new application-owned Facade');
 });
+
+test('architecture no longer names Facade as a legitimate business-logic home', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $architecture = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+    $laravel = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    // The layer enumerations listed Facades as a peer of the seven allowed layers.
+    expect($architecture)->not->toContain('Actions, Services, Facades,');
+    expect($architecture)->not->toContain('Services, Facades, Jobs, Commands');
+    expect($laravel)->not->toContain('Actions, Services, Facades,');
+
+    // The pass-through resolution now names the Model Service, not a Facade.
+    expect($architecture)->toContain('**Single-use Service method rule (Action pattern):**');
+    expect($architecture)->toContain('a single delegating call to one Model Service method');
+    expect($architecture)->not->toContain('Single-use Service/Facade method rule');
+});

@@ -1094,7 +1094,7 @@ test('pr-staged-merge-plan bounds the no-linked-issue path instead of inventing 
     expect($content)->toContain('omit this column in the *no linked issue* mode');
 });
 
-test('pr-staged-merge-plan gates every unit on the eight-point independent-shippability walk (issue #740)', function (): void {
+test('pr-staged-merge-plan gates every unit on the nine-point independent-shippability walk (issue #740)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/pr-staged-merge-plan/SKILL.md');
 
@@ -1107,6 +1107,8 @@ test('pr-staged-merge-plan gates every unit on the eight-point independent-shipp
     expect($content)->toContain('**Reversible alone**');
     expect($content)->toContain('**Consumer contracts stay compatible for the whole rollout**');
     expect($content)->toContain('**In-flight work survives**');
+    expect($content)->toContain('**No dead code**');
+    expect($content)->toContain('A unit that only defines what a later unit calls is merged into that later unit');
     expect($content)->toContain('Order by dependency first (topological');
     // The walk stays read-only: verdicts are read off the code, never proven by building a materialized unit branch.
     expect($content)->toContain('**Derive each verdict by reading the code** — never materialize a unit\'s branch to test it.');
@@ -1206,7 +1208,7 @@ test('resolve-issue targets cherry-pick-independent commits and reconciles the h
     expect($content)->toContain('**keep the dependency** and record it');
     // Shared groundwork is lifted out so item commits stay independent of each other.
     expect($content)->toContain('lift shared groundwork');
-    expect($content)->toContain('**own commit ordered first**');
+    expect($content)->toContain('**own commit ordered first only when that commit is live on its own**');
     // Ordering puts the cheapest, most independent commits first.
     expect($content)->toContain('**Order the commits:** pre-existing fixes first');
     // The landed history is reconciled against the plan before the PR exists.
@@ -1237,6 +1239,11 @@ test('resolve-issue plans only green commits and verifies each one before the PR
     expect($content)->toContain('git rebase --exec \'<gate command>\' <default-branch>');
     expect($content)->toContain('repair a failing commit **in place**');
     expect($content)->toContain('every commit in it cherry-picks onto the default branch and deploys without errors');
+
+    // Live commits: no item is planned as an "add it" commit followed by a "wire it up" commit.
+    expect($content)->toContain('**And nothing that nothing yet reaches — every commit is live.**');
+    expect($content)->toContain('Plan each item as a **vertical slice**');
+    expect($content)->toContain('Never plan a groundwork commit whose only content is a symbol waiting for a caller');
 
     // The skill carries the same contract and gates its Done when on it.
     expect($skill)->toContain('Every commit the plan produces must be green on its own');

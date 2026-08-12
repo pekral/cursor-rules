@@ -234,12 +234,12 @@ test('JIRA non-technical CR summary delegates to pr-summary Wiki Markup template
     expect($skill)->toContain('@skills/pr-summary/templates/pr-summary-jira.md');
     expect(is_file($packageDir . '/skills/code-review-jira/templates/jira-output.md'))->toBeFalse();
 
-    // JIRA report = how to test only, plus conditional clarifying questions / assignment discrepancies / critical.
+    // JIRA report = TL;DR + how to test, plus conditional clarifying questions / assignment discrepancies / critical.
     $prSummary = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');
-    expect($prSummary)->toContain('output **only `How to test`**');
+    expect($prSummary)->toContain('output **only `TL;DR` and `How to test`**');
     expect($prSummary)->toContain('No leaked markup on JIRA');
     expect($skill)->toContain('Clarifying questions block (conditional)');
-    expect($skill)->toContain('only `How to test`');
+    expect($skill)->toContain('only `TL;DR` and `How to test`');
     expect($skill)->toContain('no leaked Markdown');
     expect($template)->toContain('h2. Clarifying questions');
 });
@@ -2063,4 +2063,19 @@ test('the commit-split proposal never orphans an anchored review and stays resol
         expect((string) file_get_contents($templateFile))
             ->toContain('is listed here by title only and is exempt from Faulty Example / Expected behavior / Test hint');
     }
+});
+
+test('code review flags a new application Facade without touching framework facade calls', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($content)->toContain('**New application Facade (service-layer ceiling)**');
+    expect($content)->toContain('**Scope — declaration, not call:**');
+    expect($content)->toContain('is **never** this finding; only the application *declaring* a Facade of its own is');
+    expect($content)->toContain('an architecture test asserting no class in `app/` extends `Illuminate\Support\Facades\Facade`');
+    expect($content)->toContain('Severity: **Critical** (declared in `@rules/laravel/architecture.mdc` CR Severity Rules)');
+
+    // The pass-through item must no longer prescribe delegating to a Facade.
+    expect($content)->toContain('the **Single-use Service method rule**');
+    expect($content)->not->toContain('Single-use Service/Facade method rule');
 });

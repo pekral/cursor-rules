@@ -346,3 +346,35 @@ test('the single-public-method trigger carves out trivial pass-through Services 
     expect($content)->toContain('do not mint an Action; resolve it under the **Pass-through Action rule** instead');
     expect($content)->toContain('per the **Exceptions** section');
 });
+
+test('architecture forbids application Facades and caps the service layer at BaseModelService', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($content)->toContain('**No application Facades — `BaseModelService` is the ceiling.**');
+    expect($content)->toContain('a class extending `Illuminate\Support\Facades\Facade`, any class under `app/Facades/`');
+    expect($content)->toContain('that is the "base service" ceiling');
+    expect($content)->toContain('**Framework facades stay allowed');
+    expect($content)->toContain('Never raise a finding against a framework facade *call* under this rule');
+    expect($content)->toContain('a new application-owned Facade');
+
+    // The rule is alwaysApply:false — it must be attached for the directory it forbids,
+    // otherwise creating app/Facades/X.php never pulls the rule into context.
+    expect($content)->toContain('  - app/Facades/**');
+});
+
+test('architecture no longer names Facade as a legitimate business-logic home', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $architecture = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+    $laravel = (string) file_get_contents($packageDir . '/rules/laravel/laravel.mdc');
+
+    // The layer enumerations listed Facades as a peer of the seven allowed layers.
+    expect($architecture)->not->toContain('Actions, Services, Facades,');
+    expect($architecture)->not->toContain('Services, Facades, Jobs, Commands');
+    expect($laravel)->not->toContain('Actions, Services, Facades,');
+
+    // The pass-through resolution now names the Model Service, not a Facade.
+    expect($architecture)->toContain('**Single-use Service method rule (Action pattern):**');
+    expect($architecture)->toContain('a single delegating call to one Model Service method');
+    expect($architecture)->not->toContain('Single-use Service/Facade method rule');
+});

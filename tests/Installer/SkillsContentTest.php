@@ -1280,3 +1280,40 @@ test('class-refactoring skill proposes the Service to Action conversion (issue #
     expect($content)->toContain('is an Action wearing a Service name');
     expect($content)->toContain('rename the single public method to `__invoke()`');
 });
+
+test('analyze-problem never proposes an application Facade in the recommended solution', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');
+
+    expect($content)->toContain('### Layer ceiling — never propose an application Facade');
+    expect($content)->toContain('**Never propose an application-owned Facade**');
+    expect($content)->toContain('**The ceiling is a Model Service**');
+    expect($content)->toContain('This governs Facades the application would define, not the ones Laravel ships');
+    expect($content)->toContain('record it under **Assumptions and Missing Information** as an open architectural question');
+});
+
+test('pr-summary leads both targets with a TL;DR', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $skill = (string) file_get_contents($packageDir . '/skills/pr-summary/SKILL.md');
+    $github = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-github.md');
+    $jira = (string) file_get_contents($packageDir . '/skills/pr-summary/templates/pr-summary-jira.md');
+
+    expect($skill)->toContain('**Every comment opens with a TL;DR.**');
+    expect($skill)->toContain('**one or two sentences**');
+    expect($skill)->toContain('It is **never** omitted and never conditional');
+    expect($skill)->toContain('Lead with the TL;DR');
+
+    expect($github)->toContain('## TL;DR');
+    expect($jira)->toContain('h2. TL;DR');
+
+    // The verdict banner still sits above the new opening section on both targets.
+    expect($skill)->toContain('above `TL;DR` on both targets');
+    expect($github)->toContain('so the comment begins at `## TL;DR`');
+    expect($jira)->toContain('so the comment begins at {{h2. TL;DR}}');
+
+    // Every consumer that enumerates the contract must name TL;DR — a stale
+    // "only How to test" tells the next agent to render a shape the template dropped.
+    foreach (['rules/reports/general.mdc', 'skills/prepare-issue-context/SKILL.md'] as $consumer) {
+        expect((string) file_get_contents($packageDir . '/' . $consumer))->not->toContain('only How to test');
+    }
+});

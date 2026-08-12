@@ -98,7 +98,7 @@ Local in-conversation report only — use the template defined in `templates/tes
 
 ## After completion
 
-The tracker-facing output is **produced by `@skills/pr-summary/SKILL.md` when it exists in the project**. This skill does not author its own JIRA / GitHub comment template — that responsibility belongs to `pr-summary`, which already enforces the uniform *Authors / Available behind / Summary of changes / How to test* contract. **When `pr-summary` is not present in the current project, produce the equivalent tracker comment directly, following the same contract** — do not skip the report and do not fail on the missing dependency.
+The tracker-facing output is **produced by `@skills/pr-summary/SKILL.md` when it exists in the project**. This skill does not author its own JIRA / GitHub comment template — that responsibility belongs to `pr-summary`, which already enforces the uniform *TL;DR / Authors / Available behind / Summary of changes / How to test* contract. **When `pr-summary` is not present in the current project, produce the equivalent tracker comment directly, following the same contract** — do not skip the report and do not fail on the missing dependency.
 
 1. Hand the raw test-report markdown (from `templates/test-report.md`) and the per-scenario results to `@skills/pr-summary/SKILL.md` as input context for the publishing step (or, when absent, to your direct report).
 2. Invoke `pr-summary` with the target tracker matching the PR origin (GitHub for GitHub PRs, JIRA for JIRA-tracked work).

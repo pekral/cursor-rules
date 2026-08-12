@@ -96,12 +96,21 @@ Before proposing or implementing anything, do the research that grounds the anal
 Capture the result as a **written plan** — a text file in the repo (e.g. under `docs/plans/` or alongside the issue) **or** a GitHub issue — not only inline prose. The plan must contain exactly these five parts:
 
 - **Goal** — the outcome in one or two sentences: what will be true when this is done.
-- **Architecture** — where the change lives in the existing system (files, layers, the existing part it extends), and why that home over a new abstraction.
+- **Architecture** — where the change lives in the existing system (files, layers, the existing part it extends), and why that home over a new abstraction. In a Laravel project running `pekral/arch-app-services`, name the target layer explicitly and respect the ceiling below.
 - **Implementation steps** — concrete, ordered, independently reviewable steps a following agent can execute without re-deriving the analysis.
 - **Sources** — links to the codebase locations, commits, and any external references the plan relies on.
 - **Success criteria** — observable, verifiable conditions (tests, behavior, metrics) that prove the work is complete and correct.
 
 State where the plan artifact was written (file path or issue URL) in the analysis output so the next agent can pick it up. A durable plan that the next agent reuses is the compounding payoff — see `@rules/compound-engineering/general.mdc`.
+
+### Layer ceiling — never propose an application Facade
+
+An analysis is where a Facade gets invented: the recommended solution reaches for "a central place to call this from", and the implementing agent builds whatever the plan named. Apply this to the **Recommended Solution** (step 7) and the **Implementation Outline** (step 8) of every Laravel project running `pekral/arch-app-services`:
+
+- **Never propose an application-owned Facade** — a class extending `Illuminate\Support\Facades\Facade`, a file under `app/Facades/`, a `Facade`-suffixed class, a container alias exposing business logic as `SomeName::method(…)`, or a static wrapper fronting domain logic. It is not one of the seven Business Logic Layers, and it hides its collaborators from the constructor signature, so the dependency graph stops being readable to the container and to static analysis.
+- **The ceiling is a Model Service** extending `Pekral\Arch\Service\BaseModelService`, injected through the constructor. Propose the layer that owns the logic: a **Model Service** for single-model domain operations, an **Action** when the use case orchestrates several collaborators, a **Repository** / **ModelManager** for reads / writes, a **Data Validator** for input validation, a **Data Builder** for mapping.
+- **This governs Facades the application would define, not the ones Laravel ships.** Proposing a `Cache::` / `DB::` / `Log::` / `Storage::` call stays fine wherever the surrounding rules allow it.
+- When the analysis concludes a Facade is genuinely the only workable shape, do **not** put it in the recommendation — record it under **Assumptions and Missing Information** as an open architectural question for a human, per `@rules/laravel/architecture.mdc` *No application Facades*.
 
 ---
 

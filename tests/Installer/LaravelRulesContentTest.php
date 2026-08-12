@@ -346,3 +346,15 @@ test('the single-public-method trigger carves out trivial pass-through Services 
     expect($content)->toContain('do not mint an Action; resolve it under the **Pass-through Action rule** instead');
     expect($content)->toContain('per the **Exceptions** section');
 });
+
+test('architecture forbids application Facades and caps the service layer at BaseModelService', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($content)->toContain('**No application Facades — `BaseModelService` is the ceiling.**');
+    expect($content)->toContain('a class extending `Illuminate\Support\Facades\Facade`, any class under `app/Facades/`');
+    expect($content)->toContain('that is the "base service" ceiling');
+    expect($content)->toContain('**Framework facades stay allowed');
+    expect($content)->toContain('Never raise a finding against a framework facade *call* under this rule');
+    expect($content)->toContain('a new application-owned Facade');
+});

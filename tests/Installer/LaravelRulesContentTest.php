@@ -357,6 +357,10 @@ test('architecture forbids application Facades and caps the service layer at Bas
     expect($content)->toContain('**Framework facades stay allowed');
     expect($content)->toContain('Never raise a finding against a framework facade *call* under this rule');
     expect($content)->toContain('a new application-owned Facade');
+
+    // The rule is alwaysApply:false — it must be attached for the directory it forbids,
+    // otherwise creating app/Facades/X.php never pulls the rule into context.
+    expect($content)->toContain('  - app/Facades/**');
 });
 
 test('architecture no longer names Facade as a legitimate business-logic home', function (): void {

@@ -6,6 +6,7 @@ globs:
   - app/Actions/**
   - app/DataBuilders/**
   - app/DataValidators/**
+  - app/Facades/**
   - app/ModelManagers/**
   - app/Repositories/**
   - app/Services/**

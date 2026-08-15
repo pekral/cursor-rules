@@ -941,7 +941,6 @@ test('the comment-hygiene lens reaches pre-existing comments inside the touched 
     expect($rule)->toContain('plus the pre-existing comments inside the region the diff already passes through');
     expect($rule)->toContain('the changed hunks and the enclosing method / class member of each');
     expect($rule)->toContain('never a separate "pre-existing" category');
-    // The region is a ceiling, not an invitation to sweep the repository.
     expect($rule)->toContain('**The region is the ceiling:**');
     expect($rule)->toContain('do not turn a review into a repo-wide comment sweep');
     // A pre-existing stale comment must not block the commit that merely passed by it.

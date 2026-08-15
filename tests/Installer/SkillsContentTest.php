@@ -315,7 +315,6 @@ test('refactoring and tests hold the same comment bar as production code (issue 
     $refactoring = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
     $testing = (string) file_get_contents($packageDir . '/rules/code-testing/general.mdc');
 
-    // A restructured class ships without the prose written for its old shape.
     expect($refactoring)->toContain('**This applies to the comments already in the class, not only to the ones the refactor would add:**');
     expect($refactoring)->toContain('shipping a rewritten class still explained by prose written for the old one');
     expect($refactoring)->toContain('never as a separate repo-wide comment sweep');

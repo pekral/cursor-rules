@@ -297,6 +297,19 @@ test('core standards mandate deleting pre-existing unnecessary comments in the t
     expect($content)->toContain('@rules/sql/optimalize.mdc');
 });
 
+test('resolve-issue fixes pre-existing unnecessary comments in their own comment-only commit (issue #770)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    expect($content)->toContain('- **Unnecessary comments** —');
+    expect($content)->toContain('carry no information the code does not already give');
+    expect($content)->toContain('refactor(<scope>): pre-existing — remove redundant comments in <area>');
+    // Deleting a comment covers no new line, so it must not drag a coverage commit behind it.
+    expect($content)->toContain('touches **no executable line**');
+    expect($content)->toContain('Keep the commit **comment-only**');
+    expect($content)->toContain('when a comment\'s value is genuinely unclear, keep it and name it in the PR');
+});
+
 test('code-review skill flags speculative interfaces in Core Analysis', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md') . "\n" . (string) file_get_contents(

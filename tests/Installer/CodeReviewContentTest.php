@@ -934,6 +934,28 @@ test('every CR walks the self-documenting comment-hygiene lens and preserves its
     expect($codeReview)->toContain('Self-Documenting Code — Comment & Doc Hygiene');
 });
 
+test('the comment-hygiene lens reaches pre-existing comments inside the touched region only (issue #770)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($rule)->toContain('plus the pre-existing comments inside the region the diff already passes through');
+    expect($rule)->toContain('the changed hunks and the enclosing method / class member of each');
+    expect($rule)->toContain('never a separate "pre-existing" category');
+    expect($rule)->toContain('**The region is the ceiling:**');
+    expect($rule)->toContain('do not turn a review into a repo-wide comment sweep');
+    // A pre-existing stale comment must not block the commit that merely passed by it.
+    expect($rule)->toContain('**The Moderate severity is reserved for a comment on a line the diff itself adds or modifies**');
+    expect($rule)->toContain('punishes the wrong commit');
+
+    // The engine's Core Analysis walk carries the widened scope so wrappers inherit it.
+    $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+    expect($codeReview)->toContain('plus the pre-existing ones inside the region it passes through');
+    expect($codeReview)->toContain('never an untouched method or file');
+
+    // The refactoring lens and this one must not both bill the same comment.
+    expect($rule)->toContain('that proposal owns it and this dimension adds nothing for that line');
+});
+
 test('the CR prefers restructuring over documentation and blocks a stale comment on a touched line', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
@@ -949,11 +971,15 @@ test('the CR prefers restructuring over documentation and blocks a stale comment
     expect($rule)->toContain('stale comment on a touched line');
     expect($rule)->toContain('worse than no comment');
     expect($rule)->toContain('**Blocking scope:**');
-    expect($rule)->toContain('Do not downgrade a stale comment to Minor to keep the dimension non-blocking');
+    expect($rule)->toContain('Do not downgrade a stale comment **on a line the diff adds or modifies** to Minor');
 
     // The engine's Core Analysis walk carries the split severity so wrappers inherit it.
     $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
-    expect($codeReview)->toContain('a **stale comment on a touched line** is **Moderate** and blocks');
+    expect($codeReview)->toContain('a **stale comment on a line the diff itself touches** is **Moderate** and blocks');
+
+    // The Core Analysis index must carry the same split — a flat "Minor" there
+    // silently drops the stale-comment finding out of the merge gate.
+    expect($rule)->toContain('**Moderate** for a **stale comment on a line the diff itself adds or modifies**, which blocks the merge gate');
 
     // The authoring side: write code that needs no extensive documentation, and maintain what you keep.
     $core = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');

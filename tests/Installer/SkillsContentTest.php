@@ -280,6 +280,51 @@ test('core standards forbid speculative project-owned interfaces', function (): 
     expect($content)->toContain('test doubles, mocks, and fakes do not count toward either threshold');
 });
 
+test('core standards mandate deleting pre-existing unnecessary comments in the touched region (issue #770)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
+
+    expect($content)->toContain('The codebase\'s default state is no comments');
+    expect($content)->toContain('**including comments you did not write**');
+    expect($content)->toContain('is never a scope expansion');
+    expect($content)->toContain('**stay inside the region you are already changing**');
+    expect($content)->toContain('**when the value of a comment is genuinely unclear, keep it and raise it**');
+    // The mandate must not read as permission to touch unrelated code.
+    expect($content)->toContain('This does not loosen *Code Style*');
+    expect($content)->toContain('a comment is not logic');
+    // Deleting the justification of an exception turns compliant code into a violation.
+    expect($content)->toContain('**Never delete a load-bearing comment**');
+    expect($content)->toContain('@rules/sql/optimalize.mdc');
+});
+
+test('resolve-issue fixes pre-existing unnecessary comments in their own comment-only commit (issue #770)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+
+    expect($content)->toContain('- **Unnecessary comments** —');
+    expect($content)->toContain('carry no information the code does not already give');
+    expect($content)->toContain('refactor(<scope>): pre-existing — remove redundant comments in <area>');
+    // Deleting a comment covers no new line, so it must not drag a coverage commit behind it.
+    expect($content)->toContain('touches **no executable line**');
+    expect($content)->toContain('Keep the commit **comment-only**');
+    expect($content)->toContain('when a comment\'s value is genuinely unclear, keep it and name it in the PR');
+});
+
+test('refactoring and tests hold the same comment bar as production code (issue #770)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $refactoring = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+    $testing = (string) file_get_contents($packageDir . '/rules/code-testing/general.mdc');
+
+    expect($refactoring)->toContain('**This applies to the comments already in the class, not only to the ones the refactor would add:**');
+    expect($refactoring)->toContain('shipping a rewritten class still explained by prose written for the old one');
+    expect($refactoring)->toContain('never as a separate repo-wide comment sweep');
+
+    expect($testing)->toContain('## Comments in Tests');
+    expect($testing)->toContain('**A test carries even less comment budget than production code.**');
+    expect($testing)->toContain('rename the description instead of writing the comment');
+    expect($testing)->toContain('**A comment that survives is maintained.**');
+});
+
 test('code-review skill flags speculative interfaces in Core Analysis', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md') . "\n" . (string) file_get_contents(

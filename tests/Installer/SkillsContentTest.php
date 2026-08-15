@@ -280,6 +280,23 @@ test('core standards forbid speculative project-owned interfaces', function (): 
     expect($content)->toContain('test doubles, mocks, and fakes do not count toward either threshold');
 });
 
+test('core standards mandate deleting pre-existing unnecessary comments in the touched region (issue #770)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
+
+    expect($content)->toContain('The codebase\'s default state is no comments');
+    expect($content)->toContain('**including comments you did not write**');
+    expect($content)->toContain('is never a scope expansion');
+    expect($content)->toContain('**stay inside the region you are already changing**');
+    expect($content)->toContain('**when the value of a comment is genuinely unclear, keep it and raise it**');
+    // The mandate must not read as permission to touch unrelated code.
+    expect($content)->toContain('This does not loosen *Code Style*');
+    expect($content)->toContain('a comment is not logic');
+    // Deleting the justification of an exception turns compliant code into a violation.
+    expect($content)->toContain('**Never delete a load-bearing comment**');
+    expect($content)->toContain('@rules/sql/optimalize.mdc');
+});
+
 test('code-review skill flags speculative interfaces in Core Analysis', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md') . "\n" . (string) file_get_contents(

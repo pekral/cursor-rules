@@ -978,6 +978,10 @@ test('the CR prefers restructuring over documentation and blocks a stale comment
     $codeReview = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
     expect($codeReview)->toContain('a **stale comment on a line the diff itself touches** is **Moderate** and blocks');
 
+    // The Core Analysis index must carry the same split — a flat "Minor" there
+    // silently drops the stale-comment finding out of the merge gate.
+    expect($rule)->toContain('**Moderate** for a **stale comment on a line the diff itself adds or modifies**, which blocks the merge gate');
+
     // The authoring side: write code that needs no extensive documentation, and maintain what you keep.
     $core = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
     expect($core)->toContain('**Write the code so it needs no extensive documentation.**');

@@ -310,6 +310,22 @@ test('resolve-issue fixes pre-existing unnecessary comments in their own comment
     expect($content)->toContain('when a comment\'s value is genuinely unclear, keep it and name it in the PR');
 });
 
+test('refactoring and tests hold the same comment bar as production code (issue #770)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $refactoring = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+    $testing = (string) file_get_contents($packageDir . '/rules/code-testing/general.mdc');
+
+    // A restructured class ships without the prose written for its old shape.
+    expect($refactoring)->toContain('**This applies to the comments already in the class, not only to the ones the refactor would add:**');
+    expect($refactoring)->toContain('shipping a rewritten class still explained by prose written for the old one');
+    expect($refactoring)->toContain('never as a separate repo-wide comment sweep');
+
+    expect($testing)->toContain('## Comments in Tests');
+    expect($testing)->toContain('**A test carries even less comment budget than production code.**');
+    expect($testing)->toContain('rename the description instead of writing the comment');
+    expect($testing)->toContain('**A comment that survives is maintained.**');
+});
+
 test('code-review skill flags speculative interfaces in Core Analysis', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md') . "\n" . (string) file_get_contents(

@@ -1363,7 +1363,7 @@ test('pr-summary leads both targets with a TL;DR', function (): void {
     }
 });
 
-test('implementation skills resolve a failed checker by rewriting code, never by adding a suppression', function (): void {
+test('implementation skills and their canonical rule twin resolve a failed checker by rewriting code, never by adding a suppression', function (): void {
     $packageDir = dirname(__DIR__, 2);
 
     $quotedRuleReference = '(`@rules/php/core-standards.mdc` PHP Practices)';
@@ -1375,6 +1375,7 @@ test('implementation skills resolve a failed checker by rewriting code, never by
         'skills/test-driven-development/SKILL.md',
         'skills/rewrite-tests-pest/SKILL.md',
         'skills/create-missing-tests-in-pr/SKILL.md',
+        'rules/code-testing/general.mdc',
     ];
 
     foreach ($files as $file) {

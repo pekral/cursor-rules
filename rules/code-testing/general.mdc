@@ -93,7 +93,7 @@ A flaky test fails inconsistently, is hard to reproduce, and is often "fixed" by
 ## Code Style and Quality Gates
 - Discover available fixers and checkers: prefer Phing targets (`build.xml`/`phing.xml`) over Composer scripts (`composer.json`).
 - Run available fixers on changed test files and fix any violations.
-- Run available checkers/analyzers on changed test files and resolve all reported errors.
+- Run available checkers/analyzers on changed test files and resolve all reported errors **by rewriting the flagged code, never by adding a suppression annotation** (`@rules/php/core-standards.mdc` PHP Practices).
 - Complete all quality gates before finalizing test changes.
 
 ## Test Review

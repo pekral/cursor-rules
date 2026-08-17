@@ -241,7 +241,7 @@ test('no dataset file in malicious-uploads/ contains a PHP open tag (issue #680)
 
     $paths = array_values(array_filter(
         (array) glob($datasetDir . '/**/*', GLOB_NOSORT),
-        static fn (mixed $p): bool => is_string($p) && is_file($p),
+        static fn (string|false $p): bool => is_string($p) && is_file($p),
     ));
 
     foreach ($paths as $path) {

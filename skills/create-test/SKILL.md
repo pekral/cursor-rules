@@ -64,7 +64,7 @@ Only after Read, Map, and Verify are complete may test-writing begin.
 ### 6. Code Style and Quality Gates
 - Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`)
 - Run available fixers on changed test files and fix any violations
-- Run available checkers/analyzers on changed test files and resolve all reported errors
+- Run available checkers/analyzers on changed test files and resolve all reported errors **by rewriting the flagged code, never by adding a suppression annotation** (`@rules/php/core-standards.mdc` PHP Practices)
 
 ### 7. Test Review
 - Run a quick code review of the created/updated tests against `@rules/code-testing/general.mdc`

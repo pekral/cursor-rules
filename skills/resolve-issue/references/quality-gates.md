@@ -7,7 +7,7 @@ Before committing and pushing changes, run project fixers and checkers on change
 
 Run in this order:
 1. **Fixers** — run all available fixers on changed files (e.g. code style, rector, normalize). Fix any issues they report.
-2. **Checkers** — run all available checkers/analyzers on changed files (e.g. code style check, static analysis, audit). Resolve all reported errors before proceeding.
+2. **Checkers** — run all available checkers/analyzers on changed files (e.g. code style check, static analysis, audit). Resolve all reported errors before proceeding **by rewriting the flagged code, never by adding a suppression annotation** (`@rules/php/core-standards.mdc` PHP Practices).
 3. **Coverage** — if a coverage command exists, run it and confirm 100% coverage for changed code paths.
 
 If both fixers and checkers fail or are not found, stop and inform the user.

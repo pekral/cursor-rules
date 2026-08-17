@@ -1362,3 +1362,25 @@ test('pr-summary leads both targets with a TL;DR', function (): void {
         expect((string) file_get_contents($packageDir . '/' . $consumer))->not->toContain('only How to test');
     }
 });
+
+test('implementation skills resolve a failed checker by rewriting code, never by adding a suppression', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    $quotedRuleReference = '(`@rules/php/core-standards.mdc` PHP Practices)';
+    $files = [
+        'skills/resolve-issue/references/quality-gates.md',
+        'skills/class-refactoring/SKILL.md',
+        'skills/refactor-entry-point-to-action/SKILL.md',
+        'skills/create-test/SKILL.md',
+        'skills/test-driven-development/SKILL.md',
+        'skills/rewrite-tests-pest/SKILL.md',
+        'skills/create-missing-tests-in-pr/SKILL.md',
+    ];
+
+    foreach ($files as $file) {
+        $content = (string) file_get_contents($packageDir . '/' . $file);
+
+        expect($content)->toContain('never by adding a suppression annotation');
+        expect($content)->toContain($quotedRuleReference);
+    }
+});

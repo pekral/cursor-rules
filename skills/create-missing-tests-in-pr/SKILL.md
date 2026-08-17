@@ -109,7 +109,7 @@ Rules:
 
 -   Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`).
 -   Run available fixers on all changed test files and fix any violations.
--   Run available checkers/analyzers on all changed test files and resolve all reported errors.
+-   Run available checkers/analyzers on all changed test files and resolve all reported errors **by rewriting the flagged code, never by adding a suppression annotation** (`@rules/php/core-standards.mdc` PHP Practices).
 -   Run a quick code review of all added or updated tests against `@rules/code-testing/general.mdc` and fix any findings.
 -   Summarize what testing recommendations from the code review were
     verified.

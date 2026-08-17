@@ -51,7 +51,7 @@ Only after Read, Map, and Verify are complete may the rewrite begin.
 2. Verify 100% code coverage for all rewritten test paths — if coverage tooling exists, run it.
 3. Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`).
 4. Run available fixers on changed test files and fix any violations.
-5. Run available checkers/analyzers on changed test files and resolve all reported errors.
+5. Run available checkers/analyzers on changed test files and resolve all reported errors **by rewriting the flagged code, never by adding a suppression annotation** (`@rules/php/core-standards.mdc` PHP Practices).
 6. Run a quick code review of rewritten tests against `@rules/code-testing/general.mdc` and fix any findings.
 
 ## Done when

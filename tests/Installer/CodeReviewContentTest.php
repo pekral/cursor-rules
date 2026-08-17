@@ -2105,3 +2105,26 @@ test('code review flags a new application Facade without touching framework faca
     expect($content)->toContain('the **Single-use Service method rule**');
     expect($content)->not->toContain('Single-use Service/Facade method rule');
 });
+
+test('a static-analysis / linter suppression is never exempt, not even for an unfixable third-party false positive', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
+    $codeReviewRule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($rule)->toContain('**Never introduce a static-analysis / linter suppression — there is no exception.**');
+    expect($rule)->toContain('There is no allowance for a "genuinely unavoidable third-party / framework false positive"');
+    expect($rule)->toContain('it stops and escalates the finding to the user as a blocker, or records it as its own tracked issue');
+    expect($rule)->not->toContain('narrow, allowed exception');
+    expect($rule)->not->toContain('must then be **narrowly scoped**');
+
+    expect($codeReviewRule)->toContain('**No suppression is exempt**');
+    expect($codeReviewRule)->toContain('there is no allowance for a narrowly-scoped or documented "unfixable third-party / framework false positive"');
+    expect($codeReviewRule)->toContain(
+        'the Suggested Fix removes the suppression and escalates the finding as a blocker for the user or a separate tracked issue instead',
+    );
+    expect($codeReviewRule)->not->toContain('Exemptions (do **not** flag): a suppression that is **both** narrowly scoped');
+
+    // The only sanctioned exception is the UnusedVariable assert() fix, on both surfaces.
+    expect($rule)->toContain('The only sanctioned exception is the `UnusedVariable` fix below');
+    expect($codeReviewRule)->toContain('the only non-finding is `assert($var !== null)` for a required-but-unused variable');
+});

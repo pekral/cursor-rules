@@ -157,7 +157,7 @@ Only after Read, Map, and Verify are complete may the Test Coverage Gate and the
 
 - Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`)
 - Run available fixers on all changed files and fix any violations
-- Run available checkers/analyzers on all changed files and resolve all reported errors
+- Run available checkers/analyzers on all changed files and resolve all reported errors **by rewriting the flagged code, never by adding a suppression annotation** (`@rules/php/core-standards.mdc` PHP Practices)
 
 ## After Completion
 

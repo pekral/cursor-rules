@@ -95,7 +95,7 @@ Never fix a bug without first writing or updating a test that reproduces it.
 1. Verify 100% code coverage for all changed or added code paths — if coverage tooling exists, run it.
 2. Discover available fixers and checkers (prefer Phing targets from `build.xml`/`phing.xml`; fall back to Composer scripts in `composer.json`).
 3. Run available fixers on changed files and fix any violations.
-4. Run available checkers/analyzers on changed files and resolve all reported errors.
+4. Run available checkers/analyzers on changed files and resolve all reported errors **by rewriting the flagged code, never by adding a suppression annotation** (`@rules/php/core-standards.mdc` PHP Practices).
 5. Run a quick code review of all tests written during the TDD cycle against `@rules/code-testing/general.mdc` and fix any findings.
 
 ## Done when

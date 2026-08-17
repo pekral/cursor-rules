@@ -2115,17 +2115,28 @@ test('a static-analysis / linter suppression is never exempt, not even for an un
     expect($rule)->toContain('No suppression is ever compliant');
     expect($rule)->toContain('a genuinely unfixable third-party / framework false positive');
     expect($rule)->toContain('it **stops** implementing that change and reports it as a blocker');
-    expect($rule)->toContain('Filing the underlying defect as its own tracked issue (`@agents/athena.md` *Findings outside the diff*)');
+    expect($rule)->toContain('(`Blocked: <reason>` per `agents/talos.md`, or the running agent\'s equivalent blocked-handoff contract)');
+    expect($rule)->toContain('Filing the underlying defect as its own tracked issue (`agents/athena.md` *Findings outside the diff*)');
     expect($rule)->toContain('is a decision the caller makes only **after** that stop');
     expect($rule)->not->toContain('narrow, allowed exception');
     expect($rule)->not->toContain('must then be **narrowly scoped**');
     expect($rule)->not->toContain('The only sanctioned exception is the `UnusedVariable` fix below');
     expect($rule)->not->toContain('the inline justification a narrowly-scoped static-analysis suppression must carry');
+    expect($rule)->not->toContain('`@agents/talos.md`');
+    expect($rule)->not->toContain('`@agents/athena.md`');
 
-    // Config-level bypass carries the same finding as an inline annotation.
+    expect($rule)->toContain('a pattern must never appear as an **effective** annotation on a line of code the change adds or modifies');
+    expect($codeReviewRule)->toContain('A finding requires the pattern to appear as an **effective** annotation or configuration change');
+    expect($codeReviewRule)->toContain('on a line the diff adds, modifies, or removes');
+    expect($rule)->toContain('quoting the pattern in this rule\'s own prose or in a test assertion that pins it is not a suppression');
+    expect($codeReviewRule)->toContain('quoting the pattern in this rule\'s own prose or in a test assertion that pins it is not a suppression');
+    expect($rule)->toContain('resolve the warning with `assert($variable !== null)` or similar `assert()` instead of removing the assignment');
     expect($rule)->toContain('a new `excludePaths` entry or a lowered `level:` in `phpstan.neon`');
     expect($rule)->toContain('a new `skip()` entry in `rector.php`');
     expect($rule)->toContain('a removed `analyse` / `phpcs` / checker step from `composer.json` scripts or a CI workflow');
+    expect($rule)->toContain('a config change of this shape on a line the diff adds, modifies, or removes is the same finding');
+    expect($rule)->toContain('narrowing coverage for an unrelated, independently justified reason');
+    expect($rule)->toContain('is ordinary configuration maintenance, not a suppression');
     expect($rule)->toContain('This does not reach configuration the diff leaves untouched');
 
     expect($codeReviewRule)->toContain('**No suppression is exempt**');
@@ -2133,8 +2144,13 @@ test('a static-analysis / linter suppression is never exempt, not even for an un
     expect($codeReviewRule)->toContain(
         'the Suggested Fix removes the suppression / restores the configuration and reports the finding as a blocker to the caller instead',
     );
-    expect($codeReviewRule)->toContain('This is a **terminal** state for the review');
+    expect($codeReviewRule)->toContain('This finding is **never waivable by deferral**');
+    expect($codeReviewRule)->toContain('a distinct condition from the loop\'s own `Blocked: awaiting external input` terminal state');
+    expect($codeReviewRule)->toContain('That exit is always reachable, never a deadlock');
     expect($codeReviewRule)->toContain('a new `excludePaths` entry or a lowered `level:` in `phpstan.neon`');
+    expect($codeReviewRule)->toContain('A config-level change of this shape is this same finding only when it narrows the coverage');
+    expect($codeReviewRule)->toContain('of code the diff itself changes, or answers a reported analyzer finding');
+    expect($codeReviewRule)->toContain('is ordinary configuration maintenance, not a suppression');
     expect($codeReviewRule)->not->toContain('Exemptions (do **not** flag): a suppression that is **both** narrowly scoped');
     expect($codeReviewRule)->toContain('the only non-finding is `assert($var !== null)` for a required-but-unused variable');
 });

@@ -295,6 +295,13 @@ test('core standards mandate deleting pre-existing unnecessary comments in the t
     // Deleting the justification of an exception turns compliant code into a violation.
     expect($content)->toContain('**Never delete a load-bearing comment**');
     expect($content)->toContain('@rules/sql/optimalize.mdc');
+    // A second load-bearing example protects the security carve-out download-attachments.sh justifications rely on.
+    expect($content)->toContain('@rules/security/backend.md');
+    expect($content)->toContain('Malicious Code & Supply-Chain Indicators');
+    // Two named examples take plural pronouns, not singular ones.
+    expect($content)->toContain(
+        'Both answer *why* and are covered by the keep-bar already; they are named here because the deletion sweep is exactly where they get lost.',
+    );
 });
 
 test('resolve-issue fixes pre-existing unnecessary comments in their own comment-only commit (issue #770)', function (): void {

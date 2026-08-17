@@ -2111,20 +2111,30 @@ test('a static-analysis / linter suppression is never exempt, not even for an un
     $rule = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
     $codeReviewRule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
 
-    expect($rule)->toContain('**Never introduce a static-analysis / linter suppression — there is no exception.**');
-    expect($rule)->toContain('There is no allowance for a "genuinely unavoidable third-party / framework false positive"');
-    expect($rule)->toContain('it stops and escalates the finding to the user as a blocker, or records it as its own tracked issue');
+    expect($rule)->toContain('**Never introduce a static-analysis / linter suppression.**');
+    expect($rule)->toContain('No suppression is ever compliant');
+    expect($rule)->toContain('a genuinely unfixable third-party / framework false positive');
+    expect($rule)->toContain('it **stops** implementing that change and reports it as a blocker');
+    expect($rule)->toContain('Filing the underlying defect as its own tracked issue (`@agents/athena.md` *Findings outside the diff*)');
+    expect($rule)->toContain('is a decision the caller makes only **after** that stop');
     expect($rule)->not->toContain('narrow, allowed exception');
     expect($rule)->not->toContain('must then be **narrowly scoped**');
+    expect($rule)->not->toContain('The only sanctioned exception is the `UnusedVariable` fix below');
+    expect($rule)->not->toContain('the inline justification a narrowly-scoped static-analysis suppression must carry');
+
+    // Config-level bypass carries the same finding as an inline annotation.
+    expect($rule)->toContain('a new `excludePaths` entry or a lowered `level:` in `phpstan.neon`');
+    expect($rule)->toContain('a new `skip()` entry in `rector.php`');
+    expect($rule)->toContain('a removed `analyse` / `phpcs` / checker step from `composer.json` scripts or a CI workflow');
+    expect($rule)->toContain('This does not reach configuration the diff leaves untouched');
 
     expect($codeReviewRule)->toContain('**No suppression is exempt**');
     expect($codeReviewRule)->toContain('there is no allowance for a narrowly-scoped or documented "unfixable third-party / framework false positive"');
     expect($codeReviewRule)->toContain(
-        'the Suggested Fix removes the suppression and escalates the finding as a blocker for the user or a separate tracked issue instead',
+        'the Suggested Fix removes the suppression / restores the configuration and reports the finding as a blocker to the caller instead',
     );
+    expect($codeReviewRule)->toContain('This is a **terminal** state for the review');
+    expect($codeReviewRule)->toContain('a new `excludePaths` entry or a lowered `level:` in `phpstan.neon`');
     expect($codeReviewRule)->not->toContain('Exemptions (do **not** flag): a suppression that is **both** narrowly scoped');
-
-    // The only sanctioned exception is the UnusedVariable assert() fix, on both surfaces.
-    expect($rule)->toContain('The only sanctioned exception is the `UnusedVariable` fix below');
     expect($codeReviewRule)->toContain('the only non-finding is `assert($var !== null)` for a required-but-unused variable');
 });

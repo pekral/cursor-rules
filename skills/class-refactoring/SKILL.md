@@ -103,6 +103,7 @@ Only after Read, Map, and Verify are complete may the Test Coverage Gate and the
 - Avoid deep nesting and complex conditionals.
 - Keep method signatures clear and minimal.
 - **Method parameter count (>4 → DTO):** when a method, function, closure, constructor, `__invoke()`, or other callable crosses the threshold, propose extracting a dedicated typed DTO and passing it as a single argument, per `@rules/php/core-standards.mdc` Structure section (parameter counting rules, exemption list, and required fix are defined there).
+- **`mixed` type narrowing:** when the refactor touches a parameter, return type, property, or PHPDoc typed `mixed`, propose narrowing it to the concrete type per `@rules/php/core-standards.mdc` PHP Practices (*Never type … as `mixed`*) — a union for a finite set of shapes, a generic annotation, a typed DTO, or the missing normalization step in a FormRequest / Data Validator / Data Builder — unless a cited vendor / interface / native-callback exception applies.
 
 ---
 

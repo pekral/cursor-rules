@@ -256,6 +256,20 @@ test('class-refactoring skill surfaces the speculative-interface refactoring', f
     expect($content)->toContain('@rules/php/core-standards.mdc');
 });
 
+test('class-refactoring and refactor-entry-point-to-action skills reference the mixed-type narrowing rule', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    $classRefactoring = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+    expect($classRefactoring)->toContain('**`mixed` type narrowing:**');
+    expect($classRefactoring)->toContain('unless a cited vendor / interface / native-callback exception applies');
+
+    $refactorEntryPoint = (string) file_get_contents($packageDir . '/skills/refactor-entry-point-to-action/SKILL.md');
+    expect($refactorEntryPoint)->toContain('**The extracted Action\'s parameters, return type, and properties must be concrete, never `mixed`.**');
+    expect($refactorEntryPoint)->toContain(
+        'Normalize the input in the entry point\'s FormRequest / Data Validator / Data Builder instead of typing the Action\'s signature `mixed`',
+    );
+});
+
 test('class-refactoring skill enforces the seven business logic layers including Eloquent models', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');

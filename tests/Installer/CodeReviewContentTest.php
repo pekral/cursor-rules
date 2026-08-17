@@ -2154,3 +2154,37 @@ test('a static-analysis / linter suppression is never exempt, not even for an un
     expect($codeReviewRule)->not->toContain('Exemptions (do **not** flag): a suppression that is **both** narrowly scoped');
     expect($codeReviewRule)->toContain('the only non-finding is `assert($var !== null)` for a required-but-unused variable');
 });
+
+test('the mixed type is banned in favor of a narrowed type, with cited vendor/interface/callback exceptions', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
+    $codeReviewRule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // Authoring side: the ban, the replacements, and the boundary-normalization framing.
+    expect($rule)->toContain('**Never type a parameter, return type, property, or PHPDoc annotation');
+    expect($rule)->toContain('(`@param mixed`, `@return mixed`, `@var mixed`) as `mixed` on a line the diff adds or modifies.**');
+    expect($rule)->toContain('`mixed` is not a type — it is the absence of one');
+    expect($rule)->toContain('a union when the value truly has a small, finite set of shapes');
+    expect($rule)->toContain('normalize it to a concrete type **at that boundary**');
+    expect($rule)->toContain('`mixed` inside the application is the symptom of a missing normalization step, not a legitimate type of its own');
+    expect($rule)->toContain('**Cited exceptions only**, the same mechanism as the *Structure* section\'s public-DTO-return rule above');
+    expect($rule)->toContain('`JsonSerializable::jsonSerialize(): mixed`');
+    expect($rule)->toContain('`ArrayAccess::offsetGet(mixed $offset): mixed`');
+    expect($rule)->toContain('`usort()` / `uasort()` / `uksort()` comparator parameters');
+    expect($rule)->toContain('Pre-existing `mixed` on a line the diff does not touch is not retroactively in scope');
+    expect($rule)->toContain('a project is never expected to bulk-rewrite `mixed` usages the current change does not touch');
+    expect($rule)->toContain('On a Laravel project using `pekral/arch-app-services`, `mixed` on an Action / Model Service');
+    expect($rule)->toContain('Repository / ModelManager signature carries a stricter, Critical form');
+
+    // Review side: the mirrored CR bullet, its own exceptions list, and the Laravel escalation gate.
+    expect($codeReviewRule)->toContain('**`mixed` type introduced instead of a concrete type:**');
+    expect($codeReviewRule)->toContain(
+        'Pre-existing `mixed` on a line the diff does not touch is out of scope — do not flag it and do not require a bulk rewrite',
+    );
+    expect($codeReviewRule)->toContain('**Cited exceptions** (do not flag when the contract and a one-line reason are cited)');
+    expect($codeReviewRule)->toContain('Severity: **Moderate** (declared in `@rules/php/core-standards.mdc` PHP Practices)');
+    expect($codeReviewRule)->toContain('**Gating — raise one finding per violation, never both:**');
+    expect($codeReviewRule)->toContain(
+        'the **Architecture conformance** walk\'s Critical bullet (`@rules/laravel/architecture.mdc` CR Severity Rules) owns the finding instead',
+    );
+});

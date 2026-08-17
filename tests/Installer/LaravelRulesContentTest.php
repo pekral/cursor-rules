@@ -378,3 +378,21 @@ test('architecture no longer names Facade as a legitimate business-logic home', 
     expect($architecture)->toContain('a single delegating call to one Model Service method');
     expect($architecture)->not->toContain('Single-use Service/Facade method rule');
 });
+
+test('Action / Model Service / Repository / ModelManager receive normalized data — mixed is Critical at that boundary', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($content)->toContain('**Action / Model Service / Repository / ModelManager receive normalized, typed data — never `mixed`.**');
+    expect($content)->toContain('normalization is not their job');
+    expect($content)->toContain('produced by the FormRequest, Data Validator, or Data Builder that fed it');
+    expect($content)->toContain('it is a signal that the normalization step upstream is missing or incomplete');
+    expect($content)->toContain('never to type the parameter `mixed` to make the signature compile');
+
+    expect($content)->toContain('a `mixed` parameter, return type, property, or PHPDoc (`@param mixed` / `@return mixed` / `@var mixed`)');
+    expect($content)->toContain('on an Action / Model Service / Repository / ModelManager signature added or modified by the diff');
+    expect($content)->toContain(
+        'This is the Laravel-boundary escalation of the general **Moderate** rule in `@rules/php/core-standards.mdc` PHP Practices',
+    );
+    expect($content)->toContain('raise it here at **Critical** and never additionally at Moderate for the same line');
+});

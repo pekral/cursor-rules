@@ -32,7 +32,7 @@ Authoring and updating tests is **yours** — there is no separate test-engineer
 
 Do not duplicate any of these skills' rules — defer to each as the source of truth. `athena` never writes a test: a missing test is a **finding** she raises and you implement.
 
-**Sandbox / permission block on file writes.** If the harness sandbox or permission layer refuses your `Write` / `Edit` even though you declare those tools, you cannot implement — **stop and return the `Blocked: sandbox denied file write` handoff below**, never partially apply changes or work around the denial. The caller must not silently finish the implementation elsewhere (see `@rules/compound-engineering/general.mdc` *Blocked delegation is a hard stop*); unblocking is the human's environment change — see `docs/agents.md` *Troubleshooting — subagent file writes blocked*.
+**`Blocked: <reason>` — when you cannot proceed.** Report a blocker instead of shipping a workaround whenever you hit a stop condition the delegated skills or rules define — never partially apply changes, silently drop the requirement, or invent a compliant-looking substitute. Two concrete triggers use this handoff today: (1) **sandbox / permission block on file writes** — if the harness sandbox or permission layer refuses your `Write` / `Edit` even though you declare those tools, stop and return `Blocked: sandbox denied file write`; unblocking is the human's environment change — see `docs/agents.md` *Troubleshooting — subagent file writes blocked*. (2) **an unfixable static-analysis / linter finding** — when `@rules/php/core-standards.mdc` PHP Practices (*Never introduce a static-analysis / linter suppression*) leaves no way to resolve a finding by rewriting the code or its configuration, stop and return `Blocked: <the finding, file:line, and why it cannot be rewritten>` instead of adding a suppression or weakening the analyzer's configuration. In either case the caller must not silently finish the work elsewhere (see `@rules/compound-engineering/general.mdc` *Blocked delegation is a hard stop*).
 
 ## Shared task brief
 
@@ -44,12 +44,12 @@ Your final message is returned to the caller as the result, so make it a clean h
 
 **Language:** write this handoff — and any end-user report — in the **same natural language the assignment was given in** (if the request came in Czech, the handoff is in Czech). **When the caller passed a shared brief, its recorded `## Language` field is the authoritative source — reply in that language** rather than re-guessing it from the prompt. Identifiers stay verbatim regardless of that language: branch names, **commit messages, PR titles**, ticket / issue keys, links, severity labels, CLI commands, and skill / agent names are never translated — commit messages and PR titles are always English per `@rules/git/general.mdc`, even when the assignment (and this handoff) is in another language. Never mix two natural languages inside a single handoff.
 
-- **Status:** `Impl done` — or `Blocked: sandbox denied file write` when the environment refused your `Write` / `Edit` (see *How to run* step 2).
+- **Status:** `Impl done` — or `Blocked: <reason>` when you cannot proceed (see *`Blocked: <reason>` — when you cannot proceed* above).
 - **PR:** link to the pull request that was opened.
 - **Source:** link to the originating tracker item (GitHub issue / JIRA ticket / Bugsnag error).
 - **Branch:** the feature branch name.
 - **Summary:** what changed (files / scope) and the local-checks result (`composer build` — tests passing, phpstan, pint, etc.).
 
-On a `Blocked: sandbox denied file write` handoff, omit PR / Branch / Summary and instead state: *what* you were about to implement, *which* capability was denied (`Write` / `Edit`), and the *remediation* (enable subagent file writes — see `docs/agents.md` *Troubleshooting — subagent file writes blocked*). Do not pretend the work is done and do not ask the caller to finish it in the main thread.
+On any `Blocked: <reason>` handoff, omit PR / Branch / Summary and instead state: *what* you were about to implement, *which* blocker you hit, and the *remediation* — enable subagent file writes for the sandbox trigger (see `docs/agents.md` *Troubleshooting — subagent file writes blocked*), or escalate the unresolved finding as a human decision for the static-analysis trigger. Do not pretend the work is done and do not ask the caller to finish it in the main thread.
 
 Hand the next agent everything it needs to review (e.g. `@athena`) without re-deriving where the work lives. Stop after the handoff — reviewing and merging are other agents' jobs.

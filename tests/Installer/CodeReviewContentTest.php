@@ -939,7 +939,7 @@ test(
     function (): void {
         $packageDir = dirname(__DIR__, 2);
         $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
-    
+
         expect($rule)->toContain('require its **removal by making the code say it**');
         expect($rule)->toContain(
             'rename the symbol, extract an intention-revealing method / guard, name the magic value as a constant or enum case, then delete the narration',

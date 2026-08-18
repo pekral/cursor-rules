@@ -966,6 +966,25 @@ test('Exception 1 protects only the naming-first residue and never reaches a loa
     expect($rule)->toContain('whose text is the condition of another rule\'s exception');
 });
 
+test('the naming-first precondition routes through the keep-bar, the over-documented-block trigger, and the closing gate (issue #774)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // Bar for keeping a comment — a *why* comment clears the bar only for the residue naming cannot carry.
+    expect($rule)->toContain(
+        'and only for the residue that survives after the code has been made to say everything it can — Exception 1 *Naming-first precondition*',
+    );
+    // Over-documented block — an unreduced *why* preamble is a deterministic trigger, not a judgement call.
+    expect($rule)->toContain(
+        'a multi-line *why* / rationale preamble sitting on a condition built from unnamed literals**'
+        . ' (Exception 1\'s *Naming-first precondition* routes it here)',
+    );
+    // Gating — the closing bullet accepts the routed finding instead of disowning it.
+    expect($rule)->toContain(
+        'and the unreduced *why* preamble Exception 1\'s Naming-first precondition routes to the *over-documented block* finding',
+    );
+});
+
 test('the require-deletion finding exempts tooling-mandated docblocks, licence headers, and framework annotations (issue #774)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
@@ -994,7 +1013,7 @@ test('the comment-hygiene lens reaches pre-existing comments inside the touched 
     expect($codeReview)->toContain('never an untouched method or file');
 
     // The refactoring lens and this one must not both bill the same comment.
-    expect($rule)->toContain('that proposal owns it and this dimension adds nothing for that line');
+    expect($rule)->toContain('its proposal owns the line and this dimension adds nothing — raise one finding per violation, never both');
 });
 
 test('the CR prefers restructuring over documentation and blocks a stale comment on a touched line', function (): void {

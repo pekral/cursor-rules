@@ -934,6 +934,77 @@ test('every CR walks the self-documenting comment-hygiene lens and preserves its
     expect($codeReview)->toContain('Self-Documenting Code — Comment & Doc Hygiene');
 });
 
+test(
+    'the Core Analysis index carries the rename/extract remedy instead of plain deletion, and the merge-gate tail stays byte-identical (issue #774)',
+    function (): void {
+        $packageDir = dirname(__DIR__, 2);
+        $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+        expect($rule)->toContain('require its **removal by making the code say it**');
+        expect($rule)->toContain(
+            'rename the symbol, extract an intention-revealing method / guard, name the magic value as a constant or enum case, then delete the narration',
+        );
+        expect($rule)->toContain('plain deletion is the whole fix only when the comment was compensating for nothing');
+        expect($rule)->toContain(
+            'the rationale exception protects only the naming residue, so an unreduced multi-line *why* preamble on a condition'
+            . ' built from unnamed literals is still a finding, per that section\'s Exception 1 *Naming-first precondition*',
+        );
+        expect($rule)->toContain(
+            '**Moderate** for a **stale comment on a line the diff itself adds or modifies**, which blocks the merge gate',
+        );
+    },
+);
+
+test('Exception 1 protects only the naming-first residue and never reaches a load-bearing comment (issue #774)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($rule)->toContain('**Naming-first precondition — Exception 1 protects the *residue*, not the whole comment.**');
+    expect($rule)->toContain(
+        'the literal it tests is a named constant / enum case, the condition is an intention-revealing guard method, the variable is renamed',
+    );
+    expect($rule)->toContain('A multi-line *why* preamble sitting on a condition built from unnamed literals is **not** shielded here');
+    expect($rule)->toContain(
+        'it is the *over-documented block* finding above, whose Suggested Fix is the restructuring plus the residual pointer'
+        . ' (`@see <issue / ADR>`, Exception 2), never a reworded comment',
+    );
+    expect($rule)->toContain(
+        '**Gating — raise one finding per violation, never both:** that block finding owns the line; this exception adds no'
+        . ' second finding and does not raise its severity.',
+    );
+    expect($rule)->toContain('Never require deletion of the residual *why* or of a domain term no name can carry');
+    expect($rule)->toContain('never let this precondition reach a **load-bearing comment**');
+    expect($rule)->toContain('whose text is the condition of another rule\'s exception');
+});
+
+test('the naming-first precondition routes through the keep-bar, the over-documented-block trigger, and the closing gate (issue #774)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // Bar for keeping a comment — a *why* comment clears the bar only for the residue naming cannot carry.
+    expect($rule)->toContain(
+        'and only for the residue that survives after the code has been made to say everything it can — Exception 1 *Naming-first precondition*',
+    );
+    // Over-documented block — an unreduced *why* preamble is a deterministic trigger, not a judgement call.
+    expect($rule)->toContain(
+        'a multi-line *why* / rationale preamble sitting on a condition built from unnamed literals**'
+        . ' (Exception 1\'s *Naming-first precondition* routes it here)',
+    );
+    // Gating — the closing bullet accepts the routed finding instead of disowning it.
+    expect($rule)->toContain(
+        'and the unreduced *why* preamble Exception 1\'s Naming-first precondition routes to the *over-documented block* finding',
+    );
+});
+
+test('the require-deletion finding exempts tooling-mandated docblocks, licence headers, and framework annotations (issue #774)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($rule)->toContain('Never raise this finding on a docblock the static analyzer still needs');
+    expect($rule)->toContain('on a licence / copyright header, or on an annotation a framework / generator / tool consumes');
+    expect($rule)->toContain('*Tooling-mandated annotations are kept*');
+});
+
 test('the comment-hygiene lens reaches pre-existing comments inside the touched region only (issue #770)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
@@ -953,7 +1024,7 @@ test('the comment-hygiene lens reaches pre-existing comments inside the touched 
     expect($codeReview)->toContain('never an untouched method or file');
 
     // The refactoring lens and this one must not both bill the same comment.
-    expect($rule)->toContain('that proposal owns it and this dimension adds nothing for that line');
+    expect($rule)->toContain('its proposal owns the line and this dimension adds nothing — raise one finding per violation, never both');
 });
 
 test('the CR prefers restructuring over documentation and blocks a stale comment on a touched line', function (): void {

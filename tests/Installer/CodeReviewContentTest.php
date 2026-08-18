@@ -965,7 +965,15 @@ test('Exception 1 protects only the naming-first residue and never reaches a loa
         'the literal it tests is a named constant / enum case, the condition is an intention-revealing guard method, the variable is renamed',
     );
     expect($rule)->toContain('A multi-line *why* preamble sitting on a condition built from unnamed literals is **not** shielded here');
-    expect($rule)->toContain('**Gating — raise one finding per violation, never both:**');
+    expect($rule)->toContain(
+        'it is the *over-documented block* finding above, whose Suggested Fix is the restructuring plus the residual pointer'
+        . ' (`@see <issue / ADR>`, Exception 2), never a reworded comment',
+    );
+    expect($rule)->toContain(
+        '**Gating — raise one finding per violation, never both:** that block finding owns the line; this exception adds no'
+        . ' second finding and does not raise its severity.',
+    );
+    expect($rule)->toContain('Never require deletion of the residual *why* or of a domain term no name can carry');
     expect($rule)->toContain('never let this precondition reach a **load-bearing comment**');
     expect($rule)->toContain('whose text is the condition of another rule\'s exception');
 });

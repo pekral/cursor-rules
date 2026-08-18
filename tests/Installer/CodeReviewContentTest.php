@@ -945,6 +945,10 @@ test(
             'rename the symbol, extract an intention-revealing method / guard, name the magic value as a constant or enum case, then delete the narration',
         );
         expect($rule)->toContain('plain deletion is the whole fix only when the comment was compensating for nothing');
+        expect($rule)->toContain(
+            'the rationale exception protects only the naming residue, so an unreduced multi-line *why* preamble on a condition'
+            . ' built from unnamed literals is still a finding, per that section\'s Exception 1 *Naming-first precondition*',
+        );
         // Pinned merge-gate tail must survive untouched.
         expect($rule)->toContain(
             '**Moderate** for a **stale comment on a line the diff itself adds or modifies**, which blocks the merge gate',

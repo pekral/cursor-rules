@@ -41,9 +41,12 @@ if ($attempt >= 3) {
 }
 ```
 
-Prefer naming the value:
+Prefer naming the value, keeping the residual *why* as a `@see` pointer:
 
 ```php
+/**
+ * @see https://docs.stripe.com/webhooks#retry-logic
+ */
 private const int MAX_WEBHOOK_DELIVERY_ATTEMPTS = 3;
 
 if ($attempt >= self::MAX_WEBHOOK_DELIVERY_ATTEMPTS) {
@@ -59,8 +62,8 @@ $normalized = preg_replace('/[^\d+]/', '', $phone);
 $normalized = ltrim($normalized, '+');
 ```
 
-Prefer extracting an intention-revealing method:
+Prefer extracting an intention-revealing method, naming the purpose the comment carried:
 
 ```php
-$normalized = $this->normalizePhoneNumber($phone);
+$normalized = $this->normalizePhoneNumberForCustomerMatch($phone);
 ```

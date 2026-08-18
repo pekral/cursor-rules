@@ -334,6 +334,9 @@ test('self-documenting-code example file exists and demonstrates naming over nar
     expect($content)->toContain('BEARER_TOKEN_GUARD');
     expect($content)->toContain('expectsTokenChallenge');
     expect($content)->toContain('@see ECOMAIL-6655');
+    // Every Prefer block keeps the residue its Avoid comment carried (issue #774 CR round 2).
+    expect($content)->toContain('@see https://docs.stripe.com/webhooks#retry-logic');
+    expect($content)->toContain('normalizePhoneNumberForCustomerMatch');
 });
 
 test('resolve-issue fixes pre-existing unnecessary comments in their own comment-only commit (issue #770)', function (): void {

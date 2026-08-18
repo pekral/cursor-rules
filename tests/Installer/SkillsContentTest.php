@@ -304,6 +304,38 @@ test('core standards mandate deleting pre-existing unnecessary comments in the t
     );
 });
 
+test('core standards limit the why-bar to the residue naming cannot carry and keep tooling-mandated annotations (issue #774)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/php/core-standards.mdc');
+
+    expect($content)->toContain('**The *why* bar covers only the residue.**');
+    expect($content)->toContain('preferably shrunk to a `@see <issue / ADR>` pointer');
+    expect($content)->toContain(
+        'A multi-line rationale block sitting on a condition built from unnamed literals is a restructuring signal, not a warranted comment.',
+    );
+
+    // Tooling-mandated annotations get their own bullet, not an extension of the pinned load-bearing-comment sentence above.
+    expect($content)->toContain('**Tooling-mandated annotations are kept.**');
+    expect($content)->toContain('`@template`, `@mixin`');
+    expect($content)->toContain('a licence / copyright header');
+    expect($content)->toContain('an annotation a framework, generator, or tool reads as input');
+    expect($content)->toContain('This is no licence for a redundant `@param string $name` on an already-typed parameter');
+
+    expect($content)->toContain('See `rules/php/examples/self-documenting-code.md` for a worked before/after.');
+});
+
+test('self-documenting-code example file exists and demonstrates naming over narration (issue #774)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $path = $packageDir . '/rules/php/examples/self-documenting-code.md';
+
+    expect(is_file($path))->toBeTrue();
+
+    $content = (string) file_get_contents($path);
+    expect($content)->toContain('BEARER_TOKEN_GUARD');
+    expect($content)->toContain('expectsTokenChallenge');
+    expect($content)->toContain('@see ECOMAIL-6655');
+});
+
 test('resolve-issue fixes pre-existing unnecessary comments in their own comment-only commit (issue #770)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');

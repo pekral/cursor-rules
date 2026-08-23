@@ -51,6 +51,31 @@ When the package is required via Composer, sources are read from `vendor/pekral/
 
 **Important:** By default, the installer only copies missing files and keeps existing content untouched. Use the `--force` flag to overwrite existing files: `vendor/bin/cursor-rules install --force`. This is particularly useful when you want to update rules to their latest versions or when you've made local changes that should be replaced. The file `.cursor/rules/project.mdc` and `CLAUDE.md` are never overwritten once they exist in the target project, so you can safely customize them.
 
+### Available Commands
+
+```bash
+vendor/bin/cursor-rules help                                  # print help
+vendor/bin/cursor-rules install --editor=cursor               # install for Cursor
+vendor/bin/cursor-rules install --editor=claude               # install for Claude
+vendor/bin/cursor-rules install --editor=codex                # install for Codex
+vendor/bin/cursor-rules install --editor=all                  # install for Cursor, Claude, and Codex
+vendor/bin/cursor-rules install --editor=cursor --force       # overwrite existing files
+vendor/bin/cursor-rules install --editor=cursor --symlink     # prefer symlinks (fallback to copy)
+vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whitelist this package's bundled scripts in ~/.claude/settings.json
+```
+
+### CLI Switches
+
+| Option            | Description                                                                 |
+|-------------------|-----------------------------------------------------------------------------|
+| `--editor=EDITOR`         | Target editor (required): `cursor`, `claude`, `codex`, `all`.                                                                                              |
+| `--force`                 | Overwrite files that already exist in the target directory.                                                                                                 |
+| `--symlink`               | Create symlinks when the OS permits; automatically falls back to copy.                                                                                      |
+| `--prune`                 | Remove files in target that no longer exist in source.                                                                                                       |
+| `--allow-bundled-scripts` | Opt-in. With `--editor=claude` or `--editor=all`, idempotently appends a narrow allow-list for this package's bundled scripts (`load-issue.sh` for GitHub and JIRA) to `~/.claude/settings.json`, so Claude Code stops prompting on every run. Other entries in `settings.json` are preserved. No effect when the editor target is `cursor` / `codex` or when `HOME` / `USERPROFILE` is not set. |
+| `--allow-subagent-writes` | Opt-in. With `--editor=claude` or `--editor=all`, adds scoped `Edit` / `Write` entries for the project tree to `permissions.allow` in `.claude/settings.local.json`, so dispatched subagents are not denied file writes. |
+| *(default)*               | Only copy missing files and keep existing content untouched.                                                                                                |
+
 ### Automatic Installation via Composer Plugin
 
 By default, the Composer plugin does **not** auto-install rules on `composer install` or `composer update`. To enable automatic installation, add the following to your project's `composer.json`:
@@ -84,19 +109,6 @@ You can use this repository as a **Remote Rule** in Cursor without installing th
 
 Cursor will fetch and apply the rules from the repository. Note: this method provides rules only; Agent skills are installed into your project when you use the Composer-based installation above.
 
-### Available Commands
-
-```bash
-vendor/bin/cursor-rules help                                  # print help
-vendor/bin/cursor-rules install --editor=cursor               # install for Cursor
-vendor/bin/cursor-rules install --editor=claude               # install for Claude
-vendor/bin/cursor-rules install --editor=codex                # install for Codex
-vendor/bin/cursor-rules install --editor=all                  # install for Cursor, Claude, and Codex
-vendor/bin/cursor-rules install --editor=cursor --force       # overwrite existing files
-vendor/bin/cursor-rules install --editor=cursor --symlink     # prefer symlinks (fallback to copy)
-vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whitelist this package's bundled scripts in ~/.claude/settings.json
-```
-
 ### Installer Flow
 
 1. Determine the project root by walking up from the current directory until `composer.json` is found.
@@ -107,16 +119,54 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 6. Optionally overwrite existing files with `--force`; use `--symlink` to prefer symlinks (fallback to copy on Windows).
 7. Surface explicit errors for missing directories, removal failures, and copy/symlink failures.
 
-### CLI Switches
+---
 
-| Option            | Description                                                                 |
-|-------------------|-----------------------------------------------------------------------------|
-| `--editor=EDITOR`         | Target editor (required): `cursor`, `claude`, `codex`, `all`.                                                                                              |
-| `--force`                 | Overwrite files that already exist in the target directory.                                                                                                 |
-| `--symlink`               | Create symlinks when the OS permits; automatically falls back to copy.                                                                                      |
-| `--prune`                 | Remove files in target that no longer exist in source.                                                                                                       |
-| `--allow-bundled-scripts` | Opt-in. With `--editor=claude` or `--editor=all`, idempotently appends a narrow allow-list for this package's bundled scripts (`load-issue.sh` for GitHub and JIRA) to `~/.claude/settings.json`, so Claude Code stops prompting on every run. Other entries in `settings.json` are preserved. No effect when the editor target is `cursor` / `codex` or when `HOME` / `USERPROFILE` is not set. |
-| *(default)*               | Only copy missing files and keep existing content untouched.                                                                                                |
+## What Gets Installed
+
+The package ships three layers that build on each other:
+
+```text
+Rules  = long-lived project standards
+Skills = reusable workflows
+Agents = specialised orchestration roles over multiple skills
+```
+
+| Layer | Installed into | Covered in |
+|---|---|---|
+| **Rules** — 20 standards files (plus supporting examples under `rules/php/examples/`) | `<editor>/rules` | [Rules Overview](#rules-overview) |
+| **Skills** — 63 Agent skills | `<editor>/skills` | [Skills Overview](#-skills-overview--v091) |
+| **Agents** — 5 Claude Code subagents | `.claude/agents` (Claude only) | [Claude Code Subagents](#claude-code-subagents) |
+
+---
+
+## Rules Overview
+
+Rules included in this package:
+
+| File                          | Description                                                | Scope    |
+|-------------------------------|------------------------------------------------------------|----------|
+| `php/core-standards.mdc`      | Project context, AI behavior, and unified PHP/Laravel coding standards | Always   |
+| `php/dependency-selection.mdc`| Criteria and selection process for choosing a Composer dependency from Packagist or a GitHub-hosted VCS repository | Manual   |
+| `compound-engineering/general.mdc` | Compound engineering — make future work easier and build durable per-project compound memory | Always   |
+| `api/general.mdc`             | API design standards — treat the API as a consumer-facing contract | Always   |
+| `git/general.mdc`             | Unified git workflow, commits, and pull request rules       | Always   |
+| `code-review/general.mdc`     | Code review conventions and output rules                   | Always   |
+| `code-testing/general.mdc`    | Testing conventions and quality standards                  | Always   |
+| `refactoring/general.mdc`     | Shared refactoring definition (legacy → modern, incremental migration) | Refactor |
+| `jira/general.mdc`            | JIRA CLI usage and formatting rules                        | JIRA     |
+| `reports/general.mdc`         | Language rule for reports published to issue trackers (assignment language) | Always   |
+| `laravel/architecture.mdc`    | Laravel architecture and conventions                       | Laravel  |
+| `laravel/laravel.mdc`         | Laravel-specific rules and patterns                        | Laravel  |
+| `laravel/filament.mdc`        | Filament v4 specific rules                                 | Filament |
+| `laravel/livewire.mdc`        | Livewire component rules and conventions                   | Livewire |
+| `laravel/queue-debouncing.mdc`| Safe Laravel queue debouncing, urgency separation, and replaceable work | Laravel  |
+| `laravel/dynamodb.mdc`        | DynamoDB query safety: scan prevention, key-targeted reads, Tinker debug | Laravel  |
+| `sql/optimalize.mdc`          | SQL query optimization, index design, schema standards     | Always   |
+| `security/backend.md`         | Backend security rules and OWASP Top 10 checks             | Always   |
+| `security/frontend.md`        | Frontend security rules (XSS, CSRF, CSP)                  | Frontend |
+| `security/mobile.md`          | Mobile-specific security rules and WebView checks          | Mobile   |
+
+All `.mdc` and `.md` files are ready for automatic injection by Cursor so every PHP and Laravel edit stays aligned with the enforced standards.
 
 ---
 
@@ -128,7 +178,10 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 
 > **Note:** Skill files use relative paths (e.g. `@rules/…`, `@skills/…`) without any editor-specific prefix, so they work with any supported editor (`--editor=cursor`, `--editor=claude`, `--editor=codex`, `--editor=all`).
 
-## Issue Resolution & Delivery
+The full catalog is grouped by area — expand a section for the complete list.
+
+<details>
+<summary><b>Issue Resolution &amp; Delivery</b> — 16 skills</summary>
 
 | Skill | Description |
 |---|---|
@@ -149,7 +202,10 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `autonomous-loops` | Reference catalog of loop patterns for running Claude Code autonomously — from a single sequential pipeline to multi-agent DAG orchestration — anchored to this repo's real skills with `composer build` / `composer skill-check` as the gate between iterations. |
 | `record-project-memory` | Write side of compound engineering's per-project memory. At task convergence, distils only the lessons that clear a strict promotion bar and appends them — after a dedup/supersede/prune curation pass — to the project's `docs/memory/PROJECT_MEMORY.md`, so a recurring review finding or a non-obvious decision stops being re-derived on the next task. |
 
-## Code Review, Security & Architecture
+</details>
+
+<details>
+<summary><b>Code Review, Security &amp; Architecture</b> — 20 skills</summary>
 
 | Skill | Description |
 |---|---|
@@ -174,7 +230,10 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `production-audit` | Read-only production-readiness audit from cheap local git/code/CI/config evidence — risk lenses across auth, data integrity, payments, jobs, and deployment — returning a scored ship/block verdict with specific fixes and hard caps for critical gaps. |
 | `automation-audit-ops` | Evidence-first, read-only inventory of every automation in the repo (GitHub Actions, Claude Code hooks/settings, MCP servers, composer scripts, the installer, the skills catalog, scheduler) classified live/broken/redundant with keep/merge/cut/fix recommendations. |
 
-## Testing & Quality Automation
+</details>
+
+<details>
+<summary><b>Testing &amp; Quality Automation</b> — 9 skills</summary>
 
 | Skill | Description |
 |---|---|
@@ -188,7 +247,10 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `benchmark` | Measure performance baselines and detect regressions in a Laravel app — page Core Web Vitals, API latency percentiles, build/test velocity, and DB query timing — stored as git-tracked baselines for team comparison. |
 | `benchmark-optimization-loop` | Turn a vague speed goal ("make it faster", "reduce p95") into a bounded, measured optimization loop that promotes only verified, correctness-preserving wins via a baseline, a variant ledger, and a promotion gate. |
 
-## Platform & Data
+</details>
+
+<details>
+<summary><b>Platform &amp; Data</b> — 8 skills</summary>
 
 | Skill | Description |
 |---|---|
@@ -201,7 +263,10 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `docker-patterns` | Docker and docker-compose for a Laravel app — multi-stage PHP-FPM images, services (nginx, MySQL, Redis, queue worker, scheduler, Vite build), healthchecks, secrets, and image hardening. |
 | `latency-critical-systems` | Latency-sensitive Laravel paths — realtime dashboards, streaming, queues, and caches — where p95 latency and data freshness matter (Octane, Horizon, Redis, read replicas). |
 
-## Frontend & UI
+</details>
+
+<details>
+<summary><b>Frontend &amp; UI</b> — 7 skills</summary>
 
 | Skill | Description |
 |---|---|
@@ -213,12 +278,18 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `seo` | Audit, plan, or implement SEO in a Laravel app — crawlability, indexability, JSON-LD structured data in Blade, Core Web Vitals, on-page tags, keyword mapping, competitor gap analysis, E-E-A-T content quality, and measurement. |
 | `frontend-slides` | Build standalone HTML/CSS/JS presentation decks — self-contained single-file decks with viewport-fit layout, keyboard navigation, and browser Print-to-PDF export. |
 
-## Content & Writing
+</details>
+
+<details>
+<summary><b>Content, Writing &amp; Communication</b> — 3 skills</summary>
 
 | Skill | Description |
 |---|---|
 | `article-writing` | Write long-form content (blog posts, guides, tutorials, essays, newsletters) in a distinctive voice derived from supplied examples or a default operator voice. Leads with concrete proof, bans hollow AI phrasing, and tailors structure to the medium. |
 | `readme-generator` | Generate or rewrite a maintainer-ready `README.md` (and sibling root docs like `CONTRIBUTING` / `SECURITY`) from the project's actual code, manifests, scripts, and tests — a zero-hallucination scan that extracts real commands, setup steps, and configuration, committing or pushing only when explicitly asked. Adapted from the VoltAgent `readme-generator` subagent. |
+| `slack-messaging` | Send messages to a Slack channel or read recent messages from a channel via the Slack Web API. |
+
+</details>
 
 ---
 
@@ -226,122 +297,47 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 
 Agents are a thin orchestration layer over the existing skills — they don't replace them and they don't duplicate their prompts. The roster is named after **Greek mythology** by function (see [`docs/agents.md`](docs/agents.md)). Every agent runs at `effort: high` — deep enough for orchestration work, without the token cost of `max`.
 
-```text
-Rules  = long-lived project standards
-Skills = reusable workflows
-Agents = specialised orchestration roles over multiple skills
-```
-
 | Agent | Role | Orchestrated skills |
 |---|---|---|
-| `athena` | **The single code-review agent** — quality, architecture, optimisation **and** security in one pass. Two modes dispatched by `daidalos`: on demand a pre-implementation **security analysis** when the task carries a cyber-security question (security skills + `analyze-problem` → a remediation plan that `talos` implements, `Security analysis done`), and after `talos` the **whole code review** on the PR — the matching `code-review-*` wrapper plus the remaining security skills over the same diff, every finding deduplicated into one consolidated report, `CR done`. Dispatched exactly once, never alongside a second reviewer. Active only after installer registration — fallback: the review runs inline in `code-review-github → code-review + security-review`. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag`, `code-review`, `security-review`, `laravel-security`, `security-bounty-hunter`, `security-threat-analysis`, `analyze-problem` |
-| `talos` | Tireless code-writing implementer **and test author**. Implements an issue from context or a tracker link, authors the test coverage (it owns every write-capable test skill), runs local checks (`composer build`) and fixes their errors, opens a PR, and hands back an Impl-done handoff. Stops at the PR — never reviews (the CR belongs to `athena`) or merges. | `resolve-issue`, `create-test`, `create-missing-tests-in-pr`, `e2e-testing`, `test-like-human` |
-| `metis` | Problem-analysis advisor. Analyses a problem or a vague assignment, proposes the smallest safe solution, and publishes a reusable plan as a GitHub issue, then hands back an Analysis-done handoff. Read-only — never implements. | `analyze-problem` |
 | `daidalos` | Engineering-workflow orchestrator. The entry point for a free-form request: resolves a concrete source, then **dispatches** `metis` (analysis, if needed; or decomposition of a broad subject into multiple structured issues — after which it reports the issues and stops, no PR), `talos` (implementation and tests), `athena` (the single CR agent — on-demand pre-implementation security analysis when the task carries a cyber-security question, plus the whole code review after `talos`) and `hermes` (post-convergence reporting) through the Task tool. Plans dependency-aware resolve order when issues are interlinked. Read-only orchestrator. | `metis`, `talos`, `athena`, `hermes` (dispatched) |
+| `metis` | Problem-analysis advisor. Analyses a problem or a vague assignment, proposes the smallest safe solution, and publishes a reusable plan as a GitHub issue, then hands back an Analysis-done handoff. Read-only — never implements. | `analyze-problem` |
+| `talos` | Tireless code-writing implementer **and test author**. Implements an issue from context or a tracker link, authors the test coverage (it owns every write-capable test skill), runs local checks (`composer build`) and fixes their errors, opens a PR, and hands back an Impl-done handoff. Stops at the PR — never reviews (the CR belongs to `athena`) or merges. | `resolve-issue`, `create-test`, `create-missing-tests-in-pr`, `e2e-testing`, `test-like-human` |
+| `athena` | **The single code-review agent** — quality, architecture, optimisation **and** security in one pass. Two modes dispatched by `daidalos`: on demand a pre-implementation **security analysis** when the task carries a cyber-security question (security skills + `analyze-problem` → a remediation plan that `talos` implements, `Security analysis done`), and after `talos` the **whole code review** on the PR — the matching `code-review-*` wrapper plus the remaining security skills over the same diff, every finding deduplicated into one consolidated report, `CR done`. Dispatched exactly once, never alongside a second reviewer. Active only after installer registration — fallback: the review runs inline in `code-review-github → code-review + security-review`. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag`, `code-review`, `security-review`, `laravel-security`, `security-bounty-hunter`, `security-threat-analysis`, `analyze-problem` |
 | `hermes` | Release announcer / publicista **and post-convergence reporter**. Give it a merged change or release — from context or a tracker link — and it composes announcement content: a Twitter/X tweet (≤280 chars) + thread, release notes, and a marketing summary with pekral.cz promotion. After a converged run `daidalos` dispatches it to publish the human-readable non-technical summary (what changed + how to test) to the source tracker via `pr-summary` — no tests authored or run in that mode. Publishes only when explicitly asked and only through the canonical wrapper. Read-only. | `article-writing`, `pr-summary`, `resolve-issue/references/source-detection` |
 
-### How to use `athena` in practice
+### Using the agents
 
-1. Install for Claude Code (or every editor):
+Install for Claude Code (or every editor) — agents land in `.claude/agents/` and are **not** installed for `--editor=cursor` or `--editor=codex`:
 
-   ```bash
-   vendor/bin/cursor-rules install --editor=claude   # or --editor=all
-   ```
+```bash
+vendor/bin/cursor-rules install --editor=claude   # or --editor=all
+```
 
-   Agents land in `.claude/agents/`. They are **not** installed for `--editor=cursor` or `--editor=codex`.
+Then address an agent with a **source** — a GitHub issue/PR, a JIRA key, a Bugsnag error, or plain free-form text:
 
-2. Invoke it with a **source** — a GitHub PR/issue, a JIRA key, a Bugsnag error, or just the current branch/PR:
+```text
+@daidalos resolve a random Resolve_by_AI issue      # front door — picks the route for you
+@metis    analyse why the nightly export job times out
+@talos    implement #123
+@athena   review PR #123
+```
 
-   ```text
-   @athena review PR #123
-   @athena review https://your.atlassian.net/browse/PROJ-42
-   @athena review the current diff
-   ```
+Each agent returns a **handoff** when it finishes:
 
-3. `athena` detects the tracker, runs the matching `code-review-*` skill plus the remaining security skills over the same diff, lets the review be **posted to the PR** as one consolidated report, then returns a handoff: `CR done` + PR link + source link + Critical/Moderate/Minor counts + assignment-conformance verdict.
+| Agent | Handoff | What comes next |
+|---|---|---|
+| `daidalos` | The chosen route and reason, in the language of your request | Nothing — it drives the whole run itself |
+| `metis` | `Analysis done` + plan-artifact issue link + one-line root cause + recommended solution | Hand the plan issue to `talos` |
+| `talos` | `Impl done` + PR link + source link + branch + local-checks result | Hand the PR to `athena` |
+| `athena` | `CR done` + PR link + Critical/Moderate/Minor counts + assignment-conformance verdict | Fix findings, then re-review |
 
-`athena` is **read-only** — she never applies fixes, commits, pushes, or merges. Those belong to separate agents. She is the project's **only** CR agent: quality, architecture, optimisation and security all land in her single pass, so there is no second reviewer to invoke.
+`daidalos` is the **front door** — the agent you address when you don't want to pick a specialist yourself. It resolves a concrete source, then dispatches the matching specialist through the Task tool: ambiguous / large work → `metis` (analysis → plan) → `talos`; clear work → `talos` directly; then `athena` for the review-and-fix loop to convergence. For a broad subject that bundles separable concerns, `metis` decomposes it into multiple structured issues via `create-issues-from-text` (with `## Dependencies` and planned resolve order) and reports the created issues — no PR on this path.
 
-### How to use `talos` in practice
-
-1. Install for Claude Code (or every editor), exactly as for `athena` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.
-
-2. Invoke it with a **source** — a GitHub issue/PR, a JIRA key, a Bugsnag error, or just the task you want implemented:
-
-   ```text
-   @talos implement #123
-   @talos implement https://your.atlassian.net/browse/PROJ-42
-   @talos implement the failing upload validation
-   ```
-
-3. `talos` detects the source, runs `resolve-issue` to implement the change, runs local checks (`composer build`) and fixes their errors, then opens a PR and returns a handoff: `Impl done` + PR link + source link + branch + a summary of what changed and the local-checks result.
-
-`talos` **stops at the PR** — it never reviews its own work or merges. The whole code review — quality, architecture, optimisation and security — belongs to `athena`. Hand the PR to `athena` for review next.
+Every agent except `talos` is **read-only**. `talos` stops at the PR — it never reviews its own work or merges; the whole code review (quality, architecture, optimisation **and** security) belongs to `athena`, the project's **only** CR agent, so there is no second reviewer to invoke. `daidalos` never analyses, implements, or reviews itself; per the one-level subagent-nesting rule it runs as the top-level agent you talk to, spending that single nesting level on the dispatch. A future top-level `zeus` will sit above it to coordinate non-engineering domains too.
 
 > **If `talos` reports `Blocked: sandbox denied file write`:** dispatched subagents run non-interactively, so a write is denied unless the path is pre-allowed. Add scoped `Edit` / `Write` entries for the project tree to `permissions.allow` in `.claude/settings.local.json` (`"Edit(//Users/me/Projects/my-app/**)"`, `"Write(//Users/me/Projects/my-app/**)"`) — or run the installer with `--allow-subagent-writes` to add them for you — then re-run. See [`docs/agents.md`](docs/agents.md) *Troubleshooting — subagent file writes blocked*. The run correctly stops instead of silently finishing the work in the main thread.
 
-### How to use `metis` in practice
-
-1. Install for Claude Code (or every editor), exactly as for `athena` / `talos` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.
-
-2. Invoke it with a **subject** — a GitHub issue/PR, a JIRA key, a Bugsnag error, or just a problem you want thought through:
-
-   ```text
-   @metis analyse #123
-   @metis analyse https://your.atlassian.net/browse/PROJ-42
-   @metis analyse why the nightly export job times out
-   ```
-
-3. `metis` runs `analyze-problem`, then returns a handoff: `Analysis done` + a link to the published plan-artifact issue + the subject link + a one-line root cause + the recommended solution.
-
-`metis` is **read-only** — it analyses and plans, but never edits code, commits, or implements. Hand its plan issue to `talos` to build next.
-
-### How to use `daidalos` in practice
-
-`daidalos` is the **front door** — the agent you address with a free-form request when you don't want to pick a specialist yourself.
-
-1. Install for Claude Code (or every editor), exactly as for the other agents.
-
-2. Invoke it with a request — it resolves the source and chooses the route:
-
-   ```text
-   @daidalos resolve a random Resolve_by_AI issue
-   @daidalos resolve https://github.com/owner/repo/issues/123
-   @daidalos implement a dark-mode toggle for the settings page
-   ```
-
-3. `daidalos` resolves a concrete source, then **dispatches the matching specialist agent through the Task tool**: ambiguous / large work → `metis` (analysis → plan) → `talos`; clear work → `talos` directly; then `athena` for the review-and-fix loop to convergence. For a broad subject that bundles separable concerns → `metis` decomposes it into multiple structured issues via `create-issues-from-text` (with `## Dependencies` and planned resolve order) and reports the list of created issues — no PR on this path. It returns a handoff naming the chosen route and reason, written in the same language as your request.
-
-`daidalos` is a **read-only orchestrator** — it never analyses, implements, or reviews itself; it delegates every step by dispatching the matching specialist agent, and (per the one-level subagent-nesting rule) it runs as the top-level agent you talk to, spending that single nesting level on the dispatch rather than being a nested subagent itself. A future top-level `zeus` will sit above it to coordinate non-engineering domains too.
-
 ---
-
-## Rules Overview
-
-Rules included in this package:
-
-| File                          | Description                                                | Scope    |
-|-------------------------------|------------------------------------------------------------|----------|
-| `php/core-standards.mdc`      | Project context, AI behavior, and unified PHP/Laravel coding standards | Always   |
-| `compound-engineering/general.mdc` | Compound engineering — make future work easier and build durable per-project compound memory | Always   |
-| `git/general.mdc`             | Unified git workflow, commits, and pull request rules       | Always   |
-| `code-review/general.mdc`     | Code review conventions and output rules                   | Always   |
-| `code-testing/general.mdc`    | Testing conventions and quality standards                  | Always   |
-| `refactoring/general.mdc`     | Shared refactoring definition (legacy → modern, incremental migration) | Refactor |
-| `jira/general.mdc`            | JIRA CLI usage and formatting rules                        | JIRA     |
-| `reports/general.mdc`         | Language rule for reports published to issue trackers (assignment language) | Always   |
-| `laravel/architecture.mdc`    | Laravel architecture and conventions                       | Laravel  |
-| `laravel/laravel.mdc`         | Laravel-specific rules and patterns                        | Laravel  |
-| `laravel/filament.mdc`        | Filament v4 specific rules                                 | Filament |
-| `laravel/livewire.mdc`        | Livewire component rules and conventions                   | Livewire |
-| `laravel/queue-debouncing.mdc`| Safe Laravel queue debouncing, urgency separation, and replaceable work | Laravel  |
-| `laravel/dynamodb.mdc`        | DynamoDB query safety: scan prevention, key-targeted reads, Tinker debug | Laravel  |
-| `sql/optimalize.mdc`          | SQL query optimization, index design, schema standards     | Always   |
-| `security/backend.md`         | Backend security rules and OWASP Top 10 checks             | Always   |
-| `security/frontend.md`        | Frontend security rules (XSS, CSRF, CSP)                  | Frontend |
-| `security/mobile.md`          | Mobile-specific security rules and WebView checks          | Mobile   |
-
-All `.mdc` and `.md` files are ready for automatic injection by Cursor so every PHP and Laravel edit stays aligned with the enforced standards.
 
 ## Development & Testing
 

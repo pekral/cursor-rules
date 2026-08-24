@@ -73,8 +73,6 @@ Use these to write a failing test **before** applying the fix:
 
 If a **CR-skill finding** lacks Faulty Example, Expected Behavior, or Test Hint, request a CR rerun rather than guessing. Suggested Fix may legitimately be `n/a` per the CR rules.
 
-**Commit-split findings (issue #763)** report the shape of the history, not a code defect, so they are exempt from the reproducer requirement, from *Commit granularity*, and from the `Commit:` line. Resolve and report them per `@rules/code-review/general.mdc` *Commit Split & Atomic Deployability Proposal* (**Rewrite safety**, **Resolution contract**).
-
 **"Awaiting external input" findings are exempt from the reproducer requirement.** A finding whose Suggested Fix is the literal request-for-link template from `@rules/code-review/general.mdc` *Third-Party API & Service Documentation Verification (issue #748)* step 3 has no Faulty Example / Expected Behavior / Test Hint by nature — there is no code bug to reproduce, only a missing external source. Do **not** request a CR rerun for it and do **not** attempt a code fix for it — the only remedy is the author supplying the documentation link. It still **counts toward `criticalCount + moderateCount`** per that rule's step 6, so it is not simply waved through: it triggers the Review loop's dedicated **Awaiting-external-input short-circuit** below instead of a normal fix-and-retry iteration. The request is never posted as a separate PR reply — that rule's step 3 publishes the request-for-link Suggested Fix exclusively through the CR skill's `## Findings` block, and this exemption creates no second channel for it.
 
 **Free-form reviewer threads are exempt from the reproducer requirement.** Unresolved threads written by human reviewers will not carry the four structured fields. Do **not** request a CR rerun for them and do **not** block. Instead, derive the intent from the comment text, apply the minimal best-effort fix that satisfies it, and add or adjust a test at your discretion (a regression test when the comment describes a behavior bug; none when it is a naming / readability / dead-code remark). Keep the change scoped strictly to what the reviewer asked for. The exemption removes only the mandatory reproducer workflow — a behavior-changing best-effort fix still has to satisfy the diff-scoped coverage gate enforced by the **Review loop** below (`@rules/php/core-standards.mdc` Testing).
@@ -228,7 +226,7 @@ Every resolved review point in the PR comment **must** include a brief justifica
 
 Rules:
 - Keep each line **one sentence max**.
-- **Commit** names the single commit that resolved this item (*Commit granularity — one CR item = one commit* above); a resolved item that cannot name exactly one commit means the history was not reconciled — fix the history, not the report. A **commit-split item** renders `**History:**` instead (issue #763).
+- **Commit** names the single commit that resolved this item (*Commit granularity — one CR item = one commit* above); a resolved item that cannot name exactly one commit means the history was not reconciled — fix the history, not the report.
 - Skip the section only if a point was rejected or deferred — in that case state the rejection reason instead; a rejected or deferred point has no commit, so it carries no **Commit** line.
 - Do not pad with filler, restate the obvious, or paraphrase the diff.
 

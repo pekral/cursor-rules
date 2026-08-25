@@ -791,7 +791,7 @@ test('analyze-problem proposes an EPIC / sub-task split when the solution outgro
     expect($skill)->toContain('Bugsnag carries no issue hierarchy');
     // Boundaries: creation belongs elsewhere, oversized objectives go to blueprint, CR runs skip it.
     expect($skill)->toContain('### This skill proposes the split; it never creates it');
-    // The prohibition covers the proposed tree only — the plan artifact metis publishes stays allowed.
+    // The prohibition covers the proposed tree only — the plan artifact the skill publishes stays allowed.
     expect($skill)->toContain('**the proposed parent or any of its children**');
     expect($skill)->toContain('publishing that one analysis issue stays allowed');
     expect($skill)->toContain('`@skills/create-issues-from-text/SKILL.md` *EPIC parent & sub-issues* owns them');

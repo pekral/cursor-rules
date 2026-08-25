@@ -391,12 +391,9 @@ test('install with editor=all copies all files to all rule and skill directories
 
     $rulesTargets = InstallerPath::resolveRulesTargetDirectories($root, InstallerPath::EDITOR_ALL);
     $skillTargets = InstallerPath::resolveSkillsTargetDirectories($root, InstallerPath::EDITOR_ALL);
-    $agentTargets = InstallerPath::resolveAgentsTargetDirectories($root, InstallerPath::EDITOR_ALL);
-    $expectedAgentsCount = installerCountFiles($packageDir . '/agents');
     $claudeMdCount = InstallerPath::resolveClaudeMdSource() !== null ? 1 : 0;
     $expectedTotalFiles = $expectedRulesCount * count($rulesTargets)
         + $expectedSkillsCount * count($skillTargets)
-        + $expectedAgentsCount * count($agentTargets)
         + $claudeMdCount;
     $cwd = getcwd();
     $originalCwd = $cwd !== false ? $cwd : '';
@@ -417,11 +414,6 @@ test('install with editor=all copies all files to all rule and skill directories
         foreach ($skillTargets as $skillsTarget) {
             $actualSkillsCount = installerCountFiles($skillsTarget);
             expect($actualSkillsCount)->toBe($expectedSkillsCount, 'Skills: all source files in ' . $skillsTarget);
-        }
-
-        foreach ($agentTargets as $agentsTarget) {
-            $actualAgentsCount = installerCountFiles($agentsTarget);
-            expect($actualAgentsCount)->toBe($expectedAgentsCount, 'Agents: all source files in ' . $agentsTarget);
         }
 
         expect($output)->toContain(sprintf('(%d files,', $expectedTotalFiles));

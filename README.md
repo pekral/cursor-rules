@@ -43,9 +43,8 @@ The `--editor` flag is **required**. Use it to choose the target agent:
 |---------|--------|--------|-------|
 | Rules | ✅ | ✅ | experimental / unverified |
 | Skills | ✅ | ✅ | ✅ |
-| Agents | — | ✅ | — |
 
-Agents are installed only for `--editor=claude` and `--editor=all`; they are skipped for `cursor` and `codex` because only Claude Code has a native subagent format. Codex rules support is listed as experimental / unverified — the installer copies the files into `.codex/rules`, but native rule loading by Codex has not been confirmed; report your findings in [#663](https://github.com/pekral/cursor-rules/issues/663).
+Codex rules support is listed as experimental / unverified — the installer copies the files into `.codex/rules`, but native rule loading by Codex has not been confirmed; report your findings in [#663](https://github.com/pekral/cursor-rules/issues/663).
 
 When the package is required via Composer, sources are read from `vendor/pekral/cursor-rules/rules` and `vendor/pekral/cursor-rules/skills`.
 
@@ -219,100 +218,6 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 |---|---|
 | `article-writing` | Write long-form content (blog posts, guides, tutorials, essays, newsletters) in a distinctive voice derived from supplied examples or a default operator voice. Leads with concrete proof, bans hollow AI phrasing, and tailors structure to the medium. |
 | `readme-generator` | Generate or rewrite a maintainer-ready `README.md` (and sibling root docs like `CONTRIBUTING` / `SECURITY`) from the project's actual code, manifests, scripts, and tests — a zero-hallucination scan that extracts real commands, setup steps, and configuration, committing or pushing only when explicitly asked. Adapted from the VoltAgent `readme-generator` subagent. |
-
----
-
-## Claude Code Subagents
-
-Agents are a thin orchestration layer over the existing skills — they don't replace them and they don't duplicate their prompts. The roster is named after **Greek mythology** by function (see [`docs/agents.md`](docs/agents.md)). Every agent runs at `effort: high` — deep enough for orchestration work, without the token cost of `max`.
-
-```text
-Rules  = long-lived project standards
-Skills = reusable workflows
-Agents = specialised orchestration roles over multiple skills
-```
-
-| Agent | Role | Orchestrated skills |
-|---|---|---|
-| `athena` | **The single code-review agent** — quality, architecture, optimisation **and** security in one pass. Two modes dispatched by `daidalos`: on demand a pre-implementation **security analysis** when the task carries a cyber-security question (security skills + `analyze-problem` → a remediation plan that `talos` implements, `Security analysis done`), and after `talos` the **whole code review** on the PR — the matching `code-review-*` wrapper plus the remaining security skills over the same diff, every finding deduplicated into one consolidated report, `CR done`. Dispatched exactly once, never alongside a second reviewer. Active only after installer registration — fallback: the review runs inline in `code-review-github → code-review + security-review`. Read-only. | `code-review-github`, `code-review-jira`, `code-review-bugsnag`, `code-review`, `security-review`, `laravel-security`, `security-bounty-hunter`, `security-threat-analysis`, `analyze-problem` |
-| `talos` | Tireless code-writing implementer **and test author**. Implements an issue from context or a tracker link, authors the test coverage (it owns every write-capable test skill), runs local checks (`composer build`) and fixes their errors, opens a PR, and hands back an Impl-done handoff. Stops at the PR — never reviews (the CR belongs to `athena`) or merges. | `resolve-issue`, `create-test`, `create-missing-tests-in-pr`, `e2e-testing`, `test-like-human` |
-| `metis` | Problem-analysis advisor. Analyses a problem or a vague assignment, proposes the smallest safe solution, and publishes a reusable plan as a GitHub issue, then hands back an Analysis-done handoff. Read-only — never implements. | `analyze-problem` |
-| `daidalos` | Engineering-workflow orchestrator. The entry point for a free-form request: resolves a concrete source, then **dispatches** `metis` (analysis, if needed; or decomposition of a broad subject into multiple structured issues — after which it reports the issues and stops, no PR), `talos` (implementation and tests), `athena` (the single CR agent — on-demand pre-implementation security analysis when the task carries a cyber-security question, plus the whole code review after `talos`) and `hermes` (post-convergence reporting) through the Task tool. Plans dependency-aware resolve order when issues are interlinked. Read-only orchestrator. | `metis`, `talos`, `athena`, `hermes` (dispatched) |
-| `hermes` | Release announcer / publicista **and post-convergence reporter**. Give it a merged change or release — from context or a tracker link — and it composes announcement content: a Twitter/X tweet (≤280 chars) + thread, release notes, and a marketing summary with pekral.cz promotion. After a converged run `daidalos` dispatches it to publish the human-readable non-technical summary (what changed + how to test) to the source tracker via `pr-summary` — no tests authored or run in that mode. Publishes only when explicitly asked and only through the canonical wrapper. Read-only. | `article-writing`, `pr-summary`, `resolve-issue/references/source-detection` |
-
-### How to use `athena` in practice
-
-1. Install for Claude Code (or every editor):
-
-   ```bash
-   vendor/bin/cursor-rules install --editor=claude   # or --editor=all
-   ```
-
-   Agents land in `.claude/agents/`. They are **not** installed for `--editor=cursor` or `--editor=codex`.
-
-2. Invoke it with a **source** — a GitHub PR/issue, a JIRA key, a Bugsnag error, or just the current branch/PR:
-
-   ```text
-   @athena review PR #123
-   @athena review https://your.atlassian.net/browse/PROJ-42
-   @athena review the current diff
-   ```
-
-3. `athena` detects the tracker, runs the matching `code-review-*` skill plus the remaining security skills over the same diff, lets the review be **posted to the PR** as one consolidated report, then returns a handoff: `CR done` + PR link + source link + Critical/Moderate/Minor counts + assignment-conformance verdict.
-
-`athena` is **read-only** — she never applies fixes, commits, pushes, or merges. Those belong to separate agents. She is the project's **only** CR agent: quality, architecture, optimisation and security all land in her single pass, so there is no second reviewer to invoke.
-
-### How to use `talos` in practice
-
-1. Install for Claude Code (or every editor), exactly as for `athena` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.
-
-2. Invoke it with a **source** — a GitHub issue/PR, a JIRA key, a Bugsnag error, or just the task you want implemented:
-
-   ```text
-   @talos implement #123
-   @talos implement https://your.atlassian.net/browse/PROJ-42
-   @talos implement the failing upload validation
-   ```
-
-3. `talos` detects the source, runs `resolve-issue` to implement the change, runs local checks (`composer build`) and fixes their errors, then opens a PR and returns a handoff: `Impl done` + PR link + source link + branch + a summary of what changed and the local-checks result.
-
-`talos` **stops at the PR** — it never reviews its own work or merges. The whole code review — quality, architecture, optimisation and security — belongs to `athena`. Hand the PR to `athena` for review next.
-
-> **If `talos` reports `Blocked: sandbox denied file write`:** dispatched subagents run non-interactively, so a write is denied unless the path is pre-allowed. Add scoped `Edit` / `Write` entries for the project tree to `permissions.allow` in `.claude/settings.local.json` (`"Edit(//Users/me/Projects/my-app/**)"`, `"Write(//Users/me/Projects/my-app/**)"`) — or run the installer with `--allow-subagent-writes` to add them for you — then re-run. See [`docs/agents.md`](docs/agents.md) *Troubleshooting — subagent file writes blocked*. The run correctly stops instead of silently finishing the work in the main thread.
-
-### How to use `metis` in practice
-
-1. Install for Claude Code (or every editor), exactly as for `athena` / `talos` — agents land in `.claude/agents/` and are skipped for `--editor=cursor` / `--editor=codex`.
-
-2. Invoke it with a **subject** — a GitHub issue/PR, a JIRA key, a Bugsnag error, or just a problem you want thought through:
-
-   ```text
-   @metis analyse #123
-   @metis analyse https://your.atlassian.net/browse/PROJ-42
-   @metis analyse why the nightly export job times out
-   ```
-
-3. `metis` runs `analyze-problem`, then returns a handoff: `Analysis done` + a link to the published plan-artifact issue + the subject link + a one-line root cause + the recommended solution.
-
-`metis` is **read-only** — it analyses and plans, but never edits code, commits, or implements. Hand its plan issue to `talos` to build next.
-
-### How to use `daidalos` in practice
-
-`daidalos` is the **front door** — the agent you address with a free-form request when you don't want to pick a specialist yourself.
-
-1. Install for Claude Code (or every editor), exactly as for the other agents.
-
-2. Invoke it with a request — it resolves the source and chooses the route:
-
-   ```text
-   @daidalos resolve a random Resolve_by_AI issue
-   @daidalos resolve https://github.com/owner/repo/issues/123
-   @daidalos implement a dark-mode toggle for the settings page
-   ```
-
-3. `daidalos` resolves a concrete source, then **dispatches the matching specialist agent through the Task tool**: ambiguous / large work → `metis` (analysis → plan) → `talos`; clear work → `talos` directly; then `athena` for the review-and-fix loop to convergence. For a broad subject that bundles separable concerns → `metis` decomposes it into multiple structured issues via `create-issues-from-text` (with `## Dependencies` and planned resolve order) and reports the list of created issues — no PR on this path. It returns a handoff naming the chosen route and reason, written in the same language as your request.
-
-`daidalos` is a **read-only orchestrator** — it never analyses, implements, or reviews itself; it delegates every step by dispatching the matching specialist agent, and (per the one-level subagent-nesting rule) it runs as the top-level agent you talk to, spending that single nesting level on the dispatch rather than being a nested subagent itself. A future top-level `zeus` will sit above it to coordinate non-engineering domains too.
 
 ---
 

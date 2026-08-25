@@ -14,14 +14,14 @@ Auditní reportování používá 5 stupňů; konvergenční brána repo (CR) ma
 | Low              | Minor       | NE                   |
 | Info             | Minor       | NE                   |
 
-Piny athena.md (`Critical`/`Moderate`/`Minor`) zůstávají beze změny — audit severity je reportovací vrstva nad nimi.
+Severity stupnice code review (`Critical`/`Moderate`/`Minor`) zůstává beze změny — audit severity je reportovací vrstva nad ní.
 
 ## Každý potvrzený nález nese
 
 1. **Oblast** (1–7 níže) + **severity** (Critical/High/Medium/Low/Info).
 2. **Konkrétní soubor + řádek** (nebo vzorec vyhledávání).
 3. **Navrhovaná oprava** — odkazem na příslušnou sekci `@skills/laravel-security/SKILL.md`.
-4. **Návrh regresního testu** (Pest/PHPUnit) — auditor načrtne test, který by nález odhalil; aplikační opravu implementuje `talos`.
+4. **Návrh regresního testu** (Pest/PHPUnit) — auditor načrtne test, který by nález odhalil; aplikační opravu implementuje následný implementační běh.
 
 ## 7 oblastí auditu
 

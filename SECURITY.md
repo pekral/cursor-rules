@@ -82,15 +82,13 @@ Edit(//<absolute-project-path>/**)
 Write(//<absolute-project-path>/**)
 ```
 
-These entries pre-allow dispatched subagents (e.g. `talos`) to write files inside the project tree without requiring an interactive approval on each operation. A dispatched subagent runs non-interactively, so a write is denied at runtime unless the path is already in `permissions.allow`.
+These entries pre-allow dispatched subagents to write files inside the project tree without requiring an interactive approval on each operation. A dispatched subagent runs non-interactively, so a write is denied at runtime unless the path is already in `permissions.allow`.
 
 **Why `settings.local.json` and not `settings.json`.** The entries carry a machine-absolute path — they are personal and not portable. `settings.local.json` is git-ignored by Claude Code by default, so the absolute path never leaks into version control.
 
 **Safety guarantees.** The flag is idempotent: it only adds missing entries and never removes or modifies existing ones. After writing, the installer reads the file back and validates that every required entry is present (`InstallerClaudeSettings::validateSubagentWritePermissions()`), so a malformed file can never be produced. The package grants nothing by default — this flag is the explicit, human-owned opt-in.
 
 **Implementation reference.** `src/InstallerClaudeSettings.php` — `applySubagentWritesIfRequested()` → `ensureSubagentWritesEnabled()`.
-
-See also: [docs/agents.md — Troubleshooting (subagent file writes blocked)](docs/agents.md#troubleshooting--subagent-file-writes-blocked) and [docs/plans/agent-sandbox-write-blocked.md](docs/plans/agent-sandbox-write-blocked.md).
 
 ## Files this package writes
 
@@ -101,7 +99,6 @@ See also: [docs/agents.md — Troubleshooting (subagent file writes blocked)](do
 | `.claude/settings.local.json` | `--allow-subagent-writes` | `--editor=claude` or `--editor=all` |
 | `.cursor/rules/`, `.claude/rules/`, `.codex/rules/` | `install` | always, for the chosen editor |
 | `.cursor/skills/`, `.claude/skills/`, `.codex/skills/` | `install` | always, for the chosen editor |
-| `.claude/agents/` | `install` | `--editor=claude` or `--editor=all` only |
 | `CLAUDE.md` | `install` | `--editor=claude` or `--editor=all`; never overwrites an existing file |
 
 The installer never writes outside the project directory and the user's home directory, and it never modifies `composer.json` or any project source file.

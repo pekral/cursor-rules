@@ -68,7 +68,7 @@ Then continue with the analysis:
 
 Apply these 10 steps in order. Each step feeds the next — never jump ahead to a solution before evidence and root cause are settled.
 
-1. **Context extraction** — what we actually know from the assignment, comments, linked / sub-issues, attachments, and surrounding code (all loaded via the *Issue-tracker context* mandatory pre-flight above). First **consult the per-project compound memory** (`docs/memory/PROJECT_MEMORY.md` per `@rules/compound-engineering/general.mdc` *Compound Memory (per project)*): read it when present and reuse any entry whose `Trigger:` matches this problem instead of re-deriving a lesson the project already recorded. Apply the per-role read filter from `@rules/compound-engineering/general.mdc` *Read protocol* — load only entries where `Role: metis` or `Role: shared`; skip entries tagged for other roles.
+1. **Context extraction** — what we actually know from the assignment, comments, linked / sub-issues, attachments, and surrounding code (all loaded via the *Issue-tracker context* mandatory pre-flight above). First **consult the per-project compound memory** (`docs/memory/PROJECT_MEMORY.md` per `@rules/compound-engineering/general.mdc` *Compound Memory (per project)*): read it when present and reuse any entry whose `Trigger:` matches this problem instead of re-deriving a lesson the project already recorded. Apply the per-role read filter from `@rules/compound-engineering/general.mdc` *Read protocol* — load only entries where `Role: analysis` or `Role: shared`; skip entries tagged for other roles.
 2. **Problem statement** — one precise sentence describing the real problem.
 3. **Expected vs actual behavior** — what should happen, and what is happening instead.
 4. **Evidence** — logs, screenshots, issue comments, files, reproduction steps. Verified facts only.
@@ -148,7 +148,7 @@ Render the proposal in the vocabulary of the tracker the analyzed task actually 
 
 ### This skill proposes the split; it never creates it
 
-The proposal is **analysis output only**. This skill does not create, link, label, or transition **the proposed parent or any of its children** — creation on GitHub belongs to `@skills/create-issues-from-text/SKILL.md`, and JIRA sub-task creation stays with a human until a skill owns it. This does **not** restrict the single plan artifact that *Plan artifact (the deliverable)* above already permits: publishing that one analysis issue stays allowed, and it is what `agents/metis.md` hands back. State the handoff explicitly at the end of the section so the reader knows the next command to run.
+The proposal is **analysis output only**. This skill does not create, link, label, or transition **the proposed parent or any of its children** — creation on GitHub belongs to `@skills/create-issues-from-text/SKILL.md`, and JIRA sub-task creation stays with a human until a skill owns it. This does **not** restrict the single plan artifact that *Plan artifact (the deliverable)* above already permits: publishing that one analysis issue stays allowed, and it is what this skill hands back. State the handoff explicitly at the end of the section so the reader knows the next command to run.
 
 > **Read-only invocation (CR runs):** when `@skills/code-review/SKILL.md` invokes this skill for assignment conformance, **skip this section entirely**, exactly as the *Plan artifact* step is skipped. A code review reports on the change in front of it; it never proposes restructuring the tracker.
 

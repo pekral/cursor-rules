@@ -20,7 +20,7 @@ Turn one-off lessons into reusable rules by maintaining a **per-project memory**
 
 - **Canonical home:** a dedicated, greppable, curated memory file at `docs/memory/PROJECT_MEMORY.md` in the project being worked on. It is the index *and* the body — an index line at the top plus one short entry per lesson, the same shape as a `MEMORY.md` index with one fact per topic.
 - **Keep it separate from the hand-maintained files.** The memory file is auto-appended by agents, so it must be **distinct** from `CLAUDE.md` and `.cursor/rules/project.mdc`, which humans curate by hand — an auto-write must never clobber human prose. Reference the memory file from `CLAUDE.md` (a one-line pointer) so it stays discoverable, exactly as a `MEMORY.md` index makes its facts discoverable.
-- **The installer never touches it.** `docs/memory/PROJECT_MEMORY.md` is project data, not package data — the rules installer only syncs `rules/`, `skills/`, `agents/`, and `CLAUDE.md`, so it never creates, overwrites, or prunes the memory file. The file is therefore a safe, durable home that survives re-installation, the same guarantee `CLAUDE.md` and `.cursor/rules/project.mdc` carry.
+- **The installer never touches it.** `docs/memory/PROJECT_MEMORY.md` is project data, not package data — the rules installer only syncs `rules/`, `skills/`, and `CLAUDE.md`, so it never creates, overwrites, or prunes the memory file. The file is therefore a safe, durable home that survives re-installation, the same guarantee `CLAUDE.md` and `.cursor/rules/project.mdc` carry.
 - **Fallback for projects without a `docs/` convention:** when a project demonstrably has no `docs/` tree and refuses to grow one, fall back to a learnings / decision-log file the project already uses (e.g. `docs/decisions/`); never fall back to writing lessons into `CLAUDE.md` or `.cursor/rules/project.mdc` themselves.
 
 ### Entry format (greppable, one lesson per entry)
@@ -33,10 +33,10 @@ Each entry is short and scannable — prefer one rule per lesson over a long ess
 - Rule:    <the decision / what to do next time>
 - Example: <a concrete pointer: file / area / symbol>
 - Source:  <PR / issue link>   Added: <YYYY-MM-DD>
-- Role:    <daidalos | metis | talos | athena | shared>
+- Role:    <orchestration | analysis | implementation | review | shared>
 ```
 
-The `Role:` field scopes the lesson to the agent role that benefits most from it. Use `shared` for lessons relevant to all roles. `daidalos` = orchestration / briefing / dispatch decisions; `metis` = analysis / problem framing; `talos` = implementation / PR mechanics / test authoring; `athena` = code review / CR loop (quality, architecture, optimisation, security). A lesson may carry only one role value — when it applies to two or more roles, prefer `shared`.
+The `Role:` field scopes the lesson to the working role that benefits most from it. Use `shared` for lessons relevant to all roles. `orchestration` = routing / briefing / sequencing decisions; `analysis` = problem framing; `implementation` = code changes / PR mechanics / test authoring; `review` = code review / CR loop (quality, architecture, optimisation, security). A lesson may carry only one role value — when it applies to two or more roles, prefer `shared`.
 
 ### Promotion bar (record only the most important things)
 
@@ -61,13 +61,13 @@ Before appending, curate so the file stays small and non-redundant:
 
 The memory only compounds if it is **read at the start of each task**, before re-deriving anything:
 
-- The **daidalos gather phase** reads the memory file and folds the relevant entries into the shared brief under a `## Project memory` section, so every dispatched specialist inherits the lessons without re-deriving them. `daidalos` reads the **full** file (it is the orchestrator and must see all roles).
-- Each **specialist agent** (`metis`, `talos`, `athena`) reads only the entries where `Role:` matches its own role **or** `Role: shared` — narrowing the context to the lessons it can directly act on.
-- `@skills/analyze-problem` (*Context extraction*) and `@skills/prepare-issue-context` consult the memory file before mapping scenarios to code, filtering by the calling agent's role.
+- A run that **orchestrates** several roles reads the **full** file in its gather phase and folds the relevant entries into the context it hands to each step, so no role has to re-derive them.
+- A run working in a **single role** (`analysis`, `implementation`, `review`) reads only the entries where `Role:` matches that role **or** `Role: shared` — narrowing the context to the lessons it can directly act on.
+- `@skills/analyze-problem` (*Context extraction*) and `@skills/prepare-issue-context` consult the memory file before mapping scenarios to code, filtering by the current role.
 
 #### Per-role read filter
 
-When reading `docs/memory/PROJECT_MEMORY.md` as a specialist (not as `daidalos`), apply this filter:
+When reading `docs/memory/PROJECT_MEMORY.md` in a single role (not while orchestrating), apply this filter:
 
 ```
 include entries where Role: == <your-role> OR Role: == shared
@@ -75,13 +75,13 @@ include entries where Role: == <your-role> OR Role: == shared
 
 Grep idiom: `grep -A5 "^### " docs/memory/PROJECT_MEMORY.md | grep -E "Role:.*(<your-role>|shared)"` — then include the entries that match.
 
-### Write protocol (per-agent write at convergence)
+### Write protocol (per-role write at convergence)
 
-At task convergence (end of `@skills/resolve-issue`, `@skills/process-code-review`, and `daidalos` step 7), each agent that participated in the run writes its own durable lessons **tagged with its `Role:`** via `@skills/record-project-memory`. The promotion bar and curation pass apply unchanged — trivial tasks write nothing.
+At task convergence (end of `@skills/resolve-issue`, `@skills/process-code-review`, and the final report), the run writes its durable lessons **tagged with the `Role:` that learned them** via `@skills/record-project-memory`. The promotion bar and curation pass apply unchanged — trivial tasks write nothing.
 
-`daidalos` drives the per-agent write loop: for every agent role that genuinely participated in the run (derivable from the handoff log in the shared brief), call `@skills/record-project-memory` with that role's converged context and the matching `AGENT_ROLE`. Only after all role passes complete does `daidalos` remove the brief and release the write-lock.
+For every role that genuinely participated in the run, call `@skills/record-project-memory` with that role's converged context and the matching `AGENT_ROLE`. Only after all role passes complete is the run's scratch state cleaned up.
 
-The loop is ordered by participation: `metis` (if dispatched) → `talos` → `athena` → `daidalos` (orchestration lessons last). Skip roles not active in this run.
+The loop is ordered by participation: `analysis` (if it ran) → `implementation` → `review` → `orchestration` (routing lessons last). Skip roles not active in this run.
 
 ### What feeds the memory
 
@@ -89,20 +89,18 @@ Review comments and post-mortems are **inputs** to this memory, not throwaway ch
 
 ## Temporary-file hygiene (clean up on completion)
 
-On completion — both on the final handoff and on a `Blocked` stop — every agent and every skill must delete the temporary and unnecessary files it created during its run:
+On completion — both on the final handoff and on a `Blocked` stop — every run and every skill must delete the temporary and unnecessary files it created during its run:
 
 - **Scratchpad files** written to the session scratchpad directory.
 - **System temp files** created via `/tmp`, `mktemp`, or `tempnam`.
-- **Shared task brief** (`.claude/run/<source-slug>.md`) — scratch memory for the run, not a kept artifact.
-- **Per-brief append lock** (`$BRIEF.lock`) — must not outlive the run.
-- **Working-tree write-lock** (`.claude/run/.daidalos-write.lock`) — released by `daidalos` in step 7.
+- **Per-run scratch state** under `.claude/run/` (run notes, append locks, working-tree write-locks) — scratch memory for the run, not a kept artifact, and it must not outlive the run.
 - **Temporary `.md` preparation files** created during the run (aligns with `@rules/git/general.mdc` *Cleanup*).
 
 **Memory files are NEVER deleted** — `docs/memory/PROJECT_MEMORY.md` in the target project and any user-level memory files (`~/.claude/.../memory/*.md`) are durable, not temporary; they survive every run. Hand-maintained files (`CLAUDE.md`, `.cursor/rules/project.mdc`) are also excluded from this cleanup.
 
 Scripts and shell steps that create temporary files must bind their cleanup to `trap … EXIT` (shell) or `finally` (other languages) so the cleanup runs even when the script exits with an error.
 
-`daidalos` step 7 is the **reference implementation** of this contract: it removes the shared brief (`rm -f "$BRIEF"`) and releases the write-lock (`rm -rf .claude/run/.daidalos-write.lock`) on both the final report and a `Blocked` stop.
+The final step of a run is the **reference implementation** of this contract: it removes the run's scratch notes (`rm -f "$BRIEF"`) and releases any write-lock (`rm -rf .claude/run/*.lock`) on both the final report and a `Blocked` stop.
 
 ## Claim a tracker issue before working on it
 
@@ -119,7 +117,7 @@ The per-tracker mechanics (claim label name, helper script call, selection query
 
 ## Assign the most relevant existing label when creating a tracker issue
 
-Any agent or skill that creates a tracker issue — GitHub or JIRA — must select and assign the most relevant existing label to it as part of issue creation. Creating an issue with no thought given to labelling is an incomplete creation step.
+Any run or skill that creates a tracker issue — GitHub or JIRA — must select and assign the most relevant existing label to it as part of issue creation. Creating an issue with no thought given to labelling is an incomplete creation step.
 
 - **Select from what already exists, never invent.** List the tracker's existing labels, match the issue's type (bug / feat / docs / chore / ...) and domain against that list, and assign the closest match. Never mint a new label ad hoc, and never fall back to a random or first-available label when nothing actually fits — an unrelated label is worse than none.
 - **No relevant match → create without a label.** When none of the existing labels are a genuine match, create the issue unlabelled rather than force a bad fit. This is the expected, correct outcome, not an error to work around.
@@ -140,7 +138,7 @@ This section owns the principle; the issue-creating skills reference it and own 
 
 ## Blocked delegation is a hard stop
 
-When an orchestrator delegates a step (analysis, implementation, review) and the delegate returns a blocker it cannot resolve — most commonly a write-capable implementer (e.g. `talos`) whose `Write` / `Edit` is refused by the harness sandbox / permission layer even though the agent declares those tools, but equally an unresolvable merge conflict or a non-converging review loop — the run **stops and reports the blocker with its remediation**, never a silent bypass. Do **not** silently complete the blocked agent's work in the main thread (or in another agent's context): that bypasses the delegated, reviewed pipeline (no implementer→reviewer loop, no quality gates), hides the failure from the human, and breaks the compounding loop. Surface *what was blocked*, *why* (the denied capability), and *how to unblock it* (the environment change the human must make), then halt.
+When a run delegates a step (analysis, implementation, review) and the delegate returns a blocker it cannot resolve — most commonly a write-capable step whose `Write` / `Edit` is refused by the harness sandbox / permission layer, but equally an unresolvable merge conflict or a non-converging review loop — the run **stops and reports the blocker with its remediation**, never a silent bypass. Do **not** silently complete the blocked step's work in the main thread (or in another context): that bypasses the delegated, reviewed pipeline (no implementer→reviewer loop, no quality gates), hides the failure from the human, and breaks the compounding loop. Surface *what was blocked*, *why* (the denied capability), and *how to unblock it* (the environment change the human must make), then halt.
 
 ## Code Review Application
 

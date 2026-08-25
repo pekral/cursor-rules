@@ -231,6 +231,60 @@ Code review treats every violation of this section as a finding; the detection p
 - Name a constraint after the **rule, not the columns** — the name is what surfaces in the error the user sees.
 - A `CHECK` cannot span rows, use non-deterministic functions, or reference an `AUTO_INCREMENT` column.
 
+## Deployment Safety of Schema Changes
+A schema change runs **once, on production data, during a deploy window, while the previous release is still serving traffic**. That is a different risk surface from query performance: a migration that is fast and correct on an empty dev database can lock a table for minutes, break the running release, or fail halfway with no way back. Every diff that adds or modifies a migration (`Schema::create` / `Schema::table` / `Schema::drop*` / `DB::statement` DDL / raw `ALTER TABLE`) must satisfy every clause below before it merges.
+
+- **Destructive changes ship in a later release than the code (expand / contract).** During a rolling deploy the old and the new release run **at the same time** against **one** database, so a dropped or renamed column, a dropped table, a narrowed type (`varchar(255)` → `varchar(50)`, `bigint` → `int`), a tightened `ENUM`, or a re-purposed column breaks whichever release is not deployed yet. Split it into three releases: **expand** (add the new nullable / defaulted column or table; the old code ignores it), **migrate** (backfill and dual-write / dual-read until both releases agree), **contract** (a later release drops the old surface once no running code reads it). A single migration that drops or renames a column the current release still reads is a deploy-time outage, not a refactor.
+- **DDL on a populated table must be non-blocking.** State the algorithm and lock mode explicitly — `ALGORITHM=INSTANT` where MySQL 8 supports it (adding a column at the end, widening `VARCHAR` within the same length prefix, adding a virtual column), otherwise `ALGORITHM=INPLACE, LOCK=NONE`. A change MySQL can only run as `ALGORITHM=COPY` (dropping a column before 8.0.29, changing a column type, changing charset / collation, adding a `FULLTEXT` index) rebuilds the whole table under a metadata lock: route it through an online-schema-change tool (`pt-online-schema-change`, `gh-ost`) or a deliberate maintenance window, and say which in the PR description. Never let a deploy discover the lock.
+- **Every migration is reversible and re-runnable.** `down()` restores the exact prior structure — a destructive migration whose `down()` is empty or `// no-op` makes the deploy one-way and turns a bad release into a restore-from-backup. Guard structure changes so a partially-applied migration can be replayed: `Schema::hasTable()` / `Schema::hasColumn()` / `Schema::hasIndex()` / `Schema::hasForeignKey()` before creating or dropping. A migration that throws on its second run blocks the retry that a failed deploy needs.
+- **Data backfills do not belong in a schema migration.** A migration is a short DDL transaction; an `UPDATE` over every existing row inside it holds locks and the undo log for the whole run, times out on a large table, and rolls the whole deploy back on the last row. Ship the DDL in the migration and the backfill as a separate chunked, resumable, idempotent command or queued job per *Bulk and streaming processing of large datasets* — checkpointing its cursor so a mid-run failure resumes instead of restarting.
+- **A new constraint on an existing table is pre-flighted against real data.** `NOT NULL` without a default on a table that already has rows, a `UNIQUE` index on a column that already holds duplicates, a `CHECK` existing rows violate, and a foreign key with orphaned children all **pass on an empty dev database and fail on production**. Before adding the constraint, run the counting query that finds the violating rows (`SELECT COUNT(*) … WHERE col IS NULL`, `GROUP BY col HAVING COUNT(*) > 1`, the anti-join for orphans), remediate them in a backfill, and only then tighten the schema. State the pre-flight result in the PR description.
+- **Index the columns the release starts querying, in the same release.** A foreign key gets its backing index, and a column the new code filters, joins, or sorts on gets an index shipped with that code — a new query hitting an unindexed column on a production-sized table is a full scan under production traffic, even though it returns instantly on dev data. Follow *Index Design* for the composite order and the 3–5 index budget, and create the index non-blocking on a large table.
+- **The PR states the deploy order and the rollback path.** Say whether the migration runs **before** the code (expand: new nullable column added first) or **after** it (contract: old surface dropped once nothing reads it), name anything that must not run concurrently (a backfill job, a queue worker reading the old shape), and state how the change is undone — `down()`, a compensating migration, or an explicit "irreversible; restore from backup" that the reviewer gets to weigh. A schema change with no stated deploy order is a schema change nobody can safely deploy.
+
+```php
+// Bad — one migration drops the column the running release still reads,
+// backfills every row inside the DDL transaction, and cannot be reverted
+public function up(): void
+{
+    Schema::table('customer_order', function (Blueprint $table): void {
+        $table->string('recipient_email', 254)->nullable(false);
+    });
+
+    DB::table('customer_order')->update(['recipient_email' => DB::raw('billing_email')]);
+
+    Schema::table('customer_order', function (Blueprint $table): void {
+        $table->dropColumn('billing_email');
+    });
+}
+
+public function down(): void
+{
+    // no-op
+}
+```
+
+```php
+// Good — release 1 expands only: nullable column, non-blocking, reversible.
+// The backfill runs as a chunked command, and 'billing_email' is dropped
+// by a contract migration in a later release once no running code reads it.
+public function up(): void
+{
+    Schema::table('customer_order', function (Blueprint $table): void {
+        $table->string('recipient_email', 254)->nullable();
+    });
+}
+
+public function down(): void
+{
+    Schema::table('customer_order', function (Blueprint $table): void {
+        $table->dropColumn('recipient_email');
+    });
+}
+```
+
+Code review treats every violation of this section as a finding; the detection patterns, severities, and Suggested-Fix artifacts live in `@rules/code-review/general.mdc` *Database Change Deployment Safety*.
+
 ## Advanced SQL Patterns
 - Use CTEs for complex multi-step queries — prefer over nested subqueries.
 - Use window functions (`ROW_NUMBER`, `RANK`, `LAG`, `LEAD`) for analytics and ranking without self-joins.

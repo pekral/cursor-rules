@@ -68,3 +68,19 @@ test('sql optimalize rule carries the bulk and streaming processing standard for
     // The severity / detection detail is owned by the CR rule, not duplicated here.
     expect($content)->toContain('@rules/code-review/general.mdc` *Batch-First Processing & Performance at Scale*');
 });
+
+test('sql optimalize rule carries the deployment safety standard for schema changes', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/rules/sql/optimalize.mdc');
+
+    expect($content)->toContain('## Deployment Safety of Schema Changes');
+    expect($content)->toContain('**Destructive changes ship in a later release than the code (expand / contract).**');
+    expect($content)->toContain('**DDL on a populated table must be non-blocking.**');
+    expect($content)->toContain('ALGORITHM=INPLACE, LOCK=NONE');
+    expect($content)->toContain('**Every migration is reversible and re-runnable.**');
+    expect($content)->toContain('**Data backfills do not belong in a schema migration.**');
+    expect($content)->toContain('**A new constraint on an existing table is pre-flighted against real data.**');
+    expect($content)->toContain('**Index the columns the release starts querying, in the same release.**');
+    expect($content)->toContain('**The PR states the deploy order and the rollback path.**');
+    expect($content)->toContain('@rules/code-review/general.mdc` *Database Change Deployment Safety*');
+});

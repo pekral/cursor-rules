@@ -1212,7 +1212,7 @@ test('Database Analysis gating never suppresses a security finding sharing the l
     $jira = (string) file_get_contents($packageDir . '/skills/code-review-jira/SKILL.md');
 
     expect($rule)->toContain('Never render the same **DB-performance defect** in both `## Database Analysis` and `## Findings`.');
-    expect($rule)->toContain('This gating is scoped to the three performance bullets named above and to nothing else');
+    expect($rule)->toContain('This gating is scoped to the four database bullets named above and to nothing else');
     expect($rule)->toContain('is a **different defect**, always keeps its own entry in `## Findings` with the full finding shape');
     expect($rule)->toContain('the `## Findings` finding shape (Location / Rule / Impact plus the four reproducer fields)');
     expect($rule)->not->toContain('Never render the same `file:line` in both `## Database Analysis` and `## Findings`.');
@@ -1257,7 +1257,7 @@ test('every Core Analysis DB bullet carries the reciprocal Database Analysis rou
     expect(substr_count(
         $rule,
         'this item is folded into `## Database Analysis`',
-    ))->toBe(2);
+    ))->toBe(3);
     expect($rule)->toContain('with the batching rewrite rendered per that section\'s artifact requirement');
 });
 
@@ -1949,4 +1949,37 @@ test('a static-analysis / linter suppression is never exempt, not even for an un
     expect($codeReviewRule)->toContain('is ordinary configuration maintenance, not a suppression');
     expect($codeReviewRule)->not->toContain('Exemptions (do **not** flag): a suppression that is **both** narrowly scoped');
     expect($codeReviewRule)->toContain('the only non-finding is `assert($var !== null)` for a required-but-unused variable');
+});
+
+test('code review carries the database change deployment safety walk', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $skill = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($rule)->toContain('## Database Change Deployment Safety');
+    expect($rule)->toContain('**Destructive change in the same release as the code that reads the old surface**');
+    expect($rule)->toContain('**Blocking DDL on a populated table**');
+    expect($rule)->toContain('**Irreversible migration**');
+    expect($rule)->toContain('**Non-replayable migration**');
+    expect($rule)->toContain('**Data backfill inside a schema migration**');
+    expect($rule)->toContain('**New constraint not pre-flighted against real data**');
+    expect($rule)->toContain('**Missing index for a column the release starts querying**');
+    expect($rule)->toContain('**No stated deploy order or rollback path**');
+    // The walk owns a deploy-time surface, so it must route into Database Analysis, not the generic buckets.
+    expect($rule)->toContain('- **Database change deployment safety** — mandatory whenever the diff adds or modifies a migration');
+    expect($rule)->toContain('**Deployment-unsafe schema change** (*Database Change Deployment Safety*)');
+    expect($skill)->toContain('**Database change deployment safety is part of the same walk:**');
+    expect($skill)->toContain('*Database Change Deployment Safety*');
+});
+
+test('code review walks every database access individually', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $skill = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($rule)->toContain('**Query inventory — no query left unwalked.**');
+    expect($rule)->toContain('A sample is not a walk');
+    // A diff too large to walk must be split, never sampled.
+    expect($rule)->toContain('not a licence to sample');
+    expect($skill)->toContain('**Walk every database access individually — no query left unwalked:**');
 });

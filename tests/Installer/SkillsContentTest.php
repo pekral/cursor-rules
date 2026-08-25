@@ -341,7 +341,8 @@ test('self-documenting-code example file exists and demonstrates naming over nar
 
 test('resolve-issue fixes pre-existing unnecessary comments in their own comment-only commit (issue #770)', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+    // The procedure lives in the skill's reference file; the SKILL.md carries only the pointer.
+    $content = (string) file_get_contents($packageDir . '/skills/resolve-issue/references/pre-existing-issues.md');
 
     expect($content)->toContain('- **Unnecessary comments** —');
     expect($content)->toContain('carry no information the code does not already give');
@@ -350,6 +351,13 @@ test('resolve-issue fixes pre-existing unnecessary comments in their own comment
     expect($content)->toContain('touches **no executable line**');
     expect($content)->toContain('Keep the commit **comment-only**');
     expect($content)->toContain('when a comment\'s value is genuinely unclear, keep it and name it in the PR');
+
+    // The SKILL.md must still route the reader to the procedure, or the extraction lost it.
+    $skill = (string) file_get_contents($packageDir . '/skills/resolve-issue/SKILL.md');
+    expect(substr_count($skill, 'references/pre-existing-issues.md'))->toBe(
+        2,
+        'the skill points at the reference from the section and the References list',
+    );
 });
 
 test('refactoring and tests hold the same comment bar as production code (issue #770)', function (): void {

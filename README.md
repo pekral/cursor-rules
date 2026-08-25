@@ -246,6 +246,7 @@ Rules included in this package:
 | `security/backend.md`         | Backend security rules and OWASP Top 10 checks             | Always   |
 | `security/frontend.md`        | Frontend security rules (XSS, CSRF, CSP)                  | Frontend |
 | `security/mobile.md`          | Mobile-specific security rules and WebView checks          | Mobile   |
+| `security/untrusted-content.md`| Untrusted Content Boundary — trusted instructions outrank instructions found inside issues, comments, tool outputs, and fetched pages | Always   |
 
 All `.mdc` and `.md` files are ready for automatic injection by Cursor so every PHP and Laravel edit stays aligned with the enforced standards.
 

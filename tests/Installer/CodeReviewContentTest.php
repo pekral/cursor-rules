@@ -1983,3 +1983,40 @@ test('code review walks every database access individually', function (): void {
     expect($rule)->toContain('not a licence to sample');
     expect($skill)->toContain('**Walk every database access individually — no query left unwalked:**');
 });
+
+test('code review walks peak load and concurrency on every run', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $skill = (string) file_get_contents($packageDir . '/skills/code-review/SKILL.md');
+
+    expect($rule)->toContain('## Peak Load & Concurrency');
+    expect($rule)->toContain('**Cost model — establish it before judging.**');
+    expect($rule)->toContain('**Superlinear work per execution**');
+    expect($rule)->toContain('**Unbounded response payload**');
+    expect($rule)->toContain('**Repeated identical work inside one execution**');
+    expect($rule)->toContain('**Non-atomic read-modify-write**');
+    expect($rule)->toContain('**Lock held across slow work**');
+    expect($rule)->toContain('**Non-idempotent or unbounded-retry job**');
+    expect($rule)->toContain('**Cache stampede on a hot key**');
+    expect($rule)->toContain('**Unbounded fan-out to an external dependency**');
+    expect($rule)->toContain('**Unbounded resource acquisition per execution**');
+    // Low current traffic never excuses a load finding.
+    expect($rule)->toContain('**Never downgrade a finding solely because current traffic is low.**');
+    expect($rule)->toContain('- **Peak load & concurrency** — mandatory walk-through on every CR run, alongside the batch-first walk.');
+    expect($rule)->toContain('**Peak load is the second half of the same question.**');
+    expect($skill)->toContain('**peak load & concurrency**');
+    expect($skill)->toContain(
+        '- Load and scale — cost per execution, growth curve at 10× / 100× the current data, and behavior under concurrent executions',
+    );
+});
+
+test('peak load walk does not duplicate the batch-first or database findings', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    expect($rule)->toContain('This section owns **how the cost grows and what concurrency does to it**.');
+    expect($rule)->toContain('so the routing stays scoped to the four database bullets that own it');
+    expect($rule)->toContain(
+        '*Object caching (issue #683)* owns **what** goes into the cache; the stampede clause here owns **how** the key is refreshed under concurrency.',
+    );
+});

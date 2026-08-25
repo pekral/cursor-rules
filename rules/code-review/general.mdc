@@ -13,6 +13,7 @@ globs: []
 - Before reviewing, understand the expected outcome from the issue and PR discussion.
 - Load existing review comments and reports when available.
 - Do not repeat already reported findings.
+- **Review against the project's own instructions too, not only the packaged rules.** Load the project-local agent-instruction files per `@rules/compound-engineering/general.mdc` *Project-local agent instructions are part of the rule set*, which owns the discovery list and the precedence contract, and add every normative statement they carry to the rule set this review walks. A violation of one of those rules is a finding like any other: take the severity the project states when it states one, otherwise apply the **Strict rule compliance** stratification from Core Analysis (architectural / structural / required-pattern → **Critical**; PHP-practice violations a fixer does not catch → **Moderate**; naming / wording nits → **Minor**). Cite the file and the heading or line the rule came from inside the finding, so the author can check the claim against the same source the review read.
 
 ## Code Context
 - Ensure the review is based on the latest available state of:

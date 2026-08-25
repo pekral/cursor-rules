@@ -2036,3 +2036,49 @@ test('every CR output template renders the Database Analysis section its skill r
         expect(strpos($body, "\n## Database Analysis"))->toBeLessThan((int) strpos($body, "\n## Coverage"));
     }
 });
+
+test('every review and implementation skill reviews against the project\'s own CLAUDE.md, not only the packaged rules', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+
+    // The CR rule owns the severity of a project-local rule violation.
+    expect($rule)->toContain('**Review against the project\'s own instructions too, not only the packaged rules.**');
+    expect($rule)->toContain('A violation of one of those rules is a finding like any other');
+    expect($rule)->toContain('take the severity the project states when it states one');
+    expect($rule)->toContain('Cite the file and the heading or line the rule came from inside the finding');
+    // The discovery list lives in exactly one place, so it cannot drift across seven copies.
+    expect($rule)->toContain('which owns the discovery list and the precedence contract');
+    expect(substr_count($rule, '`CLAUDE.local.md`'))->toBe(0);
+
+    // Every CR wrapper, the CR engine, the fix loop, and the implementer carry the binding line.
+    $wired = [
+        'code-review',
+        'code-review-github',
+        'code-review-jira',
+        'code-review-bugsnag',
+        'process-code-review',
+        'resolve-issue',
+    ];
+
+    foreach ($wired as $slug) {
+        $skill = (string) file_get_contents($packageDir . '/skills/' . $slug . '/SKILL.md');
+
+        expect(substr_count($skill, '*Project-local agent instructions are part of the rule set*'))
+            ->toBe(1, $slug . ' cites the canonical section exactly once');
+        expect(substr_count($skill, 'load the project\'s own `CLAUDE.md` and the sibling instruction files that section lists'))
+            ->toBe(1, $slug . ' names CLAUDE.md and defers the rest of the discovery list to the rule');
+    }
+});
+
+test('the CR skills load the project-local instructions from the checked-out commit', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    $hook = 'Immediately after the checkout, load the project-local agent instructions per the Constraints above'
+        . ' — reading them from the checked-out commit is what makes them reflect the code under review.';
+
+    foreach (['code-review', 'code-review-github', 'code-review-jira', 'code-review-bugsnag'] as $slug) {
+        $skill = (string) file_get_contents($packageDir . '/skills/' . $slug . '/SKILL.md');
+
+        expect(substr_count($skill, $hook))->toBe(1, $slug . ' hooks the load onto its branch checkout gate exactly once');
+    }
+});

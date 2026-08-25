@@ -2020,3 +2020,17 @@ test('peak load walk does not duplicate the batch-first or database findings', f
         '*Object caching (issue #683)* owns **what** goes into the cache; the stampede clause here owns **how** the key is refreshed under concurrency.',
     );
 });
+
+test('code review flags an Action that only forwards to another Action', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $rule = (string) file_get_contents($packageDir . '/rules/code-review/general.mdc');
+    $lens = (string) file_get_contents($packageDir . '/skills/class-refactoring/SKILL.md');
+
+    expect($rule)->toContain('single delegating call to **one collaborator** — a Model Service method **or another Action**');
+    expect($rule)->toContain('the body forwards to **another Action** → delete the **outer** Action and invoke the inner one from the entry point');
+    expect($rule)->toContain('never leave both in place');
+    expect($rule)->toContain('a single call plus a comment is still a pass-through');
+    expect($rule)->toContain('**Not a finding:** a body that adapts around the single call');
+    expect($lens)->toContain('the body forwards to **another Action** → delete the **outer** Action');
+    expect($lens)->toContain('never keep both');
+});

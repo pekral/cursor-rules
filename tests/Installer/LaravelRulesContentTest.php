@@ -375,6 +375,27 @@ test('architecture no longer names Facade as a legitimate business-logic home', 
 
     // The pass-through resolution now names the Model Service, not a Facade.
     expect($architecture)->toContain('**Single-use Service method rule (Action pattern):**');
-    expect($architecture)->toContain('a single delegating call to one Model Service method');
+    expect($architecture)->toContain('a single delegating call to **one collaborator** — a Model Service method **or another Action**');
     expect($architecture)->not->toContain('Single-use Service/Facade method rule');
+});
+
+test('an Action that only forwards to another Action is redundant', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $architecture = (string) file_get_contents($packageDir . '/rules/laravel/architecture.mdc');
+
+    expect($architecture)->toContain('**Forwards to another Action** → the outer Action is always the redundant one');
+    expect($architecture)->toContain('**delete the outer Action** and have the entry point invoke the inner one directly');
+    expect($architecture)->toContain('Two Actions never survive one use case');
+    // Merging is the alternative when the outer name is the better one — never keeping both.
+    expect($architecture)->toContain('**merge them into a single Action**');
+    expect($architecture)->toContain('never keep both');
+    // The forwarding syntax must not be an escape hatch.
+    expect($architecture)->toContain('`$this->innerAction($payload)`, `($this->innerAction)($payload)`');
+    // Adapting around the call is orchestration, so it stays out of scope.
+    expect($architecture)->toContain('**Not a pass-through (do not flag):**');
+    expect($architecture)->toContain('A single call plus a code comment is still a pass-through');
+    // The severity list and the no-Action-required list mirror the same shape.
+    expect($architecture)->toContain('a Model Service method or another Action — with no orchestration of its own');
+    expect($architecture)->toContain('a use case an existing Action already covers end to end');
+    expect($architecture)->toContain('Delegating to **one** other Action does not make a flow multi-collaborator either');
 });

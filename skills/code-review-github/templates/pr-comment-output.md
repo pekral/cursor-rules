@@ -70,6 +70,34 @@
 
 ---
 
+## Database Analysis
+
+> Render only when the diff touches database operations (raw SQL, Eloquent / query-builder calls, eager loads, model scopes, ModelManager / Repository methods, migrations, seeders, DynamoDB / NoSQL access) **and** at least one finding is produced by `@skills/mysql-problem-solver/SKILL.md` or by the deployment-safety walk. Omit the entire section when no DB operations are present in the diff, or when DB ops are present but no findings result — never leave a placeholder or fold it into Coverage.
+>
+> Report only findings (errors) and their fix recommendations. Never include the trigger decision, an inspected `file:line` list, or an EXPLAIN / static-analysis summary — those belong to the internal investigation, not the published review.
+>
+> This section carries **both** halves of the database review: **performance** findings and **deployment-safety** findings per `@rules/code-review/general.mdc` *Database Change Deployment Safety* (destructive change shipped with the code that reads the old surface, blocking `ALGORITHM=COPY` DDL, missing / no-op `down()`, non-replayable migration, backfill inside a migration, an un-pre-flighted new constraint, a missing index for a newly queried column, an unstated deploy order).
+>
+> Every finding must carry the **concrete optimization artifact** in a fenced code block — the rewritten query in full, the exact index DDL, the rewritten batching code, or, for a deployment-safety finding, the corrected migration `up()` / `down()` pair, the explicit `ALGORITHM=…, LOCK=…` / `pt-online-schema-change` command, the pre-flight counting query, or the deploy-order + rollback block. A prose description of the fix ("add an index on `user_id`", "rewrite it to be SARGable") does not satisfy this section; see `@rules/code-review/general.mdc` *Database Analysis section*. Each **DB-performance** defect is rendered here exactly once and is never duplicated into `## Findings` — but a **security** finding on the same `file:line` is a different defect and always keeps its own `## Findings` entry with the full finding shape.
+
+- **Findings:**
+  1. **{Critical / Moderate / Minor}** — `file:line` — one-sentence problem
+     **Suggested Fix:** {one sentence naming the fix category per `@rules/sql/optimalize.mdc` — existing-index reuse, query rewrite, pagination change, batching, new index, the documented justification for a slower query, or the deployment-safety fix}
+     ```sql
+     -- Mandatory: the concrete artifact itself, never a prose description of it.
+     -- user-supplied values stay bound (?/:named) — never inlined or concatenated
+     -- query rewrite / index reuse / pagination  → the rewritten query in full
+     -- new index                                 → the exact DDL, e.g.
+     --   ALTER TABLE orders ADD INDEX idx_user_status_created (user_id, status, created_at);
+     -- application-level fix (Eloquent chain, batchUpdate / batchInsert,
+     --   whereIn(...)->delete(), keyed bulk read) → render a php-fenced block instead of this one
+     -- deployment safety (migration up()/down(), ALGORITHM=…/LOCK=…, online-DDL command,
+     --   pre-flight counting query, extracted chunked backfill) → render the statement or php block
+     -- slower-but-justified query / unstated deploy order → the documentation block replaces this snippet
+     ```
+
+---
+
 ## Architecture
 
 > **Laravel-only, conditional on findings (issue #530).** On every Laravel project (`laravel/framework` is in `composer.json` `require`), the architecture walk per `@skills/code-review/SKILL.md` Core Analysis "Architecture conformance (Laravel) — mandatory standalone walk-through" runs on every CR run, but this section is rendered **only when the walk produces at least one finding**. When the walk is clean, omit the entire `## Architecture` heading and body — do not render a `walked, 0 findings` status line, a `clean` placeholder, or any other confirmation that the check ran. On non-Laravel projects, omit the entire `## Architecture` section as well.

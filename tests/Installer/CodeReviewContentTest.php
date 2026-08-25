@@ -2034,3 +2034,29 @@ test('code review flags an Action that only forwards to another Action', functio
     expect($lens)->toContain('the body forwards to **another Action** → delete the **outer** Action');
     expect($lens)->toContain('never keep both');
 });
+
+test('every CR output template renders the Database Analysis section its skill requires', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+
+    foreach ([
+        $packageDir . '/skills/code-review/templates/review-output.md',
+        $packageDir . '/skills/code-review-github/templates/pr-comment-output.md',
+        $packageDir . '/skills/code-review-jira/templates/github-output.md',
+        $packageDir . '/skills/code-review-bugsnag/templates/github-output.md',
+    ] as $template) {
+        $body = (string) file_get_contents($template);
+
+        expect($body)->toContain('## Database Analysis');
+        // The section is conditional, carries both halves, and never accepts prose instead of an artifact.
+        expect($body)->toContain('Omit the entire section when no DB operations are present in the diff');
+        expect($body)->toContain('or by the deployment-safety walk');
+        expect($body)->toContain('Every finding must carry the **concrete optimization artifact** in a fenced code block');
+        expect($body)->toContain('a **security** finding on the same `file:line` is a different defect');
+        // All four templates carry the same fix categories, including the deployment-safety artifact.
+        expect($body)->toContain('or the deployment-safety fix}');
+        expect($body)->toContain('pre-flight counting query, extracted chunked backfill');
+        // It must sit before Coverage, per the wrapper skills' ordering rule.
+        // Both are anchored to a line start — the intro prose quotes "## Coverage" earlier.
+        expect(strpos($body, "\n## Database Analysis"))->toBeLessThan((int) strpos($body, "\n## Coverage"));
+    }
+});

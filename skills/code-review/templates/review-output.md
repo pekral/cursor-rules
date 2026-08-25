@@ -81,7 +81,7 @@
 
 - **Findings:**
   1. **{Critical / Moderate / Minor}** — `file:line` — one-sentence problem
-     **Suggested Fix:** {one sentence naming the fix category per `@rules/sql/optimalize.mdc` — existing-index reuse, query rewrite, pagination change, batching, new index, or the documented justification for a slower query}
+     **Suggested Fix:** {one sentence naming the fix category per `@rules/sql/optimalize.mdc` — existing-index reuse, query rewrite, pagination change, batching, new index, the documented justification for a slower query, or the deployment-safety fix}
      ```sql
      -- Mandatory: the concrete artifact itself, never a prose description of it.
      -- user-supplied values stay bound (?/:named) — never inlined or concatenated
@@ -90,7 +90,9 @@
      --   ALTER TABLE orders ADD INDEX idx_user_status_created (user_id, status, created_at);
      -- application-level fix (Eloquent chain, batchUpdate / batchInsert,
      --   whereIn(...)->delete(), keyed bulk read) → render a php-fenced block instead of this one
-     -- slower-but-justified query                → the three-part documentation block replaces this snippet
+     -- deployment safety (migration up()/down(), ALGORITHM=…/LOCK=…, online-DDL command,
+     --   pre-flight counting query, extracted chunked backfill) → render the statement or php block
+     -- slower-but-justified query / unstated deploy order → the documentation block replaces this snippet
      ```
 
 ---

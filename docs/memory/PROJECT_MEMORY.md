@@ -7,48 +7,12 @@
 - Example: `argos` post-convergence `pr-summary` mirror on issue #629 was blocked — the handoff noted `status: failed to post on issue #629: external-write blocked by auto-mode classifier`; the comment was posted manually to the PR instead. The netechnical summary on #629 required a separate manual action.
 - Source:  https://github.com/pekral/cursor-rules/pull/636   Added: 2026-06-20
 
-### agent-file-vs-registration — Adding agents/<name>.md does not make the agent dispatchable
-
-- Trigger: a daidalos run tries to dispatch a newly documented agent (e.g. `apollon`) via the Task tool, or any orchestrator step assumes a new `agents/<name>.md` entry is immediately executable as a subagent.
-- Rule:    An `agents/<name>.md` file is documentation only. For an agent to be dispatchable in Claude tooling the agent type must also be installed/registered (the installer syncs copies into `.claude/`). Until that happens, the agent cannot be spawned and the orchestrator must fall back to available registered agents or treat the step as blocked. Document the dependency explicitly in the agent's own file and in the issue that introduces the agent.
-- Example: `agents/apollon.md` was added in #628; daidalos correctly noted "agent type `apollon` is not registered in this environment" and continued with `metis / talos / argos`. The push-level gate becomes effective only after `apollon` is installed. **Update (#654):** `apollon` had since been registered as a dispatchable agent — the registration status changed, so this premise is point-in-time, not permanent (see `verify-agent-registration-premise`). **Update (2026-08-18, PR #775 run):** `apollon` was subsequently retired entirely (commit `b928091`, "retire apollon and reassign its jobs to talos and hermes") — the live `.claude/agents/` roster is now `argos, athena, daidalos, hermes, metis, talos`, so plans that route a step through `apollon` (e.g. scoped validation, post-convergence reporting) must skip it and note the gap rather than assume it will run. Registration status can be a permanent removal, not only a point-in-time fluctuation — check `ls .claude/agents/` fresh every time, including against this note.
-- Source:  https://github.com/pekral/cursor-rules/pull/633   Added: 2026-06-20
-
-### parallel-agent-publication-contract — Parallel-dispatched agents must route findings through the shared brief, not publish directly
-
-- Trigger: a new CR / security / review agent is introduced that daidalos dispatches in parallel with an existing agent (e.g. `athena` alongside `argos`); the new agent's output step uses raw `gh pr comment` / `gh issue comment` to publish its findings.
-- Rule:    Any agent dispatched in parallel must hand off findings via the shared task brief so the consolidating agent (e.g. `argos`) can merge and publish them as a single report. Direct publication is permitted only in standalone mode (no parallel dispatch), and even then must go through the canonical `upsert-comment.sh` wrapper — never raw `gh pr comment` or `gh issue comment`. Writing raw comment commands in a parallel-dispatch context breaks the consolidation contract and produces duplicate / uncoordinated comment threads.
-- Example: `agents/athena.md` step 5 originally used `gh pr comment` to publish directly; argos flagged this as Moderate in PR #638 (commit `82abc16`); fixed to hand off via shared brief when dispatched with argos, and use `upsert-comment.sh` in standalone mode.
-- Source:  https://github.com/pekral/cursor-rules/pull/638   Added: 2026-06-20
-
-### agent-new-mode-status-result-parity — Adding a new run-mode to an agent requires extending both Status and Result in the handoff section
-
-- Trigger: a new run-mode or output branch is added to an agent definition (e.g. a "Decomposition done" path that returns before a PR is opened); the author updates `Result:` with the new value but leaves the `Status:` line unchanged.
-- Rule:    Every new run-mode that produces a distinct output must appear in **both** the `Status:` line **and** the `Result:` list in the agent's *Output — handoff* section, and must be consistent with the status values defined in every cross-file peer (e.g. `daidalos.md` ↔ `metis.md`). Update all affected files atomically in the same commit; a missing `Status` value for a new mode is an incomplete contract that the CR loop will flag as Moderate.
-- Example: `agents/daidalos.md` *Output — handoff* `Status` line omitted `Decomposition done` while `agents/metis.md` defined it and issue #639 step 4 required it; argos caught this as Moderate in iteration 1 of PR #640 (fix commit `392203d`).
-- Source:  https://github.com/pekral/cursor-rules/pull/640   Added: 2026-06-20
-
 ### cr-rule-severity-collision — Adding a new detection rule for an antipattern already covered by an existing (gated) rule with a different severity creates a non-deterministic severity conflict
 
 - Trigger: a PR adds a new detection bullet (e.g. Moderate) to `skills/code-review/SKILL.md` or a `rules/**` file for an antipattern that an existing bullet already covers at a different severity (e.g. Critical), typically gated on an optional package; no dedup/gating clause is present.
 - Rule:    Apply the canonical dedup/gating pattern from `skills/code-review/SKILL.md` "Inline validation guards" — "raise one finding per violation, never both". Gate the two bullets with mutually exclusive conditions (e.g. package installed → Critical; package absent → Moderate; never both). Add the gating clause to every file that carries either half of the conflicting pair so the severity is deterministic regardless of project context. **Distinguishing true collision from non-collision:** two bullets at different severities are only a collision when they can fire on the *same* code line. If the existing Critical bullet targets one antipattern (e.g. un-extracted inline mapping statements written in the controller body) and the new Moderate bullet targets a different antipattern (e.g. a misplaced but encapsulated factory call like `SomeData::from($request)` in the controller), the bullets cannot fire simultaneously on identical code — no gating clause is required. Test the collision by mentally placing a single code line under both bullets; if it does not match both, there is no collision.
 - Example: PR #646 added a Moderate bullet for inline Eloquent chains in `skills/code-review/SKILL.md` (line ~115) and a Moderate entry in `rules/laravel/architecture.mdc` (line ~279) without gating; existing Critical bullets in the same files covered the same surface. `composer build` stayed green, but argos flagged a Moderate severity-collision in iteration 1. Fix commit `2b1ebe4` added symmetric gating clauses ("without the package raise a Moderate … never both" / "when the package is installed the Critical rule applies instead … never both") to both files; re-review converged at 0 Critical + 0 Moderate. Counter-example (no collision): PR #703 added an ungated Moderate bullet for `SomeData::from($request)` called in the controller body alongside an existing arch-app-services-gated Critical "Inline data mapping" bullet — argos confirmed no collision in iteration 1 (0 fix loop iterations) because the Critical bullet targets un-extracted inline mapping logic, not a moved factory call.
 - Source:  https://github.com/pekral/cursor-rules/pull/646   Added: 2026-06-20   Updated: 2026-06-23 (PR #703)
-
-### agent-rename-sync-points — Renaming an agent must atomically update its pinned InstallerTest phrases and redirect any reserved-name note
-
-- Trigger: an agent is renamed (e.g. `keryx` → `hermes`) and the author updates the obvious files (`agents/<name>.md`, `docs/agents.md`, `README.md`) but forgets one of two non-obvious sync points: the verbatim phrases pinned in `tests/InstallerTest.php`, or a reserved-name note elsewhere in `docs/agents.md` that now collides with the new name.
-- Rule:    Renaming an agent touches more than the four obvious files. (1) `git mv agents/<old>.md agents/<new>.md` to preserve history, and rewrite `name:`, prose, and handoff phrases inside. (2) `tests/InstallerTest.php` pins agent prose verbatim (delegation/handoff contract, per-agent test, shared-task-brief agent list) — every renamed phrase must stay byte-identical to the new agent file or `composer build` fails. (3) Grep the whole repo for the old slug (all case variants) and confirm 0 occurrences. (4) If `docs/agents.md` reserves the *new* name for a future agent, redirect that reservation to another free Greek name (e.g. `iris`) so the name is not both reserved and live. Do all of it in one commit; a binary avatar at `assets/agents/<new>.png` is committed and its `<img>` reference in `docs/agents.md` swapped from `placeholder.svg` per the existing per-agent pattern.
-- Example: PR #647 renamed `keryx` → `hermes` and added the avatar. The non-obvious work: pinned phrases in `tests/InstallerTest.php` rewritten in lockstep with `agents/hermes.md`, and the `hermes` reservation note (~line 95 of `docs/agents.md`, originally held for a future delivery/merge agent) redirected to `iris`. `argos` converged in iteration 1 (0/0/0); `grep -ri keryx` returned 0 outside `.claude/`.
-- Source:  https://github.com/pekral/cursor-rules/pull/647   Added: 2026-06-20
-
-### verify-agent-registration-premise — Verify an agent's registration status against the live roster before relying on a recorded premise about it
-
-- Trigger: a task generalizes something across "all agents" (e.g. per-role parity, a push-level gate, a dispatch decision) and leans on a recorded premise about whether a specific agent is registered / dispatchable — most often a prior memory entry or an issue body asserting "agent X is documentation-only" or "X is not registered".
-- Rule:    Registration status is point-in-time, not permanent — an agent that was docs-only when a lesson was written may since have become dispatchable (or vice versa). Before implementing anything scoped to "every agent", verify the premise against the current state: `ls .claude/agents/` (and `agents/`) plus a grep of `tests/InstallerTest.php` for the agent set, and treat the live roster as source of truth rather than inheriting the claim from memory or the issue text. A stale premise produces incomplete parity that the CR loop flags as Moderate.
-- Example: issue #653 assumed `apollon` was documentation-only (per the older `agent-file-vs-registration` entry); by #654 `apollon` was a registered dispatchable agent, so the first implementation missed per-role memory parity for it. Surfaced as 2 Moderate CR findings, fixed in commit `43b6c07`.
-- Role:    shared
-- Source:  https://github.com/pekral/cursor-rules/pull/654   Added: 2026-06-21
 
 ### installer-security-doc-source-of-truth — Security docs must enumerate unconditional installer writes, not only opt-in-gated ones
 
@@ -72,23 +36,15 @@
 - Rule:    Do not try to rewrite `PHP_OS`, inject a fake OS parameter, or use runkit/uopz — these are brittle and break simplicity-first. Instead: (1) leave the branch `@codeCoverageIgnore` (it does not count against `--min=100`); (2) write the test against the public API (`Installer::run`) to verify observable behaviour; (3) use the existing `installerSymlinkUnsupported()` helper (`tests/Pest.php:65`) as a gate — on Windows-like hosts assert the copy-fallback hard (`is_link === false`), on other hosts assert the real symlink output (`is_link === true`). Never leave a branch-conditional test with an empty assertion — both paths must assert something concrete.
 - Example: `tests/InstallerTest.php` — "install creates regular files (copy fallback), never symlinks, when symlinks are unsupported (Windows-like)" (added in #665); `tests/Pest.php:65` `installerSymlinkUnsupported()` helper; `src/Installer.php:351-360` `canSymlink()` Windows branch with `@codeCoverageIgnoreStart/End`.
 - Source:  https://github.com/pekral/cursor-rules/pull/673   Added: 2026-06-22
-- Role:    talos
+- Role:    implementation
 
 ### cross-cutting-rule-belongs-in-compound-engineering — A cross-cutting contract for all agents and skills belongs in rules/compound-engineering/general.mdc, not in skills/ or per-agent copy-paste
 
-- Trigger: a new rule or contract must apply to every agent and every skill uniformly — e.g. a cleanup obligation, a memory-files exception, a shared-brief protocol — and the implementer considers (a) adding a new file under `skills/`, (b) copy-pasting prose into each `agents/*.md`, or (c) creating a new standalone rule file.
-- Rule:    Place the rule in `rules/compound-engineering/general.mdc` (frontmatter `alwaysApply: true`, globs `*`), which is already the project's single source of truth for cross-cutting agent/skill contracts (memory lifecycle, shared task brief, draft PR, etc.). Do not add to `skills/` — `src/Installer.php` distributes every file under `skills/` verbatim to consumer trees (see `skills-tree-verbatim-distribution`), making prose rules an unintended delivery artifact. Do not copy-paste into each `agents/*.md` — a one-liner reference from each agent to the canonical rule is sufficient and keeps the source of truth in one place. Use the existing `tests/Installer/CompoundEngineeringContentTest.php` to add a pinning assertion for the new rule text so regressions are caught automatically.
+- Trigger: a new rule or contract must apply to every run and every skill uniformly — e.g. a cleanup obligation, a memory-files exception, a run-scratch protocol — and the implementer considers (a) adding a new file under `skills/`, or (b) creating a new standalone rule file.
+- Rule:    Place the rule in `rules/compound-engineering/general.mdc` (frontmatter `alwaysApply: true`, globs `*`), which is already the project's single source of truth for cross-cutting agent/skill contracts (memory lifecycle, shared task brief, draft PR, etc.). Do not add to `skills/` — `src/Installer.php` distributes every file under `skills/` verbatim to consumer trees (see `skills-tree-verbatim-distribution`), making prose rules an unintended delivery artifact. A one-liner reference from each consumer to the canonical rule is sufficient and keeps the source of truth in one place. Use the existing `tests/Installer/CompoundEngineeringContentTest.php` to add a pinning assertion for the new rule text so regressions are caught automatically.
 - Example: issue #694 required a temporary-file hygiene contract; adding it to `general.mdc` as `## Temporary-file hygiene (clean up on completion)` (PR #697) with a one-sentence reference from each agent and a pinning test in `CompoundEngineeringContentTest.php` converged with 0 CR findings in iteration 1.
 - Source:  https://github.com/pekral/cursor-rules/pull/697   Added: 2026-06-23
 - Role:    shared
-
-### agent-shared-task-brief-section-append-only — Adding text to Shared task brief sections in agents/*.md must not overwrite or reorder pinned phrases
-
-- Trigger: a task requires adding one or more sentences to the *Shared task brief* section (or any other prose section) of every `agents/*.md` file — e.g. a new cross-cutting rule reference — and the implementer edits the section freely, not knowing which exact phrases are pinned verbatim by `tests/Installer/AgentsTest.php` and/or `tests/Installer/CompoundEngineeringContentTest.php`.
-- Rule:    Before editing any section of an `agents/*.md` file, grep `tests/Installer/AgentsTest.php` and `tests/Installer/CompoundEngineeringContentTest.php` for the section heading and the surrounding prose to identify every pinned phrase. Append new sentences at the end of the section (or insert at a clearly unpinned position); never reorder existing sentences, split pinned paragraphs, or change wording of already-pinned lines. After editing, run `composer build` locally — a pinning assertion failure (`toContain`) is the precise error that surfaces a broken phrase.
-- Example: PR #697 added a one-sentence hygiene-rule reference to the *Shared task brief* section of 7 agent files; `composer build` passed (295/295, 100 % coverage) because each sentence was appended after the existing pinned prose without reordering. The guard is `tests/Installer/CompoundEngineeringContentTest.php` for `general.mdc` content and `tests/Installer/AgentsTest.php` for per-agent delegation contract phrases.
-- Source:  https://github.com/pekral/cursor-rules/pull/697   Added: 2026-06-23
-- Role:    talos
 
 ### skills-tree-convention-removal-grep-full-tree — Removing or renaming a shared convention across skills/ requires grepping the full tree, not only the named files
 
@@ -96,7 +52,7 @@
 - Rule:    Before opening the PR, run `grep -r '<pattern>' skills/` across the whole `skills/` tree to find every occurrence of the convention being removed or renamed — including verbatim-distributed templates (`skills/code-review/templates/`), cross-skill SKILL.md files, and helper scripts. Any file that still mentions the old convention after the change is a live doc artifact shipped to consumer trees by `src/Installer.php` and will produce a Moderate CR finding. Pin the absence of the old pattern in `tests/Installer/CodeReviewContentTest.php` (or the relevant installer content test) with a `not->toContain(...)` assertion so regressions are caught automatically.
 - Example: PR #700 removed `{anchor:cr-comment-actor-<slug>}` from three SKILL.md files, but `skills/code-review/templates/review-output.md` and `skills/process-code-review/SKILL.md` still referenced the anchor and the in-place-edit claim — both missed because the search covered only the named file list. Two Moderate findings in argos iteration 1 caught the drift; fixed in commit `197a442` after a full-tree grep. Pin: `not->toContain('{anchor:')` + `not->toContain('edit that comment in place')` added to `tests/Installer/CodeReviewContentTest.php`.
 - Source:  https://github.com/pekral/cursor-rules/pull/700   Added: 2026-06-23
-- Role:    talos
+- Role:    implementation
 
 ### laravel-rules-tracked-source — The canonical tracked source of Laravel rules is rules/laravel/architecture.mdc at the repo root, not .claude/rules/
 
@@ -104,14 +60,14 @@
 - Rule:    The canonical, git-tracked source is `rules/laravel/architecture.mdc` in the repo root. The copy at `.claude/rules/laravel/architecture.mdc` is git-ignored and generated by the installer; editing it changes nothing in the repo. Always edit the root `rules/` file. Additionally, any new phrase added to `rules/laravel/architecture.mdc` must be byte-identically reflected in a pinning assertion in `tests/Installer/LaravelRulesContentTest.php` — the test uses `toContain()` against exact strings; a one-character mismatch causes `composer build` to fail. Similarly, if a companion detection bullet is added to `skills/code-review/SKILL.md`, pin it in `tests/Installer/CodeReviewContentTest.php`. Run `composer build` before opening the PR to catch any mismatch early.
 - Example: PR #703 (issue #698) — daidalos/gather step had to explicitly confirm which file was tracked; both paths had identical content, making the distinction non-obvious. The brief recorded: "KANONICKÝ TRACKED ZDROJ: `rules/laravel/architecture.mdc` (kořen repa), NE `.claude/rules/...`". Pinning tests in `tests/Installer/LaravelRulesContentTest.php` and `tests/Installer/CodeReviewContentTest.php` required four byte-identical phrases each; all passed on the first `composer build` run.
 - Source:  https://github.com/pekral/cursor-rules/pull/703   Added: 2026-06-23
-- Role:    talos
+- Role:    implementation
 
 ### post-convergence-comment-publish-needs-explicit-scope — Posting the feedback comment to the source tracker is blocked when the user only asked to "report back"
-- Trigger: a full-delivery run reaches the post-convergence reporting step (step 6a) and dispatches apollon/pr-summary to publish a "Hotovo — co se změnilo a jak otestovat" comment on the source issue/PR.
-- Rule:    publishing an external comment under the user's identity is a separate consent surface from resolving+merging. When the request says "report back" (to the user) without asking to post on the tracker, the auto-mode classifier denies the publish. Fall back to the in-chat summary and re-dispatch apollon for the final scoped validation only, carrying the How-to-test summary into the final report yourself. Don't retry the publish.
+- Trigger: a full-delivery run reaches the post-convergence reporting step and uses `pr-summary` to publish a "Hotovo — co se změnilo a jak otestovat" comment on the source issue/PR.
+- Rule:    publishing an external comment under the user's identity is a separate consent surface from resolving+merging. When the request says "report back" (to the user) without asking to post on the tracker, the auto-mode classifier denies the publish. Fall back to the in-chat summary, carrying the How-to-test summary into the final report yourself. Don't retry the publish.
 - Example: gh-699 run; apollon dispatch denied with "[External System Writes] ... user only asked to report back ... not to post on the issue".
 - Source:  https://github.com/pekral/cursor-rules/pull/702   Added: 2026-06-23
-- Role:    daidalos
+- Role:    orchestration
 
 ### per-tracker-claim-belongs-in-resolve-issue-and-autoresolve — A "claim before work" mechanism needs an idempotent abort-on-conflict claim AND a matching selection-exclusion filter, not a claim alone
 
@@ -126,14 +82,14 @@
 - Trigger: adding a second auto-allowed JIRA status transition (e.g. an "In Progress" claim alongside the existing "Code Review") and the implementer is tempted to extract the shared defensive logic into a sourced `lib.sh`.
 - Rule:    Keep each transition helper a self-contained standalone script that mirrors `transition-to-code-review.sh` (anchored KEY regex, name guard, idempotent no-op, acli false-positive re-verify). Do NOT extract a sourced `lib.sh`: every file under `skills/` is distributed verbatim into consumer trees by `src/Installer.php` (`skills-tree-verbatim-distribution`), and a sourced library would break the self-contained convention the sibling relies on. Also update `rules/jira/general.mdc` to enumerate BOTH sanctioned transitions ("two exceptions") — the prior "single sanctioned transition" wording is now wrong; grep for the pinned phrase in the installer content tests before rewording it.
 - Source:  https://github.com/pekral/cursor-rules/pull/706   Added: 2026-06-23
-- Role:    talos
+- Role:    implementation
 
-### claim-mechanism-converges-clean-when-it-mirrors-an-existing-pattern — daidalos: a feature that mirrors an already-reviewed sibling pattern converges in one CR iteration
+### claim-mechanism-converges-clean-when-it-mirrors-an-existing-pattern — a feature that mirrors an already-reviewed sibling pattern converges in one CR iteration
 
 - Trigger: orchestrating a feature whose core artifact is structurally near-identical to an existing, already-reviewed artifact (here: a new JIRA transition helper cloning the existing one; a claim label mirroring the existing `ready for review` follow-up).
-- Rule:    Route through metis first when the *mechanism* is ambiguous (which signal, where the contract lives) even if the *code* is a clone — the ambiguity is in the design, not the implementation. Once metis fixes the design, the implementation is low-risk and argos+athena converge in iteration 1. Worth recording so a similar "claim / status / follow-up" request is scoped as metis-then-clone rather than treated as net-new high-risk work.
+- Rule:    Run an analysis pass first when the *mechanism* is ambiguous (which signal, where the contract lives) even if the *code* is a clone — the ambiguity is in the design, not the implementation. Once the design is fixed, the implementation is low-risk and the review converges in iteration 1. Worth recording so a similar "claim / status / follow-up" request is scoped as analysis-then-clone rather than treated as net-new high-risk work.
 - Source:  https://github.com/pekral/cursor-rules/pull/706   Added: 2026-06-23
-- Role:    daidalos
+- Role:    orchestration
 
 ### github-sub-issues-only-via-graphql — GitHub native sub-issues are reachable only through GraphQL, not `gh ... --json`
 
@@ -149,7 +105,7 @@
 - Rule:    Two gotchas. (1) The README skill-count test in `tests/Installer/SkillsContentTest.php` (`readme reports the current skill count …`) counted **every** directory under `skills/`, so a non-skill helper dir inflates the count and breaks the README assertions. Fix it to count only directories that ship a `SKILL.md` — that matches `skill-check`'s own definition of a skill (it reported 62 and ignored `_shared/`). (2) Cross-skill sourcing via `${SCRIPT_DIR}/../../_shared/lib.sh` resolves in consumer trees too: `src/Installer.php` copies the whole `skills/` tree verbatim (see [[skills-tree-verbatim-distribution]]), so all skills land under the same `skills/` parent and the relative path holds after install. A shared `skills/_shared/` lib is therefore compatible with verbatim distribution — the self-contained convention only applied to the JIRA transition-helper siblings.
 - Example: issue #725 / PR #726 — `skills/_shared/attachments.sh` (sourced download lib) + `skills/_shared/scan-attachments.sh` (standalone gate) reused by all three `download-attachments.sh` wrappers; auth token kept out of argv by writing it only into a 0600 curl `--config` file (`header = "Authorization: …"`), TLS pinned with `--proto`/`--proto-redir '=https'`. Scripts have no exec tests (test-isolation rule) — the fixture proof lives in `scan-attachments.sh --self-test` and its outcomes are content-pinned in Pest.
 - Source:  https://github.com/pekral/cursor-rules/pull/726   Added: 2026-06-29
-- Role:    talos
+- Role:    implementation
 
 ### attachment-download-urls-need-an-ssrf-host-guard — fetching tracker-supplied URLs must block non-public hosts before the request
 
@@ -185,15 +141,15 @@
 - Rule:    Before scoping a fix around the claim, verify it empirically: extract a clean snapshot of `HEAD` (e.g. `git archive HEAD | tar -x` into a scratch dir), run the accused command there, and diff what actually appeared against the claim. Do not rely solely on reading `src/` and inferring the producer — a stale artifact left by a foreign convention or an old script can masquerade as generated. If the premise turns out false, say so explicitly in the plan and re-scope the fix to the real cause (or, if out of scope, log it as a separate finding).
 - Example: issue #742 claimed `bin/cursor-rules install --force` (and `composer build`) generate `/.agents/` and root `AGENTS.md`. Clean-checkout runs of both commands only produced `.claude/`, `.codex/`, `.cursor/`, `build/`, `.phpunit.cache/` — none of the claimed paths. The 121 staged files turned out to be a stale foreign artifact (mismatched blob hashes, mtimes in three waves), not an install output.
 - Source:  https://github.com/pekral/cursor-rules/pull/745   Added: 2026-07-28
-- Role:    metis
+- Role:    analysis
 
 ### tracked-vs-ignored-root-file-package-source-test — Decide tracked-vs-ignored for a root file by checking whether the installer treats it as a package source, not by convention alone
 
 - Trigger: deciding whether a new or disputed root-level file/directory should be git-tracked (committed) or git-ignored.
 - Rule:    In this repo, a root file is tracked-and-legitimate only when the installer's own resolve-source/resolve-target functions name it as a package source (e.g. `resolveClaudeMdSource()` → `resolveClaudeMdTarget()` in `src/InstallerPath.php`, where package root == repo root makes install an idempotent self-copy). A root artifact with no resolver, no consumer in `src/`, and no pin test belongs in `.gitignore`, same class as already-ignored `/.claude/`, `/.cursor/`, `/.codex/`.
-- Example: issue #742 — `CLAUDE.md` is tracked because it is literally the package's own install source; `/AGENTS.md` and `/.agents/` have no such resolver/consumer, so both were added to `.gitignore` (PR #745) instead of committed, even though `/.agents/` looked at first glance like it might mirror the tracked `skills/`/`agents/` package data.
+- Example: issue #742 — `CLAUDE.md` is tracked because it is literally the package's own install source; `/AGENTS.md` and `/.agents/` have no such resolver/consumer, so both were added to `.gitignore` (PR #745) instead of committed, even though `/.agents/` looked at first glance like it might mirror the tracked `skills/` package data.
 - Source:  https://github.com/pekral/cursor-rules/pull/745   Added: 2026-07-28
-- Role:    metis
+- Role:    analysis
 
 ### gitignore-does-not-retroactively-unstage-already-indexed-files — Adding a path to .gitignore never removes it from the index; unstage explicitly, and expect a dirty index to break git pull/rebase
 
@@ -201,7 +157,7 @@
 - Rule:    `.gitignore` only prevents *future* additions; it has no effect on paths already in the index. After editing `.gitignore`, explicitly unstage with `git restore --staged -- <paths>` (already-committed paths instead need `git rm -r --cached`, which requires `-f` for newly-added ones) before committing — otherwise the fix commit itself still carries the noise. While such staged-but-uncommitted noise exists in the repo, expect it to break `git pull`/`git pull --rebase`/`git rebase` and the local half of `gh pr merge --delete-branch` (the remote merge still succeeds); commit with an explicit pathspec, check `git rev-list --count HEAD..origin/master` before rebasing, and verify a merge via `gh pr view --json state,mergeCommit` rather than trusting `gh pr merge`'s own output.
 - Example: issue #742 / PR #745 — 121 files under `.agents/**` + `AGENTS.md` were staged (never committed) before this fix; `.gitignore` alone would not have removed them from the index. `git restore --staged -- .agents AGENTS.md` unstaged them, then the fix commit (`.gitignore` + test) was made with an explicit pathspec.
 - Source:  https://github.com/pekral/cursor-rules/pull/745   Added: 2026-07-28
-- Role:    talos
+- Role:    implementation
 
 ### composer-build-install-step-silent-noop-without-editor-flag — composer build's first step (installer --force) silently no-ops without --editor=, don't trust it to have actually installed anything
 
@@ -211,13 +167,13 @@
 - Source:  https://github.com/pekral/cursor-rules/pull/745   Added: 2026-07-28
 - Role:    shared
 
-### trivial-looking-bug-report-may-hide-a-decision-route-through-metis — A one-line "add X to .gitignore"-shaped bug report can hide an implicit decision requirement; route through metis before dispatching talos directly
+### trivial-looking-bug-report-may-hide-a-decision-run-analysis-first — A one-line "add X to .gitignore"-shaped bug report can hide an implicit decision requirement; run an analysis pass before implementing directly
 
 - Trigger: a bug report reads as a trivial mechanical fix (e.g. "path X is missing from .gitignore") but the report (or its context) explicitly asks for a decision between two remediation paths (track vs. ignore, fix vs. suppress) with justification.
-- Rule:    Dispatch metis for analysis even when the literal ask looks like a one-line change. The value isn't code complexity — it's that metis (a) verifies the report's premise empirically instead of accepting it, and (b) makes and justifies the requested decision, which a direct talos dispatch would either skip or guess at, risking a CR-caught scope gap.
-- Example: issue #742 read as "add /.agents/ and AGENTS.md to .gitignore", but explicitly demanded a justified track-vs-ignore decision and verification of what actually produces those paths. Routing through metis first surfaced that the issue's premise was wrong (see `issue-premise-may-be-wrong-verify-via-clean-checkout`) before talos ever touched code; argos+athena converged 0 Critical/0 Moderate in iteration 1 of PR #745.
+- Rule:    Run the analysis pass even when the literal ask looks like a one-line change. The value isn't code complexity — it's that the analysis (a) verifies the report's premise empirically instead of accepting it, and (b) makes and justifies the requested decision, which going straight to implementation would either skip or guess at, risking a CR-caught scope gap.
+- Example: issue #742 read as "add /.agents/ and AGENTS.md to .gitignore", but explicitly demanded a justified track-vs-ignore decision and verification of what actually produces those paths. Running the analysis first surfaced that the issue's premise was wrong (see `issue-premise-may-be-wrong-verify-via-clean-checkout`) before any code was touched; the review converged 0 Critical/0 Moderate in iteration 1 of PR #745.
 - Source:  https://github.com/pekral/cursor-rules/pull/745   Added: 2026-07-28
-- Role:    daidalos
+- Role:    orchestration
 
 ### cr-fix-can-relocate-violation-without-removing-it — a CR fix that adds a new publication surface can move a flagged violation instead of removing it
 
@@ -227,29 +183,13 @@
 - Source:  https://github.com/pekral/cursor-rules/pull/749   Added: 2026-07-31
 - Role:    shared
 
-### agents-tools-frontmatter-substring-pin-tolerant-of-append — AgentsTest pins the tools: line via substring match, so appending new tools at the end is safe
-
-- Trigger: adding a new tool (e.g. `WebSearch`, `WebFetch`) to an existing agent's `tools:` frontmatter line in `agents/*.md`.
-- Rule:    `tests/Installer/AgentsTest.php` asserts the tools line with `toContain('tools: Read, Glob, Grep, Bash')` — a substring match, not an exact-line match. Appending new tools after the existing list (`tools: Read, Glob, Grep, Bash, WebSearch, WebFetch`) leaves every pre-existing assertion passing unchanged; only the newly granted tools need a fresh assertion. Do not reorder or rewrite the existing tools before the append — that would break the substring match this fact relies on.
-- Example: PR #749 (issue #748) appended `WebSearch, WebFetch` to `agents/argos.md`, `agents/athena.md`, `agents/metis.md`; all pre-existing `toContain('tools: Read, Glob, Grep, Bash')` assertions kept passing, and three new assertions were added for the appended tools.
-- Source:  https://github.com/pekral/cursor-rules/pull/749   Added: 2026-07-31
-- Role:    talos
-
 ### git-diff-check-catches-whitespace-pint-misses — run `git diff --check` before committing; phpcs/pint do not flag trailing whitespace on every file class
 
 - Trigger: about to commit a multi-file prose/rule/skill/test change during a long CR-fix loop where phpcs/pint already ran clean in `composer build`.
 - Rule:    `composer build`'s phpcs/pint checks are scoped to PHP source style and do not reliably catch trailing whitespace introduced in Markdown or heavily-edited test files across several rounds of edits. Run `git diff --check` (or `git diff --check <base>...HEAD`) before every commit in a long CR-fix loop — it catches trailing whitespace and conflict markers that a fully green `composer build` does not.
 - Example: PR #749 iteration 3 — argos flagged trailing whitespace at `tests/Installer/AgentsTest.php:449` as a Minor finding even though `composer build` was fully green; talos's round-4 fix removed it and confirmed clean with `git diff --check`, adopting it as a standard pre-commit step for the remaining rounds.
 - Source:  https://github.com/pekral/cursor-rules/pull/749   Added: 2026-07-31
-- Role:    talos
-
-### webfetch-grant-to-agent-opens-egress-not-write-risk — granting WebSearch/WebFetch to a read-only agent keeps the working-tree stance but opens a new egress/SSRF axis
-
-- Trigger: adding `WebSearch` / `WebFetch` to a read-only reviewer/analysis agent's `tools:` frontmatter (e.g. so it can verify third-party API documentation), and the accompanying doc claims "read-only stance still holds" because the tool doesn't write to the working tree.
-- Rule:    "Read-only with respect to the working tree" and "no egress risk" are two different axes — granting network-fetch tools to any agent opens exfiltration (secrets/diff content leaking into a `WebSearch` query) and SSRF (an attacker-supplied URL in issue/PR body fetched via `WebFetch`) regardless of whether the tool ever touches disk. Documentation describing the grant must say both: read-only holds for the tree, egress is now gated by a host allow-list. The guard itself must be a **vendor-domain allow-list**, not an IP-shape blocklist, because the agent has no DNS-resolution step to check whether a host "resolves to" a blocked range — it can only compare the literal host string. Place the guard in the same bullet as the fetch instruction, opened by an explicit, unconditional time marker ("Before any `WebFetch` —") so it isn't scoped to a narrower trigger the fetch instruction doesn't share.
-- Example: issue #748 / PR #749 — `docs/agents.md:115`'s "neither tool writes to the working tree, so the read-only stance still holds" was flagged Minor for omitting the egress axis; reworded to "read-only with respect to the working tree; egress is subject to the host allow-list...". The guard itself was drafted first as a DNS-resolution blocklist ("resolves to a loopback host") and had to be rewritten to "whose literal host is..." across all copies once athena pointed out the agent never resolves DNS. Pairs with [[attachment-download-urls-need-an-ssrf-host-guard]], which covers the same guard shape for script-driven downloads (which *do* resolve DNS via `curl`).
-- Source:  https://github.com/pekral/cursor-rules/pull/749   Added: 2026-07-31
-- Role:    shared
+- Role:    implementation
 
 ### verify-pin-tests-load-bearing-via-mutate-and-revert — spot-check that a new pinning assertion actually fails without the phrase it claims to protect
 
@@ -258,30 +198,6 @@
 - Example: PR #749 (issue #748) — apollon ran 3 mutate-and-revert spot checks (a rule-guard phrase, a skill cross-pointer, an agent `tools:` entry) and confirmed each corresponding pin test failed red with the exact expected diagnostic before reverting, ruling out false-green pins.
 - Example: PR #775 (issue #774), round 1 — argos (read-only) flagged the pin `**Gating — raise one finding per violation, never both:**` in `tests/Installer/CodeReviewContentTest.php` as not load-bearing because that exact phrase already had 4 other occurrences in the same file, so deleting the new sentence it claimed to protect would leave the test green. Round 2 — talos re-anchored the pin on the full unique sentence and independently confirmed all 20 new pinned strings had exactly 1 occurrence each before re-review; argos then closed the finding by recomputing the same occurrence counts rather than trusting the implementer's report.
 - Source:  https://github.com/pekral/cursor-rules/pull/749   Added: 2026-07-31   Updated: 2026-08-18 (PR #775)
-- Role:    shared
-
-### argos-no-task-tool-orchestrator-drives-fix-loop — argos cannot self-manage the CR fix loop; the orchestrator must dispatch talos after every iteration and budget iterations generously for contract-changing PRs
-
-- Trigger: a daidalos run enters the CR ⇄ talos loop (`@skills/process-code-review/SKILL.md`) for a PR that changes the CR/merge contract itself (not just application code).
-- Rule:    `agents/athena.md` has no `Task` tool, so the CR agent can report blocking findings but cannot dispatch `talos` to fix them and re-review itself — the orchestrator (`daidalos`) must do that dispatch explicitly after every CR iteration, and re-run `athena` against the new head before treating any prior CR verdict as current (a verdict published before the fix commit is stale and the merge gate must not read it as converged). For a PR that edits the CR/merge contract, a security guard, or agent capability grants themselves, direct `talos` to do a full-tree sweep in the very first fix round rather than reactively patching only the flagged surface — the run below took 4 of a then-5-round budget because each round's fix covered only the surface the previous CR round had named, and the budget is now **3 rounds** (see [[agent-retirement-surface-map]] for the roster collapse that retired `argos` and capped the loop), so a reactive round-by-round fix now exhausts it.
-- Example: issue #748 / PR #749 — 4 CR iterations were needed; each iteration's `daidalos` re-dispatched `talos` on the exact blocking-finding list and re-ran `argos ‖ athena` against the new head before considering merge, converging only at iteration 4 of 5.
-- Source:  https://github.com/pekral/cursor-rules/pull/749   Added: 2026-07-31
-- Role:    daidalos
-
-### agent-frontmatter-effort-field — Claude Code subagent frontmatter takes an `effort:` field; omitting it silently inherits the session level
-
-- Trigger: a task sets, audits, or reasons about how "hard" an agent thinks — reasoning depth, token cost per agent, or a request like "set effort to High for all agents" — and the repo offers no precedent because no `agents/*.md` declared the field.
-- Rule:    Subagent frontmatter accepts `effort: low | medium | high | xhigh | max` alongside `name` / `description` / `tools` / `model`; it overrides the session level while that agent is active, and **omitting it inherits whatever the session runs at** (so an ultracode session silently promotes every agent to `max`). Do not guess the field name from the Workflow tool's `effort` option — confirm against the *Supported frontmatter fields* table at https://code.claude.com/docs/en/sub-agents, which also lists `disallowedTools`, `permissionMode`, `mcpServers`, `hooks`, `maxTurns`, `skills`, `initialPrompt`, `memory`, `background`, `isolation`, `color`. This roster's standing level is `high` — documented in `docs/agents.md` *Anatomy of an agent* and enforced by a test that rejects `max` / `xhigh`.
-- Example: issue #753 / PR #754 — no agent declared an effort, so all seven inherited the session's. Adding `effort: high` after the `model:` line in each file plus the anatomy bullet was the whole change; the field name had to be verified from the docs because nothing in the repo referenced it.
-- Source:  https://github.com/pekral/cursor-rules/pull/754   Added: 2026-08-03
-- Role:    shared
-
-### agent-retirement-surface-map — Retiring or merging an agent means sweeping the role enums and cross-agent prose, not deleting one file
-
-- Trigger: an agent is removed, or its job is folded into another agent (a roster collapse), and the author deletes `agents/<old>.md` plus the obvious `docs/agents.md` / `README.md` mentions.
-- Rule:    Retirement touches strictly more surfaces than a rename (see [[agent-rename-sync-points]] for the rename set, which still applies). Beyond the agent file and its avatar under `assets/agents/`, sweep: (1) **cross-agent prose** — every other `agents/*.md` naming the retired agent as the one who reviews / consolidates / receives the handoff; (2) **the `Role:` enum in two places** — `@rules/compound-engineering/general.mdc` (entry format, per-role semantics, read protocol, write-loop order) and `@skills/record-project-memory/SKILL.md` (`AGENT_ROLE` input + template); (3) **the per-role read filter** in `@skills/prepare-issue-context/SKILL.md`, which names the contexts the skill runs under; (4) **`@rules/git/general.mdc`** *Draft pull requests*, which names the convergence loop by its agents; (5) **two test files** — `tests/Installer/AgentsTest.php` and `tests/Installer/CodeReviewContentTest.php` both pin agent prose verbatim; (6) **every skill that names an agent as its *caller*** — a skill can hardcode which agent invokes it (`@skills/pr-summary/SKILL.md` names the caller that passes pre-authored `How to test` steps), and that reference is invisible to a sweep that only looks at agent-to-agent prose; (7) **the `Role:` tag on existing memory entries** — shrinking the enum orphans any entry still tagged with the retired role, so retag those entries (a one-line curation, not a rewrite of the dated prose). Surfaces (3) and (4) carry the retired name only when it participated in that contract — verify each per retirement rather than assuming the previous one's list is complete. Finish with `grep -rn '<old>' agents/ rules/ skills/ docs/ README.md` at 0, except `docs/memory/PROJECT_MEMORY.md` (dated history — never rewrite it) and a deliberate "Retired:" note in the naming section. When the retired agent owned a guard the survivor now needs — an egress allow-list clause covering a URL-read path that moved with the job — **merge the clause instead of dropping it**, or the survivor silently gains an unguarded path. **Pick the survivor by capability, not by theme:** hand a write-capable job to an agent that already writes and a publishing job to one that already publishes, so the move needs no new tool grant and no contract rewrite.
-- Example: issue #753 / PR #754 collapsed `argos` into `athena`. The file deletion was trivial; the real work was 14 files. The non-obvious catch: `argos`'s `## Web egress safety (issue #748)` clause covered the CR wrappers' "read an inventoried external URL with your own tools" path, which moved to `athena` with the tracker routing — merging it into her section (rather than keeping only her `security-threat-analysis` variant) is what kept the guard intact. **PR #761** retired `apollon` the same way and added surfaces (6) and (7) to this list: `pr-summary` named it as the caller passing pre-authored test steps, and one memory entry carried `Role: apollon`. Surfaces (3) and (4) turned out clean that time — `prepare-issue-context` and `rules/git/general.mdc` name only `talos` / `athena` — which is why each surface is verified, not assumed. Its two jobs split by capability: test authoring to the write-capable `talos`, post-convergence reporting to the already-publishing `hermes`.
-- Source:  https://github.com/pekral/cursor-rules/pull/754, https://github.com/pekral/cursor-rules/pull/761   Added: 2026-08-03   Updated: 2026-08-07
 - Role:    shared
 
 ### verify-a-referenced-skill-exists-before-copying-a-lens-list — A CR lens list can name a skill the package never shipped; verify against `ls skills/` before propagating it
@@ -306,7 +222,7 @@
 - Rule:    GitHub's rebase-and-merge rewrites the commits when it replays them onto the base branch, so the commits landing on `origin/master` have **new SHAs** distinct from the local feature branch's tip, even though the content is identical. `git branch -d <branch>` runs an ancestry check ("is this branch's tip reachable from the target?") and fails with "not fully merged" — this is expected behavior of the rebase strategy, not a sign the merge didn't actually happen. Do not force past it blindly. First verify content equivalence: `git diff <feature-branch> origin/master -- <the PR's changed files>` should be empty. Only then delete with `git branch -D` (uppercase — skips the ancestry check).
 - Example: PR #757 (issue #756) merged via `gh pr merge 757 --rebase --delete-branch`; `git branch -d feat/queue-assert-pushed-no-callback-756` failed because `master`'s new rebase-merge commit `03c66d8` had a different SHA than the local branch's `fb468f6`. Verified `git diff feat/queue-assert-pushed-no-callback-756 origin/master -- <the 5 changed files>` was empty, then used `git branch -D` to remove the local branch.
 - Source:  https://github.com/pekral/cursor-rules/pull/757   Added: 2026-08-03
-- Role:    talos
+- Role:    implementation
 
 
 ### fixup-autosquash-without-interactive-rebase — The harness blocks `git rebase -i`; fold CR fixups with `GIT_SEQUENCE_EDITOR=true git rebase --autosquash <base>`
@@ -315,7 +231,7 @@
 - Rule:    `git commit --fixup=<sha>` works, but the autosquash it sets up normally needs `git rebase -i --autosquash`, and this environment refuses interactive git flags (`-i`). Do not fall back to a corrective commit — `@rules/git/general.mdc` *Git Rules* forbids explaining a bundled history away. Run the rebase non-interactively instead: `GIT_SEQUENCE_EDITOR=true git rebase --autosquash "origin/$DEFAULT_BRANCH"`. Setting the sequence editor to `true` accepts git's generated todo list unchanged, so the fixups squash exactly where `--fixup` targeted them with no editor ever opening. Only do this while the branch is unpushed (or you are its sole contributor and will `push --force-with-lease`), and re-run `composer build` afterwards — the rebase replays commits, so a green pre-rebase build does not prove the reshaped history is green.
 - Example: PR #761 — the self-check raised 3 Moderate findings against the first of three commits. `git commit --fixup=<A1>` + `GIT_SEQUENCE_EDITOR=true git rebase --autosquash origin/master` produced a clean 3-commit history; `composer build` was re-run on the rebased head before the push.
 - Source:  https://github.com/pekral/cursor-rules/pull/761   Added: 2026-08-07
-- Role:    talos
+- Role:    implementation
 
 ### code-review-skill-word-budget-ceiling — `skills/code-review/SKILL.md` is at its word ceiling; every new CR walk must first extract an old one into the rule
 
@@ -323,7 +239,7 @@
 - Rule:    Two independent gates guard that file at the same number and both must pass: `skill-check`'s `body.max_tokens` limit of 5000 (whitespace-split estimate, roughly `str_word_count` minus ~20) and the Pest assertion `expect(str_word_count($codeReview))->toBeLessThan(5_000)` in `tests/Installer/CodeReviewContentTest.php`. The file was at **4995 of 5000** before this change, so even a two-sentence addition breaks the build. Do not shrink the new contract to fit — write it properly in `@rules/code-review/general.mdc` (which has no cap) and move an **existing** walk-through out of the skill verbatim, leaving a pointer, exactly as the rule file's own header documents. Most `CodeReviewContentTest` assertions read `skill . "\n" . rule` concatenated, so a verbatim move keeps them green; check first whether the block you are moving is pinned by a **skill-only** assertion (`expect($codeReview)->toContain(...)` / `expect($skill)->toContain(...)`) — if it is, the move also has to reroute that test, which is a real cost when choosing what to extract.
 - Example: PR #764 (issue #763) added two mandatory walks (commit-split proposal, new-PHP-file architecture check) worth ~420 words. *Highest-Priority Fast Track* and *Assignment Conformance Gate* were moved verbatim into `@rules/code-review/general.mdc` as canonical-detail sections, bringing the skill to 4764 words. An attempted extraction of *Third-Party API & Service Analysis* was reverted instead — three tests pinned its steps against the skill alone.
 - Source:  https://github.com/pekral/cursor-rules/pull/764   Added: 2026-08-10
-- Role:    talos
+- Role:    implementation
 
 ### changelog-in-its-own-commit-keeps-items-cherry-pickable — Per-item commits collide on `CHANGELOG.md` and on adjacent rule-file lines; give the changelog its own commit and space the insertions apart
 
@@ -331,7 +247,7 @@
 - Rule:    `@rules/git/general.mdc` *Git Rules* requires every commit to be cherry-pickable onto the default branch alone, and two mechanics break that silently here. First, `CHANGELOG.md`: every item wants its entry at the top of `## [Unreleased]`, so each commit anchors on the line the previous one added — a forward reference that conflicts on a solo cherry-pick. This repo already solves it by convention — the changelog lands in its **own** trailing `docs(changelog): …` commit covering all items (see `85e6992`, `a4c6c71`, `e04dcc1`) — so keep it out of the per-item commits entirely. Second, git's merge conflicts on **adjacent** lines, not just overlapping ones: a bullet one item inserts directly above or below a line another item modifies conflicts on a solo pick even though the two edits are semantically unrelated. Space such insertions a few lines apart, or anchor the later item's block before a heading/test that already exists on the default branch. Verify rather than assume — replay each commit individually (`git checkout -b tmp <default>; git cherry-pick -n <sha>; git cherry-pick --abort; git reset --hard <default>` per commit) and fix the history **before** opening the PR, since the check costs seconds and the gate blocks the merge.
 - Example: PR #765 — three rule items (comment budget, validation traits in `app/Concerns/`, DTO-only Action returns). The first split had commits 2 and 3 conflicting solo: stacked `CHANGELOG.md` entries, an A3 bullet in `skills/refactor-entry-point-to-action/SKILL.md` inserted immediately above a line A2 had rewritten, and the A3 test anchored on the test A2 added. Moving the changelog into a fourth `docs(changelog)` commit, shifting the A3 bullet three lines up, and re-anchoring the A3 test before a pre-existing test made all four commits replay cleanly.
 - Source:  https://github.com/pekral/cursor-rules/pull/765   Added: 2026-08-10
-- Role:    talos
+- Role:    implementation
 
 ### worked-example-must-obey-its-own-rule — A worked before/after example file must pass the same bar it teaches, pair by pair
 
@@ -339,4 +255,4 @@
 - Rule:    Reviewers (and future authors copying the pattern) trust the file to be a canonical demonstration of the rule, so every pair must independently clear the same bar the rule states — not just the first, most-thought-through one. A later pair written quickly to "round out" the example can silently regress the exact residue the rule requires (a `@see` link, a purpose captured in a rename) even while the reference pair stays correct. Before finishing the file, re-read each `Prefer` block against the rule's own bar as if it were a fresh CR finding, not just the `Avoid` block it replaces.
 - Example: PR #775 (issue #774) — `rules/php/examples/self-documenting-code.md`'s first pair (`passport` guard) correctly kept `@see ECOMAIL-6655` after renaming, but the second pair (`MAX_WEBHOOK_DELIVERY_ATTEMPTS`) dropped the "Stripe recommends this" *why* residue entirely and the third pair's rename lost the "before matching it against existing customers" purpose. Both were CR Moderate findings in round 1; fixed by adding `@see https://docs.stripe.com/webhooks#retry-logic` and renaming to `normalizePhoneNumberForCustomerMatch`.
 - Source:  https://github.com/pekral/cursor-rules/pull/775   Added: 2026-08-18
-- Role:    talos
+- Role:    implementation

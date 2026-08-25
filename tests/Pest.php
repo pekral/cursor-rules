@@ -67,18 +67,6 @@ function installerSymlinkUnsupported(): bool
     return !function_exists('symlink') || stripos(PHP_OS, 'WIN') === 0;
 }
 
-function installerExpectNoAgentFileMentions(string $slug): void
-{
-    $globResult = glob(__DIR__ . '/../agents/*.md');
-    $agentFiles = $globResult !== false ? $globResult : [];
-
-    expect($agentFiles)->not->toBeEmpty();
-
-    foreach ($agentFiles as $agentFile) {
-        expect((string) file_get_contents($agentFile))->not->toContain($slug);
-    }
-}
-
 function installerCountFiles(string $dir): int
 {
     if (!is_dir($dir)) {

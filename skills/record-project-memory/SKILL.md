@@ -16,7 +16,7 @@ metadata:
 
 ## Use when
 - A `@skills/resolve-issue` or `@skills/process-code-review` run has converged (review loop at 0 Critical / 0 Moderate) and is about to publish its final report.
-- An orchestrator (daidalos) reaches its final report after the convergence gate.
+- An orchestrating run reaches its final report after the convergence gate.
 - The user explicitly asks to record a lesson into project memory.
 
 Do **not** run this skill mid-task, before convergence, or for a task that produced no durable lesson.
@@ -24,7 +24,7 @@ Do **not** run this skill mid-task, before convergence, or for a task that produ
 ## Inputs
 - `CONVERGED_CONTEXT` — required. The converged task context: what was implemented/fixed, the review findings that recurred, the wrong turns taken, and the design decisions made. The orchestrator passes this from the shared brief; a skill passes its own run context.
 - `SOURCE_REF` — required. The PR / issue link to record in each entry's `Source:` field.
-- `AGENT_ROLE` — optional. The agent role writing this entry: `daidalos`, `metis`, `talos`, `athena`, or `shared`. When omitted, defaults to `shared`. Written as the `Role:` field of every entry produced in this invocation. Pass the caller's own role — do not guess.
+- `AGENT_ROLE` — optional. The role writing this entry: `orchestration`, `analysis`, `implementation`, `review`, or `shared`. When omitted, defaults to `shared`. Written as the `Role:` field of every entry produced in this invocation. Pass the caller's own role — do not guess.
 
 ## Required approach
 
@@ -54,7 +54,7 @@ One entry per lesson, in the greppable format from the rule:
 - Rule:    <the decision / what to do next time>
 - Example: <a concrete pointer: file / area / symbol>
 - Source:  <PR / issue link>   Added: <YYYY-MM-DD>
-- Role:    <daidalos | metis | talos | athena | shared>
+- Role:    <orchestration | analysis | implementation | review | shared>
 ```
 
 `<slug>` is kebab-case and unique within the file. `Added:` is today's date. `Role:` is the value of the `AGENT_ROLE` input (defaults to `shared` when not provided). Strip any secret / credential / token / PII before writing.
@@ -66,7 +66,7 @@ Read the existing file and curate so it stays small and non-redundant:
 - **Supersede** — when a new lesson replaces or contradicts an older entry, update (or mark superseded) the old one instead of keeping both.
 - **Prune** — remove entries whose referenced code was removed or whose lesson was promoted into a real `rules/**` file.
 - **Soft cap** — when the file grows large, consolidate related entries rather than letting it sprawl.
-- **Role dedup** — when deduplicating, consider entries with the same slug across different `Role:` values: if both `talos` and `shared` carry the same lesson, keep the `shared` one and remove the role-specific one. Never widen a role-specific entry to `shared` unless the lesson genuinely applies across all roles.
+- **Role dedup** — when deduplicating, consider entries with the same slug across different `Role:` values: if both `implementation` and `shared` carry the same lesson, keep the `shared` one and remove the role-specific one. Never widen a role-specific entry to `shared` unless the lesson genuinely applies across all roles.
 
 ### 6. Write and report
 - Apply the curated changes to the memory file (append new entries, edit/remove superseded or pruned ones).

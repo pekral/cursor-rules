@@ -195,21 +195,11 @@ test('process-code-review enforces a convergence loop with quiet iterations and 
 test('the review loop is capped at three rounds on every surface that states the cap (issue #753)', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $process = (string) file_get_contents($packageDir . '/skills/process-code-review/SKILL.md');
-    $daidalos = (string) file_get_contents($packageDir . '/agents/daidalos.md');
-    $docs = (string) file_get_contents($packageDir . '/docs/agents.md');
 
     // The cap is hard, and the skill says why iterating past it cannot help.
     expect($process)->toContain('**three review rounds is the hard cap**');
     expect($process)->toContain('need a human decision');
     expect($process)->not->toContain('maxIterations = 5');
-
-    // The orchestrator and the docs quote the same number, never the retired one.
-    expect($daidalos)->toContain('capped at **three review rounds** (`maxIterations = 3`');
-    expect($docs)->toContain('`maxIterations = 3`');
-    expect($docs)->toContain('maxIterations 3');
-    expect($daidalos)->not->toContain('maxIterations = 5');
-    expect($docs)->not->toContain('maxIterations = 5');
-    expect($docs)->not->toContain('maxIterations 5');
 });
 
 test('JIRA non-technical CR summary delegates to pr-summary Wiki Markup template', function (): void {
@@ -1426,24 +1416,10 @@ test('security-review carries the same locate-or-request-link obligation and pre
     expect($securityReview)->toContain($precedence);
 });
 
-test('Web egress safety is reachable from the paths metis and athena actually read (issue #748 CR fix)', function (): void {
+test('Web egress safety is reachable from the skills that fetch remote content (issue #748 CR fix)', function (): void {
     $packageDir = dirname(__DIR__, 2);
-    $metisAgent = (string) file_get_contents($packageDir . '/agents/metis.md');
-    $athenaAgent = (string) file_get_contents($packageDir . '/agents/athena.md');
     $analyzeProblem = (string) file_get_contents($packageDir . '/skills/analyze-problem/SKILL.md');
     $securityThreatAnalysis = (string) file_get_contents($packageDir . '/skills/security-threat-analysis/SKILL.md');
-
-    foreach ([$metisAgent, $athenaAgent] as $agent) {
-        expect($agent)->toContain('## Web egress safety (issue #748)');
-        expect($agent)->not->toContain('## WebFetch host safety (issue #748)');
-        expect($agent)->toContain(
-            'the same guard `att_host_block_reason` in `skills/_shared/attachments.sh` applies to downloaded'
-                . ' attachments, without that guard\'s `ATT_ALLOW_PRIVATE_HOSTS=1` self-hosted-tracker opt-out',
-        );
-        expect($agent)->toContain(
-            'never diff content, project identifiers, hostnames, or secret values.',
-        );
-    }
 
     $analyzeProblemGuard = '**Before every `WebFetch`, apply the host allow-list guard**: fetch only an'
         . ' `https://` URL whose literal host is a public, non-internal domain';
@@ -1911,8 +1887,8 @@ test('a static-analysis / linter suppression is never exempt, not even for an un
     expect($rule)->toContain('No suppression is ever compliant');
     expect($rule)->toContain('a genuinely unfixable third-party / framework false positive');
     expect($rule)->toContain('it **stops** implementing that change and reports it as a blocker');
-    expect($rule)->toContain('(`Blocked: <reason>` per `agents/talos.md`, or the running agent\'s equivalent blocked-handoff contract)');
-    expect($rule)->toContain('Filing the underlying defect as its own tracked issue (`agents/athena.md` *Findings outside the diff*)');
+    expect($rule)->toContain('(`Blocked: <reason>`, per the running agent\'s blocked-handoff contract)');
+    expect($rule)->toContain('Filing the underlying defect as its own tracked issue');
     expect($rule)->toContain('is a decision the caller makes only **after** that stop');
     expect($rule)->not->toContain('narrow, allowed exception');
     expect($rule)->not->toContain('must then be **narrowly scoped**');

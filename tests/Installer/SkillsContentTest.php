@@ -1427,3 +1427,70 @@ test('implementation skills and their canonical rule twin resolve a failed check
         expect($content)->toContain($quotedRuleReference);
     }
 });
+
+test('codebase-simplification-audit is audit-only and holds its coverage contract (issue #777)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $skill = $packageDir . '/skills/codebase-simplification-audit/SKILL.md';
+
+    expect(is_file($skill))->toBeTrue();
+
+    $content = (string) file_get_contents($skill);
+
+    expect($content)->toContain('name: codebase-simplification-audit');
+
+    // Read-only is the skill's defining constraint, so it is pinned first.
+    expect($content)->toContain('**Audit-only, read-only, no exceptions.**');
+    expect($content)->toContain('the repository is unchanged when the audit ends');
+    expect($content)->toContain('**The repository remains unchanged**');
+
+    // A catch-all inventory row would let the audit claim coverage it never had.
+    expect($content)->toContain('**The inventory is the coverage contract.**');
+    expect($content)->toContain('proves nothing and is itself a coverage defect');
+    expect($content)->toContain('Never hide the gap by broadening a boundary that was already marked complete');
+
+    // Two per subsystem, eight fields each, and a skip is a completed review.
+    expect($content)->toContain('**at most two** materially useful simplifications');
+    expect($content)->toContain('a skip is a completed review, not a failure');
+
+    foreach ([
+        '1. **Verdict**',
+        '2. **Evidence**',
+        '3. **Current complexity or invalid states**',
+        '4. **Proposed representation and why it is simpler**',
+        '5. **Smallest credible implementation scope**',
+        '6. **Regression risks and migration concerns.**',
+        '7. **Existing and additional validation required.**',
+        '8. **Confidence**',
+    ] as $field) {
+        expect(substr_count($content, $field))->toBe(1, 'the recommendation schema states ' . $field . ' exactly once');
+    }
+
+    // The most common false positive the audit must reject.
+    expect($content)->toContain('relocates complexity instead of removing it');
+    expect($content)->toContain('Simpler means fewer representable invalid states, not fewer lines.');
+
+    // The bundled agents are gone, so the skill must work without a subagent facility.
+    expect($content)->toContain('**When no subagent facility is available, run the reviews sequentially inline**');
+    expect($content)->toContain('changes the wall-clock cost, never the coverage contract');
+
+    // The audit reads the audited project's own instructions before judging its semantics.
+    expect($content)->toContain('*Project-local agent instructions are part of the rule set*');
+});
+
+test('codebase-simplification-audit states its boundary against the neighbouring audit skills (issue #777)', function (): void {
+    $packageDir = dirname(__DIR__, 2);
+    $content = (string) file_get_contents($packageDir . '/skills/codebase-simplification-audit/SKILL.md');
+
+    expect($content)->toContain('Raise a concern once, in the skill that owns it — never file the same item twice');
+
+    foreach ([
+        '@skills/class-refactoring/SKILL.md',
+        '@skills/automation-audit-ops/SKILL.md',
+        '@skills/production-audit/SKILL.md',
+        '@skills/blueprint/SKILL.md',
+        '@skills/analyze-problem/SKILL.md',
+    ] as $neighbour) {
+        expect(substr_count($content, $neighbour))->toBe(1, 'the boundary section names ' . $neighbour . ' exactly once');
+        expect(is_file($packageDir . '/' . str_replace('@skills/', 'skills/', $neighbour)))->toBeTrue();
+    }
+});

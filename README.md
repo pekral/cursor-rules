@@ -20,7 +20,7 @@
 - unified PHP coding guidelines for PHP 8.4 projects
 - Pest-based testing with mandatory code analysis and 100% coverage
 - strong focus on clean code: typed properties, SRP, no redundant comments
-- **63 comprehensive Agent skills** for automated workflows (v0.9.1)
+- **64 comprehensive Agent skills** for automated workflows (v0.9.1)
 - fast onboarding inside development repositories
 
 ## Installation
@@ -121,7 +121,7 @@ vendor/bin/cursor-rules install --editor=claude --allow-bundled-scripts   # whit
 
 # 🎯 Skills Overview — **v0.9.1**
 
-> Current release includes 63 skills for issue resolution, planning, code review, refactoring, testing, performance benchmarking, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
+> Current release includes 64 skills for issue resolution, planning, code review, refactoring, testing, performance benchmarking, security, SQL performance, frontend and UI, platform and data, content writing, and delivery workflows.
 
 Agent skills are installed into the chosen editor’s skill directory (see `--editor`). Use `--editor=all` to install for Cursor, Claude, and Codex at once. They can be invoked when relevant. Each skill follows project conventions, ensures code quality, and maintains 100% test coverage where applicable.
 
@@ -166,6 +166,7 @@ Agent skills are installed into the chosen editor’s skill directory (see `--ed
 | `laravel-authorization-review` | Laravel-native authorization / IDOR (BOLA) reviewer. Walks the authorization chain of every HTTP route (middleware → authorize/policy/gate → query scoping → API Resource output), anchors every finding to real `php artisan route:list --json` output plus a cited `file:line`, classifies by confidence, and produces a per-route coverage map — read-only / advise-only. |
 | `security-bounty-hunter` | Hunt for exploitable, remotely reachable vulnerabilities in a PHP/Laravel codebase for responsible disclosure — biases toward user-controlled attack paths and discards low-signal noise. |
 | `penetration-tester` | Authorized, methodology-driven penetration test — runs only on an explicit pentest request against an in-scope target, validates exploitability with safe proofs of concept, and delivers a risk-rated remediation report (read-only, non-destructive). |
+| `codebase-simplification-audit` | Coordinator-driven, read-only sweep for materially useful simplifications in data structures, state representation, control flow, algorithms, and ownership. Inventories every subsystem as a coverage contract, reviews each within a non-overlapping boundary, independently verifies every finding, then audits its own coverage, duplication, materiality, schema, and ranking. Proposes only — never edits, tests, commits, or pushes. |
 | `class-refactoring` | Refactor PHP classes using SOLID and Laravel best practices with testability focus. |
 | `refactor-entry-point-to-action` | Refactor controller/job/command/listener entry-point logic into Action classes. |
 | `smartest-project-addition` | Propose one high-impact, low-risk project improvement. |

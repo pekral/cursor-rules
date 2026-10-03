@@ -523,18 +523,6 @@ test('resolve-issue claims the GitHub issue before implementation and releases o
     expect($content)->toContain('no claim step');
 });
 
-test('autoresolve QUERY excludes already-claimed issues via label negation (issue #704)', function (): void {
-    $packageDir = dirname(__DIR__, 2);
-    $content = (string) file_get_contents($packageDir . '/skills/autoresolve-oldest-github-issue/SKILL.md');
-
-    // QUERY must include the -label: negation to skip already-claimed issues.
-    expect($content)->toContain('-label:');
-    expect($content)->toContain('Resolve_by_AI:in-progress');
-    expect($content)->toContain('CLAIM_LABEL');
-    // Line-17 amendment: claim label is a sanctioned write owned by the delegated skill.
-    expect($content)->toContain('sanctioned write owned by the delegated skill');
-});
-
 test('JIRA context-consuming skills offer gather-issue-context.sh', function (): void {
     $packageDir = dirname(__DIR__, 2);
     $skills = [

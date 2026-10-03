@@ -1,6 +1,6 @@
 ---
 name: autonomous-loops
-description: "Use when choosing how to run Claude Code autonomously on this project — from a single sequential pipeline to multi-agent DAG orchestration. A reference catalog of loop patterns anchored to this repo's real tooling (resolve-issue, autoresolve-oldest-github-issue, code-review-github, process-code-review, merge-github-pr, /loop), with composer build / composer skill-check as the quality gate between iterations."
+description: "Use when choosing how to run Claude Code autonomously on this project — from a single sequential pipeline to multi-agent DAG orchestration. A reference catalog of loop patterns anchored to this repo's real tooling (resolve-issue, code-review-github, process-code-review, merge-github-pr, /loop), with composer build / composer skill-check as the quality gate between iterations."
 license: MIT
 metadata:
   author: "Petr Král (pekral.cz)"
@@ -55,17 +55,16 @@ Use when you want a recurring task without authoring a runner: poll PR status, r
 
 ```text
 /loop 5m run `composer skill-check` and report only new failures
-/loop autoresolve-oldest-github-issue   # self-paced, one issue per pass
 ```
 
 Still bounded in practice: stop it when there is no open work or a blocker appears.
 
 ### 3. Single-issue end-to-end chain
-Medium complexity. This is the project's existing autonomous unit: pick one issue and drive it resolve → review → process-feedback → merge, stopping at any blocker. You rarely need to build this — it already exists.
+Medium complexity. This is the project's existing autonomous unit: pick one issue and drive it resolve → review → process-feedback → merge, stopping at any blocker. Run the four skills in order; no single entry point wraps them.
 
 Use when one tracker issue should be taken from open to merged without a human between steps.
 
-Entry point: `@skills/autoresolve-oldest-github-issue/SKILL.md`, which chains:
+Pick the oldest open issue (for example `gh issue list --label Resolve_by_AI --state open --search "sort:created-asc" --limit 1`), then run:
 1. `@skills/resolve-issue/SKILL.md` — branch, implement, local code-review + security-review loop, pre-push gates, PR.
 2. `@skills/code-review-github/SKILL.md` — review the PR, post findings.
 3. `@skills/process-code-review/SKILL.md` — drive findings to Critical+Moderate == 0.
@@ -83,8 +82,8 @@ set -e
 MAX_RUNS=5; NOTES=.loop/SHARED_NOTES.md   # context bridge across iterations
 for i in $(seq 1 "$MAX_RUNS"); do
   gh issue list --label Resolve_by_AI --state open --limit 1 | grep -q . || break  # stop: no work
-  claude -p "Read $NOTES for prior-pass context. Run @skills/autoresolve-oldest-github-issue/SKILL.md \
-             for label Resolve_by_AI. Append outcome, decisions, and follow-ups to $NOTES. \
+  claude -p "Read $NOTES for prior-pass context. Take the oldest open issue labelled \
+             Resolve_by_AI through the single-issue chain (pattern 3). Append outcome, decisions, and follow-ups to $NOTES. \
              Stop and report if the chain hit any blocker."
 done
 ```

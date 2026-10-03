@@ -264,9 +264,8 @@ test('compound-engineering rule mandates early idempotent claim before work star
     // Bugsnag no-claim documented as known limitation.
     expect($content)->toContain('Bugsnag has no auto-claim');
 
-    // Reference back to the skills that own the execution.
+    // Reference back to the skill that owns the execution.
     expect($content)->toContain('@skills/resolve-issue/SKILL.md');
-    expect($content)->toContain('@skills/autoresolve-oldest-github-issue/SKILL.md');
 });
 
 test('compound-engineering rule mandates assigning the most relevant existing label on issue creation (issue #734)', function (): void {
